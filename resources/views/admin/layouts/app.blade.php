@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…') - Ù†Ø¸Ø§Ù… Ø´Ø±ÙƒØ© Ø§Ù„Ø§Ù…ØªÙŠØ§Ø² Ù„Ù„Ø§Ø³ØªÙ‚Ø¯Ø§Ù…</title>
+    <title>@yield('title', 'لوحة التحكم') - نظام شركة الامتياز للاستقدام</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -73,14 +73,14 @@
                 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)"
                      class="mb-4 bg-green-100 border border-green-400 text-green-800 px-4 py-3 rounded-lg flex justify-between">
                     <span>{{ session('success') }}</span>
-                    <button @click="show = false" class="text-green-600 font-bold">Ã—</button>
+                    <button @click="show = false" class="text-green-600 font-bold">×</button>
                 </div>
             @endif
             @if(session('error'))
                 <div x-data="{ show: true }" x-show="show"
                      class="mb-4 bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded-lg flex justify-between">
                     <span>{{ session('error') }}</span>
-                    <button @click="show = false" class="text-red-600 font-bold">Ã—</button>
+                    <button @click="show = false" class="text-red-600 font-bold">×</button>
                 </div>
             @endif
             @if($errors->any())

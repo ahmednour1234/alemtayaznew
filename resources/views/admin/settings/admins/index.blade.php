@@ -1,13 +1,13 @@
-﻿@extends('admin.layouts.app')
-@section('title', 'Ø§Ù„Ù…Ø¯ÙŠØ±ÙˆÙ†')
+@extends('admin.layouts.app')
+@section('title', 'المديرون')
 @section('content')
 
 <div class="flex justify-between items-center mb-5">
-    <h2 class="text-xl font-bold text-slate-800">Ø§Ù„Ù…Ø¯ÙŠØ±ÙˆÙ†</h2>
+    <h2 class="text-xl font-bold text-slate-800">المديرون</h2>
     <a href="{{ route('admin.settings.admins.create') }}"
        class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg flex items-center gap-1">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        Ø¥Ø¶Ø§ÙØ© Ù…Ø¯ÙŠØ±
+        إضا�ة مدير
     </a>
 </div>
 
@@ -16,11 +16,11 @@
         <thead class="bg-slate-50 text-slate-500 text-xs border-b">
             <tr>
                 <th class="px-4 py-3 text-right">#</th>
-                <th class="px-4 py-3 text-right">Ø§Ù„Ø§Ø³Ù…</th>
-                <th class="px-4 py-3 text-right">Ø§Ù„Ø¨Ø±ÙŠØ¯</th>
-                <th class="px-4 py-3 text-right">Ø§Ù„Ø£Ø¯ÙˆØ§Ø±</th>
-                <th class="px-4 py-3 text-right">Ø§Ù„Ø­Ø§Ù„Ø©</th>
-                <th class="px-4 py-3 text-right">Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡Ø§Øª</th>
+                <th class="px-4 py-3 text-right">الاسم</th>
+                <th class="px-4 py-3 text-right">البريد</th>
+                <th class="px-4 py-3 text-right">الأدوار</th>
+                <th class="px-4 py-3 text-right">الحالة</th>
+                <th class="px-4 py-3 text-right">الإجراءات</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
@@ -36,9 +36,9 @@
                 </td>
                 <td class="px-4 py-3">
                     @if($admin->active)
-                        <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs">Ù†Ø´Ø·</span>
+                        <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs">نشط</span>
                     @else
-                        <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs">ØºÙŠØ± Ù†Ø´Ø·</span>
+                        <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs">غير نشط</span>
                     @endif
                 </td>
                 <td class="px-4 py-3">
@@ -49,12 +49,12 @@
                         @if($admin->id !== auth('admin')->id())
                         <form action="{{ route('admin.settings.admins.toggle-active', $admin->id) }}" method="POST" class="inline">
                             @csrf @method('PATCH')
-                            <button type="submit" class="text-slate-500 hover:text-purple-600" title="{{ $admin->active ? 'ØªØ¹Ø·ÙŠÙ„' : 'ØªÙØ¹ÙŠÙ„' }}">
+                            <button type="submit" class="text-slate-500 hover:text-purple-600" title="{{ $admin->active ? 'تعطيل' : 'ت�عيل' }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
                             </button>
                         </form>
                         <form action="{{ route('admin.settings.admins.destroy', $admin->id) }}" method="POST" class="inline"
-                              onsubmit="return confirm('Ø­Ø°Ù Ù‡Ø°Ø§ Ø§Ù„Ù…Ø¯ÙŠØ±ØŸ')">
+                              onsubmit="return confirm('حذ� هذا المدير؟')">
                             @csrf @method('DELETE')
                             <button type="submit" class="text-slate-500 hover:text-red-600">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7"/></svg>
@@ -65,7 +65,7 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ù…Ø¯ÙŠØ±ÙˆÙ†</td></tr>
+            <tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">لا يوجد مديرون</td></tr>
             @endforelse
         </tbody>
     </table>
@@ -76,14 +76,14 @@
 
 @if($trashed->isNotEmpty())
 <div x-data="{ open: false }" class="mt-6">
-    <button @click="open = !open" class="text-sm text-slate-500 hover:text-red-600">Ø§Ù„Ù…Ø­Ø°ÙˆÙØ© ({{ $trashed->count() }})</button>
+    <button @click="open = !open" class="text-sm text-slate-500 hover:text-red-600">المحذو�ة ({{ $trashed->count() }})</button>
     <div x-show="open" class="mt-3 bg-white rounded-xl shadow-sm overflow-hidden">
         <table class="w-full text-sm">
             <thead class="bg-red-50 text-xs text-slate-500 border-b">
                 <tr>
-                    <th class="px-4 py-2 text-right">Ø§Ù„Ø§Ø³Ù…</th>
-                    <th class="px-4 py-2 text-right">Ø§Ù„Ø¨Ø±ÙŠØ¯</th>
-                    <th class="px-4 py-2 text-right">Ø§Ø³ØªØ¹Ø§Ø¯Ø©</th>
+                    <th class="px-4 py-2 text-right">الاسم</th>
+                    <th class="px-4 py-2 text-right">البريد</th>
+                    <th class="px-4 py-2 text-right">استعادة</th>
                 </tr>
             </thead>
             <tbody class="divide-y">
@@ -94,7 +94,7 @@
                     <td class="px-4 py-2">
                         <form action="{{ route('admin.settings.admins.restore', $admin->id) }}" method="POST" class="inline">
                             @csrf @method('PATCH')
-                            <button type="submit" class="text-xs text-green-600 hover:underline">Ø§Ø³ØªØ¹Ø§Ø¯Ø©</button>
+                            <button type="submit" class="text-xs text-green-600 hover:underline">استعادة</button>
                         </form>
                     </td>
                 </tr>

@@ -1,12 +1,12 @@
-﻿@extends('admin.layouts.app')
-@section('title', 'Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¯Ø®Ù„')
+@extends('admin.layouts.app')
+@section('title', 'قائمة الدخل')
 @section('content')
 
 <div class="flex justify-between items-center mb-5">
-    <h2 class="text-xl font-bold text-slate-800">Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø¯Ø®Ù„ Ø¨ÙŠÙ† Ø§Ù„ÙØ±ÙˆØ¹</h2>
+    <h2 class="text-xl font-bold text-slate-800">قائمة الدخل بين ال�روع</h2>
     @if(isset($report))
     <a href="{{ route('admin.reports.income-statement.export', request()->query()) }}"
-       class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg">ØªØµØ¯ÙŠØ± Excel</a>
+       class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg">تصدير Excel</a>
     @endif
 </div>
 
@@ -15,7 +15,7 @@
     <form method="GET" class="space-y-4">
         <div class="flex flex-wrap gap-4 items-end">
             <div class="flex-1 min-w-64">
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">Ø§Ù„ÙØ±ÙˆØ¹</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">ال�روع</label>
                 <div class="grid grid-cols-2 gap-2 bg-slate-50 rounded-lg p-3">
                     @foreach($branches as $branch)
                     <label class="flex items-center gap-2 text-sm">
@@ -27,17 +27,17 @@
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">Ù…Ù† ØªØ§Ø±ÙŠØ®</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">من تاريخ</label>
                 <input type="date" name="date_from" value="{{ request('date_from') }}"
                        class="border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">Ø¥Ù„Ù‰ ØªØ§Ø±ÙŠØ®</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">إلى تاريخ</label>
                 <input type="date" name="date_to" value="{{ request('date_to') }}"
                        class="border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
             </div>
         </div>
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-5 py-2.5 rounded-lg">Ø¹Ø±Ø¶ Ø§Ù„ØªÙ‚Ø±ÙŠØ±</button>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-5 py-2.5 rounded-lg">عرض التقرير</button>
     </form>
 </div>
 
@@ -49,12 +49,12 @@
         <table class="w-full text-sm">
             <thead class="bg-slate-50 text-slate-500 text-xs border-b">
                 <tr>
-                    <th class="px-4 py-3 text-right">Ø§Ù„ÙØ±Ø¹</th>
-                    <th class="px-4 py-3 text-right">Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ø¯Ø®Ù„</th>
-                    <th class="px-4 py-3 text-right">Ø¥Ø¬Ù…Ø§Ù„ÙŠ Ø§Ù„Ù…ØµØ§Ø±ÙŠÙ</th>
-                    <th class="px-4 py-3 text-right">Ø§Ù„ØªØ­ÙˆÙŠÙ„Ø§Øª Ø§Ù„ÙˆØ§Ø±Ø¯Ø©</th>
-                    <th class="px-4 py-3 text-right">Ø§Ù„ØªØ­ÙˆÙŠÙ„Ø§Øª Ø§Ù„ØµØ§Ø¯Ø±Ø©</th>
-                    <th class="px-4 py-3 text-right">ØµØ§ÙÙŠ Ø§Ù„Ø±Ø¨Ø­</th>
+                    <th class="px-4 py-3 text-right">ال�رع</th>
+                    <th class="px-4 py-3 text-right">إجمالي الدخل</th>
+                    <th class="px-4 py-3 text-right">إجمالي المصاري�</th>
+                    <th class="px-4 py-3 text-right">التحويلات الواردة</th>
+                    <th class="px-4 py-3 text-right">التحويلات الصادرة</th>
+                    <th class="px-4 py-3 text-right">صا�ي الربح</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
@@ -74,7 +74,7 @@
             </tbody>
             <tfoot class="bg-slate-100 text-xs font-bold border-t">
                 <tr>
-                    <td class="px-4 py-2">Ø§Ù„Ø¥Ø¬Ù…Ø§Ù„ÙŠ</td>
+                    <td class="px-4 py-2">الإجمالي</td>
                     <td class="px-4 py-2 text-green-700">{{ number_format(collect($report)->sum('income'), 2) }}</td>
                     <td class="px-4 py-2 text-red-700">{{ number_format(collect($report)->sum('expenses'), 2) }}</td>
                     <td class="px-4 py-2 text-blue-700">{{ number_format(collect($report)->sum('transfers_in'), 2) }}</td>
@@ -90,7 +90,7 @@
 
 <!-- Chart -->
 <div class="bg-white rounded-xl shadow-sm p-5">
-    <h3 class="font-semibold text-slate-700 mb-4">Ù…Ù‚Ø§Ø±Ù†Ø© Ø¨ÙŠØ§Ù†ÙŠØ©</h3>
+    <h3 class="font-semibold text-slate-700 mb-4">مقارنة بيانية</h3>
     <canvas id="incomeStatChart" height="120"></canvas>
 </div>
 
@@ -102,8 +102,8 @@ new Chart(document.getElementById('incomeStatChart'), {
     data: {
         labels: reportData.map(r => r.branch),
         datasets: [
-            { label: 'Ø§Ù„Ø¯Ø®Ù„', data: reportData.map(r => r.income), backgroundColor: 'rgba(34,197,94,0.7)' },
-            { label: 'Ø§Ù„Ù…ØµØ§Ø±ÙŠÙ', data: reportData.map(r => r.expenses), backgroundColor: 'rgba(239,68,68,0.7)' },
+            { label: 'الدخل', data: reportData.map(r => r.income), backgroundColor: 'rgba(34,197,94,0.7)' },
+            { label: 'المصاري�', data: reportData.map(r => r.expenses), backgroundColor: 'rgba(239,68,68,0.7)' },
         ]
     },
     options: { responsive: true, plugins: { legend: { position: 'top' } } }

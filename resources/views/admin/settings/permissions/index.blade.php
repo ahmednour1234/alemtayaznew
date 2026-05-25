@@ -1,10 +1,10 @@
-﻿@extends('admin.layouts.app')
-@section('title', 'Ø§Ù„ØµÙ„Ø§Ø­ÙŠØ§Øª')
+@extends('admin.layouts.app')
+@section('title', 'الصلاحيات')
 @section('content')
 
 <div class="flex justify-between items-center mb-5">
-    <h2 class="text-xl font-bold text-slate-800">Ø§Ù„ØµÙ„Ø§Ø­ÙŠØ§Øª</h2>
-    <p class="text-sm text-slate-400">Ù„Ù„Ù‚Ø±Ø§Ø¡Ø© ÙÙ‚Ø· - ÙŠØªÙ… Ø¥Ø¯Ø§Ø±ØªÙ‡Ø§ Ù…Ù† Ø®Ù„Ø§Ù„ Ø§Ù„Ø£Ø¯ÙˆØ§Ø±</p>
+    <h2 class="text-xl font-bold text-slate-800">الصلاحيات</h2>
+    <p class="text-sm text-slate-400">للقراءة �قط - يتم إدارتها من خلال الأدوار</p>
 </div>
 
 @php $grouped = $permissions->groupBy(fn($p) => explode('.', $p->slug)[0]); @endphp

@@ -1,4 +1,4 @@
-﻿<header class="bg-white sticky top-0 z-40 flex items-center justify-between px-5 py-3" style="box-shadow:0 1px 4px rgba(0,0,0,.06)">
+<header class="bg-white sticky top-0 z-40 flex items-center justify-between px-5 py-3" style="box-shadow:0 1px 4px rgba(0,0,0,.06)">
 
     <!-- Right: sidebar toggle + page title + breadcrumb -->
     <div class="flex items-center gap-4">
@@ -9,13 +9,13 @@
             </svg>
         </button>
         <div>
-            <h1 class="text-[15px] font-bold text-slate-800 leading-tight">@yield('title', 'Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…')</h1>
+            <h1 class="text-[15px] font-bold text-slate-800 leading-tight">@yield('title', 'لوحة التحكم')</h1>
             <p class="text-[11px] text-slate-400 leading-tight mt-0.5">
-                Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©
+                الرئيسية
                 @hasSection('breadcrumb-extra')
                 <span class="mx-1">/</span>@yield('breadcrumb-extra')
                 @endif
-                <span class="mx-1">/</span> @yield('title', 'Ù„ÙˆØ­Ø© Ø§Ù„ØªØ­ÙƒÙ…')
+                <span class="mx-1">/</span> @yield('title', 'لوحة التحكم')
             </p>
         </div>
     </div>
@@ -26,7 +26,7 @@
             <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <input type="text" placeholder="Ø§Ø¨Ø­Ø« Ù‡Ù†Ø§..."
+            <input type="text" placeholder="ابحث هنا..."
                    class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pr-9 pl-4 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent">
         </div>
     </div>
@@ -91,7 +91,7 @@
                 </div>
                 <div class="text-right hidden sm:block">
                     <p class="text-xs font-semibold text-slate-700 leading-tight">{{ $authAdmin?->name }}</p>
-                    <p class="text-[10px] text-slate-400 leading-tight">{{ $authAdmin?->roles->first()?->name ?? 'Ù…Ø¯ÙŠØ± Ø§Ù„Ù†Ø¸Ø§Ù…' }}</p>
+                    <p class="text-[10px] text-slate-400 leading-tight">{{ $authAdmin?->roles->first()?->name ?? 'مدير النظام' }}</p>
                 </div>
                 <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <polyline points="6 9 12 15 18 9"/>
@@ -105,7 +105,7 @@
                         <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                         <circle cx="12" cy="7" r="4"/>
                     </svg>
-                    Ø§Ù„Ù…Ù„Ù Ø§Ù„Ø´Ø®ØµÙŠ
+                    المل� الشخصي
                 </a>
                 <hr class="my-1 border-slate-100">
                 <form action="{{ route('admin.logout') }}" method="POST">
@@ -114,7 +114,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                             <path d="M17 16l4-4m0 0l-4-4m4 4H7"/><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
                         </svg>
-                        ØªØ³Ø¬ÙŠÙ„ Ø®Ø±ÙˆØ¬
+                        تسجيل خروج
                     </button>
                 </form>
             </div>

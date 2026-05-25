@@ -1,5 +1,5 @@
-﻿@extends('admin.layouts.app')
-@section('title', 'Ø¥Ø¶Ø§ÙØ© Ù…Ø¯ÙŠØ±')
+@extends('admin.layouts.app')
+@section('title', 'إضا�ة مدير')
 @section('content')
 <div class="w-full">
 
@@ -13,8 +13,8 @@
                 </svg>
             </a>
             <div>
-                <h2 class="text-xl font-bold text-slate-800">Ø¥Ø¶Ø§ÙØ© Ù…Ø¯ÙŠØ± Ø¬Ø¯ÙŠØ¯</h2>
-                <p class="text-slate-400 text-xs mt-0.5">Ø£Ø¯Ø®Ù„ Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø¯ÙŠØ± Ø§Ù„Ø¬Ø¯ÙŠØ¯</p>
+                <h2 class="text-xl font-bold text-slate-800">إضا�ة مدير جديد</h2>
+                <p class="text-slate-400 text-xs mt-0.5">أدخل بيانات المدير الجديد</p>
             </div>
         </div>
         <a href="{{ route('admin.settings.admins.index') }}"
@@ -22,7 +22,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
-            Ø¥Ù„ØºØ§Ø¡
+            إلغاء
         </a>
     </div>
 
@@ -41,29 +41,29 @@
                                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
                             </svg>
                         </span>
-                        Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø£Ø³Ø§Ø³ÙŠØ©
+                        البيانات الأساسية
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
-                            <label class="block text-sm font-semibold text-slate-600 mb-1.5">Ø§Ù„Ø§Ø³Ù… <span class="text-red-500">*</span></label>
-                            <input type="text" name="name" value="{{ old('name') }}" required placeholder="Ø£Ø¯Ø®Ù„ Ø§Ù„Ø§Ø³Ù… Ø§Ù„ÙƒØ§Ù…Ù„"
+                            <label class="block text-sm font-semibold text-slate-600 mb-1.5">الاسم <span class="text-red-500">*</span></label>
+                            <input type="text" name="name" value="{{ old('name') }}" required placeholder="أدخل الاسم الكامل"
                                    class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition @error('name') border-red-400 bg-red-50 @enderror">
                             @error('name')<p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-slate-600 mb-1.5">Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-semibold text-slate-600 mb-1.5">البريد الإلكتروني <span class="text-red-500">*</span></label>
                             <input type="email" name="email" value="{{ old('email') }}" required placeholder="example@domain.com"
                                    class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition @error('email') border-red-400 bg-red-50 @enderror">
                             @error('email')<p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-slate-600 mb-1.5">ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± <span class="text-red-500">*</span></label>
-                            <input type="password" name="password" required placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                            <label class="block text-sm font-semibold text-slate-600 mb-1.5">كلمة المرور <span class="text-red-500">*</span></label>
+                            <input type="password" name="password" required placeholder="••••••••"
                                    class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-slate-600 mb-1.5">ØªØ£ÙƒÙŠØ¯ ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± <span class="text-red-500">*</span></label>
-                            <input type="password" name="password_confirmation" required placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                            <label class="block text-sm font-semibold text-slate-600 mb-1.5">تأكيد كلمة المرور <span class="text-red-500">*</span></label>
+                            <input type="password" name="password_confirmation" required placeholder="••••••••"
                                    class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition">
                         </div>
                     </div>
@@ -77,7 +77,7 @@
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                             </svg>
                         </span>
-                        Ø§Ù„Ø£Ø¯ÙˆØ§Ø± ÙˆØ§Ù„ØµÙ„Ø§Ø­ÙŠØ§Øª
+                        الأدوار والصلاحيات
                     </h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                         @foreach($roles as $role)
@@ -104,10 +104,10 @@
                                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </span>
-                        Ø§Ù„Ø­Ø§Ù„Ø©
+                        الحالة
                     </h3>
                     <label class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-green-50 hover:border-green-200 transition">
-                        <span class="text-sm font-medium text-slate-700">Ù…Ø¯ÙŠØ± Ù†Ø´Ø·</span>
+                        <span class="text-sm font-medium text-slate-700">مدير نشط</span>
                         <input type="checkbox" name="active" id="active" value="1"
                                {{ old('active', '1') ? 'checked' : '' }}
                                class="w-4 h-4 rounded accent-green-600">
@@ -116,18 +116,18 @@
 
                 {{-- Actions card --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                    <h3 class="text-sm font-bold text-slate-700 mb-4 pb-3 border-b border-slate-100">Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡Ø§Øª</h3>
+                    <h3 class="text-sm font-bold text-slate-700 mb-4 pb-3 border-b border-slate-100">الإجراءات</h3>
                     <div class="space-y-3">
                         <button type="submit"
                                 class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-5 py-3 rounded-xl shadow-sm transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                                 <path d="M5 13l4 4L19 7"/>
                             </svg>
-                            Ø­ÙØ¸ Ø§Ù„Ù…Ø¯ÙŠØ±
+                            ح�ظ المدير
                         </button>
                         <a href="{{ route('admin.settings.admins.index') }}"
                            class="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-sm px-5 py-3 rounded-xl transition">
-                            Ø¥Ù„ØºØ§Ø¡
+                            إلغاء
                         </a>
                     </div>
                 </div>
