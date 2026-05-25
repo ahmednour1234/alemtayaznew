@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Providers;
+
+use App\Repositories\AdminRepository;
+use App\Repositories\BranchRepository;
+use App\Repositories\Contracts\AdminRepositoryInterface;
+use App\Repositories\Contracts\BranchRepositoryInterface;
+use App\Repositories\Contracts\ExpenseRepositoryInterface;
+use App\Repositories\Contracts\ExpenseTypeRepositoryInterface;
+use App\Repositories\Contracts\IncomeRepositoryInterface;
+use App\Repositories\Contracts\IncomeTypeRepositoryInterface;
+use App\Repositories\Contracts\PermissionRepositoryInterface;
+use App\Repositories\Contracts\RoleRepositoryInterface;
+use App\Repositories\Contracts\TransferRepositoryInterface;
+use App\Repositories\ExpenseRepository;
+use App\Repositories\ExpenseTypeRepository;
+use App\Repositories\IncomeRepository;
+use App\Repositories\IncomeTypeRepository;
+use App\Repositories\PermissionRepository;
+use App\Repositories\RoleRepository;
+use App\Repositories\TransferRepository;
+use Illuminate\Support\ServiceProvider;
+
+class RepositoryServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        $this->app->bind(AdminRepositoryInterface::class, AdminRepository::class);
+        $this->app->bind(BranchRepositoryInterface::class, BranchRepository::class);
+        $this->app->bind(IncomeTypeRepositoryInterface::class, IncomeTypeRepository::class);
+        $this->app->bind(ExpenseTypeRepositoryInterface::class, ExpenseTypeRepository::class);
+        $this->app->bind(IncomeRepositoryInterface::class, IncomeRepository::class);
+        $this->app->bind(ExpenseRepositoryInterface::class, ExpenseRepository::class);
+        $this->app->bind(TransferRepositoryInterface::class, TransferRepository::class);
+        $this->app->bind(RoleRepositoryInterface::class, RoleRepository::class);
+        $this->app->bind(PermissionRepositoryInterface::class, PermissionRepository::class);
+    }
+}

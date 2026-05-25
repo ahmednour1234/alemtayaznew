@@ -1,0 +1,107 @@
+<?php
+
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\BranchController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ExpenseController;
+use App\Http\Controllers\Admin\ExpenseTypeController;
+use App\Http\Controllers\Admin\IncomeController;
+use App\Http\Controllers\Admin\IncomeTypeController;
+use App\Http\Controllers\Admin\Reports\BranchStatementController;
+use App\Http\Controllers\Admin\Reports\IncomeStatementController;
+use App\Http\Controllers\Admin\Settings\AdminController as SettingsAdminController;
+use App\Http\Controllers\Admin\Settings\PermissionController;
+use App\Http\Controllers\Admin\Settings\RoleController;
+use App\Http\Controllers\Admin\TransferController;
+use Illuminate\Support\Facades\Route;
+
+// ── Redirect root to admin dashboard ─────────────────────────────────────────
+Route::get('/', fn() => redirect()->route('admin.login'));
+
+// ── Admin Auth ────────────────────────────────────────────────────────────────
+Route::prefix('admin')->name('admin.')->group(function () {
+
+    Route::get('login',  [AuthController::class, 'showLogin'])->name('login');
+    Route::post('login', [AuthController::class, 'login'])->name('login.post');
+
+    // ── Protected ─────────────────────────────────────────────────────────────
+    Route::middleware('auth.admin')->group(function () {
+
+        Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+
+        // Dashboard
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Branches
+        Route::get('branches/trashed',         [BranchController::class, 'index'])->name('branches.trashed');
+        Route::post('branches/{id}/restore',   [BranchController::class, 'restore'])->name('branches.restore');
+        Route::post('branches/{id}/toggle',    [BranchController::class, 'toggleActive'])->name('branches.toggle');
+        Route::resource('branches', BranchController::class);
+
+        // Income Types
+        Route::post('income-types/{id}/restore', [IncomeTypeController::class, 'restore'])->name('income-types.restore');
+        Route::post('income-types/{id}/toggle',  [IncomeTypeController::class, 'toggleActive'])->name('income-types.toggle');
+        Route::resource('income-types', IncomeTypeController::class);
+
+        // Expense Types
+        Route::post('expense-types/{id}/restore', [ExpenseTypeController::class, 'restore'])->name('expense-types.restore');
+        Route::post('expense-types/{id}/toggle',  [ExpenseTypeController::class, 'toggleActive'])->name('expense-types.toggle');
+        Route::resource('expense-types', ExpenseTypeController::class);
+
+        // Incomes
+        Route::get('incomes/export',          [IncomeController::class, 'export'])->name('incomes.export');
+        Route::get('incomes/template',        [IncomeController::class, 'importTemplate'])->name('incomes.template');
+        Route::post('incomes/import',         [IncomeController::class, 'import'])->name('incomes.import');
+        Route::post('incomes/{id}/restore',   [IncomeController::class, 'restore'])->name('incomes.restore');
+        Route::resource('incomes', IncomeController::class);
+
+        // Expenses
+        Route::get('expenses/export',         [ExpenseController::class, 'export'])->name('expenses.export');
+        Route::get('expenses/template',       [ExpenseController::class, 'importTemplate'])->name('expenses.template');
+        Route::post('expenses/import',        [ExpenseController::class, 'import'])->name('expenses.import');
+        Route::post('expenses/{id}/approve',  [ExpenseController::class, 'approve'])->name('expenses.approve');
+        Route::post('expenses/{id}/reject',   [ExpenseController::class, 'reject'])->name('expenses.reject');
+        Route::post('expenses/{id}/restore',  [ExpenseController::class, 'restore'])->name('expenses.restore');
+        Route::resource('expenses', ExpenseController::class);
+
+        // Transfers
+        Route::post('transfers/{id}/approve', [TransferController::class, 'approve'])->name('transfers.approve');
+        Route::post('transfers/{id}/reject',  [TransferController::class, 'reject'])->name('transfers.reject');
+        Route::post('transfers/{id}/restore', [TransferController::class, 'restore'])->name('transfers.restore');
+        Route::resource('transfers', TransferController::class);
+
+        // Reports
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('branch-statement',        [BranchStatementController::class, 'index'])->name('branch-statement');
+            Route::get('branch-statement/export', [BranchStatementController::class, 'export'])->name('branch-statement.export');
+            Route::get('income-statement',        [IncomeStatementController::class, 'index'])->name('income-statement');
+            Route::get('income-statement/export', [IncomeStatementController::class, 'export'])->name('income-statement.export');
+        });
+
+        // Settings
+        Route::prefix('settings')->name('settings.')->group(function () {
+            // Admins
+            Route::post('admins/{id}/restore',  [SettingsAdminController::class, 'restore'])->name('admins.restore');
+            Route::post('admins/{id}/toggle',   [SettingsAdminController::class, 'toggleActive'])->name('admins.toggle');
+            Route::resource('admins', SettingsAdminController::class);
+
+            // Roles
+            Route::resource('roles', RoleController::class)->except('show');
+
+            // Permissions (read-only view)
+            Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
+        });
+
+        // Cities (distinct cities from branches)
+        Route::get('cities', function () {
+            $cities = \App\Models\Branch::whereNotNull('city')
+                ->select('city', \Illuminate\Support\Facades\DB::raw('count(*) as branches_count'))
+                ->groupBy('city')
+                ->orderBy('city')
+                ->get();
+            return view('admin.cities.index', compact('cities'));
+        })->name('cities.index');
+
+    });
+});
+
