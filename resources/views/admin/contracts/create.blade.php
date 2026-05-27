@@ -5,12 +5,20 @@
     $me       = Auth::guard('admin')->user();
     $myDept   = $me->department ?? null;
     $isBoss   = $me->isSuperAdmin() || in_array($myDept, ['branch_manager', 'chairman']);
-    $showT1   = $isBoss || ! $myDept || $myDept === 'customer_service';
-    $showT2   = $isBoss || ! $myDept || in_array($myDept, ['accounts', 'accountant']);
-    $showT3   = $isBoss || ! $myDept || $myDept === 'coordination';
+
+    // What each dept can FILL (only their own section)
+    $editT1   = $isBoss || !$myDept || $myDept === 'customer_service';
+    $editT2   = $isBoss || !$myDept || in_array($myDept, ['accounts', 'accountant']);
+    $editT3   = $isBoss || !$myDept || $myDept === 'coordination';
+
+    // Tabs visible: your tab + all preceding (placeholder if no data yet)
+    $showT1   = true;
+    $showT2   = $isBoss || !$myDept || in_array($myDept, ['accounts', 'accountant', 'coordination']);
+    $showT3   = $isBoss || !$myDept || $myDept === 'coordination';
+
     $defaultTab = match (true) {
-        in_array($myDept, ['accounts', 'accountant']) && ! $isBoss => 'acc',
-        $myDept === 'coordination' && ! $isBoss                   => 'coord',
+        in_array($myDept, ['accounts', 'accountant']) && !$isBoss => 'acc',
+        $myDept === 'coordination' && !$isBoss                    => 'coord',
         default                                                    => 'cs',
     };
 @endphp
@@ -53,6 +61,7 @@
                 <span :class="tab==='cs' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-600'"
                       class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">١</span>
                 خدمة عملاء
+                @if(!$editT1)<svg class="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>@endif
             </button>
             @endif
             {{-- Divider --}}
@@ -69,6 +78,7 @@
                 <span :class="tab==='acc' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-600'"
                       class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">٢</span>
                 حسابات
+                @if(!$editT2)<svg class="w-3.5 h-3.5 opacity-50" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>@endif
             </button>
             @endif
             {{-- Divider --}}
@@ -97,8 +107,7 @@
              ║   TAB 1 — خدمة عملاء                                        ║
              ╚══════════════════════════════════════════════════════════════╝ --}}
         <div x-show="tab==='cs'" class="space-y-6">
-
-        {{-- ── بيانات العقد ──────────────────────────────────────────────────── --}}
+        @if($editT1)        {{-- ── بيانات العقد ──────────────────────────────────────────────────── --}}
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
             <h3 class="text-sm font-bold text-slate-700 mb-5 pb-3 border-b border-slate-100 flex items-center gap-2">
                 <span class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center">
@@ -245,6 +254,14 @@
             </div>
         </div>
 
+        @else
+        {{-- Tab 1 placeholder for non-CS users --}}
+        <div class="bg-blue-50/40 border border-blue-100 rounded-2xl p-8 text-center">
+            <svg class="w-10 h-10 text-blue-200 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <p class="text-sm font-semibold text-blue-700 mb-1">بيانات خدمة العملاء</p>
+            <p class="text-xs text-slate-400">هذا القسم يتم تعبئته من قبل قسم خدمة العملاء — انتقل لقسمك من التبويبات أعلاه</p>
+        </div>
+        @endif
         {{-- Tab 1 – Next button or Submit (CS-only) --}}
         <div class="flex justify-end gap-3">
             @if($showT2)
@@ -265,8 +282,7 @@
              ║   TAB 2 — حسابات                                             ║
              ╚══════════════════════════════════════════════════════════════╝ --}}
         <div x-show="tab==='acc'" class="space-y-6">
-
-        {{-- ── قسم الحسابات ──────────────────────────────────────────────────── --}}
+        @if($editT2)        {{-- ── قسم الحسابات ──────────────────────────────────────────────────── --}}
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
             <h3 class="text-sm font-bold text-slate-700 mb-5 pb-3 border-b border-slate-100 flex items-center gap-2">
                 <span class="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center">
@@ -294,6 +310,14 @@
             </div>
         </div>
 
+        @else
+        {{-- Tab 2 placeholder for non-accounts users --}}
+        <div class="bg-emerald-50/40 border border-emerald-100 rounded-2xl p-8 text-center">
+            <svg class="w-10 h-10 text-emerald-200 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <p class="text-sm font-semibold text-emerald-700 mb-1">بيانات الحسابات</p>
+            <p class="text-xs text-slate-400">هذا القسم يتم تعبئته من قبل قسم الحسابات — انتقل لقسمك من التبويبات أعلاه</p>
+        </div>
+        @endif
         {{-- Tab 2 – Prev / Next or Submit (accounts-only) --}}
         <div class="flex justify-between">
             <div>
