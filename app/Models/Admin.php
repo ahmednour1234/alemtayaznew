@@ -2,18 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'active'])]
-#[Hidden(['password', 'remember_token'])]
 class Admin extends Authenticatable
 {
+    protected $fillable = ['name', 'email', 'password', 'active', 'branch_id'];
+    protected $hidden   = ['password', 'remember_token'];
+
     use HasFactory, Notifiable, SoftDeletes;
 
     protected function casts(): array
@@ -22,6 +22,17 @@ class Admin extends Authenticatable
             'active'    => 'boolean',
             'password'  => 'hashed',
         ];
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    /** True if this admin is scoped to a single branch (not super-admin). */
+    public function isBranchAdmin(): bool
+    {
+        return $this->branch_id !== null && ! $this->isSuperAdmin();
     }
 
     public function roles(): BelongsToMany

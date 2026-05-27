@@ -1,5 +1,5 @@
-@extends('admin.layouts.app')
-@section('title', 'تعديل نوع مصرو�')
+﻿@extends('admin.layouts.app')
+@section('title', 'تعديل نوع مصروف')
 @section('content')
 <div class="w-full">
     <div class="flex items-center gap-3 mb-6">
@@ -18,7 +18,7 @@
                 @error('name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">الوص�</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">الوصف</label>
                 <textarea name="description" rows="3"
                           class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">{{ old('description', $type->description) }}</textarea>
             </div>

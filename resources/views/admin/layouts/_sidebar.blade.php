@@ -1,156 +1,357 @@
-<aside class="fixed right-0 top-0 h-full w-64 flex flex-col z-50 select-none"
-       :class="sidebarOpen ? 'translate-x-0' : 'translate-x-full'"
-       style="background:#0a1628; transition: transform .25s cubic-bezier(.4,0,.2,1)">
+@php
+    $admin = auth('admin')->user();
+    $openSettings   = request()->routeIs(['admin.branches.*', 'admin.cities.*', 'admin.settings.*', 'admin.nationalities.*', 'admin.airports.*']);
+    $openFinance    = request()->routeIs(['admin.income-types.*','admin.expense-types.*','admin.incomes.*','admin.expenses.*','admin.transfers.*','admin.reports.*']);
+    $openAccounting = request()->routeIs(['admin.income-types.*', 'admin.expense-types.*']);
+    $openMoney      = request()->routeIs(['admin.incomes.*', 'admin.expenses.*', 'admin.transfers.*']);
+    $openReports    = request()->routeIs(['admin.reports.*']);
+    $openPeople     = request()->routeIs(['admin.clients.*', 'admin.agents.*']);
+@endphp
 
-    <!-- Logo -->
-    <div class="flex items-center gap-3 px-5 py-[18px]" style="border-bottom:1px solid rgba(255,255,255,.07)">
-        <div class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#2563eb,#1d4ed8)">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L3 7V17L12 22L21 17V7L12 2Z" stroke="white" stroke-width="1.8" stroke-linejoin="round"/>
-                <path d="M12 2V22M3 7L12 12M21 7L12 12" stroke="white" stroke-width="1.8"/>
+<div x-data="{
+        s: {{ $openSettings   ? 'true' : 'false' }},
+        f: {{ $openFinance    ? 'true' : 'false' }},
+        a: {{ $openAccounting ? 'true' : 'false' }},
+        m: {{ $openMoney      ? 'true' : 'false' }},
+        r: {{ $openReports    ? 'true' : 'false' }},
+        p: {{ $openPeople     ? 'true' : 'false' }}
+     }"
+     style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+
+    {{-- Logo --}}
+    <div style="padding:0 16px;height:64px;display:flex;align-items:center;gap:12px;
+                border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;">
+        <div style="width:36px;height:36px;border-radius:9px;
+                    background:linear-gradient(135deg,#2563eb,#1d4ed8);
+                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L3 7V17L12 22L21 17V7L12 2Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M12 2V22M3 7L12 12M21 7L12 12" stroke="white" stroke-width="1.6"/>
             </svg>
         </div>
         <div>
-            <p class="text-white font-bold text-[13px] leading-tight">نظام الامتياز</p>
-            <p class="text-[11px] leading-tight mt-0.5" style="color:#4a7ab5">للاستقدام</p>
+            <p style="color:#f1f5f9;font-size:13px;font-weight:700;line-height:1.2;margin:0;">نظام الامتياز</p>
+            <p style="color:#475569;font-size:10px;line-height:1.3;margin:0;">للاستقدام</p>
         </div>
     </div>
 
-    <!-- Navigation -->
-    <nav class="flex-1 px-3 py-3 overflow-y-auto space-y-0.5">
-        @php $admin = auth('admin')->user(); @endphp
+    {{-- Scrollable nav --}}
+    <nav style="flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 8px 8px;
+                scrollbar-width:thin;scrollbar-color:#1e293b transparent;">
 
-        <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
-                <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+        {{-- Dashboard --}}
+        <a href="{{ route('admin.dashboard') }}"
+           style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;
+                  text-decoration:none;font-size:13px;font-weight:500;margin-bottom:6px;
+                  {{ request()->routeIs('admin.dashboard') ? 'color:#fff;background:#2563eb;' : 'color:#94a3b8;background:transparent;' }}"
+           onmouseover="if(!this.dataset.active){this.style.background='rgba(255,255,255,.06)';this.style.color='#e2e8f0';}"
+           onmouseout="if(!this.dataset.active){this.style.background='transparent';this.style.color='#94a3b8';}"
+           {{ request()->routeIs('admin.dashboard') ? 'data-active=1' : '' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="14" width="7" height="7" rx="1.5"/>
             </svg>
             لوحة التحكم
         </a>
 
-        <a href="{{ route('admin.incomes.index') }}" class="sidebar-link {{ request()->routeIs('admin.incomes.*') ? 'active' : '' }}">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
-                <polyline points="16 7 22 7 22 13"/>
-            </svg>
-            الإيرادات
-        </a>
-
-        <a href="{{ route('admin.expenses.index') }}" class="sidebar-link {{ request()->routeIs('admin.expenses.*') ? 'active' : '' }}">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <rect x="2" y="5" width="20" height="14" rx="2"/>
-                <line x1="2" y1="10" x2="22" y2="10"/>
-            </svg>
-            المصرو�ات
-        </a>
-
-        <a href="{{ route('admin.transfers.index') }}" class="sidebar-link {{ request()->routeIs('admin.transfers.*') ? 'active' : '' }}">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <path d="M7 16l-4-4 4-4M17 8l4 4-4 4M14 4l-4 16"/>
-            </svg>
-            التحويلات بين ال�روع
-        </a>
-
-        <a href="{{ route('admin.reports.branch-statement') }}" class="sidebar-link {{ request()->routeIs('admin.reports.branch-statement') ? 'active' : '' }}">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10 9 9 9 8 9"/>
-            </svg>
-            كش� حساب ال�رع
-        </a>
-
-        <a href="{{ route('admin.reports.income-statement') }}" class="sidebar-link {{ request()->routeIs('admin.reports.income-statement') ? 'active' : '' }}">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="2" y1="12" x2="22" y2="12"/>
-                <path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
-            </svg>
-            قائمة دخل بين ال�روع
-        </a>
-
-        <a href="{{ route('admin.reports.branch-statement') }}" class="sidebar-link">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
-                <line x1="6" y1="20" x2="6" y2="14"/>
-            </svg>
-            التقارير
-        </a>
-
-        <!-- Settings Section -->
-        <div class="pt-4 pb-1.5 px-2">
-            <p class="text-[11px] font-bold uppercase tracking-widest" style="color:#3d5c80">الإعدادات</p>
+        {{-- Section label: الإعدادات --}}
+        <div style="padding:10px 10px 4px;">
+            <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
+                      text-transform:uppercase;color:#334155;margin:0;">الإعدادات</p>
         </div>
 
-        <a href="{{ route('admin.branches.index') }}" class="sidebar-link {{ request()->routeIs('admin.branches.*') ? 'active' : '' }}">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <path d="M3 21h18M3 7l9-4 9 4M4 7v14M20 7v14M9 21V11h6v10"/>
-            </svg>
-            ال�روع
-        </a>
+        {{-- ── GROUP 1: الإعدادات العامة ── --}}
+        <div style="margin-bottom:1px;">
+            <button @click="s=!s"
+                    style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
+                           border-radius:8px;border:none;cursor:pointer;text-align:right;
+                           font-family:Cairo,sans-serif;font-size:13px;font-weight:600;
+                           transition:background .15s,color .15s;"
+                    :style="{ color: s ? '#e2e8f0' : '#64748b', background: s ? 'rgba(255,255,255,.05)' : 'transparent' }"
+                    @mouseenter="$el.style.background='rgba(255,255,255,.06)';$el.style.color='#e2e8f0';"
+                    @mouseleave="$el.style.background=s?'rgba(255,255,255,.05)':'transparent';$el.style.color=s?'#e2e8f0':'#64748b';">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                    <circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 014-4h4a4 4 0 014 4v2"/>
+                </svg>
+                <span style="flex:1;">الإعدادات العامة</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                     style="flex-shrink:0;transition:transform .25s;" :style="{ transform: s ? 'rotate(180deg)' : 'none' }">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div x-show="s" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
+                @php $items = [
+                    ['r'=>'admin.branches.index',        'p'=>'admin.branches.*',        'l'=>'الفروع',              'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14M20 7v14M9 21V11h6v10'],
+                    ['r'=>'admin.cities.index',          'p'=>'admin.cities.*',          'l'=>'المدن',               'd'=>'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'],
+                    ['r'=>'admin.nationalities.index',   'p'=>'admin.nationalities.*',   'l'=>'الجنسيات',            'd'=>'M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6H10.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9'],
+                    ['r'=>'admin.airports.index',        'p'=>'admin.airports.*',        'l'=>'المطارات',            'd'=>'M2.5 19h19M6.5 12.5L4 19 M17.5 12.5L20 19 M12 3L6.5 12.5h11L12 3z'],
+                    ['r'=>'admin.settings.roles.index',  'p'=>'admin.settings.roles.*',  'l'=>'الأدوار والصلاحيات', 'd'=>'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'],
+                    ['r'=>'admin.settings.admins.index', 'p'=>'admin.settings.admins.*', 'l'=>'المديرين',            'd'=>'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z'],
+                ] @endphp
+                @foreach($items as $it)
+                    @php $on = request()->routeIs($it['p']); @endphp
+                    <a href="{{ route($it['r']) }}"
+                       style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
+                              border-radius:7px;text-decoration:none;font-size:12.5px;
+                              {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                       onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
+                       onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
+                       {{ $on ? 'data-on=1' : '' }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                            <path d="{{ $it['d'] }}"/>
+                        </svg>
+                        {{ $it['l'] }}
+                    </a>
+                @endforeach
+            </div>
+        </div>
 
-        <a href="{{ route('admin.income-types.index') }}" class="sidebar-link {{ request()->routeIs('admin.income-types.*') ? 'active' : '' }}">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
-            </svg>
-            أنواع الإيرادات
-        </a>
+        {{-- Section label: المالية --}}
+        <div style="padding:10px 10px 4px;margin-top:4px;">
+            <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
+                      text-transform:uppercase;color:#334155;margin:0;">المالية</p>
+        </div>
 
-        <a href="{{ route('admin.expense-types.index') }}" class="sidebar-link {{ request()->routeIs('admin.expense-types.*') ? 'active' : '' }}">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="8" y1="12" x2="16" y2="12"/>
-            </svg>
-            أنواع المصرو�ات
-        </a>
+        {{-- ── OUTER: القسم المالي ── --}}
+        <div style="margin-bottom:1px;">
+            <button @click="f=!f"
+                    style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
+                           border-radius:8px;border:none;cursor:pointer;text-align:right;
+                           font-family:Cairo,sans-serif;font-size:13px;font-weight:700;
+                           transition:background .15s,color .15s;"
+                    :style="{ color: f ? '#e2e8f0' : '#64748b', background: f ? 'rgba(255,255,255,.07)' : 'transparent' }"
+                    @mouseenter="$el.style.background='rgba(255,255,255,.07)';$el.style.color='#e2e8f0';"
+                    @mouseleave="$el.style.background=f?'rgba(255,255,255,.07)':'transparent';$el.style.color=f?'#e2e8f0':'#64748b';">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                    <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
+                </svg>
+                <span style="flex:1;">القسم المالي</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                     style="flex-shrink:0;transition:transform .25s;" :style="{ transform: f ? 'rotate(180deg)' : 'none' }">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
 
-        <a href="{{ route('admin.cities.index') }}" class="sidebar-link {{ request()->routeIs('admin.cities.*') ? 'active' : '' }}">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                <circle cx="12" cy="9" r="2.5"/>
-            </svg>
-            المدن
-        </a>
+            <div x-show="f" x-collapse style="overflow:hidden;">
+                <div style="padding:4px 0 4px 10px;border-right:2px solid rgba(255,255,255,.06);margin-right:12px;">
 
-        <a href="{{ route('admin.settings.roles.index') }}" class="sidebar-link {{ request()->routeIs('admin.settings.roles.*') || request()->routeIs('admin.settings.permissions.*') ? 'active' : '' }}">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-            الأدوار والصلاحيات
-        </a>
+                    {{-- SUB 1: إعدادات المحاسبة --}}
+                    <div style="margin-bottom:1px;">
+                        <button @click="a=!a"
+                                style="width:100%;display:flex;align-items:center;gap:9px;padding:7px 10px;
+                                       border-radius:7px;border:none;cursor:pointer;text-align:right;
+                                       font-family:Cairo,sans-serif;font-size:12.5px;font-weight:600;
+                                       transition:background .15s,color .15s;"
+                                :style="{ color: a ? '#cbd5e1' : '#64748b', background: a ? 'rgba(255,255,255,.04)' : 'transparent' }"
+                                @mouseenter="$el.style.background='rgba(255,255,255,.05)';$el.style.color='#cbd5e1';"
+                                @mouseleave="$el.style.background=a?'rgba(255,255,255,.04)':'transparent';$el.style.color=a?'#cbd5e1':'#64748b';">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+                            </svg>
+                            <span style="flex:1;">إعدادات المحاسبة</span>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                 style="flex-shrink:0;transition:transform .25s;" :style="{ transform: a ? 'rotate(180deg)' : 'none' }">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <div x-show="a" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
+                            @php $acctItems = [
+                                ['r'=>'admin.income-types.index',  'p'=>'admin.income-types.*',  'l'=>'أنواع الإيرادات',  'd'=>'M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6'],
+                                ['r'=>'admin.expense-types.index', 'p'=>'admin.expense-types.*', 'l'=>'أنواع المصروفات', 'd'=>'M3 6h18M3 12h18M3 18h18'],
+                            ] @endphp
+                            @foreach($acctItems as $it)
+                                @php $on = request()->routeIs($it['p']); @endphp
+                                <a href="{{ route($it['r']) }}"
+                                   style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
+                                          border-radius:6px;text-decoration:none;font-size:12px;
+                                          {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                                   onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
+                                   onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
+                                   {{ $on ? 'data-on=1' : '' }}>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;"><path d="{{ $it['d'] }}"/></svg>
+                                    {{ $it['l'] }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
 
-        <a href="{{ route('admin.settings.admins.index') }}" class="sidebar-link {{ request()->routeIs('admin.settings.admins.*') ? 'active' : '' }}">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-            </svg>
-            المديرين <span class="text-[11px] opacity-50 mr-1">(Admins)</span>
-        </a>
+                    {{-- SUB 2: المالية --}}
+                    <div style="margin-bottom:1px;">
+                        <button @click="m=!m"
+                                style="width:100%;display:flex;align-items:center;gap:9px;padding:7px 10px;
+                                       border-radius:7px;border:none;cursor:pointer;text-align:right;
+                                       font-family:Cairo,sans-serif;font-size:12.5px;font-weight:600;
+                                       transition:background .15s,color .15s;"
+                                :style="{ color: m ? '#cbd5e1' : '#64748b', background: m ? 'rgba(255,255,255,.04)' : 'transparent' }"
+                                @mouseenter="$el.style.background='rgba(255,255,255,.05)';$el.style.color='#cbd5e1';"
+                                @mouseleave="$el.style.background=m?'rgba(255,255,255,.04)':'transparent';$el.style.color=m?'#cbd5e1':'#64748b';">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                                <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
+                            </svg>
+                            <span style="flex:1;">المالية</span>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                 style="flex-shrink:0;transition:transform .25s;" :style="{ transform: m ? 'rotate(180deg)' : 'none' }">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <div x-show="m" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
+                            @php $finItems = [
+                                ['r'=>'admin.incomes.index',   'p'=>'admin.incomes.*',   'l'=>'الإيرادات',             'd'=>'M22 7L13.5 15.5L8.5 10.5L2 17 M16 7h6v6'],
+                                ['r'=>'admin.expenses.index',  'p'=>'admin.expenses.*',  'l'=>'المصروفات',             'd'=>'M22 17L13.5 8.5L8.5 13.5L2 7 M16 17h6v-6'],
+                                ['r'=>'admin.transfers.index', 'p'=>'admin.transfers.*', 'l'=>'التحويلات بين الفروع', 'd'=>'M7 16l-4-4 4-4 M17 8l4 4-4 4 M14 4l-4 16'],
+                            ] @endphp
+                            @foreach($finItems as $it)
+                                @php $on = request()->routeIs($it['p']); @endphp
+                                <a href="{{ route($it['r']) }}"
+                                   style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
+                                          border-radius:6px;text-decoration:none;font-size:12px;
+                                          {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                                   onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
+                                   onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
+                                   {{ $on ? 'data-on=1' : '' }}>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;"><path d="{{ $it['d'] }}"/></svg>
+                                    {{ $it['l'] }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
 
-        <a href="{{ route('admin.settings.permissions.index') }}" class="sidebar-link">
-            <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
-            </svg>
-            الإعدادات العامة
-        </a>
+                    {{-- SUB 3: التقارير --}}
+                    <div style="margin-bottom:1px;">
+                        <button @click="r=!r"
+                                style="width:100%;display:flex;align-items:center;gap:9px;padding:7px 10px;
+                                       border-radius:7px;border:none;cursor:pointer;text-align:right;
+                                       font-family:Cairo,sans-serif;font-size:12.5px;font-weight:600;
+                                       transition:background .15s,color .15s;"
+                                :style="{ color: r ? '#cbd5e1' : '#64748b', background: r ? 'rgba(255,255,255,.04)' : 'transparent' }"
+                                @mouseenter="$el.style.background='rgba(255,255,255,.05)';$el.style.color='#cbd5e1';"
+                                @mouseleave="$el.style.background=r?'rgba(255,255,255,.04)':'transparent';$el.style.color=r?'#cbd5e1':'#64748b';">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                            </svg>
+                            <span style="flex:1;">التقارير</span>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                 style="flex-shrink:0;transition:transform .25s;" :style="{ transform: r ? 'rotate(180deg)' : 'none' }">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <div x-show="r" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
+                            @php $repItems = [
+                                ['r'=>'admin.reports.branch-statement', 'p'=>'admin.reports.branch-statement', 'l'=>'كشف حساب الفرع',       'd'=>'M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v14a2 2 0 002 2z'],
+                                ['r'=>'admin.reports.income-statement', 'p'=>'admin.reports.income-statement', 'l'=>'قائمة دخل بين الفروع', 'd'=>'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z'],
+                            ] @endphp
+                            @foreach($repItems as $it)
+                                @php $on = request()->routeIs($it['p']); @endphp
+                                <a href="{{ route($it['r']) }}"
+                                   style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
+                                          border-radius:6px;text-decoration:none;font-size:12px;
+                                          {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                                   onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
+                                   onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
+                                   {{ $on ? 'data-on=1' : '' }}>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;"><path d="{{ $it['d'] }}"/></svg>
+                                    {{ $it['l'] }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        {{-- Section label: العملاء والوكلاء --}}
+        <div style="padding:10px 10px 4px;margin-top:4px;">
+            <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
+                      text-transform:uppercase;color:#334155;margin:0;">العملاء والوكلاء</p>
+        </div>
+
+        {{-- ── GROUP: العملاء والوكلاء ── --}}
+        <div style="margin-bottom:1px;">
+            <button @click="p=!p"
+                    style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
+                           border-radius:8px;border:none;cursor:pointer;text-align:right;
+                           font-family:Cairo,sans-serif;font-size:13px;font-weight:600;
+                           transition:background .15s,color .15s;"
+                    :style="{ color: p ? '#e2e8f0' : '#64748b', background: p ? 'rgba(255,255,255,.05)' : 'transparent' }"
+                    @mouseenter="$el.style.background='rgba(255,255,255,.06)';$el.style.color='#e2e8f0';"
+                    @mouseleave="$el.style.background=p?'rgba(255,255,255,.05)':'transparent';$el.style.color=p?'#e2e8f0':'#64748b';">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+                </svg>
+                <span style="flex:1;">العملاء والوكلاء</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                     style="flex-shrink:0;transition:transform .25s;" :style="{ transform: p ? 'rotate(180deg)' : 'none' }">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div x-show="p" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
+                @php $peopleItems = [
+                    ['r'=>'admin.clients.index', 'p'=>'admin.clients.*', 'l'=>'العملاء',
+                     'd'=>'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 7a4 4 0 100 8 4 4 0 000-8z'],
+                    ['r'=>'admin.agents.index',  'p'=>'admin.agents.*',  'l'=>'الوكلاء',
+                     'd'=>'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75'],
+                ] @endphp
+                @foreach($peopleItems as $it)
+                    @php $on = request()->routeIs($it['p']); @endphp
+                    <a href="{{ route($it['r']) }}"
+                       style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
+                              border-radius:7px;text-decoration:none;font-size:12.5px;
+                              {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                       onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
+                       onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
+                       {{ $on ? 'data-on=1' : '' }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                            <path d="{{ $it['d'] }}"/>
+                        </svg>
+                        {{ $it['l'] }}
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
     </nav>
 
-    <!-- Logout -->
-    <div class="px-3 py-3" style="border-top:1px solid rgba(255,255,255,.07)">
-        <form action="{{ route('admin.logout') }}" method="POST">
+    {{-- User & Logout --}}
+    <div style="padding:10px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;
+                    border-radius:8px;margin-bottom:6px;background:rgba(255,255,255,.04);">
+            <div style="width:32px;height:32px;border-radius:50%;
+                        background:linear-gradient(135deg,#2563eb,#7c3aed);
+                        display:flex;align-items:center;justify-content:center;
+                        color:#fff;font-size:13px;font-weight:700;flex-shrink:0;">
+                {{ mb_substr($admin?->name ?? 'A', 0, 1) }}
+            </div>
+            <div style="min-width:0;flex:1;">
+                <p style="color:#e2e8f0;font-size:12px;font-weight:600;line-height:1.3;
+                          overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0;">
+                    {{ $admin?->name }}
+                </p>
+                <p style="color:#475569;font-size:10px;line-height:1.2;margin:0;">
+                    {{ $admin?->roles->first()?->name ?? 'مدير عام' }}
+                </p>
+            </div>
+        </div>
+        <form action="{{ route('admin.logout') }}" method="POST" style="margin:0;">
             @csrf
-            <button type="submit" class="sidebar-link w-full" style="color:#e87575" onmouseover="this.style.background='rgba(239,68,68,.12)'" onmouseout="this.style.background=''">
-                <svg class="w-[17px] h-[17px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path d="M17 16l4-4m0 0l-4-4m4 4H7"/>
-                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+            <button type="submit"
+                    style="width:100%;display:flex;align-items:center;gap:9px;padding:8px 12px;
+                           border-radius:7px;font-size:12.5px;color:#f87171;border:none;
+                           background:transparent;cursor:pointer;font-family:Cairo,sans-serif;
+                           transition:background .15s;"
+                    onmouseover="this.style.background='rgba(248,113,113,.08)'"
+                    onmouseout="this.style.background='transparent'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M17 16l4-4m0 0l-4-4m4 4H7"/><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
                 </svg>
                 تسجيل خروج
             </button>
         </form>
     </div>
-</aside>
+
+</div>
 

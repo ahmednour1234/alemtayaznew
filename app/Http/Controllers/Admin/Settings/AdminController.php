@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAdminRequest;
 use App\Http\Requests\Admin\UpdateAdminRequest;
+use App\Models\Branch;
 use App\Services\AdminService;
+use App\Services\NotificationService;
 use App\Services\RoleService;
 
 class AdminController extends Controller
@@ -13,6 +15,7 @@ class AdminController extends Controller
     public function __construct(
         private readonly AdminService $service,
         private readonly RoleService  $roleService,
+        private readonly NotificationService $notifService,
     ) {}
 
     public function index()
@@ -24,13 +27,20 @@ class AdminController extends Controller
 
     public function create()
     {
-        $roles = $this->roleService->list();
-        return view('admin.settings.admins.create', compact('roles'));
+        $roles    = $this->roleService->list();
+        $branches = Branch::where('active', true)->orderBy('name')->get();
+        return view('admin.settings.admins.create', compact('roles', 'branches'));
     }
 
     public function store(StoreAdminRequest $request)
     {
-        $this->service->store($request->validated());
+        $newAdmin = $this->service->store($request->validated());
+        $this->notifService->notify(
+            'admin_created',
+            'تم إنشاء مستخدم جديد',
+            'تم إنشاء مستخدم جديد باسم ' . ($newAdmin->name ?? ''),
+            route('admin.settings.admins.show', $newAdmin->id)
+        );
         return redirect()->route('admin.settings.admins.index')->with('success', 'تم إنشاء المدير بنجاح.');
     }
 
@@ -42,9 +52,10 @@ class AdminController extends Controller
 
     public function edit(int $id)
     {
-        $admin = $this->service->find($id);
-        $roles = $this->roleService->list();
-        return view('admin.settings.admins.edit', compact('admin', 'roles'));
+        $admin    = $this->service->find($id);
+        $roles    = $this->roleService->list();
+        $branches = Branch::where('active', true)->orderBy('name')->get();
+        return view('admin.settings.admins.edit', compact('admin', 'roles', 'branches'));
     }
 
     public function update(UpdateAdminRequest $request, int $id)

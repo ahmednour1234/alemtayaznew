@@ -85,12 +85,24 @@ class ReportService
                 ->when($dateTo,   fn($q) => $q->whereDate('date', '<=', $dateTo))
                 ->sum('amount');
 
+            $transfersIn = \App\Models\FinancialTransfer::where('to_branch_id', $branch->id)
+                ->when($dateFrom, fn($q) => $q->whereDate('date', '>=', $dateFrom))
+                ->when($dateTo,   fn($q) => $q->whereDate('date', '<=', $dateTo))
+                ->sum('amount');
+
+            $transfersOut = \App\Models\FinancialTransfer::where('from_branch_id', $branch->id)
+                ->when($dateFrom, fn($q) => $q->whereDate('date', '>=', $dateFrom))
+                ->when($dateTo,   fn($q) => $q->whereDate('date', '<=', $dateTo))
+                ->sum('amount');
+
             return [
                 'branch'            => $branch,
                 'total_income'      => $totalIncome,
                 'total_expenses'    => $totalApprovedExpenses,
                 'net_profit'        => $totalIncome - $totalApprovedExpenses,
                 'pending_expenses'  => $pendingExpenses,
+                'transfers_in'      => $transfersIn,
+                'transfers_out'     => $transfersOut,
             ];
         });
 
@@ -99,9 +111,11 @@ class ReportService
             'date_from' => $dateFrom,
             'date_to'   => $dateTo,
             'totals'    => [
-                'income'   => $rows->sum('total_income'),
-                'expenses' => $rows->sum('total_expenses'),
-                'net'      => $rows->sum('net_profit'),
+                'income'        => $rows->sum('total_income'),
+                'expenses'      => $rows->sum('total_expenses'),
+                'transfers_in'  => $rows->sum('transfers_in'),
+                'transfers_out' => $rows->sum('transfers_out'),
+                'net'           => $rows->sum('net_profit'),
             ],
         ];
     }

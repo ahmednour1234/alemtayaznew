@@ -19,13 +19,16 @@ class DashboardController extends Controller
 
     public function index()
     {
-        $stats         = $this->dashboardService->getStats();
-        $chartData     = $this->dashboardService->getChartData();
+        $me       = \Illuminate\Support\Facades\Auth::guard('admin')->user();
+        $branchId = $me->isBranchAdmin() ? $me->branch_id : null;
+
+        $stats         = $this->dashboardService->getStats($branchId);
+        $chartData     = $this->dashboardService->getChartData($branchId);
         $branchChart   = $this->dashboardService->getBranchComparisonData();
-        $recentIncomes = $this->incomeService->recent(5);
-        $recentExpenses = $this->expenseService->recent(5);
-        $pendingExpenses = $this->expenseService->pending();
-        $pendingTransfers = $this->transferService->pending();
+        $recentIncomes = $this->incomeService->recent(5, $branchId);
+        $recentExpenses = $this->expenseService->recent(5, $branchId);
+        $pendingExpenses  = $this->expenseService->pending($branchId);
+        $pendingTransfers = $this->transferService->pending($branchId);
 
         return view('admin.dashboard.index', compact(
             'stats', 'chartData', 'branchChart',

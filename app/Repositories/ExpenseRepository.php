@@ -53,10 +53,11 @@ class ExpenseRepository implements ExpenseRepositoryInterface
         return Expense::onlyTrashed()->with(['branch', 'expenseType'])->latest()->get();
     }
 
-    public function getPending()
+    public function getPending(?int $branchId = null)
     {
         return Expense::with(['branch', 'expenseType', 'admin'])
             ->where('status', 'pending')
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->latest()
             ->get();
     }
@@ -71,8 +72,10 @@ class ExpenseRepository implements ExpenseRepositoryInterface
             ->sum('amount');
     }
 
-    public function getRecent(int $limit = 10)
+    public function getRecent(int $limit = 10, ?int $branchId = null)
     {
-        return Expense::with(['branch', 'expenseType'])->latest('date')->limit($limit)->get();
+        return Expense::with(['branch', 'expenseType'])
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->latest('date')->limit($limit)->get();
     }
 }

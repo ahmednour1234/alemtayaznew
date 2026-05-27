@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['name', 'description', 'active'])]
 class ExpenseType extends Model
 {
+    protected $fillable = ['name', 'description', 'active'];
     use SoftDeletes;
 
     protected function casts(): array

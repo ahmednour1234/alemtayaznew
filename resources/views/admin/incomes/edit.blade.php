@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+﻿@extends('admin.layouts.app')
 @section('title', 'تعديل الإيراد')
 @section('content')
 <div class="w-full">
@@ -13,7 +13,7 @@
             @csrf @method('PUT')
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1.5">ال�رع <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">الفرع <span class="text-red-500">*</span></label>
                     <select name="branch_id" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                         @foreach($branches as $branch)
                         <option value="{{ $branch->id }}" {{ old('branch_id', $income->branch_id) == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
@@ -23,7 +23,7 @@
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">نوع الدخل <span class="text-red-500">*</span></label>
                     <select name="income_type_id" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        @foreach($incomeTypes as $type)
+                         @foreach($types as $type)
                         <option value="{{ $type->id }}" {{ old('income_type_id', $income->income_type_id) == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
                         @endforeach
                     </select>
@@ -39,7 +39,7 @@
                            class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1.5">طريقة الد�ع</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">طريقة الدفع</label>
                     <select name="payment_method" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                         @foreach(['cash'=>'نقد','bank_transfer'=>'تحويل بنكي','check'=>'شيك','other'=>'أخرى'] as $val => $label)
                         <option value="{{ $val }}" {{ old('payment_method', $income->payment_method) === $val ? 'selected' : '' }}>{{ $label }}</option>
@@ -53,14 +53,14 @@
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">الوص�</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">الوصف</label>
                 <textarea name="description" rows="2"
                           class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">{{ old('description', $income->description) }}</textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">المر�ق</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">المرفق</label>
                 @if($income->attachment)
-                    <a href="{{ Storage::url($income->attachment) }}" target="_blank" class="text-blue-600 text-xs hover:underline block mb-2">عرض المر�ق الحالي</a>
+                    <a href="{{ Storage::url($income->attachment) }}" target="_blank" class="text-blue-600 text-xs hover:underline block mb-2">عرض المرفق الحالي</a>
                 @endif
                 <input type="file" name="attachment" accept="image/*,.pdf"
                        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">

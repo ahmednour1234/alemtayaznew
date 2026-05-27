@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+﻿@extends('admin.layouts.app')
 @section('title', 'الأدوار')
 @section('content')
 
@@ -7,7 +7,7 @@
     <a href="{{ route('admin.settings.roles.create') }}"
        class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg flex items-center gap-1">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        إضا�ة دور
+        إضافة دور
     </a>
 </div>
 
@@ -36,7 +36,7 @@
                         </a>
                         @if($role->slug !== 'super-admin')
                         <form action="{{ route('admin.settings.roles.destroy', $role->id) }}" method="POST" class="inline"
-                              onsubmit="return confirm('حذ� هذا الدور؟')">
+                              onsubmit="return confirm('حذف هذا الدور؟')">
                             @csrf @method('DELETE')
                             <button type="submit" class="text-slate-500 hover:text-red-600">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7"/></svg>

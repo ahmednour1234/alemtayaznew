@@ -1,19 +1,19 @@
-@extends('admin.layouts.app')
-@section('title', 'تعديل المصرو�')
+﻿@extends('admin.layouts.app')
+@section('title', 'تعديل المصروف')
 @section('content')
 <div class="w-full">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('admin.expenses.index') }}" class="text-slate-400 hover:text-slate-600">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
-        <h2 class="text-xl font-bold text-slate-800">تعديل المصرو�</h2>
+        <h2 class="text-xl font-bold text-slate-800">تعديل المصروف</h2>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-6">
         <form action="{{ route('admin.expenses.update', $expense->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5">
             @csrf @method('PUT')
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1.5">ال�رع <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">الفرع <span class="text-red-500">*</span></label>
                     <select name="branch_id" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                         @foreach($branches as $branch)
                         <option value="{{ $branch->id }}" {{ old('branch_id', $expense->branch_id) == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
@@ -21,9 +21,9 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1.5">نوع المصرو� <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">نوع المصروف <span class="text-red-500">*</span></label>
                     <select name="expense_type_id" required class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        @foreach($expenseTypes as $type)
+                         @foreach($types as $type)
                         <option value="{{ $type->id }}" {{ old('expense_type_id', $expense->expense_type_id) == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
                         @endforeach
                     </select>
@@ -39,7 +39,7 @@
                            class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1.5">طريقة الد�ع</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">طريقة الدفع</label>
                     <select name="payment_method" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                         @foreach(['cash'=>'نقد','bank_transfer'=>'تحويل بنكي','check'=>'شيك','other'=>'أخرى'] as $val => $label)
                         <option value="{{ $val }}" {{ old('payment_method', $expense->payment_method) === $val ? 'selected' : '' }}>{{ $label }}</option>
@@ -53,14 +53,14 @@
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">الوص�</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">الوصف</label>
                 <textarea name="description" rows="2"
                           class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">{{ old('description', $expense->description) }}</textarea>
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">المر�ق</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">المرفق</label>
                 @if($expense->attachment)
-                    <a href="{{ Storage::url($expense->attachment) }}" target="_blank" class="text-blue-600 text-xs hover:underline block mb-2">عرض المر�ق الحالي</a>
+                    <a href="{{ Storage::url($expense->attachment) }}" target="_blank" class="text-blue-600 text-xs hover:underline block mb-2">عرض المرفق الحالي</a>
                 @endif
                 <input type="file" name="attachment" accept="image/*,.pdf"
                        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">

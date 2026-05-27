@@ -1,5 +1,5 @@
-@extends('admin.layouts.app')
-@section('title', 'إضا�ة مدير')
+﻿@extends('admin.layouts.app')
+@section('title', 'إضافة مدير')
 @section('content')
 <div class="w-full">
 
@@ -13,7 +13,7 @@
                 </svg>
             </a>
             <div>
-                <h2 class="text-xl font-bold text-slate-800">إضا�ة مدير جديد</h2>
+                <h2 class="text-xl font-bold text-slate-800">إضافة مدير جديد</h2>
                 <p class="text-slate-400 text-xs mt-0.5">أدخل بيانات المدير الجديد</p>
             </div>
         </div>
@@ -65,6 +65,16 @@
                             <label class="block text-sm font-semibold text-slate-600 mb-1.5">تأكيد كلمة المرور <span class="text-red-500">*</span></label>
                             <input type="password" name="password_confirmation" required placeholder="••••••••"
                                    class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-slate-600 mb-1.5">الفرع المرتبط <span class="text-slate-400 text-xs font-normal">(اتركه فارغاً للمدير العام)</span></label>
+                            <select name="branch_id" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition @error('branch_id') border-red-400 bg-red-50 @enderror">
+                                <option value="">— مدير عام (كل الفروع) —</option>
+                                @foreach($branches as $branch)
+                                    <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('branch_id')<p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>@enderror
                         </div>
                     </div>
                 </div>
@@ -123,7 +133,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                                 <path d="M5 13l4 4L19 7"/>
                             </svg>
-                            ح�ظ المدير
+                            حفظ المدير
                         </button>
                         <a href="{{ route('admin.settings.admins.index') }}"
                            class="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-sm px-5 py-3 rounded-xl transition">

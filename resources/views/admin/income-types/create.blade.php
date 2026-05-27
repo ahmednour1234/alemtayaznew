@@ -1,12 +1,12 @@
-@extends('admin.layouts.app')
-@section('title', 'إضا�ة نوع دخل')
+﻿@extends('admin.layouts.app')
+@section('title', 'إضافة نوع دخل')
 @section('content')
 <div class="w-full">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('admin.income-types.index') }}" class="text-slate-400 hover:text-slate-600">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
-        <h2 class="text-xl font-bold text-slate-800">إضا�ة نوع دخل</h2>
+        <h2 class="text-xl font-bold text-slate-800">إضافة نوع دخل</h2>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-6">
         <form action="{{ route('admin.income-types.store') }}" method="POST" class="space-y-4">
@@ -18,7 +18,7 @@
                 @error('name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">الوص�</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">الوصف</label>
                 <textarea name="description" rows="3"
                           class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">{{ old('description') }}</textarea>
             </div>
@@ -27,7 +27,7 @@
                 <label for="active" class="text-sm font-medium text-slate-700">نشط</label>
             </div>
             <div class="flex gap-3 pt-2">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2.5 rounded-lg">ح�ظ</button>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2.5 rounded-lg">حفظ</button>
                 <a href="{{ route('admin.income-types.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-6 py-2.5 rounded-lg">إلغاء</a>
             </div>
         </form>

@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+﻿@extends('admin.layouts.app')
 @section('title', 'تعديل مدير')
 @section('content')
 <div class="w-full">
@@ -22,7 +22,7 @@
                        class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">كلمة المرور الجديدة <span class="text-slate-400 text-xs">(اتركها �ارغة إذا لم تريد تغييرها)</span></label>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">كلمة المرور الجديدة <span class="text-slate-400 text-xs">(اتركها فارغة إذا لم تريد تغييرها)</span></label>
                 <input type="password" name="password"
                        class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
             </div>
@@ -30,6 +30,15 @@
                 <label class="block text-sm font-medium text-slate-700 mb-1.5">تأكيد كلمة المرور</label>
                 <input type="password" name="password_confirmation"
                        class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">الفرع المرتبط <span class="text-slate-400 text-xs">(فارغ = مدير عام)</span></label>
+                <select name="branch_id" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <option value="">— مدير عام (كل الفروع) —</option>
+                    @foreach($branches as $branch)
+                        <option value="{{ $branch->id }}" {{ old('branch_id', $admin->branch_id) == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                    @endforeach
+                </select>
             </div>
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-2">الأدوار</label>

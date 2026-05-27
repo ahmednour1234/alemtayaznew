@@ -1,10 +1,10 @@
-@extends('admin.layouts.app')
+﻿@extends('admin.layouts.app')
 @section('title', 'الصلاحيات')
 @section('content')
 
 <div class="flex justify-between items-center mb-5">
     <h2 class="text-xl font-bold text-slate-800">الصلاحيات</h2>
-    <p class="text-sm text-slate-400">للقراءة �قط - يتم إدارتها من خلال الأدوار</p>
+    <p class="text-sm text-slate-400">للقراءة فقط - يتم إدارتها من خلال الأدوار</p>
 </div>
 
 @php $grouped = $permissions->groupBy(fn($p) => explode('.', $p->slug)[0]); @endphp

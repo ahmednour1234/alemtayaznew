@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+﻿@extends('admin.layouts.app')
 @section('title', 'المدن')
 @section('content')
 
@@ -30,8 +30,8 @@
         </div>
         <div>
             <p class="text-2xl font-bold text-slate-800">{{ $totalBranches }}</p>
-            <p class="text-xs text-slate-400 mt-0.5">إجمالي ال�روع</p>
-            <p class="text-[11px] text-blue-500 mt-0.5">�ي جميع المدن</p>
+            <p class="text-xs text-slate-400 mt-0.5">إجمالي الفروع</p>
+            <p class="text-[11px] text-blue-500 mt-0.5">في جميع المدن</p>
         </div>
     </div>
 </div>
@@ -43,7 +43,7 @@
         <a href="{{ route('admin.branches.index') }}"
            class="text-xs text-blue-600 hover:underline flex items-center gap-1">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M3 7l9-4 9 4M4 7v14M20 7v14M9 21V11h6v10"/></svg>
-            إدارة ال�روع
+            إدارة الفروع
         </a>
     </div>
 
@@ -51,7 +51,7 @@
     <div class="py-16 text-center text-slate-400">
         <svg class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
         <p>لا توجد مدن مسجلة</p>
-        <a href="{{ route('admin.branches.index') }}" class="mt-2 inline-block text-xs text-blue-600 hover:underline">إضا�ة �رع جديد</a>
+        <a href="{{ route('admin.branches.index') }}" class="mt-2 inline-block text-xs text-blue-600 hover:underline">إضافة فرع جديد</a>
     </div>
     @else
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-5">
@@ -67,7 +67,7 @@
             <div class="min-w-0 flex-1">
                 <p class="font-semibold text-slate-700 text-sm truncate group-hover:text-blue-700">{{ $cityRow->city }}</p>
                 <p class="text-xs text-slate-400 mt-0.5">
-                    {{ $cityRow->branches_count }} {{ $cityRow->branches_count == 1 ? '�رع' : '�روع' }}
+                    {{ $cityRow->branches_count }} {{ $cityRow->branches_count == 1 ? 'فرع' : 'فروع' }}
                 </p>
             </div>
             <svg class="w-4 h-4 text-slate-300 group-hover:text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

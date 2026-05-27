@@ -1,135 +1,180 @@
-@extends('admin.layouts.app')
-
+﻿@extends('admin.layouts.app')
 @section('title', 'لوحة التحكم')
 
 @section('content')
-<!-- Stat Cards -->
-<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
 
-    <div class="bg-white rounded-xl p-4 shadow-sm border-r-4 border-green-500 col-span-2 sm:col-span-1">
-        <p class="text-xs text-slate-500">إجمالي الدخل</p>
-        <p class="text-2xl font-bold text-green-600 mt-1">{{ number_format($stats['total_income'], 2) }}</p>
-        <p class="text-xs text-slate-400 mt-1">ريال سعودي</p>
-    </div>
+{{-- ── Stat Cards ─────────────────────────────────────────────────────── --}}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;">
 
-    <div class="bg-white rounded-xl p-4 shadow-sm border-r-4 border-red-500 col-span-2 sm:col-span-1">
-        <p class="text-xs text-slate-500">إجمالي المصاري�</p>
-        <p class="text-2xl font-bold text-red-600 mt-1">{{ number_format($stats['total_expenses'], 2) }}</p>
-        <p class="text-xs text-slate-400 mt-1">المعتمدة �قط</p>
-    </div>
-
-    <div class="bg-white rounded-xl p-4 shadow-sm border-r-4 border-blue-500 col-span-2 sm:col-span-1">
-        <p class="text-xs text-slate-500">صا�ي الربح</p>
-        <p class="text-2xl font-bold {{ $stats['net_profit'] >= 0 ? 'text-blue-600' : 'text-red-600' }} mt-1">
-            {{ number_format($stats['net_profit'], 2) }}
-        </p>
-        <p class="text-xs text-slate-400 mt-1">ريال سعودي</p>
-    </div>
-
-    <div class="bg-white rounded-xl p-4 shadow-sm border-r-4 border-purple-500">
-        <p class="text-xs text-slate-500">ال�روع النشطة</p>
-        <p class="text-2xl font-bold text-purple-600 mt-1">{{ $stats['branch_count'] }}</p>
-        <p class="text-xs text-slate-400 mt-1">�رع</p>
-    </div>
-
-    <div class="bg-white rounded-xl p-4 shadow-sm border-r-4 border-orange-500">
-        <p class="text-xs text-slate-500">مصاري� معلقة</p>
-        <p class="text-2xl font-bold text-orange-600 mt-1">{{ $stats['pending_expenses'] }}</p>
-        <p class="text-xs text-slate-400 mt-1">تنتظر الموا�قة</p>
-    </div>
-
-    <div class="bg-white rounded-xl p-4 shadow-sm border-r-4 border-yellow-500">
-        <p class="text-xs text-slate-500">تحويلات معلقة</p>
-        <p class="text-2xl font-bold text-yellow-600 mt-1">{{ $stats['pending_transfers'] }}</p>
-        <p class="text-xs text-slate-400 mt-1">تنتظر الموا�قة</p>
-    </div>
-</div>
-
-<!-- Charts Row -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-
-    <!-- Income vs Expense Chart -->
-    <div class="bg-white rounded-xl p-5 shadow-sm">
-        <h3 class="font-semibold text-slate-700 mb-4">الدخل مقابل المصاري� ({{ now()->year }})</h3>
-        <canvas id="incomeExpenseChart" height="200"></canvas>
-    </div>
-
-    <!-- Branch Comparison Chart -->
-    <div class="bg-white rounded-xl p-5 shadow-sm">
-        <h3 class="font-semibold text-slate-700 mb-4">مقارنة ال�روع ({{ now()->year }})</h3>
-        <canvas id="branchChart" height="200"></canvas>
-    </div>
-</div>
-
-<!-- Recent Tables Row -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-
-    <!-- Recent Incomes -->
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div class="px-5 py-4 border-b flex justify-between items-center">
-            <h3 class="font-semibold text-slate-700">أحدث الإيرادات</h3>
-            <a href="{{ route('admin.incomes.index') }}" class="text-xs text-blue-600 hover:underline">عرض الكل</a>
+    {{-- Total Income --}}
+    <div class="card" style="padding:20px;display:flex;align-items:center;gap:16px;">
+        <div class="stat-icon" style="background:#f0fdf4;">
+            <svg width="20" height="20" fill="none" stroke="#16a34a" stroke-width="1.8" viewBox="0 0 24 24">
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                <polyline points="16 7 22 7 22 13"/>
+            </svg>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-slate-50 text-slate-500 text-xs">
+        <div>
+            <p style="font-size:11px;color:#94a3b8;font-weight:500;margin-bottom:4px;">إجمالي الدخل</p>
+            <p style="font-size:22px;font-weight:800;color:#16a34a;line-height:1;">{{ number_format($stats['total_income'], 2) }}</p>
+            <p style="font-size:11px;color:#cbd5e1;margin-top:3px;">ريال سعودي</p>
+        </div>
+    </div>
+
+    {{-- Total Expenses --}}
+    <div class="card" style="padding:20px;display:flex;align-items:center;gap:16px;">
+        <div class="stat-icon" style="background:#fff1f2;">
+            <svg width="20" height="20" fill="none" stroke="#ef4444" stroke-width="1.8" viewBox="0 0 24 24">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+        </div>
+        <div>
+            <p style="font-size:11px;color:#94a3b8;font-weight:500;margin-bottom:4px;">إجمالي المصاريف</p>
+            <p style="font-size:22px;font-weight:800;color:#ef4444;line-height:1;">{{ number_format($stats['total_expenses'], 2) }}</p>
+            <p style="font-size:11px;color:#cbd5e1;margin-top:3px;">المعتمدة فقط</p>
+        </div>
+    </div>
+
+    {{-- Net Profit --}}
+    <div class="card" style="padding:20px;display:flex;align-items:center;gap:16px;">
+        <div class="stat-icon" style="background:#eff6ff;">
+            <svg width="20" height="20" fill="none" stroke="#2563eb" stroke-width="1.8" viewBox="0 0 24 24">
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+            </svg>
+        </div>
+        <div>
+            <p style="font-size:11px;color:#94a3b8;font-weight:500;margin-bottom:4px;">صافي الربح</p>
+            <p style="font-size:22px;font-weight:800;line-height:1;color:{{ $stats['net_profit'] >= 0 ? '#2563eb' : '#ef4444' }};">
+                {{ number_format($stats['net_profit'], 2) }}
+            </p>
+            <p style="font-size:11px;color:#cbd5e1;margin-top:3px;">ريال سعودي</p>
+        </div>
+    </div>
+
+    {{-- Active Branches --}}
+    <div class="card" style="padding:20px;display:flex;align-items:center;gap:16px;">
+        <div class="stat-icon" style="background:#faf5ff;">
+            <svg width="20" height="20" fill="none" stroke="#9333ea" stroke-width="1.8" viewBox="0 0 24 24">
+                <path d="M3 21h18M3 7l9-4 9 4M4 7v14M20 7v14M9 21V11h6v10"/>
+            </svg>
+        </div>
+        <div>
+            <p style="font-size:11px;color:#94a3b8;font-weight:500;margin-bottom:4px;">الفروع النشطة</p>
+            <p style="font-size:22px;font-weight:800;color:#9333ea;line-height:1;">{{ $stats['branch_count'] }}</p>
+            <p style="font-size:11px;color:#cbd5e1;margin-top:3px;">فرع</p>
+        </div>
+    </div>
+
+    {{-- Pending Expenses --}}
+    <div class="card" style="padding:20px;display:flex;align-items:center;gap:16px;">
+        <div class="stat-icon" style="background:#fff7ed;">
+            <svg width="20" height="20" fill="none" stroke="#f97316" stroke-width="1.8" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+        </div>
+        <div>
+            <p style="font-size:11px;color:#94a3b8;font-weight:500;margin-bottom:4px;">مصاريف معلقة</p>
+            <p style="font-size:22px;font-weight:800;color:#f97316;line-height:1;">{{ $stats['pending_expenses'] }}</p>
+            <p style="font-size:11px;color:#cbd5e1;margin-top:3px;">تنتظر الموافقة</p>
+        </div>
+    </div>
+
+    {{-- Pending Transfers --}}
+    <div class="card" style="padding:20px;display:flex;align-items:center;gap:16px;">
+        <div class="stat-icon" style="background:#fefce8;">
+            <svg width="20" height="20" fill="none" stroke="#ca8a04" stroke-width="1.8" viewBox="0 0 24 24">
+                <path d="M7 16l-4-4 4-4M17 8l4 4-4 4M14 4l-4 16"/>
+            </svg>
+        </div>
+        <div>
+            <p style="font-size:11px;color:#94a3b8;font-weight:500;margin-bottom:4px;">تحويلات معلقة</p>
+            <p style="font-size:22px;font-weight:800;color:#ca8a04;line-height:1;">{{ $stats['pending_transfers'] }}</p>
+            <p style="font-size:11px;color:#cbd5e1;margin-top:3px;">تنتظر الموافقة</p>
+        </div>
+    </div>
+</div>
+
+{{-- ── Charts ──────────────────────────────────────────────────────────── --}}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+    <div class="card" style="padding:20px;">
+        <p style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:16px;">الدخل مقابل المصاريف ({{ now()->year }})</p>
+        <canvas id="incomeExpenseChart" height="180"></canvas>
+    </div>
+    <div class="card" style="padding:20px;">
+        <p style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:16px;">مقارنة الفروع ({{ now()->year }})</p>
+        <canvas id="branchChart" height="180"></canvas>
+    </div>
+</div>
+
+{{-- ── Recent Tables ────────────────────────────────────────────────────── --}}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+
+    {{-- Recent Incomes --}}
+    <div class="card" style="overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #f1f5f9;">
+            <p style="font-size:13px;font-weight:700;color:#0f172a;">أحدث الإيرادات</p>
+            <a href="{{ route('admin.incomes.index') }}" style="font-size:12px;color:#2563eb;text-decoration:none;font-weight:500;">عرض الكل ←</a>
+        </div>
+        <div style="overflow-x:auto;">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <th class="px-4 py-2 text-right">ال�رع</th>
-                        <th class="px-4 py-2 text-right">النوع</th>
-                        <th class="px-4 py-2 text-right">المبلغ</th>
-                        <th class="px-4 py-2 text-right">التاريخ</th>
+                        <th>الفرع</th><th>النوع</th><th>المبلغ</th><th>التاريخ</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @forelse($recentIncomes as $income)
-                    <tr class="hover:bg-slate-50">
-                        <td class="px-4 py-2.5 text-xs">{{ $income->branch?->name }}</td>
-                        <td class="px-4 py-2.5 text-xs">{{ $income->incomeType?->name }}</td>
-                        <td class="px-4 py-2.5 font-semibold text-green-600">{{ number_format($income->amount, 2) }}</td>
-                        <td class="px-4 py-2.5 text-xs text-slate-400">{{ $income->date?->format('Y-m-d') }}</td>
+                    <tr>
+                        <td style="font-size:12px;color:#334155;">{{ $income->branch?->name ?? '—' }}</td>
+                        <td style="font-size:12px;color:#64748b;">{{ $income->incomeType?->name ?? '—' }}</td>
+                        <td style="font-size:13px;font-weight:600;color:#16a34a;">{{ number_format($income->amount, 2) }}</td>
+                        <td style="font-size:11px;color:#94a3b8;">{{ $income->date?->format('Y-m-d') }}</td>
                     </tr>
                     @empty
-                    <tr><td colspan="4" class="px-4 py-6 text-center text-slate-400 text-xs">لا توجد إيرادات</td></tr>
+                    <tr>
+                        <td colspan="4" style="padding:32px;text-align:center;color:#cbd5e1;font-size:13px;">لا توجد إيرادات</td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Recent Expenses -->
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div class="px-5 py-4 border-b flex justify-between items-center">
-            <h3 class="font-semibold text-slate-700">أحدث المصاري�</h3>
-            <a href="{{ route('admin.expenses.index') }}" class="text-xs text-blue-600 hover:underline">عرض الكل</a>
+    {{-- Recent Expenses --}}
+    <div class="card" style="overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #f1f5f9;">
+            <p style="font-size:13px;font-weight:700;color:#0f172a;">أحدث المصاريف</p>
+            <a href="{{ route('admin.expenses.index') }}" style="font-size:12px;color:#2563eb;text-decoration:none;font-weight:500;">عرض الكل ←</a>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-slate-50 text-slate-500 text-xs">
+        <div style="overflow-x:auto;">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <th class="px-4 py-2 text-right">ال�رع</th>
-                        <th class="px-4 py-2 text-right">النوع</th>
-                        <th class="px-4 py-2 text-right">المبلغ</th>
-                        <th class="px-4 py-2 text-right">الحالة</th>
+                        <th>الفرع</th><th>النوع</th><th>المبلغ</th><th>الحالة</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @forelse($recentExpenses as $expense)
-                    <tr class="hover:bg-slate-50">
-                        <td class="px-4 py-2.5 text-xs">{{ $expense->branch?->name }}</td>
-                        <td class="px-4 py-2.5 text-xs">{{ $expense->expenseType?->name }}</td>
-                        <td class="px-4 py-2.5 font-semibold text-red-600">{{ number_format($expense->amount, 2) }}</td>
-                        <td class="px-4 py-2.5">
+                    <tr>
+                        <td style="font-size:12px;color:#334155;">{{ $expense->branch?->name ?? '—' }}</td>
+                        <td style="font-size:12px;color:#64748b;">{{ $expense->expenseType?->name ?? '—' }}</td>
+                        <td style="font-size:13px;font-weight:600;color:#ef4444;">{{ number_format($expense->amount, 2) }}</td>
+                        <td>
                             @if($expense->status === 'approved')
-                                <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs">معتمد</span>
+                                <span style="display:inline-flex;align-items:center;padding:2px 8px;background:#f0fdf4;color:#16a34a;border-radius:20px;font-size:11px;font-weight:600;">معتمد</span>
                             @elseif($expense->status === 'pending')
-                                <span class="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs">معلق</span>
+                                <span style="display:inline-flex;align-items:center;padding:2px 8px;background:#fff7ed;color:#f97316;border-radius:20px;font-size:11px;font-weight:600;">معلق</span>
                             @else
-                                <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs">مر�وض</span>
+                                <span style="display:inline-flex;align-items:center;padding:2px 8px;background:#fff1f2;color:#ef4444;border-radius:20px;font-size:11px;font-weight:600;">مرفوض</span>
                             @endif
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="4" class="px-4 py-6 text-center text-slate-400 text-xs">لا توجد مصاري�</td></tr>
+                    <tr>
+                        <td colspan="4" style="padding:32px;text-align:center;color:#cbd5e1;font-size:13px;">لا توجد مصاريف</td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -137,35 +182,47 @@
     </div>
 </div>
 
-<!-- Pending Approvals -->
+{{-- ── Pending Approvals ────────────────────────────────────────────────── --}}
 @if($pendingExpenses->count() || $pendingTransfers->count())
-<div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-    <div class="px-5 py-4 border-b bg-orange-50">
-        <h3 class="font-semibold text-orange-700 flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01"/></svg>
-            طلبات الموا�قة المعلقة ({{ $pendingExpenses->count() + $pendingTransfers->count() }})
-        </h3>
+<div class="card" style="overflow:hidden;margin-bottom:24px;">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #fde68a;background:#fffbeb;">
+        <div style="width:32px;height:32px;border-radius:8px;background:#fef3c7;display:flex;align-items:center;justify-content:center;">
+            <svg width="16" height="16" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+        </div>
+        <p style="font-size:13px;font-weight:700;color:#92400e;">طلبات الموافقة المعلقة ({{ $pendingExpenses->count() + $pendingTransfers->count() }})</p>
     </div>
-    <div class="p-4 space-y-2">
+    <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
         @foreach($pendingExpenses->take(5) as $expense)
-        <div class="flex items-center justify-between bg-orange-50 rounded-lg px-4 py-2.5">
-            <span class="text-sm">مصرو�: {{ $expense->branch?->name }} - {{ number_format($expense->amount,2) }} ريال</span>
-            <div class="flex gap-2">
-                <form action="{{ route('admin.expenses.approve', $expense->id) }}" method="POST">
-                    @csrf <button class="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">موا�قة</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;">
+            <div>
+                <p style="font-size:13px;color:#334155;font-weight:500;">مصروف: <span style="font-weight:700;">{{ $expense->branch?->name }}</span></p>
+                <p style="font-size:12px;color:#f97316;font-weight:600;">{{ number_format($expense->amount, 2) }} ريال</p>
+            </div>
+            <div style="display:flex;gap:6px;">
+                <form action="{{ route('admin.expenses.approve', $expense->id) }}" method="POST" style="display:inline;">
+                    @csrf
+                    <button type="submit" style="padding:5px 12px;background:#16a34a;color:#fff;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:Cairo,sans-serif;">موافقة</button>
                 </form>
-                <a href="{{ route('admin.expenses.show', $expense->id) }}" class="text-xs bg-slate-200 text-slate-700 px-3 py-1 rounded hover:bg-slate-300">عرض</a>
+                <a href="{{ route('admin.expenses.show', $expense->id) }}" style="padding:5px 12px;background:#f1f5f9;color:#475569;border-radius:7px;font-size:12px;font-weight:600;text-decoration:none;">عرض</a>
             </div>
         </div>
         @endforeach
+
         @foreach($pendingTransfers->take(5) as $transfer)
-        <div class="flex items-center justify-between bg-yellow-50 rounded-lg px-4 py-2.5">
-            <span class="text-sm">تحويل: {{ $transfer->fromBranch?->name }} � {{ $transfer->toBranch?->name }} - {{ number_format($transfer->amount,2) }} ريال</span>
-            <div class="flex gap-2">
-                <form action="{{ route('admin.transfers.approve', $transfer->id) }}" method="POST">
-                    @csrf <button class="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">موا�قة</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fefce8;border:1px solid #fef08a;border-radius:10px;">
+            <div>
+                <p style="font-size:13px;color:#334155;font-weight:500;">تحويل: <span style="font-weight:700;">{{ $transfer->fromBranch?->name }}</span> → {{ $transfer->toBranch?->name }}</p>
+                <p style="font-size:12px;color:#ca8a04;font-weight:600;">{{ number_format($transfer->amount, 2) }} ريال</p>
+            </div>
+            <div style="display:flex;gap:6px;">
+                <form action="{{ route('admin.transfers.approve', $transfer->id) }}" method="POST" style="display:inline;">
+                    @csrf
+                    <button type="submit" style="padding:5px 12px;background:#16a34a;color:#fff;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:Cairo,sans-serif;">موافقة</button>
                 </form>
-                <a href="{{ route('admin.transfers.show', $transfer->id) }}" class="text-xs bg-slate-200 text-slate-700 px-3 py-1 rounded hover:bg-slate-300">عرض</a>
+                <a href="{{ route('admin.transfers.show', $transfer->id) }}" style="padding:5px 12px;background:#f1f5f9;color:#475569;border-radius:7px;font-size:12px;font-weight:600;text-decoration:none;">عرض</a>
             </div>
         </div>
         @endforeach
@@ -177,34 +234,62 @@
 
 @push('scripts')
 <script>
-const chartData = @json($chartData);
+document.addEventListener('DOMContentLoaded', function () {
+const chartData  = @json($chartData);
 const branchData = @json($branchChart);
 
-// Income vs Expense
+Chart.defaults.font.family = 'Cairo, sans-serif';
+Chart.defaults.font.size   = 12;
+Chart.defaults.color       = '#94a3b8';
+
 new Chart(document.getElementById('incomeExpenseChart'), {
-    type: 'bar',
+    type: 'line',
     data: {
         labels: chartData.months,
         datasets: [
-            { label: 'الدخل', data: chartData.incomes, backgroundColor: 'rgba(34,197,94,0.7)', borderColor: '#16a34a', borderWidth: 1 },
-            { label: 'المصاري�', data: chartData.expenses, backgroundColor: 'rgba(239,68,68,0.7)', borderColor: '#dc2626', borderWidth: 1 }
+            {
+                label: 'الدخل', data: chartData.incomes,
+                borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,.08)',
+                borderWidth: 2.5, tension: 0.4, fill: true,
+                pointRadius: 4, pointHoverRadius: 6,
+                pointBackgroundColor: '#16a34a',
+            },
+            {
+                label: 'المصاريف', data: chartData.expenses,
+                borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.06)',
+                borderWidth: 2.5, tension: 0.4, fill: true,
+                pointRadius: 4, pointHoverRadius: 6,
+                pointBackgroundColor: '#ef4444',
+            }
         ]
     },
-    options: { responsive: true, plugins: { legend: { position: 'top' } } }
+    options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { position: 'top', labels: { usePointStyle: true, pointStyleWidth: 8, padding: 16 } } },
+        scales: {
+            x: { grid: { display: false } },
+            y: { grid: { color: '#f1f5f9' }, border: { display: false }, beginAtZero: true }
+        }
+    }
 });
 
-// Branch Comparison
 new Chart(document.getElementById('branchChart'), {
-    type: 'bar',
+    type: 'line',
     data: {
         labels: branchData.labels,
-        datasets: [
-            { label: 'الدخل', data: branchData.incomes, backgroundColor: 'rgba(59,130,246,0.7)' },
-            { label: 'المصاري�', data: branchData.expenses, backgroundColor: 'rgba(168,85,247,0.7)' }
-        ]
+        datasets: branchData.datasets,
     },
-    options: { responsive: true, plugins: { legend: { position: 'top' } } }
+    options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { position: 'top', labels: { usePointStyle: true, pointStyleWidth: 8, padding: 16 } } },
+        scales: {
+            x: { grid: { display: false } },
+            y: { grid: { color: '#f1f5f9' }, border: { display: false }, beginAtZero: true }
+        }
+    }
+});
 });
 </script>
 @endpush
-

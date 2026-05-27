@@ -22,9 +22,9 @@ class TransferService
         return $this->repo->findById($id);
     }
 
-    public function pending()
+    public function pending(?int $branchId = null)
     {
-        return $this->repo->getPending();
+        return $this->repo->getPending($branchId);
     }
 
     public function recent(int $limit = 10)

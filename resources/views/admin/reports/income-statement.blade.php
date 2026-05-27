@@ -1,9 +1,9 @@
-@extends('admin.layouts.app')
+﻿@extends('admin.layouts.app')
 @section('title', 'قائمة الدخل')
 @section('content')
 
 <div class="flex justify-between items-center mb-5">
-    <h2 class="text-xl font-bold text-slate-800">قائمة الدخل بين ال�روع</h2>
+    <h2 class="text-xl font-bold text-slate-800">قائمة الدخل بين الفروع</h2>
     @if(isset($report))
     <a href="{{ route('admin.reports.income-statement.export', request()->query()) }}"
        class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg">تصدير Excel</a>
@@ -15,7 +15,7 @@
     <form method="GET" class="space-y-4">
         <div class="flex flex-wrap gap-4 items-end">
             <div class="flex-1 min-w-64">
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">ال�روع</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">الفروع</label>
                 <div class="grid grid-cols-2 gap-2 bg-slate-50 rounded-lg p-3">
                     @foreach($branches as $branch)
                     <label class="flex items-center gap-2 text-sm">
@@ -41,7 +41,7 @@
     </form>
 </div>
 
-@if(isset($report) && count($report) > 0)
+@if(isset($report) && count($report['rows']) > 0)
 
 <!-- Comparison Table -->
 <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
@@ -49,21 +49,21 @@
         <table class="w-full text-sm">
             <thead class="bg-slate-50 text-slate-500 text-xs border-b">
                 <tr>
-                    <th class="px-4 py-3 text-right">ال�رع</th>
+                    <th class="px-4 py-3 text-right">الفرع</th>
                     <th class="px-4 py-3 text-right">إجمالي الدخل</th>
-                    <th class="px-4 py-3 text-right">إجمالي المصاري�</th>
+                    <th class="px-4 py-3 text-right">إجمالي المصاريف</th>
                     <th class="px-4 py-3 text-right">التحويلات الواردة</th>
                     <th class="px-4 py-3 text-right">التحويلات الصادرة</th>
-                    <th class="px-4 py-3 text-right">صا�ي الربح</th>
+                    <th class="px-4 py-3 text-right">صافي الربح</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-                @foreach($report as $row)
-                @php $net = $row['income'] + $row['transfers_in'] - $row['expenses'] - $row['transfers_out']; @endphp
+                @foreach($report['rows'] as $row)
+                @php $net = $row['total_income'] + $row['transfers_in'] - $row['total_expenses'] - $row['transfers_out']; @endphp
                 <tr class="hover:bg-slate-50">
-                    <td class="px-4 py-3 font-medium">{{ $row['branch'] }}</td>
-                    <td class="px-4 py-3 font-semibold text-green-600">{{ number_format($row['income'], 2) }}</td>
-                    <td class="px-4 py-3 font-semibold text-red-600">{{ number_format($row['expenses'], 2) }}</td>
+                    <td class="px-4 py-3 font-medium">{{ $row['branch']->name }}</td>
+                    <td class="px-4 py-3 font-semibold text-green-600">{{ number_format($row['total_income'], 2) }}</td>
+                    <td class="px-4 py-3 font-semibold text-red-600">{{ number_format($row['total_expenses'], 2) }}</td>
                     <td class="px-4 py-3 text-blue-600">{{ number_format($row['transfers_in'], 2) }}</td>
                     <td class="px-4 py-3 text-purple-600">{{ number_format($row['transfers_out'], 2) }}</td>
                     <td class="px-4 py-3 font-bold {{ $net >= 0 ? 'text-green-700' : 'text-red-700' }}">
@@ -75,12 +75,12 @@
             <tfoot class="bg-slate-100 text-xs font-bold border-t">
                 <tr>
                     <td class="px-4 py-2">الإجمالي</td>
-                    <td class="px-4 py-2 text-green-700">{{ number_format(collect($report)->sum('income'), 2) }}</td>
-                    <td class="px-4 py-2 text-red-700">{{ number_format(collect($report)->sum('expenses'), 2) }}</td>
-                    <td class="px-4 py-2 text-blue-700">{{ number_format(collect($report)->sum('transfers_in'), 2) }}</td>
-                    <td class="px-4 py-2 text-purple-700">{{ number_format(collect($report)->sum('transfers_out'), 2) }}</td>
-                    <td class="px-4 py-2 {{ (collect($report)->sum('income') + collect($report)->sum('transfers_in') - collect($report)->sum('expenses') - collect($report)->sum('transfers_out')) >= 0 ? 'text-green-700' : 'text-red-700' }}">
-                        {{ number_format(collect($report)->sum('income') + collect($report)->sum('transfers_in') - collect($report)->sum('expenses') - collect($report)->sum('transfers_out'), 2) }}
+                    <td class="px-4 py-2 text-green-700">{{ number_format($report['totals']['income'], 2) }}</td>
+                    <td class="px-4 py-2 text-red-700">{{ number_format($report['totals']['expenses'], 2) }}</td>
+                    <td class="px-4 py-2 text-blue-700">{{ number_format($report['totals']['transfers_in'], 2) }}</td>
+                    <td class="px-4 py-2 text-purple-700">{{ number_format($report['totals']['transfers_out'], 2) }}</td>
+                    <td class="px-4 py-2 {{ $report['totals']['net'] >= 0 ? 'text-green-700' : 'text-red-700' }}">
+                        {{ number_format($report['totals']['net'], 2) }}
                     </td>
                 </tr>
             </tfoot>
@@ -96,17 +96,19 @@
 
 @push('scripts')
 <script>
-const reportData = @json($report);
+document.addEventListener('DOMContentLoaded', function () {
+    const reportData = @json($report['rows']);
 new Chart(document.getElementById('incomeStatChart'), {
     type: 'bar',
     data: {
-        labels: reportData.map(r => r.branch),
+        labels: reportData.map(r => r.branch.name),
         datasets: [
-            { label: 'الدخل', data: reportData.map(r => r.income), backgroundColor: 'rgba(34,197,94,0.7)' },
-            { label: 'المصاري�', data: reportData.map(r => r.expenses), backgroundColor: 'rgba(239,68,68,0.7)' },
+            { label: 'الدخل', data: reportData.map(r => r.total_income), backgroundColor: 'rgba(34,197,94,0.7)' },
+            { label: 'المصاريف', data: reportData.map(r => r.total_expenses), backgroundColor: 'rgba(239,68,68,0.7)' },
         ]
     },
     options: { responsive: true, plugins: { legend: { position: 'top' } } }
+});
 });
 </script>
 @endpush

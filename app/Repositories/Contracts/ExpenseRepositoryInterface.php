@@ -11,7 +11,7 @@ interface ExpenseRepositoryInterface
     public function delete(int $id): bool;
     public function restore(int $id): bool;
     public function getTrashed();
-    public function getPending();
+    public function getPending(?int $branchId = null);
     public function getTotalByStatus(string $status, array $filters = []): float;
     public function getRecent(int $limit = 10);
 }

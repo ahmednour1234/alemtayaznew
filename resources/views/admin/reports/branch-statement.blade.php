@@ -1,9 +1,9 @@
-@extends('admin.layouts.app')
-@section('title', 'كش� حساب ال�رع')
+﻿@extends('admin.layouts.app')
+@section('title', 'كشف حساب الفرع')
 @section('content')
 
 <div class="flex justify-between items-center mb-5">
-    <h2 class="text-xl font-bold text-slate-800">كش� حساب ال�رع</h2>
+    <h2 class="text-xl font-bold text-slate-800">كشف حساب الفرع</h2>
     @if(isset($report))
     <a href="{{ route('admin.reports.branch-statement.export', request()->query()) }}"
        class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg">تصدير Excel</a>
@@ -14,9 +14,9 @@
 <div class="bg-white rounded-xl p-5 shadow-sm mb-6">
     <form method="GET" class="flex flex-wrap gap-4 items-end">
         <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1.5">ال�رع <span class="text-red-500">*</span></label>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">الفرع <span class="text-red-500">*</span></label>
             <select name="branch_id" required class="border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-48">
-                <option value="">اختر ال�رع</option>
+                <option value="">اختر الفرع</option>
                 @foreach($branches as $branch)
                 <option value="{{ $branch->id }}" {{ request('branch_id') == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
                 @endforeach
@@ -32,7 +32,7 @@
             <input type="date" name="date_to" value="{{ request('date_to') }}"
                    class="border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
         </div>
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-5 py-2.5 rounded-lg">عرض الكش�</button>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-5 py-2.5 rounded-lg">عرض الكشف</button>
     </form>
 </div>
 
@@ -42,27 +42,26 @@
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
         <p class="text-xs text-green-600">إجمالي الدخل</p>
-        <p class="text-xl font-bold text-green-700 mt-1">{{ number_format($report['totals']['total_income'], 2) }}</p>
+        <p class="text-xl font-bold text-green-700 mt-1">{{ number_format($report['total_income'], 2) }}</p>
     </div>
     <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-        <p class="text-xs text-red-600">إجمالي المصاري�</p>
-        <p class="text-xl font-bold text-red-700 mt-1">{{ number_format($report['totals']['total_expenses'], 2) }}</p>
+        <p class="text-xs text-red-600">إجمالي المصاريف</p>
+        <p class="text-xl font-bold text-red-700 mt-1">{{ number_format($report['total_expenses'], 2) }}</p>
     </div>
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
         <p class="text-xs text-blue-600">التحويلات الواردة</p>
-        <p class="text-xl font-bold text-blue-700 mt-1">{{ number_format($report['totals']['transfers_in'], 2) }}</p>
+        <p class="text-xl font-bold text-blue-700 mt-1">{{ number_format($report['transfers_in']->sum('amount'), 2) }}</p>
     </div>
     <div class="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
         <p class="text-xs text-purple-600">التحويلات الصادرة</p>
-        <p class="text-xl font-bold text-purple-700 mt-1">{{ number_format($report['totals']['transfers_out'], 2) }}</p>
+        <p class="text-xl font-bold text-purple-700 mt-1">{{ number_format($report['transfers_out']->sum('amount'), 2) }}</p>
     </div>
 </div>
 
 <!-- Net Balance -->
-@php $net = $report['totals']['total_income'] + $report['totals']['transfers_in'] - $report['totals']['total_expenses'] - $report['totals']['transfers_out']; @endphp
 <div class="bg-white rounded-xl p-4 shadow-sm mb-6 flex justify-between items-center">
-    <span class="font-semibold text-slate-700">الرصيد الصا�ي</span>
-    <span class="text-2xl font-bold {{ $net >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ number_format($net, 2) }} ريال</span>
+    <span class="font-semibold text-slate-700">الرصيد الصافي</span>
+    <span class="text-2xl font-bold {{ $report['net_balance'] >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ number_format($report['net_balance'], 2) }} ريال</span>
 </div>
 
 <!-- Incomes Table -->
@@ -77,7 +76,7 @@
                 <th class="px-4 py-2 text-right">التاريخ</th>
                 <th class="px-4 py-2 text-right">النوع</th>
                 <th class="px-4 py-2 text-right">المبلغ</th>
-                <th class="px-4 py-2 text-right">طريقة الد�ع</th>
+                <th class="px-4 py-2 text-right">طريقة الدفع</th>
                 <th class="px-4 py-2 text-right">المرجع</th>
             </tr>
         </thead>
@@ -103,7 +102,7 @@
 @if($report['expenses']->isNotEmpty())
 <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
     <div class="px-5 py-3 border-b bg-red-50">
-        <h3 class="font-semibold text-red-700">المصاري� (المعتمدة)</h3>
+        <h3 class="font-semibold text-red-700">المصاريف (المعتمدة)</h3>
     </div>
     <table class="w-full text-sm">
         <thead class="bg-slate-50 text-slate-500 text-xs border-b">
@@ -111,7 +110,7 @@
                 <th class="px-4 py-2 text-right">التاريخ</th>
                 <th class="px-4 py-2 text-right">النوع</th>
                 <th class="px-4 py-2 text-right">المبلغ</th>
-                <th class="px-4 py-2 text-right">الوص�</th>
+                <th class="px-4 py-2 text-right">الوصف</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">

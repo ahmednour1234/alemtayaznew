@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdateExpenseRequest;
 use App\Services\BranchService;
 use App\Services\ExpenseService;
 use App\Services\ExpenseTypeService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -20,25 +21,36 @@ class ExpenseController extends Controller
         private readonly ExpenseService $service,
         private readonly BranchService $branchService,
         private readonly ExpenseTypeService $expenseTypeService,
+        private readonly NotificationService $notifService,
     ) {}
 
     public function index(Request $request)
     {
+        $me       = Auth::guard('admin')->user();
         $filters  = $request->only('branch_id', 'expense_type_id', 'status', 'payment_method', 'date_from', 'date_to');
+        if ($me->isBranchAdmin()) {
+            $filters['branch_id'] = $me->branch_id;
+        }
         $expenses = $this->service->list($filters);
         $totals   = [
             'approved' => $this->service->totalByStatus('approved', $filters),
             'pending'  => $this->service->totalByStatus('pending', $filters),
             'rejected' => $this->service->totalByStatus('rejected', $filters),
         ];
-        $branches = $this->branchService->allActive();
+        $branches = $me->isBranchAdmin()
+            ? $this->branchService->allActive()->where('id', $me->branch_id)
+            : $this->branchService->allActive();
         $types    = $this->expenseTypeService->allActive();
-        return view('admin.expenses.index', compact('expenses', 'totals', 'branches', 'types', 'filters'));
+        $trashed  = $this->service->trashed();
+        return view('admin.expenses.index', compact('expenses', 'totals', 'branches', 'types', 'filters', 'trashed'));
     }
 
     public function create()
     {
-        $branches = $this->branchService->allActive();
+        $me       = Auth::guard('admin')->user();
+        $branches = $me->isBranchAdmin()
+            ? $this->branchService->allActive()->where('id', $me->branch_id)
+            : $this->branchService->allActive();
         $types    = $this->expenseTypeService->allActive();
         return view('admin.expenses.create', compact('branches', 'types'));
     }
@@ -46,8 +58,19 @@ class ExpenseController extends Controller
     public function store(StoreExpenseRequest $request)
     {
         $data = $request->validated();
-        $data['admin_id'] = Auth::guard('admin')->id();
-        $this->service->store($data, $request->file('attachment'));
+        $me   = Auth::guard('admin')->user();
+        $data['admin_id'] = $me->id;
+        if ($me->isBranchAdmin()) {
+            $data['branch_id'] = $me->branch_id;
+        }
+        $expense = $this->service->store($data, $request->file('attachment'));
+        $this->notifService->notify(
+            'expense_created',
+            'تم تسجيل مصروف جديد',
+            'تم إضافة مصروف بقيمة ' . number_format($data['amount'] ?? 0, 0) . ' ريال (بانتظار الموافقة)',
+            route('admin.expenses.show', $expense->id),
+            [$data['branch_id']]
+        );
         return redirect()->route('admin.expenses.index')->with('success', 'تم إضافة المصروف بنجاح وهو في انتظار الموافقة.');
     }
 
@@ -59,8 +82,14 @@ class ExpenseController extends Controller
 
     public function edit(int $id)
     {
+        $me       = Auth::guard('admin')->user();
         $expense  = $this->service->find($id);
-        $branches = $this->branchService->allActive();
+        if ($me->isBranchAdmin() && $expense->branch_id !== $me->branch_id) {
+            abort(403, 'ليس لديك صلاحية تعديل هذا السجل.');
+        }
+        $branches = $me->isBranchAdmin()
+            ? $this->branchService->allActive()->where('id', $me->branch_id)
+            : $this->branchService->allActive();
         $types    = $this->expenseTypeService->allActive();
         return view('admin.expenses.edit', compact('expense', 'branches', 'types'));
     }
@@ -84,6 +113,23 @@ class ExpenseController extends Controller
         }
         try {
             $this->service->approve($id, $admin);
+            $expense = $this->service->find($id);
+            // Notify the creator that their expense was approved
+            $this->notifService->notifyOne(
+                $expense->admin_id,
+                'expense_approved',
+                'تمت الموافقة على المصروف',
+                'تمت الموافقة على مصروفك بقيمة ' . number_format($expense->amount, 0) . ' ريال',
+                route('admin.expenses.show', $id)
+            );
+            // Notify all admins with view permission (branch scoped)
+            $this->notifService->notify(
+                'expense_approved',
+                'تمت الموافقة على مصروف',
+                'تمت الموافقة على مصروف بقيمة ' . number_format($expense->amount, 0) . ' ريال',
+                route('admin.expenses.show', $id),
+                [$expense->branch_id]
+            );
         } catch (\RuntimeException $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
@@ -99,6 +145,14 @@ class ExpenseController extends Controller
         }
         try {
             $this->service->reject($id, $admin, $request->rejection_reason);
+            $expense = $this->service->find($id);
+            $this->notifService->notifyOne(
+                $expense->admin_id,
+                'expense_rejected',
+                'تم رفض المصروف',
+                'تم رفض مصروفك بقيمة ' . number_format($expense->amount, 0) . ' ريال',
+                route('admin.expenses.show', $id)
+            );
         } catch (\RuntimeException $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
@@ -119,7 +173,11 @@ class ExpenseController extends Controller
 
     public function export(Request $request)
     {
+        $me      = Auth::guard('admin')->user();
         $filters = $request->only('branch_id', 'expense_type_id', 'status', 'payment_method', 'date_from', 'date_to');
+        if ($me->isBranchAdmin()) {
+            $filters['branch_id'] = $me->branch_id;
+        }
         return Excel::download(new ExpenseExport($filters), 'expenses_' . now()->format('Y-m-d') . '.xlsx');
     }
 

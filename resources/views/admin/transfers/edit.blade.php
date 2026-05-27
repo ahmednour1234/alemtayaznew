@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+﻿@extends('admin.layouts.app')
 @section('title', 'تعديل التحويل')
 @section('content')
 <div class="max-w-xl">
@@ -13,18 +13,18 @@
             @csrf @method('PUT')
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1.5">من �رع</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">من فرع</label>
                     <select name="from_branch_id" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        <option value="">خارجي / بدون �رع</option>
+                        <option value="">خارجي / بدون فرع</option>
                         @foreach($branches as $branch)
                         <option value="{{ $branch->id }}" {{ old('from_branch_id', $transfer->from_branch_id) == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1.5">إلى �رع</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">إلى فرع</label>
                     <select name="to_branch_id" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                        <option value="">خارجي / بدون �رع</option>
+                        <option value="">خارجي / بدون فرع</option>
                         @foreach($branches as $branch)
                         <option value="{{ $branch->id }}" {{ old('to_branch_id', $transfer->to_branch_id) == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
                         @endforeach
@@ -42,7 +42,7 @@
                 </div>
             </div>
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">الوص�</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">الوصف</label>
                 <textarea name="description" rows="2"
                           class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">{{ old('description', $transfer->description) }}</textarea>
             </div>

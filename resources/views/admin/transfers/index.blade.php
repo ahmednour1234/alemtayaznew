@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+﻿@extends('admin.layouts.app')
 @section('title', 'التحويلات المالية')
 @section('content')
 
@@ -6,34 +6,77 @@
     <h2 class="text-xl font-bold text-slate-800">التحويلات المالية</h2>
     <a href="{{ route('admin.transfers.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg flex items-center gap-1">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        إضا�ة تحويل
+        إضافة تحويل
     </a>
 </div>
 
 <!-- Filters -->
-<div class="bg-white rounded-xl p-4 shadow-sm mb-4">
-    <form method="GET" class="flex flex-wrap gap-3 items-end">
-        <div>
-            <label class="block text-xs text-slate-500 mb-1">الحالة</label>
-            <select name="status" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <option value="">الكل</option>
-                <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>معلق</option>
-                <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>معتمد</option>
-                <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>مر�وض</option>
-            </select>
+<div class="bg-white rounded-xl p-5 shadow-sm mb-4 border border-slate-100">
+    <form method="GET">
+        <div class="flex flex-wrap gap-3 items-end">
+
+            {{-- Status --}}
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-medium text-slate-500 mb-1.5">الحالة</label>
+                <div style="position:relative;">
+                    <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#94a3b8;"
+                         width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+                    </svg>
+                    <select name="status"
+                            style="width:100%;padding:8px 34px 8px 32px;border:1.5px solid #e2e8f0;border-radius:8px;
+                                   font-size:13px;color:#0f172a;background:#fff;outline:none;
+                                   font-family:Cairo,sans-serif;appearance:none;-webkit-appearance:none;cursor:pointer;">
+                        <option value="">الكل</option>
+                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>معلق</option>
+                        <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>معتمد</option>
+                        <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>مرفوض</option>
+                    </select>
+                    <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#94a3b8;"
+                         width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </div>
+            </div>
+
+            {{-- Date From --}}
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-medium text-slate-500 mb-1.5">من تاريخ</label>
+                <input type="date" name="date_from" value="{{ request('date_from') }}"
+                       style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;
+                              font-size:13px;color:#0f172a;outline:none;font-family:Cairo,sans-serif;">
+            </div>
+
+            {{-- Date To --}}
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-medium text-slate-500 mb-1.5">إلى تاريخ</label>
+                <input type="date" name="date_to" value="{{ request('date_to') }}"
+                       style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;
+                              font-size:13px;color:#0f172a;outline:none;font-family:Cairo,sans-serif;">
+            </div>
+
+            {{-- Buttons --}}
+            <div class="flex items-center gap-2 pb-0.5">
+                <button type="submit"
+                        style="display:flex;align-items:center;gap:6px;padding:8px 18px;
+                               background:#2563eb;color:#fff;border:none;border-radius:8px;
+                               font-size:13px;font-weight:600;font-family:Cairo,sans-serif;
+                               cursor:pointer;white-space:nowrap;">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8" fill="none" stroke="currentColor"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    بحث
+                </button>
+                <a href="{{ route('admin.transfers.index') }}"
+                   style="font-size:13px;color:#94a3b8;text-decoration:none;white-space:nowrap;
+                          padding:8px 10px;border-radius:8px;"
+                   onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">
+                    مسح
+                </a>
+            </div>
+
         </div>
-        <div>
-            <label class="block text-xs text-slate-500 mb-1">من تاريخ</label>
-            <input type="date" name="date_from" value="{{ request('date_from') }}"
-                   class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-        </div>
-        <div>
-            <label class="block text-xs text-slate-500 mb-1">إلى تاريخ</label>
-            <input type="date" name="date_to" value="{{ request('date_to') }}"
-                   class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-        </div>
-        <button type="submit" class="bg-slate-700 text-white text-sm px-4 py-2 rounded-lg hover:bg-slate-800">بحث</button>
-        <a href="{{ route('admin.transfers.index') }}" class="text-sm text-slate-500 hover:underline self-center">مسح</a>
     </form>
 </div>
 
@@ -44,8 +87,8 @@
             <thead class="bg-slate-50 text-slate-500 text-xs border-b">
                 <tr>
                     <th class="px-4 py-3 text-right">#</th>
-                    <th class="px-4 py-3 text-right">من �رع</th>
-                    <th class="px-4 py-3 text-right">إلى �رع</th>
+                    <th class="px-4 py-3 text-right">من فرع</th>
+                    <th class="px-4 py-3 text-right">إلى فرع</th>
                     <th class="px-4 py-3 text-right">المبلغ</th>
                     <th class="px-4 py-3 text-right">التاريخ</th>
                     <th class="px-4 py-3 text-right">الحالة</th>
@@ -66,7 +109,7 @@
                         @elseif($transfer->status === 'pending')
                             <span class="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs">معلق</span>
                         @else
-                            <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs">مر�وض</span>
+                            <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs">مرفوض</span>
                         @endif
                     </td>
                     <td class="px-4 py-3">
@@ -80,11 +123,11 @@
                             </a>
                             <form action="{{ route('admin.transfers.approve', $transfer->id) }}" method="POST" class="inline">
                                 @csrf
-                                <button type="submit" class="text-xs text-green-600 hover:underline">موا�قة</button>
+                                <button type="submit" class="text-xs text-green-600 hover:underline">موافقة</button>
                             </form>
                             @endif
                             <form action="{{ route('admin.transfers.destroy', $transfer->id) }}" method="POST" class="inline"
-                                  onsubmit="return confirm('حذ� هذا التحويل؟')">
+                                  onsubmit="return confirm('حذف هذا التحويل؟')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="text-slate-500 hover:text-red-600">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7"/></svg>
@@ -106,13 +149,13 @@
 
 @if($trashed->isNotEmpty())
 <div x-data="{ open: false }" class="mt-6">
-    <button @click="open = !open" class="text-sm text-slate-500 hover:text-red-600">المحذو�ة ({{ $trashed->count() }})</button>
+    <button @click="open = !open" class="text-sm text-slate-500 hover:text-red-600">المحذوفة ({{ $trashed->count() }})</button>
     <div x-show="open" class="mt-3 bg-white rounded-xl shadow-sm overflow-hidden">
         <table class="w-full text-sm">
             <thead class="bg-red-50 text-xs text-slate-500 border-b">
                 <tr>
-                    <th class="px-4 py-2 text-right">من �رع</th>
-                    <th class="px-4 py-2 text-right">إلى �رع</th>
+                    <th class="px-4 py-2 text-right">من فرع</th>
+                    <th class="px-4 py-2 text-right">إلى فرع</th>
                     <th class="px-4 py-2 text-right">المبلغ</th>
                     <th class="px-4 py-2 text-right">استعادة</th>
                 </tr>

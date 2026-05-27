@@ -6,10 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreBranchRequest;
 use App\Http\Requests\Admin\UpdateBranchRequest;
 use App\Services\BranchService;
+use App\Services\NotificationService;
 
 class BranchController extends Controller
 {
-    public function __construct(private readonly BranchService $service) {}
+    public function __construct(
+        private readonly BranchService $service,
+        private readonly NotificationService $notifService,
+    ) {}
 
     public function index()
     {
@@ -27,7 +31,13 @@ class BranchController extends Controller
     {
         $data = $request->validated();
         $data['active'] = $request->boolean('active', true);
-        $this->service->store($data);
+        $branch = $this->service->store($data);
+        $this->notifService->notify(
+            'branch_created',
+            'تم إضافة فرع جديد',
+            'تم إضافة فرع جديد باسم ' . ($branch->name ?? ''),
+            route('admin.branches.show', $branch->id)
+        );
         return redirect()->route('admin.branches.index')->with('success', 'تم إنشاء الفرع بنجاح.');
     }
 

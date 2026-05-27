@@ -28,9 +28,9 @@ class IncomeService
         return $this->repo->getTotalByFilters($filters);
     }
 
-    public function recent(int $limit = 10)
+    public function recent(int $limit = 10, ?int $branchId = null)
     {
-        return $this->repo->getRecent($limit);
+        return $this->repo->getRecent($limit, $branchId);
     }
 
     public function store(array $data, ?UploadedFile $attachment = null)

@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['from_branch_id', 'to_branch_id', 'admin_id', 'approved_by', 'amount', 'date', 'status', 'description', 'rejection_reason', 'approved_at'])]
 class FinancialTransfer extends Model
 {
+    protected $fillable = [
+        'from_branch_id', 'to_branch_id', 'admin_id', 'approved_by',
+        'amount', 'date', 'status', 'description',
+        'rejection_reason', 'approved_at',
+    ];
     use SoftDeletes;
 
     protected function casts(): array

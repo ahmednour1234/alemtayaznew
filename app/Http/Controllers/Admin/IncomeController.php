@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdateIncomeRequest;
 use App\Services\BranchService;
 use App\Services\IncomeService;
 use App\Services\IncomeTypeService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -20,21 +21,32 @@ class IncomeController extends Controller
         private readonly IncomeService $service,
         private readonly BranchService $branchService,
         private readonly IncomeTypeService $incomeTypeService,
+        private readonly NotificationService $notifService,
     ) {}
 
     public function index(Request $request)
     {
+        $me       = Auth::guard('admin')->user();
         $filters  = $request->only('branch_id', 'income_type_id', 'payment_method', 'date_from', 'date_to');
+        if ($me->isBranchAdmin()) {
+            $filters['branch_id'] = $me->branch_id;
+        }
         $incomes  = $this->service->list($filters);
         $total    = $this->service->total($filters);
-        $branches = $this->branchService->allActive();
+        $branches = $me->isBranchAdmin()
+            ? $this->branchService->allActive()->where('id', $me->branch_id)
+            : $this->branchService->allActive();
         $types    = $this->incomeTypeService->allActive();
-        return view('admin.incomes.index', compact('incomes', 'total', 'branches', 'types', 'filters'));
+        $trashed  = $this->service->trashed();
+        return view('admin.incomes.index', compact('incomes', 'total', 'branches', 'types', 'filters', 'trashed'));
     }
 
     public function create()
     {
-        $branches = $this->branchService->allActive();
+        $me       = Auth::guard('admin')->user();
+        $branches = $me->isBranchAdmin()
+            ? $this->branchService->allActive()->where('id', $me->branch_id)
+            : $this->branchService->allActive();
         $types    = $this->incomeTypeService->allActive();
         return view('admin.incomes.create', compact('branches', 'types'));
     }
@@ -42,8 +54,19 @@ class IncomeController extends Controller
     public function store(StoreIncomeRequest $request)
     {
         $data = $request->validated();
-        $data['admin_id'] = Auth::guard('admin')->id();
-        $this->service->store($data, $request->file('attachment'));
+        $me   = Auth::guard('admin')->user();
+        $data['admin_id'] = $me->id;
+        if ($me->isBranchAdmin()) {
+            $data['branch_id'] = $me->branch_id;
+        }
+        $income = $this->service->store($data, $request->file('attachment'));
+        $this->notifService->notify(
+            'income_created',
+            'تم تسجيل إيراد جديد',
+            'تم إضافة إيراد بقيمة ' . number_format($data['amount'] ?? 0, 0) . ' ريال',
+            route('admin.incomes.show', $income->id),
+            [$data['branch_id']]
+        );
         return redirect()->route('admin.incomes.index')->with('success', 'تم إضافة الدخل بنجاح.');
     }
 
@@ -55,8 +78,14 @@ class IncomeController extends Controller
 
     public function edit(int $id)
     {
+        $me       = Auth::guard('admin')->user();
         $income   = $this->service->find($id);
-        $branches = $this->branchService->allActive();
+        if ($me->isBranchAdmin() && $income->branch_id !== $me->branch_id) {
+            abort(403, 'ليس لديك صلاحية تعديل هذا السجل.');
+        }
+        $branches = $me->isBranchAdmin()
+            ? $this->branchService->allActive()->where('id', $me->branch_id)
+            : $this->branchService->allActive();
         $types    = $this->incomeTypeService->allActive();
         return view('admin.incomes.edit', compact('income', 'branches', 'types'));
     }
@@ -82,7 +111,11 @@ class IncomeController extends Controller
 
     public function export(Request $request)
     {
+        $me      = Auth::guard('admin')->user();
         $filters = $request->only('branch_id', 'income_type_id', 'payment_method', 'date_from', 'date_to');
+        if ($me->isBranchAdmin()) {
+            $filters['branch_id'] = $me->branch_id;
+        }
         return Excel::download(new IncomeExport($filters), 'incomes_' . now()->format('Y-m-d') . '.xlsx');
     }
 

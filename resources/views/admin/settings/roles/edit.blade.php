@@ -28,16 +28,37 @@
                 @php
                     $grouped = $permissions->groupBy(fn($p) => explode('.', $p->slug)[0]);
                     $currentPerms = old('permissions', $role->permissions->pluck('id')->toArray());
+                    $groupLabels = [
+                        'branches'       => 'الفروع',
+                        'income-types'   => 'أنواع الدخل',
+                        'expense-types'  => 'أنواع المصاريف',
+                        'nationalities'  => 'الجنسيات',
+                        'airports'       => 'المطارات',
+                        'incomes'        => 'الإيرادات',
+                        'expenses'       => 'المصاريف',
+                        'transfers'      => 'التحويلات',
+                        'reports'        => 'التقارير',
+                        'admins'         => 'المديرين',
+                        'roles'          => 'الأدوار والصلاحيات',
+                    ];
                 @endphp
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     @foreach($grouped as $group => $groupPerms)
+                    @php $groupId = 'grp_' . Str::slug($group); @endphp
                     <div class="bg-slate-50 rounded-lg p-3">
-                        <p class="text-xs font-semibold text-slate-600 mb-2 uppercase">{{ $group }}</p>
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs font-bold text-slate-700">{{ $groupLabels[$group] ?? strtoupper($group) }}</p>
+                            <label class="flex items-center gap-1 text-xs text-slate-500 cursor-pointer">
+                                <input type="checkbox" class="rounded" onchange="document.querySelectorAll('.' + '{{ $groupId }}').forEach(c => c.checked = this.checked)">
+                                الكل
+                            </label>
+                        </div>
                         <div class="space-y-1.5">
                             @foreach($groupPerms as $perm)
                             <label class="flex items-center gap-2 text-xs">
                                 <input type="checkbox" name="permissions[]" value="{{ $perm->id }}"
-                                       {{ in_array($perm->id, $currentPerms) ? 'checked' : '' }} class="rounded">
+                                       class="rounded {{ $groupId }}"
+                                       {{ in_array($perm->id, $currentPerms) ? 'checked' : '' }}>
                                 {{ $perm->name }}
                             </label>
                             @endforeach

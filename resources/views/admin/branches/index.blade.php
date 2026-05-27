@@ -1,5 +1,5 @@
-@extends('admin.layouts.app')
-@section('title', 'ال�روع')
+﻿@extends('admin.layouts.app')
+@section('title', 'الفروع')
 @section('content')
 @php
     $totalBranches   = \App\Models\Branch::count();
@@ -19,8 +19,8 @@
         </div>
         <div>
             <p class="text-2xl font-bold text-slate-800">{{ $totalBranches }}</p>
-            <p class="text-xs text-slate-400 mt-0.5">إجمالي ال�روع</p>
-            <p class="text-[11px] text-blue-500 mt-0.5">�رع مسجل</p>
+            <p class="text-xs text-slate-400 mt-0.5">إجمالي الفروع</p>
+            <p class="text-[11px] text-blue-500 mt-0.5">فرع مسجل</p>
         </div>
     </div>
     <!-- Active -->
@@ -33,7 +33,7 @@
         </div>
         <div>
             <p class="text-2xl font-bold text-slate-800">{{ $activeBranches }}</p>
-            <p class="text-xs text-slate-400 mt-0.5">ال�روع النشطة</p>
+            <p class="text-xs text-slate-400 mt-0.5">الفروع النشطة</p>
             <p class="text-[11px] text-green-500 mt-0.5">نشط</p>
         </div>
     </div>
@@ -47,7 +47,7 @@
         </div>
         <div>
             <p class="text-2xl font-bold text-slate-800">{{ $inactiveBranches }}</p>
-            <p class="text-xs text-slate-400 mt-0.5">ال�روع غير النشطة</p>
+            <p class="text-xs text-slate-400 mt-0.5">الفروع غير النشطة</p>
             <p class="text-[11px] text-red-400 mt-0.5">غير نشط</p>
         </div>
     </div>
@@ -62,7 +62,7 @@
         <div>
             <p class="text-2xl font-bold text-slate-800">{{ $citiesCount }}</p>
             <p class="text-xs text-slate-400 mt-0.5">المدن</p>
-            <p class="text-[11px] text-purple-500 mt-0.5">مدن مختل�ة</p>
+            <p class="text-[11px] text-purple-500 mt-0.5">مدن مختلفة</p>
         </div>
     </div>
 </div>
@@ -75,14 +75,14 @@
 
         <!-- Table header bar -->
         <div class="px-5 py-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100">
-            <p class="font-semibold text-slate-700 text-sm">قائمة ال�روع</p>
+            <p class="font-semibold text-slate-700 text-sm">قائمة الفروع</p>
             <div class="flex items-center gap-2 flex-wrap">
                 <!-- Search -->
                 <form method="GET" class="flex items-center gap-2">
                     <div class="relative">
                         <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         <input type="text" name="search" value="{{ request('search') }}"
-                               placeholder="ابحث عن �رع..."
+                               placeholder="ابحث عن فرع..."
                                class="bg-slate-50 border border-slate-200 rounded-lg pr-8 pl-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-300 w-44">
                     </div>
                     <select name="active" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-300">
@@ -104,7 +104,7 @@
                 <button @click="showPanel = true; editMode = false"
                         class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    إضا�ة �رع جديد
+                    إضافة فرع جديد
                 </button>
             </div>
         </div>
@@ -115,11 +115,11 @@
                 <thead style="background:#f8fafc">
                     <tr class="text-xs text-slate-500 border-b border-slate-100">
                         <th class="px-4 py-3 text-right font-medium">#</th>
-                        <th class="px-4 py-3 text-right font-medium">اسم ال�رع</th>
+                        <th class="px-4 py-3 text-right font-medium">اسم الفرع</th>
                         <th class="px-4 py-3 text-right font-medium">الكود</th>
                         <th class="px-4 py-3 text-right font-medium">المدينة</th>
                         <th class="px-4 py-3 text-right font-medium">المدير</th>
-                        <th class="px-4 py-3 text-right font-medium">الهات�</th>
+                        <th class="px-4 py-3 text-right font-medium">الهاتف</th>
                         <th class="px-4 py-3 text-right font-medium">الحالة</th>
                         <th class="px-4 py-3 text-right font-medium">الإجراءات</th>
                     </tr>
@@ -157,10 +157,10 @@
                                     </svg>
                                 </a>
                                 <form action="{{ route('admin.branches.destroy', $branch->id) }}" method="POST" class="inline"
-                                      onsubmit="return confirm('هل أنت متأكد من حذ� هذا ال�رع؟')">
+                                      onsubmit="return confirm('هل أنت متأكد من حذف هذا الفرع؟')">
                                     @csrf @method('DELETE')
                                     <button type="submit"
-                                            class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition" title="حذ�">
+                                            class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition" title="حذف">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                             <polyline points="3 6 5 6 21 6"/>
                                             <path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/>
@@ -180,13 +180,13 @@
                                         <a href="{{ route('admin.branches.show', $branch->id) }}"
                                            class="flex items-center gap-2 px-3 py-2 hover:bg-slate-50 text-slate-600">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            عرض الت�اصيل
+                                            عرض التفاصيل
                                         </a>
                                         <form action="{{ route('admin.branches.toggle', $branch->id) }}" method="POST">
-                                            @csrf @method('PATCH')
+                                            @csrf
                                             <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-50 text-slate-600">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18.364 5.636a9 9 0 11-12.728 0"/><line x1="12" y1="3" x2="12" y2="12"/></svg>
-                                                {{ $branch->active ? 'تعطيل' : 'ت�عيل' }}
+                                                {{ $branch->active ? 'تعطيل' : 'تفعيل' }}
                                             </button>
                                         </form>
                                     </div>
@@ -195,7 +195,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">لا توجد �روع مسجلة</td></tr>
+                    <tr><td colspan="8" class="px-4 py-12 text-center text-slate-400">لا توجد فروع مسجلة</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -220,7 +220,7 @@
          class="bg-white rounded-2xl shadow-sm w-80 flex-shrink-0 overflow-hidden self-start">
 
         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-            <p class="font-semibold text-slate-700 text-sm">إضا�ة �رع جديد</p>
+            <p class="font-semibold text-slate-700 text-sm">إضافة فرع جديد</p>
             <button @click="showPanel = false" class="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -229,12 +229,12 @@
         <form action="{{ route('admin.branches.store') }}" method="POST" class="px-5 py-4 space-y-3">
             @csrf
             <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1">اسم ال�رع <span class="text-red-500">*</span></label>
-                <input type="text" name="name" required placeholder="أدخل اسم ال�رع"
+                <label class="block text-xs font-medium text-slate-600 mb-1">اسم الفرع <span class="text-red-500">*</span></label>
+                <input type="text" name="name" required placeholder="أدخل اسم الفرع"
                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 bg-slate-50">
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1">كود ال�رع <span class="text-red-500">*</span></label>
+                <label class="block text-xs font-medium text-slate-600 mb-1">كود الفرع <span class="text-red-500">*</span></label>
                 <input type="text" name="code" required placeholder="مثال: MAIN-001"
                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-300 bg-slate-50">
             </div>
@@ -250,18 +250,18 @@
                 </datalist>
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1">رقم الهات� <span class="text-red-500">*</span></label>
+                <label class="block text-xs font-medium text-slate-600 mb-1">رقم الهاتف <span class="text-red-500">*</span></label>
                 <input type="text" name="phone" required placeholder="05xxxxxxxx"
                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-300 bg-slate-50">
             </div>
             <div>
                 <label class="block text-xs font-medium text-slate-600 mb-1">العنوان <span class="text-red-500">*</span></label>
-                <textarea name="address" required rows="2" placeholder="أدخل عنوان ال�رع بالت�صيل"
+                <textarea name="address" required rows="2" placeholder="أدخل عنوان الفرع بالتفصيل"
                           class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 bg-slate-50 resize-none"></textarea>
             </div>
             <div>
                 <label class="block text-xs font-medium text-slate-600 mb-1">اسم المدير</label>
-                <input type="text" name="manager_name" placeholder="أدخل اسم مدير ال�رع"
+                <input type="text" name="manager_name" placeholder="أدخل اسم مدير الفرع"
                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 bg-slate-50">
             </div>
             <div>
@@ -275,7 +275,7 @@
             <div class="flex gap-2 pt-1">
                 <button type="submit"
                         class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 rounded-lg font-medium transition">
-                    ح�ظ ال�رع
+                    حفظ الفرع
                 </button>
                 <button type="button" @click="showPanel = false"
                         class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm py-2 rounded-lg font-medium transition">
@@ -291,7 +291,7 @@
 <div x-data="{ open: false }" class="mt-5">
     <button @click="open = !open" class="text-xs text-slate-500 hover:text-red-600 flex items-center gap-1.5">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-        المحذو�ة ({{ $trashed->count() }})
+        المحذوفة ({{ $trashed->count() }})
     </button>
     <div x-show="open" class="mt-3 bg-white rounded-2xl shadow-sm overflow-hidden">
         <table class="w-full text-sm">
@@ -299,7 +299,7 @@
                 <tr>
                     <th class="px-4 py-2 text-right">الاسم</th>
                     <th class="px-4 py-2 text-right">الرمز</th>
-                    <th class="px-4 py-2 text-right">تاريخ الحذ�</th>
+                    <th class="px-4 py-2 text-right">تاريخ الحذف</th>
                     <th class="px-4 py-2 text-right">استعادة</th>
                 </tr>
             </thead>

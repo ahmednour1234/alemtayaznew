@@ -11,8 +11,13 @@ class TransferRepository implements TransferRepositoryInterface
     {
         return FinancialTransfer::query()
             ->with(['fromBranch', 'toBranch', 'admin', 'approver'])
-            ->when(!empty($filters['from_branch_id']), fn($q) => $q->where('from_branch_id', $filters['from_branch_id']))
-            ->when(!empty($filters['to_branch_id']), fn($q) => $q->where('to_branch_id', $filters['to_branch_id']))
+            // Branch-admin scope: see transfers involving their branch
+            ->when(!empty($filters['branch_id']), fn($q) => $q->where(fn($q2) =>
+                $q2->where('from_branch_id', $filters['branch_id'])
+                   ->orWhere('to_branch_id', $filters['branch_id'])
+            ))
+            ->when(empty($filters['branch_id']) && !empty($filters['from_branch_id']), fn($q) => $q->where('from_branch_id', $filters['from_branch_id']))
+            ->when(empty($filters['branch_id']) && !empty($filters['to_branch_id']),   fn($q) => $q->where('to_branch_id', $filters['to_branch_id']))
             ->when(!empty($filters['status']), fn($q) => $q->where('status', $filters['status']))
             ->when(!empty($filters['date_from']), fn($q) => $q->whereDate('date', '>=', $filters['date_from']))
             ->when(!empty($filters['date_to']), fn($q) => $q->whereDate('date', '<=', $filters['date_to']))
@@ -52,10 +57,13 @@ class TransferRepository implements TransferRepositoryInterface
         return FinancialTransfer::onlyTrashed()->with(['fromBranch', 'toBranch'])->latest()->get();
     }
 
-    public function getPending()
+    public function getPending(?int $branchId = null)
     {
         return FinancialTransfer::with(['fromBranch', 'toBranch', 'admin'])
             ->where('status', 'pending')
+            ->when($branchId, fn($q) => $q->where(fn($q2) =>
+                $q2->where('from_branch_id', $branchId)->orWhere('to_branch_id', $branchId)
+            ))
             ->latest()
             ->get();
     }

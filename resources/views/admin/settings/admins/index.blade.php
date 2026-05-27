@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+﻿@extends('admin.layouts.app')
 @section('title', 'المديرون')
 @section('content')
 
@@ -7,7 +7,7 @@
     <a href="{{ route('admin.settings.admins.create') }}"
        class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg flex items-center gap-1">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        إضا�ة مدير
+        إضافة مدير
     </a>
 </div>
 
@@ -47,14 +47,14 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         </a>
                         @if($admin->id !== auth('admin')->id())
-                        <form action="{{ route('admin.settings.admins.toggle-active', $admin->id) }}" method="POST" class="inline">
-                            @csrf @method('PATCH')
-                            <button type="submit" class="text-slate-500 hover:text-purple-600" title="{{ $admin->active ? 'تعطيل' : 'ت�عيل' }}">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                        <form action="{{ route('admin.settings.admins.toggle', $admin->id) }}" method="POST" class="inline">
+                            @csrf
+                            <button type="submit" class="text-slate-500 hover:text-purple-600" title="{{ $admin->active ? 'تعطيل' : 'تفعيل' }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 11-12.728 0M12 3v9"/></svg>
                             </button>
                         </form>
                         <form action="{{ route('admin.settings.admins.destroy', $admin->id) }}" method="POST" class="inline"
-                              onsubmit="return confirm('حذ� هذا المدير؟')">
+                              onsubmit="return confirm('حذف هذا المدير؟')">
                             @csrf @method('DELETE')
                             <button type="submit" class="text-slate-500 hover:text-red-600">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7"/></svg>
@@ -76,7 +76,7 @@
 
 @if($trashed->isNotEmpty())
 <div x-data="{ open: false }" class="mt-6">
-    <button @click="open = !open" class="text-sm text-slate-500 hover:text-red-600">المحذو�ة ({{ $trashed->count() }})</button>
+    <button @click="open = !open" class="text-sm text-slate-500 hover:text-red-600">المحذوفة ({{ $trashed->count() }})</button>
     <div x-show="open" class="mt-3 bg-white rounded-xl shadow-sm overflow-hidden">
         <table class="w-full text-sm">
             <thead class="bg-red-50 text-xs text-slate-500 border-b">

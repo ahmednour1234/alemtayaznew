@@ -3,9 +3,13 @@
 namespace App\Providers;
 
 use App\Repositories\AdminRepository;
+use App\Repositories\AgentRepository;
 use App\Repositories\BranchRepository;
+use App\Repositories\ClientRepository;
 use App\Repositories\Contracts\AdminRepositoryInterface;
+use App\Repositories\Contracts\AgentRepositoryInterface;
 use App\Repositories\Contracts\BranchRepositoryInterface;
+use App\Repositories\Contracts\ClientRepositoryInterface;
 use App\Repositories\Contracts\ExpenseRepositoryInterface;
 use App\Repositories\Contracts\ExpenseTypeRepositoryInterface;
 use App\Repositories\Contracts\IncomeRepositoryInterface;
@@ -27,7 +31,9 @@ class RepositoryServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(AdminRepositoryInterface::class, AdminRepository::class);
+        $this->app->bind(AgentRepositoryInterface::class, AgentRepository::class);
         $this->app->bind(BranchRepositoryInterface::class, BranchRepository::class);
+        $this->app->bind(ClientRepositoryInterface::class, ClientRepository::class);
         $this->app->bind(IncomeTypeRepositoryInterface::class, IncomeTypeRepository::class);
         $this->app->bind(ExpenseTypeRepositoryInterface::class, ExpenseTypeRepository::class);
         $this->app->bind(IncomeRepositoryInterface::class, IncomeRepository::class);

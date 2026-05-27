@@ -12,8 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'auth.admin' => \App\Http\Middleware\AdminAuthenticate::class,
-            'permission'  => \App\Http\Middleware\CheckPermission::class,
+            'auth.admin'      => \App\Http\Middleware\AdminAuthenticate::class,
+            'permission'      => \App\Http\Middleware\CheckPermission::class,
+            'auto.permission' => \App\Http\Middleware\AutoPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

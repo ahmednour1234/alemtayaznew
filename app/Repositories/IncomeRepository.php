@@ -63,8 +63,10 @@ class IncomeRepository implements IncomeRepositoryInterface
             ->sum('amount');
     }
 
-    public function getRecent(int $limit = 10)
+    public function getRecent(int $limit = 10, ?int $branchId = null)
     {
-        return Income::with(['branch', 'incomeType'])->latest('date')->limit($limit)->get();
+        return Income::with(['branch', 'incomeType'])
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->latest('date')->limit($limit)->get();
     }
 }

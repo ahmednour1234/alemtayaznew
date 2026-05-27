@@ -1,12 +1,17 @@
 <?php
 
+use App\Http\Controllers\Admin\AirportController;
+use App\Http\Controllers\Admin\AgentController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BranchController;
+use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\ExpenseTypeController;
 use App\Http\Controllers\Admin\IncomeController;
 use App\Http\Controllers\Admin\IncomeTypeController;
+use App\Http\Controllers\Admin\NationalityController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\Reports\BranchStatementController;
 use App\Http\Controllers\Admin\Reports\IncomeStatementController;
 use App\Http\Controllers\Admin\Settings\AdminController as SettingsAdminController;
@@ -25,12 +30,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('login.post');
 
     // ── Protected ─────────────────────────────────────────────────────────────
-    Route::middleware('auth.admin')->group(function () {
+    Route::middleware(['auth.admin', 'auto.permission'])->group(function () {
 
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
         // Dashboard
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Notifications
+        Route::get('notifications',           [NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+        Route::get('notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
+        // Nationalities
+        Route::post('nationalities/{id}/restore', [NationalityController::class, 'restore'])->name('nationalities.restore');
+        Route::post('nationalities/{id}/toggle',  [NationalityController::class, 'toggleActive'])->name('nationalities.toggle');
+        Route::resource('nationalities', NationalityController::class)->except('show');
+
+        // Airports
+        Route::post('airports/{id}/restore', [AirportController::class, 'restore'])->name('airports.restore');
+        Route::post('airports/{id}/toggle',  [AirportController::class, 'toggleActive'])->name('airports.toggle');
+        Route::resource('airports', AirportController::class)->except('show');
 
         // Branches
         Route::get('branches/trashed',         [BranchController::class, 'index'])->name('branches.trashed');
@@ -91,6 +110,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Permissions (read-only view)
             Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
         });
+
+        // Clients
+        Route::post('clients/{id}/restore', [ClientController::class, 'restore'])->name('clients.restore');
+        Route::resource('clients', ClientController::class);
+
+        // Agents
+        Route::post('agents/{id}/restore', [AgentController::class, 'restore'])->name('agents.restore');
+        Route::resource('agents', AgentController::class);
 
         // Cities (distinct cities from branches)
         Route::get('cities', function () {

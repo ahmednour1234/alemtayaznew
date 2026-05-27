@@ -1,5 +1,5 @@
-@extends('admin.layouts.app')
-@section('title', 'ت�اصيل ال�رع')
+﻿@extends('admin.layouts.app')
+@section('title', 'تفاصيل الفرع')
 @section('content')
 
 <div class="w-full">
@@ -18,7 +18,7 @@
     <div class="bg-white rounded-xl shadow-sm p-6 space-y-4">
         <div class="grid grid-cols-2 gap-4">
             <div>
-                <p class="text-xs text-slate-400">اسم ال�رع</p>
+                <p class="text-xs text-slate-400">اسم الفرع</p>
                 <p class="font-medium mt-0.5">{{ $branch->name }}</p>
             </div>
             <div>
@@ -34,7 +34,7 @@
                 <p class="font-medium mt-0.5">{{ $branch->manager_name ?? '-' }}</p>
             </div>
             <div>
-                <p class="text-xs text-slate-400">الهات�</p>
+                <p class="text-xs text-slate-400">الهاتف</p>
                 <p class="font-medium mt-0.5">{{ $branch->phone ?? '-' }}</p>
             </div>
             <div>

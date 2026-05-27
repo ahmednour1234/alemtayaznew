@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+﻿@extends('admin.layouts.app')
 @section('title', 'الإيرادات')
 @section('content')
 
@@ -19,51 +19,111 @@
         <a href="{{ route('admin.incomes.create') }}"
            class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            إضا�ة
+            إضافة
         </a>
     </div>
 </div>
 
 <!-- Filters -->
-<div class="bg-white rounded-xl p-4 shadow-sm mb-4">
-    <form method="GET" class="flex flex-wrap gap-3 items-end">
-        <div>
-            <label class="block text-xs text-slate-500 mb-1">ال�رع</label>
-            <select name="branch_id" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <option value="">الكل</option>
-                @foreach($branches as $branch)
-                <option value="{{ $branch->id }}" {{ request('branch_id') == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
-                @endforeach
-            </select>
+<div class="bg-white rounded-xl p-5 shadow-sm mb-4 border border-slate-100">
+    <form method="GET">
+        <div class="flex flex-wrap gap-3 items-end">
+
+            {{-- Branch --}}
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-medium text-slate-500 mb-1.5">الفرع</label>
+                <div style="position:relative;">
+                    <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#94a3b8;"
+                         width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    <select name="branch_id"
+                            style="width:100%;padding:8px 34px 8px 32px;border:1.5px solid #e2e8f0;border-radius:8px;
+                                   font-size:13px;color:#0f172a;background:#fff;outline:none;
+                                   font-family:Cairo,sans-serif;appearance:none;-webkit-appearance:none;cursor:pointer;">
+                        <option value="">الكل</option>
+                        @foreach($branches as $branch)
+                        <option value="{{ $branch->id }}" {{ request('branch_id') == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                        @endforeach
+                    </select>
+                    <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#94a3b8;"
+                         width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </div>
+            </div>
+
+            {{-- Income Type --}}
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-medium text-slate-500 mb-1.5">نوع الدخل</label>
+                <div style="position:relative;">
+                    <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#94a3b8;"
+                         width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+                        <path d="M9 9h.01"/><line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                    <select name="income_type_id"
+                            style="width:100%;padding:8px 34px 8px 32px;border:1.5px solid #e2e8f0;border-radius:8px;
+                                   font-size:13px;color:#0f172a;background:#fff;outline:none;
+                                   font-family:Cairo,sans-serif;appearance:none;-webkit-appearance:none;cursor:pointer;">
+                        <option value="">الكل</option>
+                        @foreach($types as $type)
+                        <option value="{{ $type->id }}" {{ request('income_type_id') == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
+                        @endforeach
+                    </select>
+                    <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#94a3b8;"
+                         width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </div>
+            </div>
+
+            {{-- Date From --}}
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-medium text-slate-500 mb-1.5">من تاريخ</label>
+                <input type="date" name="date_from" value="{{ request('date_from') }}"
+                       style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;
+                              font-size:13px;color:#0f172a;outline:none;font-family:Cairo,sans-serif;">
+            </div>
+
+            {{-- Date To --}}
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-medium text-slate-500 mb-1.5">إلى تاريخ</label>
+                <input type="date" name="date_to" value="{{ request('date_to') }}"
+                       style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;
+                              font-size:13px;color:#0f172a;outline:none;font-family:Cairo,sans-serif;">
+            </div>
+
+            {{-- Buttons --}}
+            <div class="flex items-center gap-2 pb-0.5">
+                <button type="submit"
+                        style="display:flex;align-items:center;gap:6px;padding:8px 18px;
+                               background:#2563eb;color:#fff;border:none;border-radius:8px;
+                               font-size:13px;font-weight:600;font-family:Cairo,sans-serif;
+                               cursor:pointer;white-space:nowrap;">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8" fill="none" stroke="currentColor"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    بحث
+                </button>
+                <a href="{{ route('admin.incomes.index') }}"
+                   style="font-size:13px;color:#94a3b8;text-decoration:none;white-space:nowrap;
+                          padding:8px 10px;border-radius:8px;transition:color .15s;"
+                   onmouseover="this.style.color='#ef4444'"
+                   onmouseout="this.style.color='#94a3b8'">
+                    مسح
+                </a>
+            </div>
+
         </div>
-        <div>
-            <label class="block text-xs text-slate-500 mb-1">نوع الدخل</label>
-            <select name="income_type_id" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <option value="">الكل</option>
-                @foreach($incomeTypes as $type)
-                <option value="{{ $type->id }}" {{ request('income_type_id') == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label class="block text-xs text-slate-500 mb-1">من تاريخ</label>
-            <input type="date" name="date_from" value="{{ request('date_from') }}"
-                   class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-        </div>
-        <div>
-            <label class="block text-xs text-slate-500 mb-1">إلى تاريخ</label>
-            <input type="date" name="date_to" value="{{ request('date_to') }}"
-                   class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-        </div>
-        <button type="submit" class="bg-slate-700 text-white text-sm px-4 py-2 rounded-lg hover:bg-slate-800">بحث</button>
-        <a href="{{ route('admin.incomes.index') }}" class="text-sm text-slate-500 hover:underline self-center">مسح</a>
     </form>
 </div>
 
 <!-- Total -->
 @if($total > 0)
 <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-3 mb-4 flex justify-between items-center">
-    <span class="text-sm text-green-700">إجمالي الإيرادات المص�اة:</span>
+    <span class="text-sm text-green-700">إجمالي الإيرادات المصفاة:</span>
     <span class="font-bold text-green-700 text-lg">{{ number_format($total, 2) }} ريال</span>
 </div>
 @endif
@@ -75,11 +135,11 @@
             <thead class="bg-slate-50 text-slate-500 text-xs border-b">
                 <tr>
                     <th class="px-4 py-3 text-right">#</th>
-                    <th class="px-4 py-3 text-right">ال�رع</th>
+                    <th class="px-4 py-3 text-right">الفرع</th>
                     <th class="px-4 py-3 text-right">النوع</th>
                     <th class="px-4 py-3 text-right">المبلغ</th>
                     <th class="px-4 py-3 text-right">التاريخ</th>
-                    <th class="px-4 py-3 text-right">طريقة الد�ع</th>
+                    <th class="px-4 py-3 text-right">طريقة الدفع</th>
                     <th class="px-4 py-3 text-right">المرجع</th>
                     <th class="px-4 py-3 text-right">الإجراءات</th>
                 </tr>
@@ -106,7 +166,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             </a>
                             <form action="{{ route('admin.incomes.destroy', $income->id) }}" method="POST" class="inline"
-                                  onsubmit="return confirm('حذ� هذا الإيراد؟')">
+                                  onsubmit="return confirm('حذف هذا الإيراد؟')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="text-slate-500 hover:text-red-600">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -129,12 +189,12 @@
 <!-- Trashed -->
 @if($trashed->isNotEmpty())
 <div x-data="{ open: false }" class="mt-6">
-    <button @click="open = !open" class="text-sm text-slate-500 hover:text-red-600">المحذو�ة ({{ $trashed->count() }})</button>
+    <button @click="open = !open" class="text-sm text-slate-500 hover:text-red-600">المحذوفة ({{ $trashed->count() }})</button>
     <div x-show="open" class="mt-3 bg-white rounded-xl shadow-sm overflow-hidden">
         <table class="w-full text-sm">
             <thead class="bg-red-50 text-xs text-slate-500 border-b">
                 <tr>
-                    <th class="px-4 py-2 text-right">ال�رع</th>
+                    <th class="px-4 py-2 text-right">الفرع</th>
                     <th class="px-4 py-2 text-right">المبلغ</th>
                     <th class="px-4 py-2 text-right">التاريخ</th>
                     <th class="px-4 py-2 text-right">استعادة</th>
@@ -167,7 +227,7 @@
         <form action="{{ route('admin.incomes.import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">مل� Excel</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">ملف Excel</label>
                 <input type="file" name="file" accept=".xlsx,.xls,.csv" required
                        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
                 <p class="text-xs text-slate-400 mt-1">

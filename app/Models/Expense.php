@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['branch_id', 'expense_type_id', 'admin_id', 'approved_by', 'amount', 'date', 'payment_method', 'status', 'reference_number', 'description', 'attachment', 'rejection_reason', 'approved_at'])]
 class Expense extends Model
 {
+    protected $fillable = [
+        'branch_id', 'expense_type_id', 'admin_id', 'approved_by',
+        'amount', 'date', 'payment_method', 'status',
+        'reference_number', 'description', 'attachment',
+        'rejection_reason', 'approved_at',
+    ];
     use SoftDeletes;
 
     protected function casts(): array
