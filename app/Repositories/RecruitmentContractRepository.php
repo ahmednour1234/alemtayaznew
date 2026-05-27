@@ -11,7 +11,7 @@ class RecruitmentContractRepository implements RecruitmentContractRepositoryInte
 {
     public function getAll(array $filters = [], int $perPage = 20): LengthAwarePaginator
     {
-        $q = RecruitmentContract::with(['client', 'branch', 'admin', 'worker'])
+        $q = RecruitmentContract::with(['client', 'branch', 'admin', 'worker.nationality'])
             ->latest();
 
         if (! empty($filters['branch_id'])) {
@@ -39,6 +39,10 @@ class RecruitmentContractRepository implements RecruitmentContractRepositoryInte
             });
         }
 
+        if (! empty($filters['nationality_id'])) {
+            $q->whereHas('worker', fn($w) => $w->where('nationality_id', $filters['nationality_id']));
+        }
+
         return $q->paginate($perPage)->withQueryString();
     }
 
@@ -46,7 +50,7 @@ class RecruitmentContractRepository implements RecruitmentContractRepositoryInte
     {
         return RecruitmentContract::with([
             'client', 'branch', 'admin', 'worker', 'agent',
-            'arrivalAirport', 'departureAirport', 'deliveryAirport',
+            'arrivalAirport', 'originNationality', 'deliveryAirport',
             'statusHistories.admin',
         ])->findOrFail($id);
     }
@@ -82,7 +86,16 @@ class RecruitmentContractRepository implements RecruitmentContractRepositoryInte
             ['status_date' => $date, 'admin_id' => $adminId, 'whatsapp_message' => $waMessage]
         );
 
-        $contract->update(['current_status' => $status]);
+        $department = match (true) {
+            $status <= 4  => 'customer_service',
+            $status <= 8  => 'accounts',
+            default       => 'coordination',
+        };
+
+        $contract->update([
+            'current_status'     => $status,
+            'current_department' => $department,
+        ]);
     }
 
     public function getStatsByBranch(): array

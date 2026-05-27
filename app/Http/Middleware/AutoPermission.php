@@ -144,14 +144,15 @@ class AutoPermission
         'admin.settings.permissions.index' => 'roles.manage',
 
         // ── Clients ───────────────────────────────────
-        'admin.clients.index'   => 'clients.view',
-        'admin.clients.show'    => 'clients.view',
-        'admin.clients.create'  => 'clients.create',
-        'admin.clients.store'   => 'clients.create',
-        'admin.clients.edit'    => 'clients.edit',
-        'admin.clients.update'  => 'clients.edit',
-        'admin.clients.destroy' => 'clients.delete',
-        'admin.clients.restore' => 'clients.delete',
+        'admin.clients.index'       => 'clients.view',
+        'admin.clients.show'        => 'clients.view',
+        'admin.clients.create'      => 'clients.create',
+        'admin.clients.store'       => 'clients.create',
+        'admin.clients.quick-store' => 'clients.create',
+        'admin.clients.edit'        => 'clients.edit',
+        'admin.clients.update'      => 'clients.edit',
+        'admin.clients.destroy'     => 'clients.delete',
+        'admin.clients.restore'     => 'clients.delete',
 
         // ── Agents ────────────────────────────────────
         'admin.agents.index'   => 'agents.view',
@@ -169,6 +170,7 @@ class AutoPermission
         'admin.workers.store'         => 'workers.create',
         'admin.workers.bulk'          => 'workers.create',
         'admin.workers.bulk-store'    => 'workers.create',
+        'admin.workers.quick-store'   => 'workers.create',
         'admin.workers.edit'          => 'workers.edit',
         'admin.workers.update'        => 'workers.edit',
         'admin.workers.destroy'       => 'workers.delete',
@@ -176,7 +178,25 @@ class AutoPermission
         'admin.workers.assign'        => 'workers.assign',
         'admin.workers.do-assign'     => 'workers.assign',
         'admin.workers.unassign'      => 'workers.assign',
-        'admin.workers.send-whatsapp' => 'workers.view',    ];
+        'admin.workers.send-whatsapp' => 'workers.view',
+
+        // ── Contracts ─────────────────────────────────────────────────────────
+        'admin.contracts.index'         => 'contracts.view',
+        'admin.contracts.show'          => 'contracts.view',
+        'admin.contracts.print'         => 'contracts.view',
+        'admin.contracts.export'        => 'contracts.view',
+        'admin.contracts.trashed'       => 'contracts.view',
+        'admin.contracts.create'        => 'contracts.create',
+        'admin.contracts.store'         => 'contracts.create',
+        'admin.contracts.template'      => 'contracts.create',
+        'admin.contracts.import'        => 'contracts.create',
+        'admin.contracts.edit'          => 'contracts.edit',
+        'admin.contracts.update'        => 'contracts.edit',
+        'admin.contracts.update-status' => 'contracts.edit',
+        'admin.contracts.restore'       => 'contracts.edit',
+        'admin.contracts.destroy'       => 'contracts.delete',
+        'admin.contracts.force-delete'  => 'contracts.delete',
+    ];
 
     public function handle(Request $request, Closure $next): Response
     {

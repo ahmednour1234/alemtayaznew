@@ -44,5 +44,9 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(RoleRepositoryInterface::class, RoleRepository::class);
         $this->app->bind(PermissionRepositoryInterface::class, PermissionRepository::class);
         $this->app->bind(WorkerRepositoryInterface::class, WorkerRepository::class);
+        $this->app->bind(
+            \App\Repositories\Contracts\RecruitmentContractRepositoryInterface::class,
+            \App\Repositories\RecruitmentContractRepository::class
+        );
     }
 }

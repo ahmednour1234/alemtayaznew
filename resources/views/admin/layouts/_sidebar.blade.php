@@ -7,6 +7,8 @@
     $openReports    = request()->routeIs(['admin.reports.*']);
     $openPeople     = request()->routeIs(['admin.clients.*', 'admin.agents.*']);
     $openWorkers    = request()->routeIs(['admin.workers.*']);
+    $openContracts  = request()->routeIs(['admin.contracts.*', 'admin.reports.contracts-*']);
+    $openCReps      = request()->routeIs(['admin.reports.contracts-*']);
 @endphp
 
 <div x-data="{
@@ -16,7 +18,9 @@
         m: {{ $openMoney      ? 'true' : 'false' }},
         r: {{ $openReports    ? 'true' : 'false' }},
         p: {{ $openPeople     ? 'true' : 'false' }},
-        w: {{ $openWorkers    ? 'true' : 'false' }}
+        w: {{ $openWorkers    ? 'true' : 'false' }},
+        c: {{ $openContracts  ? 'true' : 'false' }},
+        cr: {{ $openCReps     ? 'true' : 'false' }}
      }"
      style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
 
@@ -242,8 +246,8 @@
                         </button>
                         <div x-show="r" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                             @php $repItems = [
-                                ['r'=>'admin.reports.branch-statement', 'p'=>'admin.reports.branch-statement', 'l'=>'كشف حساب الفرع',       'd'=>'M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v14a2 2 0 002 2z'],
-                                ['r'=>'admin.reports.income-statement', 'p'=>'admin.reports.income-statement', 'l'=>'قائمة دخل بين الفروع', 'd'=>'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z'],
+                                ['r'=>'admin.reports.branch-statement',   'p'=>'admin.reports.branch-statement',   'l'=>'كشف حساب الفرع',       'd'=>'M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v14a2 2 0 002 2z'],
+                                ['r'=>'admin.reports.income-statement',   'p'=>'admin.reports.income-statement',   'l'=>'قائمة دخل بين الفروع', 'd'=>'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z'],
                             ] @endphp
                             @foreach($repItems as $it)
                                 @php $on = request()->routeIs($it['p']); @endphp
@@ -365,6 +369,95 @@
                         {{ $it['l'] }}
                     </a>
                 @endforeach
+            </div>
+        </div>
+
+        {{-- Section label: عقود الاستقدام --}}
+        <div style="padding:10px 10px 4px;margin-top:4px;">
+            <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
+                      text-transform:uppercase;color:#334155;margin:0;">عقود الاستقدام</p>
+        </div>
+
+        {{-- ── GROUP: Contracts ── --}}
+        <div style="margin-bottom:1px;">
+            <button @click="c=!c"
+                    style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
+                           border-radius:8px;border:none;cursor:pointer;text-align:right;
+                           font-family:Cairo,sans-serif;font-size:13px;font-weight:600;
+                           transition:background .15s,color .15s;"
+                    :style="{ color: c ? '#e2e8f0' : '#64748b', background: c ? 'rgba(255,255,255,.05)' : 'transparent' }"
+                    @mouseenter="$el.style.background='rgba(255,255,255,.06)';$el.style.color='#e2e8f0';"
+                    @mouseleave="$el.style.background=c?'rgba(255,255,255,.05)':'transparent';$el.style.color=c?'#e2e8f0':'#64748b';">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span style="flex:1;">عقود الاستقدام</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                     style="flex-shrink:0;transition:transform .25s;" :style="{ transform: c ? 'rotate(180deg)' : 'none' }">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div x-show="c" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
+                @php $contractItems = [
+                    ['r'=>'admin.contracts.index',  'p'=>'admin.contracts.index',  'l'=>'قائمة العقود',    'd'=>'M4 6h16M4 10h16M4 14h8'],
+                    ['r'=>'admin.contracts.create', 'p'=>'admin.contracts.create', 'l'=>'إضافة عقد جديد', 'd'=>'M12 5v14M5 12h14'],
+                ] @endphp
+                @foreach($contractItems as $it)
+                    @php $on = request()->routeIs($it['p']); @endphp
+                    <a href="{{ route($it['r']) }}"
+                       style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
+                              border-radius:7px;text-decoration:none;font-size:12.5px;
+                              {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                       onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
+                       onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
+                       {{ $on ? 'data-on=1' : '' }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                            <path d="{{ $it['d'] }}"/>
+                        </svg>
+                        {{ $it['l'] }}
+                    </a>
+                @endforeach
+
+                {{-- ── قسم التقارير (sub-dropdown) ── --}}
+                <div style="margin-top:4px;">
+                    <button @click="cr=!cr"
+                            style="width:100%;display:flex;align-items:center;gap:9px;padding:7px 10px;
+                                   border-radius:7px;border:none;cursor:pointer;text-align:right;
+                                   font-family:Cairo,sans-serif;font-size:12.5px;font-weight:600;
+                                   transition:background .15s,color .15s;"
+                            :style="{ color: cr ? '#93c5fd' : '#64748b', background: cr ? 'rgba(96,165,250,.08)' : 'transparent' }"
+                            @mouseenter="$el.style.background='rgba(255,255,255,.05)';$el.style.color='#cbd5e1';"
+                            @mouseleave="$el.style.background=cr?'rgba(96,165,250,.08)':'transparent';$el.style.color=cr?'#93c5fd':'#64748b';">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                            <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        <span style="flex:1;">قسم التقارير</span>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                             style="flex-shrink:0;transition:transform .25s;" :style="{ transform: cr ? 'rotate(180deg)' : 'none' }">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                    <div x-show="cr" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
+                        @php $crItems = [
+                            ['r'=>'admin.reports.contracts-stats',    'p'=>'admin.reports.contracts-stats',    'l'=>'إحصائيات العقود', 'd'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
+                            ['r'=>'admin.reports.contracts-received', 'p'=>'admin.reports.contracts-received', 'l'=>'العمالة المستلمة',  'd'=>'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                            ['r'=>'admin.reports.contracts-delayed',  'p'=>'admin.reports.contracts-delayed',  'l'=>'العقود المتأخرة',   'd'=>'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ] @endphp
+                        @foreach($crItems as $it)
+                            @php $on = request()->routeIs($it['p']); @endphp
+                            <a href="{{ route($it['r']) }}"
+                               style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
+                                      border-radius:6px;text-decoration:none;font-size:12px;
+                                      {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                               onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
+                               onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
+                               {{ $on ? 'data-on=1' : '' }}>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;"><path d="{{ $it['d'] }}"/></svg>
+                                {{ $it['l'] }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
             </div>
         </div>
 

@@ -20,7 +20,7 @@ class StoreRecruitmentContractRequest extends FormRequest
             'visa_type'            => ['nullable', 'in:domestic,rehabilitation'],
             'visa_number'          => ['nullable', 'string', 'max:100'],
             'arrival_airport_id'   => ['nullable', 'exists:airports,id'],
-            'departure_airport_id' => ['nullable', 'exists:airports,id'],
+            'origin_nationality_id' => ['nullable', 'exists:nationalities,id'],
             'delivery_airport_id'  => ['nullable', 'exists:airports,id'],
 
             // Musaned

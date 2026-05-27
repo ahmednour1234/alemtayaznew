@@ -61,6 +61,29 @@ class WorkerController extends Controller
         return redirect()->route('admin.workers.index')->with('success', 'تم إضافة العاملة بنجاح.');
     }
 
+    // ── Quick store (popup from contracts form) ────────────────────────────────
+    public function quickStore(Request $request)
+    {
+        $request->validate([
+            'name'            => ['required', 'string', 'max:255'],
+            'nationality_id'  => ['nullable', 'integer', 'exists:nationalities,id'],
+            'passport_number' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $me = Auth::guard('admin')->user();
+        $worker = Worker::create([
+            'name'            => $request->name,
+            'nationality_id'  => $request->nationality_id,
+            'passport_number' => $request->passport_number,
+            'status'          => 'available',
+            'branch_id'       => $me->branch_id,
+            'admin_id'        => $me->id,
+            'active'          => true,
+        ]);
+
+        return response()->json(['id' => $worker->id, 'name' => $worker->name]);
+    }
+
     // ── Bulk Upload ───────────────────────────────────────────────────────────
     public function bulk()
     {

@@ -6,6 +6,8 @@ use App\Models\Branch;
 use App\Models\Expense;
 use App\Models\FinancialTransfer;
 use App\Models\Income;
+use App\Models\RecruitmentContract;
+use Carbon\Carbon;
 
 class ReportService
 {
@@ -118,5 +120,164 @@ class ReportService
                 'net'           => $rows->sum('net_profit'),
             ],
         ];
+    }
+
+    // ── إحصائيات العقود الشاملة ──────────────────────────────────────────────
+    public function getContractStats(?int $branchId): array
+    {
+        $statuses = RecruitmentContract::statuses();
+        $palette  = ['#2563eb','#16a34a','#f97316','#9333ea','#ef4444','#ca8a04','#0891b2','#db2777'];
+
+        $base = fn() => RecruitmentContract::when($branchId, fn($q) => $q->where('branch_id', $branchId));
+
+        // Status counts
+        $bySt     = $base()->selectRaw('current_status, count(*) as cnt')->groupBy('current_status')->pluck('cnt', 'current_status');
+        $total    = (int) $bySt->sum();
+        $received = (int) ($bySt[13] ?? 0);
+        $returned = (int) ($bySt[14] ?? 0);
+        $escaped  = (int) ($bySt[15] ?? 0);
+        $active   = (int) $bySt->filter(fn($v, $k) => ! in_array($k, [13, 14, 15]))->sum();
+
+        // Dept & payment counts
+        $byDept = $base()->selectRaw('current_department, count(*) as cnt')->groupBy('current_department')->pluck('cnt', 'current_department');
+        $byPay  = $base()->selectRaw('payment_status, count(*) as cnt')->groupBy('payment_status')->pluck('cnt', 'payment_status');
+
+        // Delayed count
+        $delayed = $this->getDelayedContracts($branchId)->count();
+
+        // Monthly trend — last 6 months
+        $monthLabels = [];
+        $monthCounts = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $dt = Carbon::now()->subMonths($i);
+            $monthLabels[] = $dt->translatedFormat('M Y');
+            $monthCounts[] = $base()->whereYear('created_at', $dt->year)->whereMonth('created_at', $dt->month)->count();
+        }
+
+        // Status donut — only statuses with > 0
+        $stColors = ['#3b82f6','#60a5fa','#93c5fd','#2563eb','#1d4ed8','#7c3aed','#a855f7','#c084fc','#ef4444','#22c55e','#f97316','#10b981','#16a34a','#f59e0b','#dc2626'];
+        $statusLabels = [];
+        $statusData   = [];
+        $statusColors = [];
+        foreach ($statuses as $num => $st) {
+            if (($bySt[$num] ?? 0) > 0) {
+                $statusLabels[] = $st['label'];
+                $statusData[]   = (int) ($bySt[$num] ?? 0);
+                $statusColors[] = $stColors[$num - 1] ?? '#94a3b8';
+            }
+        }
+
+        // Branch monthly chart + branch table (super admin only)
+        $branchMonthly = null;
+        $branchTable   = [];
+        if (! $branchId) {
+            $branches       = Branch::where('active', true)->get();
+            $bChartDatasets = [];
+            foreach ($branches as $i => $branch) {
+                $md = [];
+                for ($j = 5; $j >= 0; $j--) {
+                    $dt  = Carbon::now()->subMonths($j);
+                    $md[] = RecruitmentContract::where('branch_id', $branch->id)
+                        ->whereYear('created_at', $dt->year)
+                        ->whereMonth('created_at', $dt->month)
+                        ->count();
+                }
+                $c = $palette[$i % count($palette)];
+                $bChartDatasets[] = [
+                    'label'           => $branch->name,
+                    'data'            => $md,
+                    'backgroundColor' => $c . 'cc',
+                    'borderColor'     => $c,
+                    'borderWidth'     => 2,
+                    'borderRadius'    => 6,
+                ];
+
+                $branchTable[] = [
+                    'id'       => $branch->id,
+                    'name'     => $branch->name,
+                    'total'    => RecruitmentContract::where('branch_id', $branch->id)->count(),
+                    'active'   => RecruitmentContract::where('branch_id', $branch->id)->whereNotIn('current_status', [13, 14, 15])->count(),
+                    'received' => RecruitmentContract::where('branch_id', $branch->id)->where('current_status', 13)->count(),
+                    'returned' => RecruitmentContract::where('branch_id', $branch->id)->where('current_status', 14)->count(),
+                    'escaped'  => RecruitmentContract::where('branch_id', $branch->id)->where('current_status', 15)->count(),
+                    'cs'       => RecruitmentContract::where('branch_id', $branch->id)->where('current_department', 'customer_service')->count(),
+                    'acc'      => RecruitmentContract::where('branch_id', $branch->id)->where('current_department', 'accounts')->count(),
+                    'coord'    => RecruitmentContract::where('branch_id', $branch->id)->where('current_department', 'coordination')->count(),
+                ];
+            }
+            $branchMonthly = ['labels' => $monthLabels, 'datasets' => $bChartDatasets];
+        }
+
+        return [
+            'total'         => $total,
+            'active'        => $active,
+            'received'      => $received,
+            'returned'      => $returned,
+            'escaped'       => $escaped,
+            'delayed'       => $delayed,
+            'by_status'     => $bySt->toArray(),
+            'by_dept'       => $byDept,
+            'by_payment'    => $byPay,
+            'month_labels'  => $monthLabels,
+            'month_counts'  => $monthCounts,
+            'status_labels' => $statusLabels,
+            'status_data'   => $statusData,
+            'status_colors' => $statusColors,
+            'branch_monthly'=> $branchMonthly,
+            'branch_table'  => $branchTable,
+        ];
+    }
+    public function getReceivedContracts(?string $dateFrom, ?string $dateTo, ?int $branchId): \Illuminate\Support\Collection
+    {
+        $today = Carbon::today();
+
+        return RecruitmentContract::with(['client', 'worker.nationality', 'branch', 'statusHistories'])
+            ->where('current_status', 13)
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->orderByDesc('updated_at')
+            ->get()
+            ->filter(function ($c) use ($dateFrom, $dateTo) {
+                $history = $c->statusHistories->firstWhere('status', 13);
+                if (! $history || ! $history->status_date) {
+                    return ! $dateFrom && ! $dateTo; // show only if no date filter
+                }
+                if ($dateFrom && $history->status_date->lt(Carbon::parse($dateFrom)->startOfDay())) return false;
+                if ($dateTo   && $history->status_date->gt(Carbon::parse($dateTo)->endOfDay()))   return false;
+                return true;
+            })
+            ->values();
+    }
+
+    // ── تقرير العقود المتأخرة ─────────────────────────────────────────────────
+    public function getDelayedContracts(?int $branchId): \Illuminate\Support\Collection
+    {
+        $statuses = RecruitmentContract::statuses();
+        $today    = Carbon::today();
+
+        $contracts = RecruitmentContract::with(['client', 'worker.nationality', 'branch', 'statusHistories'])
+            ->whereNotIn('current_status', [9, 13, 14, 15])
+            ->where('active', true)
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->get();
+
+        return $contracts->filter(function ($contract) use ($statuses, $today) {
+            $currentStatus = $contract->current_status;
+            $expectedDays  = $statuses[$currentStatus]['days'] ?? null;
+
+            if (! $expectedDays) return false;
+
+            $history = $contract->statusHistories->firstWhere('status', $currentStatus);
+            if (! $history || ! $history->status_date) return false;
+
+            $daysInStatus = $history->status_date->diffInDays($today);
+            if ($daysInStatus < $expectedDays + 2) return false;
+
+            // Attach computed delay info as dynamic properties
+            $contract->delay_days     = $daysInStatus - $expectedDays;
+            $contract->days_in_status = $daysInStatus;
+            $contract->expected_days  = $expectedDays;
+
+            return true;
+        })->sortByDesc('delay_days')->values();
     }
 }

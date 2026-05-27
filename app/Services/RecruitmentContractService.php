@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Models\Admin;
 use App\Models\AdminNotification;
+use App\Models\ContractActivityLog;
 use App\Models\RecruitmentContract;
+use App\Models\Worker;
 use App\Repositories\Contracts\RecruitmentContractRepositoryInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -43,36 +45,174 @@ class RecruitmentContractService
 
         $contract = $this->repo->create($data);
 
-        // Notify all admins of the branch
-        $this->notifyBranch($contract, 'contracts.created', 'عقد جديد', "تم إنشاء عقد رقم {$contract->contract_number}");
+        // Mark worker as assigned
+        if (! empty($data['worker_id'])) {
+            Worker::where('id', $data['worker_id'])->update(['status' => 'assigned']);
+        }
+
+        // Notify: if created by a dept employee → notify next dept; otherwise notify whole branch
+        $creator = Auth::guard('admin')->user();
+        $dept    = $creator->department ?? null;
+
+        // Log activity
+        ContractActivityLog::create([
+            'contract_id' => $contract->id,
+            'admin_id'    => Auth::guard('admin')->id(),
+            'action'      => 'created',
+            'section'     => $dept,
+            'label'       => 'تم إنشاء العقد',
+        ]);
+
+        $next = $this->nextDepartment($dept);
+
+        if ($next) {
+            $this->notifyDepartment(
+                $contract, $next,
+                'contracts.created',
+                "عقد جديد يحتاج مراجعتك: {$contract->contract_number}",
+                "أنشأ قسم خدمة العملاء عقداً جديداً — يرجى استكمال البيانات"
+            );
+        } else {
+            $this->notifyBranch($contract, 'contracts.created', 'عقد جديد', "تم إنشاء عقد رقم {$contract->contract_number}");
+        }
 
         return $contract;
     }
 
     public function update(RecruitmentContract $contract, array $data): RecruitmentContract
     {
-        $data = $this->handleUploads($data, $contract);
-        return $this->repo->update($contract, $data);
+        $data    = $this->handleUploads($data, $contract);
+
+        // Handle worker change: free old, assign new
+        $newWorkerId = $data['worker_id'] ?? null;
+        if ($newWorkerId != $contract->worker_id) {
+            if ($contract->worker_id) {
+                Worker::where('id', $contract->worker_id)->update(['status' => 'available']);
+            }
+            if ($newWorkerId) {
+                Worker::where('id', $newWorkerId)->update(['status' => 'assigned']);
+            }
+        }
+
+        $updated = $this->repo->update($contract, $data);
+
+        // Log activity
+        $logDept = Auth::guard('admin')->user()->department ?? null;
+        ContractActivityLog::create([
+            'contract_id' => $contract->id,
+            'admin_id'    => Auth::guard('admin')->id(),
+            'action'      => 'updated',
+            'section'     => $logDept,
+            'label'       => 'تم تعديل بيانات العقد',
+        ]);
+
+        // Notify next department that this section was completed
+        $editor = Auth::guard('admin')->user();
+        $dept   = $editor->department ?? null;
+        $next   = $this->nextDepartment($dept);
+        if ($next) {
+            $this->notifyDepartment(
+                $updated, $next,
+                'contracts.updated',
+                "عقد {$contract->contract_number} جاهز للمراجعة",
+                "أتمّ قسم " . $this->deptLabel($dept) . " بيانات العقد — يرجى استكمال دورك"
+            );
+        }
+
+        return $updated;
     }
 
     public function updateStatus(RecruitmentContract $contract, int $status, ?string $date, ?string $waMessage): void
     {
-        $adminId = Auth::guard('admin')->id();
+        $adminId     = Auth::guard('admin')->id();
         $this->repo->updateStatus($contract, $status, $date, $waMessage, $adminId);
 
-        $statusLabel = RecruitmentContract::statuses()[$status]['label'] ?? "مرحلة {$status}";
+        // Free worker when contract ends (returned or escaped)
+        if (in_array($status, [14, 15]) && $contract->worker_id) {
+            Worker::where('id', $contract->worker_id)->update(['status' => 'available']);
+        }
 
-        $this->notifyBranch(
+        // Log status change
+        ContractActivityLog::create([
+            'contract_id' => $contract->id,
+            'admin_id'    => $adminId,
+            'action'      => 'status_changed',
+            'section'     => $this->statusToDepartment($status),
+            'label'       => 'تحديث الحالة: ' . (RecruitmentContract::statuses()[$status]['label'] ?? "مرحلة {$status}"),
+        ]);
+
+        $statusLabel = RecruitmentContract::statuses()[$status]['label'] ?? "مرحلة {$status}";
+        $department  = $this->statusToDepartment($status);
+
+        $this->notifyDepartment(
             $contract,
+            $department,
             'contracts.status_updated',
             "تحديث حالة العقد {$contract->contract_number}",
             "الحالة الجديدة: {$statusLabel}"
         );
     }
 
+    /** Map status number to the responsible department */
+    private function statusToDepartment(int $status): string
+    {
+        return match (true) {
+            $status <= 4  => 'customer_service',
+            $status <= 8  => 'accounts',
+            default       => 'coordination',
+        };
+    }
+
+    /** Returns the next department in the workflow chain */
+    private function nextDepartment(?string $dept): ?string
+    {
+        return match ($dept) {
+            'customer_service' => 'accounts',
+            'accounts'         => 'coordination',
+            'accountant'       => 'coordination',
+            default            => null,
+        };
+    }
+
+    /** Human-readable dept label for notifications */
+    private function deptLabel(?string $dept): string
+    {
+        return match ($dept) {
+            'customer_service' => 'خدمة العملاء',
+            'accounts'         => 'الحسابات',
+            'accountant'       => 'المحاسبة',
+            'coordination'     => 'التنسيق',
+            default            => 'الإدارة',
+        };
+    }
+
     public function delete(int $id): void
     {
+        $contract = $this->repo->findById($id);
+        // Free the worker when contract is deleted
+        if ($contract->worker_id) {
+            Worker::where('id', $contract->worker_id)->update(['status' => 'available']);
+        }
         $this->repo->delete($id);
+    }
+
+    public function getTrashed(?int $branchId): \Illuminate\Pagination\LengthAwarePaginator
+    {
+        return RecruitmentContract::onlyTrashed()
+            ->with(['client', 'branch'])
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->latest('deleted_at')
+            ->paginate(20);
+    }
+
+    public function restore(int $id): void
+    {
+        RecruitmentContract::onlyTrashed()->findOrFail($id)->restore();
+    }
+
+    public function forceDelete(int $id): void
+    {
+        RecruitmentContract::onlyTrashed()->findOrFail($id)->forceDelete();
     }
 
     public function getStatsByBranch(): array
@@ -101,9 +241,44 @@ class RecruitmentContractService
     private function notifyBranch(RecruitmentContract $contract, string $type, string $title, string $body): void
     {
         $url     = route('admin.contracts.show', $contract->id);
-        $admins  = Admin::where('branch_id', $contract->branch_id)
-            ->orWhereNull('branch_id')   // super admins
+        $admins  = Admin::where(function ($q) use ($contract) {
+                $q->where('branch_id', $contract->branch_id)
+                  ->orWhereNull('branch_id');  // super admins
+            })
             ->where('active', true)
+            ->pluck('id');
+
+        $notifications = $admins->map(fn($adminId) => [
+            'admin_id'   => $adminId,
+            'type'       => $type,
+            'title'      => $title,
+            'body'       => $body,
+            'url'        => $url,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ])->toArray();
+
+        AdminNotification::insert($notifications);
+    }
+
+    /**
+     * Notify the responsible department members in the same branch,
+     * plus branch managers of that branch and super admins.
+     */
+    private function notifyDepartment(RecruitmentContract $contract, string $department, string $type, string $title, string $body): void
+    {
+        $url = route('admin.contracts.show', $contract->id);
+
+        // Department members in same branch + branch managers + super admins
+        $admins = Admin::where('active', true)
+            ->where(function ($q) use ($contract, $department) {
+                $q->where(function ($q2) use ($contract, $department) {
+                        // Same branch → department members or branch manager
+                        $q2->where('branch_id', $contract->branch_id)
+                           ->whereIn('department', [$department, 'branch_manager']);
+                    })
+                    ->orWhereNull('branch_id'); // super admins (no branch restriction)
+            })
             ->pluck('id');
 
         $notifications = $admins->map(fn($adminId) => [

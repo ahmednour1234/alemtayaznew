@@ -99,6 +99,11 @@ class PermissionSeeder extends Seeder
             ['name' => 'تعديل عاملة',          'slug' => 'workers.edit'],
             ['name' => 'حذف عاملة',            'slug' => 'workers.delete'],
             ['name' => 'تعيين عاملة لعميل',    'slug' => 'workers.assign'],
+            // Contracts
+            ['name' => 'عرض عقود الاستقدام',   'slug' => 'contracts.view'],
+            ['name' => 'إنشاء عقد استقدام',    'slug' => 'contracts.create'],
+            ['name' => 'تعديل عقد استقدام',    'slug' => 'contracts.edit'],
+            ['name' => 'حذف عقد استقدام',      'slug' => 'contracts.delete'],
         ];
 
         foreach ($permissions as $p) {

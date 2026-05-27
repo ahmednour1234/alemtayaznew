@@ -13,16 +13,21 @@ use App\Http\Controllers\Admin\IncomeTypeController;
 use App\Http\Controllers\Admin\NationalityController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\Reports\BranchStatementController;
+use App\Http\Controllers\Admin\Reports\ContractReportsController;
 use App\Http\Controllers\Admin\Reports\IncomeStatementController;
 use App\Http\Controllers\Admin\Settings\AdminController as SettingsAdminController;
 use App\Http\Controllers\Admin\Settings\PermissionController;
 use App\Http\Controllers\Admin\Settings\RoleController;
 use App\Http\Controllers\Admin\TransferController;
+use App\Http\Controllers\Admin\RecruitmentContractController;
 use App\Http\Controllers\Admin\WorkerController;
 use Illuminate\Support\Facades\Route;
 
 // ── Redirect root to admin dashboard ─────────────────────────────────────────
 Route::get('/', fn() => redirect()->route('admin.login'));
+
+// ── Public contract tracking ──────────────────────────────────────────────────
+Route::get('/track', [RecruitmentContractController::class, 'publicTrack'])->name('contract.track');
 
 // ── Admin Auth ────────────────────────────────────────────────────────────────
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -96,6 +101,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('branch-statement/export', [BranchStatementController::class, 'export'])->name('branch-statement.export');
             Route::get('income-statement',        [IncomeStatementController::class, 'index'])->name('income-statement');
             Route::get('income-statement/export', [IncomeStatementController::class, 'export'])->name('income-statement.export');
+            Route::get('contracts-received',      [ContractReportsController::class, 'received'])->name('contracts-received');
+            Route::get('contracts-delayed',       [ContractReportsController::class, 'delayed'])->name('contracts-delayed');
+            Route::get('contracts-stats',         [ContractReportsController::class, 'stats'])->name('contracts-stats');
         });
 
         // Settings
@@ -113,6 +121,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         // Clients
+        Route::post('clients/quick-store',  [ClientController::class, 'quickStore'])->name('clients.quick-store');
         Route::post('clients/{id}/restore', [ClientController::class, 'restore'])->name('clients.restore');
         Route::resource('clients', ClientController::class);
 
@@ -123,12 +132,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Workers
         Route::get('workers/bulk',              [WorkerController::class, 'bulk'])->name('workers.bulk');
         Route::post('workers/bulk-store',       [WorkerController::class, 'bulkStore'])->name('workers.bulk-store');
+        Route::post('workers/quick-store',      [WorkerController::class, 'quickStore'])->name('workers.quick-store');
         Route::post('workers/send-whatsapp',    [WorkerController::class, 'sendWhatsapp'])->name('workers.send-whatsapp');
         Route::post('workers/{id}/restore',     [WorkerController::class, 'restore'])->name('workers.restore');
         Route::get('workers/{id}/assign',       [WorkerController::class, 'assign'])->name('workers.assign');
         Route::post('workers/{id}/assign',      [WorkerController::class, 'doAssign'])->name('workers.do-assign');
         Route::post('workers/{id}/unassign',    [WorkerController::class, 'unassign'])->name('workers.unassign');
         Route::resource('workers', WorkerController::class);
+
+        // Recruitment Contracts
+        Route::post('contracts/{id}/update-status',  [RecruitmentContractController::class, 'updateStatus'])->name('contracts.update-status');
+        Route::get('contracts/trashed',              [RecruitmentContractController::class, 'trashed'])->name('contracts.trashed');
+        Route::post('contracts/{id}/restore',        [RecruitmentContractController::class, 'restore'])->name('contracts.restore');
+        Route::delete('contracts/{id}/force-delete', [RecruitmentContractController::class, 'forceDelete'])->name('contracts.force-delete');
+        Route::get('contracts/export',               [RecruitmentContractController::class, 'export'])->name('contracts.export');
+        Route::get('contracts/template',             [RecruitmentContractController::class, 'template'])->name('contracts.template');
+        Route::post('contracts/import',              [RecruitmentContractController::class, 'import'])->name('contracts.import');
+        Route::get('contracts/{id}/print',           [RecruitmentContractController::class, 'printView'])->name('contracts.print');
+        Route::resource('contracts', RecruitmentContractController::class);
 
         // Cities (distinct cities from branches)
         Route::get('cities', function () {
