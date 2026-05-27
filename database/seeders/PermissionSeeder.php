@@ -93,6 +93,12 @@ class PermissionSeeder extends Seeder
             ['name' => 'إنشاء وكيل',    'slug' => 'agents.create'],
             ['name' => 'تعديل وكيل',    'slug' => 'agents.edit'],
             ['name' => 'حذف وكيل',      'slug' => 'agents.delete'],
+            // Workers
+            ['name' => 'عرض العاملات',         'slug' => 'workers.view'],
+            ['name' => 'إضافة عاملة',          'slug' => 'workers.create'],
+            ['name' => 'تعديل عاملة',          'slug' => 'workers.edit'],
+            ['name' => 'حذف عاملة',            'slug' => 'workers.delete'],
+            ['name' => 'تعيين عاملة لعميل',    'slug' => 'workers.assign'],
         ];
 
         foreach ($permissions as $p) {

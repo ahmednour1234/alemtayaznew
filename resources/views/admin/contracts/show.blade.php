@@ -1,0 +1,221 @@
+@extends('admin.layouts.app')
+@section('title', 'عقد ' . $contract->contract_number)
+@section('content')
+<div class="w-full space-y-5">
+
+    {{-- Header --}}
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('admin.contracts.index') }}"
+               class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-blue-600 shadow-sm transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+            </a>
+            <div>
+                <h2 class="text-xl font-bold text-slate-800 font-mono">{{ $contract->contract_number }}</h2>
+                <p class="text-slate-400 text-xs mt-0.5">{{ $contract->request_date?->format('Y/m/d') }}</p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ route('admin.contracts.edit', $contract->id) }}"
+               class="flex items-center gap-2 text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl shadow transition">
+                تعديل
+            </a>
+        </div>
+    </div>
+
+    @if(session('success'))
+    <div class="bg-green-50 border border-green-200 text-green-700 text-sm rounded-xl px-4 py-3">{{ session('success') }}</div>
+    @endif
+
+    {{-- Department tabs (visual indicator) --}}
+    <div class="grid grid-cols-3 gap-3">
+        @foreach(\App\Models\RecruitmentContract::departments() as $key => $label)
+        <div class="bg-white rounded-xl border-2 {{ $contract->current_department === $key ? 'border-blue-500 bg-blue-50' : 'border-slate-100' }} p-3 text-center">
+            <p class="text-xs font-semibold {{ $contract->current_department === $key ? 'text-blue-600' : 'text-slate-400' }}">{{ $label }}</p>
+            @if($contract->current_department === $key)
+            <p class="text-xs text-blue-400 mt-0.5">العقد هنا الآن</p>
+            @endif
+        </div>
+        @endforeach
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+
+        {{-- Main info --}}
+        <div class="xl:col-span-2 space-y-5">
+
+            {{-- Contract data --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="text-sm font-bold text-slate-700 mb-4 pb-3 border-b border-slate-100">بيانات العقد</h3>
+                <dl class="grid grid-cols-2 gap-4 text-sm">
+                    <div><dt class="text-slate-400 text-xs mb-0.5">رقم العقد</dt><dd class="font-mono font-medium text-slate-800">{{ $contract->contract_number }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs mb-0.5">تاريخ الطلب</dt><dd>{{ $contract->request_date?->format('Y/m/d') }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs mb-0.5">العميل</dt><dd class="font-medium">{{ $contract->client->name ?? '—' }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs mb-0.5">الفرع</dt><dd>{{ $contract->branch->name ?? '—' }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs mb-0.5">أُنشئ بواسطة</dt><dd>{{ $contract->admin->name ?? '—' }}</dd></div>
+                </dl>
+            </div>
+
+            {{-- Visa --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="text-sm font-bold text-slate-700 mb-4 pb-3 border-b border-slate-100">بيانات التأشيرة</h3>
+                <dl class="grid grid-cols-2 gap-4 text-sm">
+                    <div><dt class="text-slate-400 text-xs mb-0.5">نوع التأشيرة</dt><dd>{{ $contract->visa_type_label }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs mb-0.5">رقم التأشيرة</dt><dd class="font-mono">{{ $contract->visa_number ?? '—' }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs mb-0.5">محطة الوصول</dt><dd>{{ $contract->arrivalAirport->name ?? '—' }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs mb-0.5">محطة القدوم</dt><dd>{{ $contract->departureAirport->name ?? '—' }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs mb-0.5">محطة الاستلام</dt><dd>{{ $contract->deliveryAirport->name ?? '—' }}</dd></div>
+                    @if($contract->visa_image)
+                    <div><dt class="text-slate-400 text-xs mb-0.5">صورة التأشيرة</dt>
+                        <dd><a href="{{ Storage::url($contract->visa_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض الملف</a></dd>
+                    </div>
+                    @endif
+                </dl>
+            </div>
+
+            {{-- Musaned --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="text-sm font-bold text-slate-700 mb-4 pb-3 border-b border-slate-100">بيانات مساند</h3>
+                <dl class="grid grid-cols-2 gap-4 text-sm">
+                    <div><dt class="text-slate-400 text-xs mb-0.5">رقم عقد مساند</dt><dd class="font-mono font-medium">{{ $contract->musaned_number ?? '—' }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs mb-0.5">تاريخ العقد</dt><dd>{{ $contract->musaned_date?->format('Y/m/d') ?? '—' }}</dd></div>
+                    @if($contract->musaned_file)
+                    <div><dt class="text-slate-400 text-xs mb-0.5">ملف العقد</dt>
+                        <dd><a href="{{ Storage::url($contract->musaned_file) }}" target="_blank" class="text-blue-600 hover:underline text-xs">تحميل الملف</a></dd>
+                    </div>
+                    @endif
+                    @if($contract->musaned_number)
+                    <div class="col-span-2">
+                        <dt class="text-slate-400 text-xs mb-1">رابط التتبع العام للعميل</dt>
+                        <dd class="flex items-center gap-2">
+                            <span class="font-mono text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded px-2 py-1">{{ url('/track?musaned_number=' . $contract->musaned_number) }}</span>
+                            <button onclick="navigator.clipboard.writeText('{{ url('/track?musaned_number=' . $contract->musaned_number) }}')" class="text-xs text-blue-500 hover:text-blue-700">نسخ</button>
+                        </dd>
+                    </div>
+                    @endif
+                </dl>
+            </div>
+
+            {{-- Coordination --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="text-sm font-bold text-slate-700 mb-4 pb-3 border-b border-slate-100">قسم التنسيق</h3>
+                <dl class="grid grid-cols-2 gap-4 text-sm mb-5">
+                    <div><dt class="text-slate-400 text-xs mb-0.5">العاملة</dt><dd class="font-medium">{{ $contract->worker->name ?? '—' }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs mb-0.5">رقم التوثيق الالكتروني</dt><dd class="font-mono">{{ $contract->e_doc_number ?? '—' }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs mb-0.5">الوكيل</dt><dd>{{ $contract->agent->name ?? '—' }}</dd></div>
+                </dl>
+
+                {{-- Status timeline --}}
+                <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">متابعة الحالات</h4>
+                <div class="space-y-0 border border-slate-200 rounded-xl overflow-hidden">
+                    @foreach($statuses as $num => $st)
+                    @php $h = $historyMap->get($num); $isDone = $h && $h->status_date; $isCurrent = $num === $contract->current_status; @endphp
+                    <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-50 {{ $isCurrent ? 'bg-blue-50' : ($isDone ? 'bg-green-50' : '') }}">
+                        <span class="w-7 h-7 flex-shrink-0 flex items-center justify-center rounded-full text-xs font-bold
+                            {{ $isCurrent ? 'bg-blue-500 text-white' : ($isDone ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-400') }}">
+                            {{ $isDone ? '✓' : $num }}
+                        </span>
+                        <div class="flex-1 text-sm {{ $isCurrent ? 'text-blue-700 font-semibold' : ($isDone ? 'text-green-700' : 'text-slate-500') }}">
+                            {{ $st['label'] }}
+                        </div>
+                        <div class="text-xs text-slate-400">
+                            {{ $h?->status_date?->format('Y/m/d') ?? ($st['days'] ? $st['days'] . ' أيام' : '—') }}
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+
+                {{-- Quick status update form --}}
+                <form action="{{ route('admin.contracts.update-status', $contract->id) }}" method="POST" class="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    @csrf
+                    <p class="text-sm font-semibold text-slate-600 mb-3">تحديث الحالة</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                            <select name="status" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                @foreach($statuses as $num => $st)
+                                <option value="{{ $num }}" {{ $num === $contract->current_status ? 'selected' : '' }}>{{ $st['label'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <input type="date" name="status_date" value="{{ now()->format('Y-m-d') }}"
+                                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg">تحديث</button>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <input type="text" name="whatsapp_message" placeholder="رسالة واتساب للعميل (اختياري)..."
+                               class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {{-- Sidebar --}}
+        <div class="space-y-5">
+
+            {{-- Current status card --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+                <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">الحالة الحالية</h4>
+                @php $statusColors = [13 => 'bg-green-100 text-green-700', 9 => 'bg-red-100 text-red-700', 15 => 'bg-red-100 text-red-700']; $statusColor = $statusColors[$contract->current_status] ?? 'bg-blue-100 text-blue-700'; @endphp
+                <span class="inline-block px-3 py-1.5 rounded-full text-sm font-medium {{ $statusColor }}">{{ $contract->status_label }}</span>
+                <p class="text-xs text-slate-400 mt-2">المرحلة {{ $contract->current_status }} من 15</p>
+            </div>
+
+            {{-- Accounts card --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+                <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">قسم الحسابات</h4>
+                <dl class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <dt class="text-slate-400">حالة الدفع</dt>
+                        <dd>
+                            @php $payColors = ['full' => 'bg-green-100 text-green-700', 'partial' => 'bg-yellow-100 text-yellow-700', 'pending' => 'bg-slate-100 text-slate-500']; @endphp
+                            <span class="px-2 py-0.5 rounded-full text-xs {{ $payColors[$contract->payment_status] ?? '' }}">{{ $contract->payment_label }}</span>
+                        </dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-slate-400">إجمالي التكلفة</dt>
+                        <dd class="font-semibold">{{ $contract->total_cost ? number_format($contract->total_cost, 2) . ' ر.س' : '—' }}</dd>
+                    </div>
+                </dl>
+            </div>
+
+            {{-- Dates card --}}
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+                <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">التواريخ</h4>
+                <dl class="space-y-2 text-sm">
+                    <div><dt class="text-slate-400 text-xs">تاريخ الوصول</dt><dd class="font-medium">{{ $contract->arrival_date?->format('Y/m/d') ?? '—' }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs">نهاية التجربة</dt><dd class="font-medium">{{ $contract->trial_end_date?->format('Y/m/d') ?? '—' }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs">نهاية العقد</dt><dd class="font-medium">{{ $contract->contract_end_date?->format('Y/m/d') ?? '—' }}</dd></div>
+                </dl>
+            </div>
+
+            {{-- Notes --}}
+            @if($contract->notes)
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+                <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">ملاحظات</h4>
+                <p class="text-sm text-slate-600 leading-relaxed">{{ $contract->notes }}</p>
+            </div>
+            @endif
+
+            {{-- WhatsApp quick send --}}
+            @if($contract->client?->phone)
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+                <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">إرسال واتساب للعميل</h4>
+                <div x-data="{ msg: '' }">
+                    <textarea x-model="msg" rows="3" placeholder="اكتب رسالتك هنا..."
+                              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-400"></textarea>
+                    <button @click="if(msg) window.open('https://wa.me/{{ preg_replace('/[^0-9]/', '', $contract->client->phone) }}?text=' + encodeURIComponent(msg), '_blank')"
+                            class="mt-2 w-full bg-green-500 hover:bg-green-600 text-white text-sm py-2 rounded-lg flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.025.507 3.934 1.395 5.61L0 24l6.582-1.366A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.003-1.368l-.36-.213-3.905.81.836-3.807-.234-.371A9.818 9.818 0 0112 2.182c5.424 0 9.818 4.394 9.818 9.818S17.424 21.818 12 21.818z"/></svg>
+                        إرسال واتساب
+                    </button>
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+@endsection

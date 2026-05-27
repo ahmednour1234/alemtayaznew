@@ -11,7 +11,24 @@ use Illuminate\Notifications\Notifiable;
 
 class Admin extends Authenticatable
 {
-    protected $fillable = ['name', 'email', 'password', 'active', 'branch_id'];
+    protected $fillable = ['name', 'email', 'password', 'active', 'branch_id', 'department'];
+
+    public static function departments(): array
+    {
+        return [
+            'customer_service' => 'قسم خدمة عملاء',
+            'coordination'     => 'قسم تنسيق',
+            'accounts'         => 'قسم حسابات',
+            'accountant'       => 'محاسب عام',
+            'branch_manager'   => 'مدير فرع',
+            'chairman'         => 'رئيس مجلس إدارة',
+        ];
+    }
+
+    public function getDepartmentLabelAttribute(): string
+    {
+        return self::departments()[$this->department] ?? $this->department ?? '—';
+    }
     protected $hidden   = ['password', 'remember_token'];
 
     use HasFactory, Notifiable, SoftDeletes;

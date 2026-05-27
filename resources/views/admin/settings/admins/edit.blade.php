@@ -9,40 +9,63 @@
         <h2 class="text-xl font-bold text-slate-800">تعديل: {{ $admin->name }}</h2>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-6">
-        <form action="{{ route('admin.settings.admins.update', $admin->id) }}" method="POST" class="space-y-5">
+        <form action="{{ route('admin.settings.admins.update', $admin->id) }}" method="POST" class="space-y-6">
             @csrf @method('PUT')
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">الاسم <span class="text-red-500">*</span></label>
-                <input type="text" name="name" value="{{ old('name', $admin->name) }}" required
-                       class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            {{-- Row 1: Name + Email --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">الاسم <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" value="{{ old('name', $admin->name) }}" required
+                           class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">البريد الإلكتروني <span class="text-red-500">*</span></label>
+                    <input type="email" name="email" value="{{ old('email', $admin->email) }}" required
+                           class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">البريد الإلكتروني <span class="text-red-500">*</span></label>
-                <input type="email" name="email" value="{{ old('email', $admin->email) }}" required
-                       class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            {{-- Row 2: Password + Confirm Password --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">كلمة المرور الجديدة <span class="text-slate-400 text-xs">(اتركها فارغة إذا لم تريد تغييرها)</span></label>
+                    <input type="password" name="password"
+                           class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">تأكيد كلمة المرور</label>
+                    <input type="password" name="password_confirmation"
+                           class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">كلمة المرور الجديدة <span class="text-slate-400 text-xs">(اتركها فارغة إذا لم تريد تغييرها)</span></label>
-                <input type="password" name="password"
-                       class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            {{-- Row 3: Branch + Department --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">الفرع المرتبط <span class="text-slate-400 text-xs">(فارغ = مدير عام)</span></label>
+                    <select name="branch_id" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        <option value="">— مدير عام (كل الفروع) —</option>
+                        @foreach($branches as $branch)
+                            <option value="{{ $branch->id }}" {{ old('branch_id', $admin->branch_id) == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">القسم / المنصب</label>
+                    <select name="department" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        <option value="">— اختر القسم —</option>
+                        @foreach(\App\Models\Admin::departments() as $key => $label)
+                            <option value="{{ $key }}" {{ old('department', $admin->department) === $key ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">تأكيد كلمة المرور</label>
-                <input type="password" name="password_confirmation"
-                       class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">الفرع المرتبط <span class="text-slate-400 text-xs">(فارغ = مدير عام)</span></label>
-                <select name="branch_id" class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    <option value="">— مدير عام (كل الفروع) —</option>
-                    @foreach($branches as $branch)
-                        <option value="{{ $branch->id }}" {{ old('branch_id', $admin->branch_id) == $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
-                    @endforeach
-                </select>
-            </div>
+
+            {{-- Roles --}}
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-2">الأدوار</label>
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                     @foreach($roles as $role)
                     <label class="flex items-center gap-2 text-sm">
                         <input type="checkbox" name="roles[]" value="{{ $role->id }}"
@@ -52,13 +75,17 @@
                     @endforeach
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <input type="checkbox" name="active" id="active" value="1" {{ old('active', $admin->active) ? 'checked' : '' }} class="rounded">
-                <label for="active" class="text-sm font-medium text-slate-700">مدير نشط</label>
-            </div>
-            <div class="flex gap-3 pt-2">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2.5 rounded-lg">تحديث</button>
-                <a href="{{ route('admin.settings.admins.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-6 py-2.5 rounded-lg">إلغاء</a>
+
+            {{-- Active + Submit --}}
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" name="active" id="active" value="1" {{ old('active', $admin->active) ? 'checked' : '' }} class="rounded">
+                    <label for="active" class="text-sm font-medium text-slate-700">مدير نشط</label>
+                </div>
+                <div class="flex gap-3">
+                    <a href="{{ route('admin.settings.admins.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-6 py-2.5 rounded-lg">إلغاء</a>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2.5 rounded-lg">تحديث</button>
+                </div>
             </div>
         </form>
     </div>

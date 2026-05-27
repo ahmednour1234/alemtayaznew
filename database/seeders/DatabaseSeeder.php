@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             AdminSeeder::class,
             BranchSeeder::class,
-            NationalitySeeder::class,
+            NationalityAirportSeeder::class,
         ]);
     }
 }

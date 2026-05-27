@@ -6,6 +6,7 @@
     $openMoney      = request()->routeIs(['admin.incomes.*', 'admin.expenses.*', 'admin.transfers.*']);
     $openReports    = request()->routeIs(['admin.reports.*']);
     $openPeople     = request()->routeIs(['admin.clients.*', 'admin.agents.*']);
+    $openWorkers    = request()->routeIs(['admin.workers.*']);
 @endphp
 
 <div x-data="{
@@ -14,7 +15,8 @@
         a: {{ $openAccounting ? 'true' : 'false' }},
         m: {{ $openMoney      ? 'true' : 'false' }},
         r: {{ $openReports    ? 'true' : 'false' }},
-        p: {{ $openPeople     ? 'true' : 'false' }}
+        p: {{ $openPeople     ? 'true' : 'false' }},
+        w: {{ $openWorkers    ? 'true' : 'false' }}
      }"
      style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
 
@@ -297,6 +299,58 @@
                      'd'=>'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75'],
                 ] @endphp
                 @foreach($peopleItems as $it)
+                    @php $on = request()->routeIs($it['p']); @endphp
+                    <a href="{{ route($it['r']) }}"
+                       style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
+                              border-radius:7px;text-decoration:none;font-size:12.5px;
+                              {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                       onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
+                       onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
+                       {{ $on ? 'data-on=1' : '' }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                            <path d="{{ $it['d'] }}"/>
+                        </svg>
+                        {{ $it['l'] }}
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Section label: العاملات --}}
+        <div style="padding:10px 10px 4px;margin-top:4px;">
+            <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
+                      text-transform:uppercase;color:#334155;margin:0;">العاملات (CVs)</p>
+        </div>
+
+        {{-- ── GROUP: العاملات ── --}}
+        <div style="margin-bottom:1px;">
+            <button @click="w=!w"
+                    style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
+                           border-radius:8px;border:none;cursor:pointer;text-align:right;
+                           font-family:Cairo,sans-serif;font-size:13px;font-weight:600;
+                           transition:background .15s,color .15s;"
+                    :style="{ color: w ? '#e2e8f0' : '#64748b', background: w ? 'rgba(255,255,255,.05)' : 'transparent' }"
+                    @mouseenter="$el.style.background='rgba(255,255,255,.06)';$el.style.color='#e2e8f0';"
+                    @mouseleave="$el.style.background=w?'rgba(255,255,255,.05)':'transparent';$el.style.color=w?'#e2e8f0':'#64748b';">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                    <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span style="flex:1;">العاملات</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                     style="flex-shrink:0;transition:transform .25s;" :style="{ transform: w ? 'rotate(180deg)' : 'none' }">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div x-show="w" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
+                @php $workerItems = [
+                    ['r'=>'admin.workers.index', 'p'=>'admin.workers.index', 'l'=>'قائمة العاملات',
+                     'd'=>'M4 6h16M4 10h16M4 14h8'],
+                    ['r'=>'admin.workers.create','p'=>'admin.workers.create','l'=>'إضافة عاملة',
+                     'd'=>'M12 5v14M5 12h14'],
+                    ['r'=>'admin.workers.bulk',  'p'=>'admin.workers.bulk',  'l'=>'رفع CVs متعددة',
+                     'd'=>'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12'],
+                ] @endphp
+                @foreach($workerItems as $it)
                     @php $on = request()->routeIs($it['p']); @endphp
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;

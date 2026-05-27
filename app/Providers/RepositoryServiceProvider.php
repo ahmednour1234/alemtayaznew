@@ -23,7 +23,9 @@ use App\Repositories\IncomeRepository;
 use App\Repositories\IncomeTypeRepository;
 use App\Repositories\PermissionRepository;
 use App\Repositories\RoleRepository;
+use App\Repositories\Contracts\WorkerRepositoryInterface;
 use App\Repositories\TransferRepository;
+use App\Repositories\WorkerRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider
@@ -41,5 +43,6 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(TransferRepositoryInterface::class, TransferRepository::class);
         $this->app->bind(RoleRepositoryInterface::class, RoleRepository::class);
         $this->app->bind(PermissionRepositoryInterface::class, PermissionRepository::class);
+        $this->app->bind(WorkerRepositoryInterface::class, WorkerRepository::class);
     }
 }

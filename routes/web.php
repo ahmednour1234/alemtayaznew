@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\Settings\AdminController as SettingsAdminControll
 use App\Http\Controllers\Admin\Settings\PermissionController;
 use App\Http\Controllers\Admin\Settings\RoleController;
 use App\Http\Controllers\Admin\TransferController;
+use App\Http\Controllers\Admin\WorkerController;
 use Illuminate\Support\Facades\Route;
 
 // ── Redirect root to admin dashboard ─────────────────────────────────────────
@@ -118,6 +119,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Agents
         Route::post('agents/{id}/restore', [AgentController::class, 'restore'])->name('agents.restore');
         Route::resource('agents', AgentController::class);
+
+        // Workers
+        Route::get('workers/bulk',              [WorkerController::class, 'bulk'])->name('workers.bulk');
+        Route::post('workers/bulk-store',       [WorkerController::class, 'bulkStore'])->name('workers.bulk-store');
+        Route::post('workers/send-whatsapp',    [WorkerController::class, 'sendWhatsapp'])->name('workers.send-whatsapp');
+        Route::post('workers/{id}/restore',     [WorkerController::class, 'restore'])->name('workers.restore');
+        Route::get('workers/{id}/assign',       [WorkerController::class, 'assign'])->name('workers.assign');
+        Route::post('workers/{id}/assign',      [WorkerController::class, 'doAssign'])->name('workers.do-assign');
+        Route::post('workers/{id}/unassign',    [WorkerController::class, 'unassign'])->name('workers.unassign');
+        Route::resource('workers', WorkerController::class);
 
         // Cities (distinct cities from branches)
         Route::get('cities', function () {

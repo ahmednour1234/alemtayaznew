@@ -66,8 +66,8 @@
                             <input type="password" name="password_confirmation" required placeholder="••••••••"
                                    class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition">
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-slate-600 mb-1.5">الفرع المرتبط <span class="text-slate-400 text-xs font-normal">(اتركه فارغاً للمدير العام)</span></label>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-600 mb-1.5">الفرع المرتبط <span class="text-slate-400 text-xs font-normal">(فارغ = مدير عام)</span></label>
                             <select name="branch_id" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition @error('branch_id') border-red-400 bg-red-50 @enderror">
                                 <option value="">— مدير عام (كل الفروع) —</option>
                                 @foreach($branches as $branch)
@@ -75,6 +75,16 @@
                                 @endforeach
                             </select>
                             @error('branch_id')<p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-600 mb-1.5">القسم / المنصب</label>
+                            <select name="department" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition @error('department') border-red-400 bg-red-50 @enderror">
+                                <option value="">— اختر القسم —</option>
+                                @foreach(\App\Models\Admin::departments() as $key => $label)
+                                    <option value="{{ $key }}" {{ old('department') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            @error('department')<p class="text-red-500 text-xs mt-1.5">{{ $message }}</p>@enderror
                         </div>
                     </div>
                 </div>

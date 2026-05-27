@@ -162,7 +162,21 @@ class AutoPermission
         'admin.agents.update'  => 'agents.edit',
         'admin.agents.destroy' => 'agents.delete',
         'admin.agents.restore' => 'agents.delete',
-    ];
+        // ── Workers ───────────────────────────────────────────────────────────
+        'admin.workers.index'         => 'workers.view',
+        'admin.workers.show'          => 'workers.view',
+        'admin.workers.create'        => 'workers.create',
+        'admin.workers.store'         => 'workers.create',
+        'admin.workers.bulk'          => 'workers.create',
+        'admin.workers.bulk-store'    => 'workers.create',
+        'admin.workers.edit'          => 'workers.edit',
+        'admin.workers.update'        => 'workers.edit',
+        'admin.workers.destroy'       => 'workers.delete',
+        'admin.workers.restore'       => 'workers.delete',
+        'admin.workers.assign'        => 'workers.assign',
+        'admin.workers.do-assign'     => 'workers.assign',
+        'admin.workers.unassign'      => 'workers.assign',
+        'admin.workers.send-whatsapp' => 'workers.view',    ];
 
     public function handle(Request $request, Closure $next): Response
     {
