@@ -96,8 +96,9 @@ class RecruitmentContractService
 
         $updated = $this->repo->update($contract, $data);
 
-        // Log activity
-        $logDept = Auth::guard('admin')->user()->department ?? null;
+        // Log activity — super admins are not bound to a department, so log null (shows as "الإدارة")
+        $editor  = Auth::guard('admin')->user();
+        $logDept = $editor->isSuperAdmin() ? null : ($editor->department ?? null);
         ContractActivityLog::create([
             'contract_id' => $contract->id,
             'admin_id'    => Auth::guard('admin')->id(),

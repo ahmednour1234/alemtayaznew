@@ -12,12 +12,23 @@ class NationalityAirportSeeder extends Seeder
     {
         // ── Nationalities ─────────────────────────────────────────────────────
         $nationalities = [
-            ['name' => 'بنغلاديش',   'code' => 'BD'],
-            ['name' => 'بوروندي',    'code' => 'BI'],
-            ['name' => 'كينيا',      'code' => 'KE'],
-            ['name' => 'فليبين',     'code' => 'PH'],
-            ['name' => 'سريلانكا',   'code' => 'LK'],
-            ['name' => 'إثيوبيا',    'code' => 'ET'],
+            ['name' => 'إندونيسية',    'code' => 'ID'],
+            ['name' => 'إثيوبية',      'code' => 'ET'],
+            ['name' => 'أثيوبية',      'code' => 'ET2'],
+            ['name' => 'بنجلاديشية',   'code' => 'BD'],
+            ['name' => 'فلبينية',      'code' => 'PH'],
+            ['name' => 'سريلانكية',    'code' => 'LK'],
+            ['name' => 'كينية',        'code' => 'KE'],
+            ['name' => 'أوغندية',      'code' => 'UG'],
+            ['name' => 'بوروندية',     'code' => 'BI'],
+            ['name' => 'غانية',        'code' => 'GH'],
+            ['name' => 'تنزانية',      'code' => 'TZ'],
+            ['name' => 'نيجيرية',      'code' => 'NG'],
+            ['name' => 'سنغالية',      'code' => 'SN'],
+            ['name' => 'كاميرونية',    'code' => 'CM'],
+            ['name' => 'هندية',        'code' => 'IN'],
+            ['name' => 'باكستانية',    'code' => 'PK'],
+            ['name' => 'نيبالية',      'code' => 'NP'],
         ];
 
         foreach ($nationalities as $nat) {

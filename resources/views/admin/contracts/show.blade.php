@@ -1,6 +1,13 @@
 @extends('admin.layouts.app')
 @section('title', 'عقد ' . $contract->contract_number)
 @section('content')
+@php
+    $_su      = Auth::guard('admin')->user();
+    $_sdept   = $_su->department;
+    $canEdit  = $_su->isSuperAdmin() || $_su->hasPermission('contracts.edit');
+    $canDelete= ($_su->isSuperAdmin() || $_su->hasPermission('contracts.delete'))
+                && ! in_array($_sdept, ['accounts', 'accountant', 'coordination']);
+@endphp
 <div class="w-full space-y-5">
 
     {{-- Header --}}
@@ -23,10 +30,23 @@
                 </svg>
                 طباعة
             </a>
+            @if($canEdit)
             <a href="{{ route('admin.contracts.edit', $contract->id) }}"
                class="flex items-center gap-2 text-sm bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl shadow transition">
                 تعديل
             </a>
+            @endif
+            @if($canDelete)
+            <form action="{{ route('admin.contracts.destroy', $contract->id) }}" method="POST"
+                  onsubmit="return confirm('هل أنت متأكد من حذف العقد {{ $contract->contract_number }}؟')">
+                @csrf @method('DELETE')
+                <button type="submit"
+                        class="flex items-center gap-2 text-sm bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl shadow transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    حذف
+                </button>
+            </form>
+            @endif
         </div>
     </div>
 

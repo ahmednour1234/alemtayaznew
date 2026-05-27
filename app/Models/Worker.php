@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Worker extends Model
@@ -125,5 +126,10 @@ class Worker extends Model
     public function admin(): BelongsTo
     {
         return $this->belongsTo(Admin::class);
+    }
+
+    public function latestContract(): HasOne
+    {
+        return $this->hasOne(\App\Models\RecruitmentContract::class)->latest();
     }
 }

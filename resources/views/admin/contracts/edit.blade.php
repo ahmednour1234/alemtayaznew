@@ -6,15 +6,26 @@
     $myDept   = $me->department ?? null;
     $isBoss   = $me->isSuperAdmin() || in_array($myDept, ['branch_manager', 'chairman']);
 
-    // What each dept can EDIT (only their own section)
-    $editT1   = $isBoss || !$myDept || $myDept === 'customer_service';
-    $editT2   = $isBoss || !$myDept || in_array($myDept, ['accounts', 'accountant']);
-    $editT3   = $isBoss || !$myDept || $myDept === 'coordination';
+    // What each dept can EDIT (only their own section).
+    // Accounts & coordination departments must NEVER edit CS data — even if super-admin role,
+    // the department affiliation decides what section belongs to you.
+    $accsCoordDepts = ['accounts', 'accountant', 'coordination'];
+    $editT1   = !in_array($myDept, $accsCoordDepts);          // CS: everyone except accounts/coordination
+    $editT2   = $isBoss || in_array($myDept, ['accounts', 'accountant']);
+    $editT3   = $isBoss || $myDept === 'coordination';
 
-    // What tabs are VISIBLE: your tab + all preceding tabs (read-only)
-    $showT1   = true; // everyone sees CS section (read-only if not CS)
-    $showT2   = $isBoss || !$myDept || in_array($myDept, ['accounts', 'accountant', 'coordination']);
-    $showT3   = $isBoss || !$myDept || $myDept === 'coordination';
+    // Tabs visible:
+    //   - Tab 1: always (everyone sees CS data, read-only if not CS)
+    //   - Tab 2: only once contract has passed to accounts/coordination stage
+    //            AND the user is accounts, coordination, boss, or no dept
+    //   - Tab 3: only once contract has passed to coordination stage
+    //            AND the user is coordination or boss
+    $contractDept = $contract->current_department;
+    $showT1   = true;
+    $showT2   = in_array($contractDept, ['accounts', 'coordination'])
+                && ($isBoss || in_array($myDept, ['accounts', 'accountant', 'coordination', null]));
+    $showT3   = $contractDept === 'coordination'
+                && ($isBoss || in_array($myDept, ['coordination', null]));
 
     $defaultTab = match (true) {
         in_array($myDept, ['accounts', 'accountant']) && !$isBoss => 'acc',
@@ -86,6 +97,16 @@
 
     <form action="{{ route('admin.contracts.update', $contract->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf @method('PUT')
+        {{-- Hidden: explicit department forwarding (set by submit buttons below) --}}
+        <input type="hidden" name="advance_to" id="__advance_to" value="">
+@php
+    // Who can forward to next department?
+    $isCSUser          = !$isBoss && $myDept === 'customer_service';
+    $isAccountsUser    = !$isBoss && in_array($myDept, ['accounts', 'accountant']);
+    $isCoordUser       = !$isBoss && $myDept === 'coordination';
+    $canForwardToAccs  = $isCSUser       && $contractDept === 'customer_service';
+    $canForwardToCoord = $isAccountsUser && $contractDept === 'accounts';
+@endphp
 
         {{-- ╔═══ TAB 1 — خدمة عملاء ══════════════════════════════════════════╗ --}}
         <div x-show="tab==='cs'" class="space-y-6">
@@ -115,11 +136,20 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">الفرع <span class="text-red-500">*</span></label>
+                    @if($me->branch_id && !$me->isSuperAdmin())
+                    {{-- Branch-restricted user: cannot change branch --}}
+                    <div class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-100 text-slate-600 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        {{ $contract->branch?->name ?? '—' }}
+                    </div>
+                    <input type="hidden" name="branch_id" value="{{ $contract->branch_id }}">
+                    @else
                     <select name="branch_id" required class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
                         @foreach($branches as $br)
                         <option value="{{ $br->id }}" {{ old('branch_id', $contract->branch_id) == $br->id ? 'selected' : '' }}>{{ $br->name }}</option>
                         @endforeach
                     </select>
+                    @endif
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">تاريخ الطلب <span class="text-red-500">*</span></label>
@@ -254,23 +284,47 @@
                 @endif
             </div>
         </div>
+        {{-- Hidden required fields so validation passes when CS is read-only --}}
+        <input type="hidden" name="branch_id" value="{{ $contract->branch_id }}">
+        <input type="hidden" name="request_date" value="{{ $contract->request_date?->format('Y-m-d') }}">
         @endif
-        {{-- Tab 1 Next or Submit (CS-only) --}}
-        <div class="flex justify-end gap-3">
-            @if($showT2)
-            <button type="button" @click="tab='acc'"
-                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-8 py-2.5 rounded-xl shadow flex items-center gap-2">
-                التالي — حسابات
-                <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-            </button>
-            @else
-            <a href="{{ route('admin.contracts.show', $contract->id) }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-6 py-2.5 rounded-xl">إلغاء</a>
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">تحديث العقد</button>
-            @endif
+        {{-- Tab 1 Submit area --}}
+        <div class="flex justify-between items-center gap-3">
+            <div>
+                @if($showT2)
+                <button type="button" @click="tab='acc'"
+                        class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2.5 rounded-xl flex items-center gap-2">
+                    <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                    عرض تبويب الحسابات
+                </button>
+                @endif
+            </div>
+            <div class="flex gap-3">
+                <a href="{{ route('admin.contracts.show', $contract->id) }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-5 py-2.5 rounded-xl">إلغاء</a>
+                @if($editT1)
+                    @if($canForwardToAccs)
+                    {{-- CS dept: two options --}}
+                    <button type="submit" onclick="document.getElementById('__advance_to').value=''"
+                            class="bg-slate-500 hover:bg-slate-600 text-white text-sm px-5 py-2.5 rounded-xl shadow">
+                        حفظ فقط
+                    </button>
+                    <button type="submit" onclick="document.getElementById('__advance_to').value='accounts'"
+                            class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2.5 rounded-xl shadow flex items-center gap-2">
+                        حفظ وإرسال للحسابات
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                    @else
+                    {{-- Boss or other: generic save --}}
+                    <button type="submit" onclick="document.getElementById('__advance_to').value=''"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">تحديث العقد</button>
+                    @endif
+                @endif
+            </div>
         </div>
         </div>{{-- /tab cs --}}
 
         {{-- ╔═══ TAB 2 — حسابات ══════════════════════════════════════════════╗ --}}
+        @if($showT2)
         <div x-show="tab==='acc'" class="space-y-6">
 
         @if($editT2)
@@ -316,8 +370,8 @@
             </div>
         </div>
         @endif
-        {{-- Tab 2 Prev/Next or Submit (accounts-only) --}}
-        <div class="flex justify-between">
+        {{-- Tab 2 Submit area --}}
+        <div class="flex justify-between items-center">
             <div>
                 @if($showT1)
                 <button type="button" @click="tab='cs'"
@@ -329,20 +383,35 @@
             </div>
             <div class="flex gap-3">
                 @if($showT3)
+                {{-- Already at coordination stage: navigation to tab 3 --}}
                 <button type="button" @click="tab='coord'"
-                        class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-8 py-2.5 rounded-xl shadow flex items-center gap-2">
-                    التالي — تنسيق
+                        class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2.5 rounded-xl flex items-center gap-2">
                     <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                    عرض تبويب التنسيق
                 </button>
-                @else
-                <a href="{{ route('admin.contracts.show', $contract->id) }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-6 py-2.5 rounded-xl">إلغاء</a>
-                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">تحديث العقد</button>
+                @endif
+                <a href="{{ route('admin.contracts.show', $contract->id) }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-5 py-2.5 rounded-xl">إلغاء</a>
+                @if($editT2)
+                    @if($canForwardToCoord)
+                    {{-- Accounts dept: save always advances to coordination --}}
+                    <button type="submit" onclick="document.getElementById('__advance_to').value='coordination'"
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-6 py-2.5 rounded-xl shadow flex items-center gap-2">
+                        حفظ وإرسال للتنسيق
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                    @else
+                    {{-- Boss or other: generic save --}}
+                    <button type="submit" onclick="document.getElementById('__advance_to').value=''"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">تحديث العقد</button>
+                    @endif
                 @endif
             </div>
         </div>
         </div>{{-- /tab acc --}}
+        @endif{{-- /showT2 --}}
 
         {{-- ╔═══ TAB 3 — تنسيق ═══════════════════════════════════════════════╗ --}}
+        @if($showT3)
         <div x-show="tab==='coord'" class="space-y-6">
 
         {{-- التواريخ (auto-calculate) --}}
@@ -513,6 +582,7 @@
             </div>
         </div>
         </div>{{-- /tab coord --}}
+        @endif{{-- /showT3 --}}
 
     </form>
 

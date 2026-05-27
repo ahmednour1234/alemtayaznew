@@ -47,6 +47,9 @@ class UpdateRecruitmentContractRequest extends FormRequest
             'update_status'        => ['nullable', 'integer', 'min:1', 'max:15'],
             'status_date'          => ['nullable', 'date'],
             'whatsapp_message'     => ['nullable', 'string', 'max:1000'],
+
+            // Explicit department forwarding (set by "حفظ وإرسال" buttons)
+            'advance_to'           => ['nullable', 'in:customer_service,accounts,coordination'],
         ];
     }
 }

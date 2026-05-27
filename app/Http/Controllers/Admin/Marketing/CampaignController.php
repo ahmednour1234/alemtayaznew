@@ -1,0 +1,207 @@
+<?php
+
+namespace App\Http\Controllers\Admin\Marketing;
+
+use App\Http\Controllers\Controller;
+use App\Models\Campaign;
+use App\Models\Branch;
+use App\Models\Admin;
+use App\Models\Nationality;
+use App\Models\Lead;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+
+class CampaignController extends Controller
+{
+    public function index(Request $request)
+    {
+        $me = Auth::guard('admin')->user();
+
+        $query = Campaign::withCount([
+            'leads',
+            'leads as converted_count' => fn($q) => $q->where('status', 'converted'),
+        ])->with('branch', 'admin')->latest();
+
+        if ($me->isBranchAdmin()) {
+            $query->where('branch_id', $me->branch_id);
+        }
+
+        if ($search = $request->input('search')) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $campaigns = $query->paginate(20)->withQueryString();
+
+        return view('admin.marketing.campaigns.index', compact('campaigns'));
+    }
+
+    public function create()
+    {
+        $branches = Branch::where('active', true)->get();
+        return view('admin.marketing.campaigns.create', compact('branches'));
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'sheet_url'   => 'nullable|url',
+            'budget'      => 'nullable|numeric|min:0',
+            'start_date'  => 'nullable|date',
+            'end_date'    => 'nullable|date|after_or_equal:start_date',
+            'branch_id'   => 'nullable|exists:branches,id',
+        ]);
+
+        $me = Auth::guard('admin')->user();
+        if ($me->isBranchAdmin()) {
+            $data['branch_id'] = $me->branch_id;
+        }
+
+        $data['admin_id'] = $me->id;
+
+        $campaign = Campaign::create($data);
+
+        return redirect()->route('admin.marketing.campaigns.show', $campaign)
+            ->with('success', 'تم إنشاء الحملة بنجاح');
+    }
+
+    public function show(Campaign $campaign)
+    {
+        $campaign->load(['branch', 'admin', 'leads.nationality', 'leads.assignedAdmin', 'leads.latestCallLog']);
+
+        $stats = [
+            'total'       => $campaign->leads()->count(),
+            'new'         => $campaign->leads()->where('status', 'new')->count(),
+            'in_progress' => $campaign->leads()->where('status', 'in_progress')->count(),
+            'converted'   => $campaign->leads()->where('status', 'converted')->count(),
+            'archived'    => $campaign->leads()->where('status', 'archived')->count(),
+        ];
+
+        $admins      = Admin::where('active', true)->orderBy('name')->get();
+        $nationalities = Nationality::where('active', true)->orderBy('name')->get();
+
+        return view('admin.marketing.campaigns.show', compact('campaign', 'stats', 'admins', 'nationalities'));
+    }
+
+    public function edit(Campaign $campaign)
+    {
+        $branches = Branch::where('active', true)->get();
+        return view('admin.marketing.campaigns.edit', compact('campaign', 'branches'));
+    }
+
+    public function update(Request $request, Campaign $campaign)
+    {
+        $data = $request->validate([
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'sheet_url'   => 'nullable|url',
+            'budget'      => 'nullable|numeric|min:0',
+            'start_date'  => 'nullable|date',
+            'end_date'    => 'nullable|date|after_or_equal:start_date',
+            'branch_id'   => 'nullable|exists:branches,id',
+            'active'      => 'boolean',
+        ]);
+
+        $campaign->update($data);
+
+        return back()->with('success', 'تم تحديث الحملة');
+    }
+
+    /**
+     * Import leads from Google Sheets public URL.
+     * Sheet columns: A=الاسم, B=الجوال, C=المدينة, D=الجنسية المطلوبة
+     */
+    public function importSheet(Request $request, Campaign $campaign)
+    {
+        $request->validate(['sheet_url' => 'required|url']);
+
+        $url = $request->input('sheet_url');
+        $campaign->update(['sheet_url' => $url]);
+
+        $csvUrl = $this->sheetToCsvUrl($url);
+        if (! $csvUrl) {
+            return back()->withErrors(['sheet_url' => 'رابط الشيت غير صحيح، تأكد أنه رابط Google Sheets عام']);
+        }
+
+        try {
+            $response = Http::timeout(30)->get($csvUrl);
+            if (! $response->ok()) {
+                return back()->withErrors(['sheet_url' => 'تعذّر جلب البيانات من الشيت، تأكد أنه مشارك للعموم']);
+            }
+
+            $rows    = array_filter(explode("\n", $response->body()));
+            $imported = 0;
+            $me      = Auth::guard('admin')->user();
+
+            foreach (array_slice($rows, 1) as $line) { // skip header row
+                $cols = str_getcsv(trim($line));
+                $name  = trim($cols[0] ?? '');
+                if (! $name) continue;
+
+                $phone    = trim($cols[1] ?? '') ?: null;
+                $city     = trim($cols[2] ?? '') ?: null;
+                $natName  = trim($cols[3] ?? '') ?: null;
+
+                $natId = null;
+                if ($natName) {
+                    $natId = \App\Models\Nationality::where('name', 'like', "%{$natName}%")
+                        ->value('id');
+                }
+
+                Lead::create([
+                    'campaign_id'  => $campaign->id,
+                    'name'         => $name,
+                    'phone'        => $phone,
+                    'city'         => $city,
+                    'nationality_id' => $natId,
+                    'branch_id'    => $campaign->branch_id ?? ($me->isBranchAdmin() ? $me->branch_id : null),
+                    'source'       => 'sheet',
+                    'status'       => 'new',
+                ]);
+                $imported++;
+            }
+
+            // Notify branch admins
+            if ($campaign->branch_id && $imported > 0) {
+                $this->notifyBranchAdmins($campaign, $imported);
+            }
+
+            return back()->with('success', "تم استيراد {$imported} عميل محتمل بنجاح");
+        } catch (\Throwable $e) {
+            return back()->withErrors(['sheet_url' => 'حدث خطأ أثناء الاستيراد: ' . $e->getMessage()]);
+        }
+    }
+
+    private function sheetToCsvUrl(string $url): ?string
+    {
+        // https://docs.google.com/spreadsheets/d/SHEET_ID/edit#gid=0
+        // → https://docs.google.com/spreadsheets/d/SHEET_ID/export?format=csv&gid=0
+        if (preg_match('#/spreadsheets/d/([^/]+)#', $url, $m)) {
+            $gid = '';
+            if (preg_match('#[#&]gid=(\d+)#', $url, $g)) {
+                $gid = '&gid=' . $g[1];
+            }
+            return "https://docs.google.com/spreadsheets/d/{$m[1]}/export?format=csv{$gid}";
+        }
+        return null;
+    }
+
+    private function notifyBranchAdmins(Campaign $campaign, int $count): void
+    {
+        $admins = Admin::where('branch_id', $campaign->branch_id)
+            ->where('active', true)
+            ->get();
+
+        foreach ($admins as $admin) {
+            \App\Models\AdminNotification::create([
+                'admin_id' => $admin->id,
+                'title'    => 'عملاء محتملون جدد',
+                'body'     => "تم إضافة {$count} عميل محتمل للحملة «{$campaign->name}»",
+                'type'     => 'lead',
+                'url'      => route('admin.marketing.campaigns.show', $campaign->id),
+            ]);
+        }
+    }
+}

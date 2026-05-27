@@ -142,12 +142,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Recruitment Contracts
         Route::post('contracts/{id}/update-status',  [RecruitmentContractController::class, 'updateStatus'])->name('contracts.update-status');
+        Route::post('contracts/{id}/forward',        [RecruitmentContractController::class, 'forward'])->name('contracts.forward');
         Route::get('contracts/trashed',              [RecruitmentContractController::class, 'trashed'])->name('contracts.trashed');
         Route::post('contracts/{id}/restore',        [RecruitmentContractController::class, 'restore'])->name('contracts.restore');
         Route::delete('contracts/{id}/force-delete', [RecruitmentContractController::class, 'forceDelete'])->name('contracts.force-delete');
         Route::get('contracts/export',               [RecruitmentContractController::class, 'export'])->name('contracts.export');
         Route::get('contracts/template',             [RecruitmentContractController::class, 'template'])->name('contracts.template');
         Route::post('contracts/import',              [RecruitmentContractController::class, 'import'])->name('contracts.import');
+        Route::post('contracts/bulk-delete',         [RecruitmentContractController::class, 'bulkDelete'])->name('contracts.bulk-delete');
         Route::get('contracts/{id}/print',           [RecruitmentContractController::class, 'printView'])->name('contracts.print');
         Route::resource('contracts', RecruitmentContractController::class);
 

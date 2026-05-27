@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Client extends Model
@@ -40,8 +41,13 @@ class Client extends Model
         return $this->belongsTo(Nationality::class, 'required_nationality_id');
     }
 
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(RecruitmentContract::class)->latest();
+    }
+
     // ── Labels ──────────────────────────────────────────────────────────────
-    public function getMaritalStatusLabelAttribute(): string
+    public function getMaritalStatusLabelAttribute(): ?string
     {
         return match ($this->marital_status) {
             'single'   => 'أعزب',

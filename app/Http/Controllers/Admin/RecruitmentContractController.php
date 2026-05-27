@@ -39,6 +39,30 @@ class RecruitmentContractController extends Controller
         return $me->isSuperAdmin() ? null : $me->branch_id;
     }
 
+    /**
+     * Enforce department + branch access on a specific contract.
+     * - Super admins: unrestricted.
+     * - Branch managers / chairmen: restricted to their own branch.
+     * - Department employees: restricted to their branch AND only contracts
+     *   whose current_department matches their own department.
+     */
+    private function authorizeContractAccess(RecruitmentContract $contract): void
+    {
+        $me     = $this->me();
+        $myDept = $me->department;
+
+        // Super admin: full access
+        if ($me->isSuperAdmin()) return;
+
+        // Branch check: everyone (except super admin) must share the contract's branch
+        if ($me->branch_id && $contract->branch_id !== $me->branch_id) {
+            abort(403, 'ليس لديك صلاحية الوصول إلى عقود فرع آخر.');
+        }
+
+        // All other employees within the branch can view/edit the contract at any stage.
+        // Field-level restrictions are enforced in update() by stripping fields outside their dept.
+    }
+
     private function formData(): array
     {
         return [
@@ -60,7 +84,7 @@ class RecruitmentContractController extends Controller
     public function index(Request $request): View
     {
         $me       = $this->me();
-        $filters  = $request->only(['search', 'department', 'status', 'payment_status', 'branch_id', 'nationality_id']);
+        $filters  = $request->only(['search', 'department', 'status', 'payment_status', 'branch_id', 'origin_nationality_id']);
         $branchId = $this->branchFilter();
 
         // Non-super-admin: restrict to their department view
@@ -86,17 +110,30 @@ class RecruitmentContractController extends Controller
     public function create(): View
     {
         $me = $this->me();
+        // Department guard (middleware also enforces this, belt-and-suspenders)
+        if (in_array($me->department, ['accounts', 'accountant', 'coordination'])) {
+            abort(403, 'إنشاء العقود مخصص لقسم خدمة العملاء فقط.');
+        }
         $data = $this->formData();
-        // Pre-select branch for branch admins
         $data['defaultBranch'] = $me->branch_id;
         return view('admin.contracts.create', $data);
     }
 
     public function store(StoreRecruitmentContractRequest $request): RedirectResponse
     {
+        $me = $this->me();
+        // Department guard (middleware also enforces this, belt-and-suspenders)
+        if (in_array($me->department, ['accounts', 'accountant', 'coordination'])) {
+            abort(403, 'إنشاء العقود مخصص لقسم خدمة العملاء فقط.');
+        }
         $data = $request->validated();
         $data['client_sms']    = $request->boolean('client_sms');
         $data['client_rating'] = $request->boolean('client_rating');
+
+        // Branch ownership: non-super-admin with a fixed branch cannot create for another branch
+        if (!$me->isSuperAdmin() && $me->branch_id && (int)($data['branch_id'] ?? 0) !== (int)$me->branch_id) {
+            abort(403, 'لا يمكنك إضافة عقود لفرع غير فرعك. فرعك المخصص: ' . $me->branch?->name);
+        }
 
         $contract = $this->service->store($data);
 
@@ -107,6 +144,7 @@ class RecruitmentContractController extends Controller
     public function show(int $id): View
     {
         $contract    = $this->service->findById($id);
+        $this->authorizeContractAccess($contract);
         $statuses     = RecruitmentContract::statuses();
         $departments  = RecruitmentContract::departments();
         $historyMap   = $contract->statusHistories->keyBy('status');
@@ -118,6 +156,7 @@ class RecruitmentContractController extends Controller
     public function edit(int $id): View
     {
         $contract    = $this->service->findById($id);
+        $this->authorizeContractAccess($contract);
         $historyMap  = $contract->statusHistories->keyBy('status');
         $data        = $this->formData();
         // Also include the currently assigned worker even if they are 'assigned'
@@ -134,9 +173,63 @@ class RecruitmentContractController extends Controller
     public function update(UpdateRecruitmentContractRequest $request, int $id): RedirectResponse
     {
         $contract = $this->service->findById($id);
+        $this->authorizeContractAccess($contract);
         $data     = $request->validated();
         $data['client_sms']    = $request->boolean('client_sms');
         $data['client_rating'] = $request->boolean('client_rating');
+
+        $me     = $this->me();
+        $myDept = $me->department;
+
+        // Department-based field isolation (strip sections the user doesn't own)
+        if (!$me->isSuperAdmin()) {
+            $csFields      = ['client_id', 'branch_id', 'request_date', 'visa_type', 'visa_image',
+                              'visa_number', 'arrival_airport_id', 'origin_nationality_id',
+                              'delivery_airport_id', 'musaned_number', 'musaned_date', 'musaned_file'];
+            $accountsFields = ['payment_status', 'total_cost'];
+            $coordFields    = ['arrival_date', 'trial_end_date', 'contract_end_date',
+                               'worker_id', 'e_doc_number', 'agent_id',
+                               'notes', 'client_sms', 'client_rating', 'rating_image'];
+
+            if ($myDept === 'customer_service') {
+                // CS: cannot modify accounts or coordination data — strip both sections
+                foreach (array_merge($accountsFields, $coordFields) as $f) unset($data[$f]);
+                // Branch ownership: CS user cannot reassign a contract to a different branch
+                if ($me->branch_id && isset($data['branch_id']) && (int)$data['branch_id'] !== (int)$me->branch_id) {
+                    abort(403, 'لا يمكنك تغيير فرع العقد إلى فرع غير فرعك.');
+                }
+            } elseif (in_array($myDept, ['accounts', 'accountant'])) {
+                // Accounts: strip CS data and ALWAYS advance to coordination
+                foreach ($csFields as $f) unset($data[$f]);
+                $data['current_department'] = 'coordination';
+            } elseif ($myDept === 'coordination') {
+                // Coordination: cannot modify CS or accounts data
+                foreach (array_merge($csFields, $accountsFields) as $f) unset($data[$f]);
+            }
+        }
+
+        // Explicit department forwarding via the "حفظ وإرسال" buttons
+        // Each department can only advance to the NEXT stage — no skipping.
+        $advanceTo = $request->input('advance_to');
+        if ($advanceTo) {
+            $nextMap = [
+                'customer_service' => 'accounts',
+                'accounts'         => 'coordination',
+                'accountant'       => 'coordination',
+            ];
+            $allowedNext = $me->isSuperAdmin()
+                ? $advanceTo                                        // super admin: any stage
+                : ($nextMap[$myDept] ?? null);                      // dept user: only their next stage
+
+            if ($allowedNext === $advanceTo || $me->isSuperAdmin()) {
+                $data['current_department'] = $advanceTo;
+            }
+        } else {
+            // No forwarding requested — keep current_department as-is (don't let non-bosses change it)
+            if (!$me->isSuperAdmin() && !in_array($myDept, ['branch_manager', 'chairman'])) {
+                unset($data['current_department']);
+            }
+        }
 
         // Handle status update
         if ($request->filled('update_status')) {
@@ -153,12 +246,77 @@ class RecruitmentContractController extends Controller
 
         $this->service->update($contract, $data);
 
+        $successMsg = match (true) {
+            in_array($myDept, ['accounts', 'accountant']) && !$me->isSuperAdmin()
+                                          => 'تم حفظ بيانات الحسابات وإحالة العقد تلقائياً لقسم التنسيق.',
+            $advanceTo === 'accounts'     => 'تم حفظ بيانات خدمة العملاء وإحالة العقد لقسم الحسابات.',
+            $advanceTo === 'coordination' => 'تم حفظ بيانات الحسابات وإحالة العقد لقسم التنسيق.',
+            default                       => 'تم تحديث العقد بنجاح.',
+        };
+
         return redirect()->route('admin.contracts.show', $id)
-            ->with('success', 'تم تحديث العقد بنجاح');
+            ->with('success', $successMsg);
+    }
+
+    /**
+     * Quick-forward: advance a contract to the next department stage directly from the list.
+     * Only the dept user whose stage matches the contract's current stage can forward.
+     */
+    public function forward(int $id): RedirectResponse
+    {
+        $contract = $this->service->findById($id);
+
+        $me     = $this->me();
+        $myDept = $me->department;
+
+        // Super admins and bosses cannot use the quick-forward (they use the full edit)
+        if ($me->isSuperAdmin() || in_array($myDept, ['branch_manager', 'chairman'])) {
+            abort(403, 'استخدم صفحة التعديل لتغيير القسم.');
+        }
+
+        // Branch check
+        if ($me->branch_id && $contract->branch_id !== $me->branch_id) {
+            abort(403, 'ليس لديك صلاحية الوصول إلى عقود فرع آخر.');
+        }
+
+        $nextMap = [
+            'customer_service' => 'accounts',
+            'accounts'         => 'coordination',
+            'accountant'       => 'coordination',
+        ];
+        $next = $nextMap[$myDept] ?? null;
+        if (!$next) {
+            abort(403, 'قسمك لا يملك صلاحية توجيه العقود.');
+        }
+
+        // Contract must be at the current dept's stage
+        $myStage = match ($myDept) {
+            'accountant' => 'accounts',
+            default      => $myDept,
+        };
+        if ($contract->current_department !== $myStage) {
+            return back()->with('error', 'العقد ليس في مرحلة قسمك الحالية.');
+        }
+
+        $this->service->update($contract, ['current_department' => $next]);
+
+        $deptLabels = RecruitmentContract::departments();
+        return back()->with('success',
+            "تم توجيه العقد {$contract->contract_number} إلى {$deptLabels[$next]}.");
     }
 
     public function destroy(int $id): RedirectResponse
     {
+        $contract = $this->service->findById($id);
+        $this->authorizeContractAccess($contract);
+
+        // Deletion is restricted: accounts & coordination departments cannot delete contracts.
+        // Only customer_service, branch managers, chairmen, and super-admins may delete.
+        $me = $this->me();
+        if (! $me->isSuperAdmin() && in_array($me->department, ['accounts', 'accountant', 'coordination'])) {
+            abort(403, 'حذف العقود غير مسموح لقسمك.');
+        }
+
         $this->service->delete($id);
         return redirect()->route('admin.contracts.index')
             ->with('success', 'تم حذف العقد');
@@ -216,6 +374,31 @@ class RecruitmentContractController extends Controller
         }
 
         return back()->with('success', $msg);
+    }
+
+    // ── Bulk delete ─────────────────────────────────────────────────────────────
+
+    public function bulkDelete(Request $request): RedirectResponse
+    {
+        $me = $this->me();
+        if (! $me->isSuperAdmin() && ! $me->hasPermission('contracts.delete')) {
+            abort(403);
+        }
+
+        $ids = array_filter((array) $request->input('ids', []), 'is_numeric');
+        if (empty($ids)) {
+            return back()->with('error', 'لم يتم تحديد أي عقد');
+        }
+
+        // Branch-scoped admins can only delete contracts in their branch
+        $query = RecruitmentContract::whereIn('id', $ids);
+        if ($me->isBranchAdmin()) {
+            $query->where('branch_id', $me->branch_id);
+        }
+        $deleted = $query->count();
+        $query->delete();
+
+        return back()->with('success', "تم حذف {$deleted} عقد بنجاح");
     }
 
     // ── Print view ─────────────────────────────────────────────────────────────

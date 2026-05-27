@@ -11,10 +11,10 @@
     $editT2   = $isBoss || !$myDept || in_array($myDept, ['accounts', 'accountant']);
     $editT3   = $isBoss || !$myDept || $myDept === 'coordination';
 
-    // Tabs visible: your tab + all preceding (placeholder if no data yet)
+    // On CREATE: only Tab 1 (خدمة عملاء) is shown — the contract doesn't exist yet
     $showT1   = true;
-    $showT2   = $isBoss || !$myDept || in_array($myDept, ['accounts', 'accountant', 'coordination']);
-    $showT3   = $isBoss || !$myDept || $myDept === 'coordination';
+    $showT2   = false;
+    $showT3   = false;
 
     $defaultTab = match (true) {
         in_array($myDept, ['accounts', 'accountant']) && !$isBoss => 'acc',
@@ -135,13 +135,22 @@
                 {{-- Branch --}}
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">الفرع <span class="text-red-500">*</span></label>
+                    @if($defaultBranch)
+                    {{-- User is tied to a specific branch — locked --}}
+                    <div class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-100 text-slate-600 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        {{ $branches->firstWhere('id', $defaultBranch)?->name ?? '—' }}
+                    </div>
+                    <input type="hidden" name="branch_id" value="{{ $defaultBranch }}">
+                    @else
                     <select name="branch_id" required class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition @error('branch_id') border-red-400 @enderror">
                         <option value="">— اختر الفرع —</option>
                         @foreach($branches as $br)
-                        <option value="{{ $br->id }}" {{ old('branch_id', $defaultBranch) == $br->id ? 'selected' : '' }}>{{ $br->name }}</option>
+                        <option value="{{ $br->id }}" {{ old('branch_id') == $br->id ? 'selected' : '' }}>{{ $br->name }}</option>
                         @endforeach
                     </select>
                     @error('branch_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                    @endif
                 </div>
 
                 {{-- Request date --}}

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('agents', function (Blueprint $table) {
             $table->id();
             $table->string('name');                          // اسم الوكيل
-            $table->string('phone');                         // رقم الجوال
+            $table->string('phone')->nullable();             // رقم الجوال
             $table->string('email')->nullable();             // الإيميل
             $table->foreignId('nationality_id')
                   ->nullable()->constrained('nationalities')->nullOnDelete(); // الجنسية

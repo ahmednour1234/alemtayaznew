@@ -117,10 +117,13 @@ class AutoPermission
         'admin.transfers.restore' => 'transfers.restore',
 
         // ── Reports ───────────────────────────────────
-        'admin.reports.branch-statement'        => 'reports.branch-statement',
-        'admin.reports.branch-statement.export' => 'reports.branch-statement.export',
-        'admin.reports.income-statement'        => 'reports.income-statement',
-        'admin.reports.income-statement.export' => 'reports.income-statement.export',
+        'admin.reports.branch-statement'         => 'reports.branch-statement',
+        'admin.reports.branch-statement.export'  => 'reports.branch-statement.export',
+        'admin.reports.income-statement'         => 'reports.income-statement',
+        'admin.reports.income-statement.export'  => 'reports.income-statement.export',
+        'admin.reports.contracts-stats'          => 'reports.contracts-stats',
+        'admin.reports.contracts-received'       => 'reports.contracts-received',
+        'admin.reports.contracts-delayed'        => 'reports.contracts-delayed',
 
         // ── Settings: Admins ──────────────────────────
         'admin.settings.admins.index'   => 'admins.manage',
@@ -221,6 +224,19 @@ class AutoPermission
                 return response()->json(['message' => 'ليس لديك صلاحية لهذا الإجراء.'], 403);
             }
             abort(403, 'ليس لديك صلاحية للوصول إلى هذه الصفحة.');
+        }
+
+        // Extra check: contracts.create is restricted to customer_service department only.
+        // Accounts and coordination departments process existing contracts — they cannot create new ones,
+        // even if their role has the contracts.create permission assigned.
+        if (in_array($routeName, ['admin.contracts.create', 'admin.contracts.store', 'admin.contracts.template', 'admin.contracts.import'])) {
+            $dept = $admin->department;
+            if (in_array($dept, ['accounts', 'accountant', 'coordination'])) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => 'إنشاء العقود مخصص لقسم خدمة العملاء فقط.'], 403);
+                }
+                abort(403, 'إنشاء العقود مخصص لقسم خدمة العملاء فقط.');
+            }
         }
 
         return $next($request);

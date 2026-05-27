@@ -24,6 +24,7 @@ class RoleSeeder extends Seeder
                 'branches.view', 'incomes.view', 'incomes.create', 'incomes.edit',
                 'expenses.view', 'expenses.create', 'expenses.edit',
                 'transfers.view', 'reports.view',
+                'reports.contracts-stats', 'reports.contracts-received', 'reports.contracts-delayed',
             ])->pluck('id')
         );
 
@@ -34,6 +35,9 @@ class RoleSeeder extends Seeder
             Permission::whereIn('slug', [
                 'branches.view', 'incomes.view', 'incomes.create',
                 'expenses.view', 'expenses.create', 'transfers.view', 'transfers.create',
+                'reports.view', 'reports.branch-statement', 'reports.income-statement',
+                'reports.contracts-stats', 'reports.contracts-received', 'reports.contracts-delayed',
+                'contracts.view', 'contracts.edit',
             ])->pluck('id')
         );
     }

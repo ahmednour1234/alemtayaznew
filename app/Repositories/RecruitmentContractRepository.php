@@ -39,8 +39,8 @@ class RecruitmentContractRepository implements RecruitmentContractRepositoryInte
             });
         }
 
-        if (! empty($filters['nationality_id'])) {
-            $q->whereHas('worker', fn($w) => $w->where('nationality_id', $filters['nationality_id']));
+        if (! empty($filters['origin_nationality_id'])) {
+            $q->where('origin_nationality_id', $filters['origin_nationality_id']);
         }
 
         return $q->paginate($perPage)->withQueryString();

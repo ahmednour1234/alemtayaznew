@@ -24,7 +24,10 @@ class ClientRepository implements ClientRepositoryInterface
 
     public function findById(int $id)
     {
-        return Client::with(['branch', 'admin', 'requiredNationality'])->findOrFail($id);
+        return Client::with([
+            'branch', 'admin', 'requiredNationality',
+            'contracts.worker', 'contracts.originNationality', 'contracts.agent',
+        ])->findOrFail($id);
     }
 
     public function create(array $data)

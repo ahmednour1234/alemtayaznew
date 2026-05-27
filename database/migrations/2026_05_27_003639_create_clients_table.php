@@ -16,8 +16,8 @@ return new class extends Migration
             // ── Personal Data ────────────────────────────────────────────────
             $table->string('name');                          // الاسم
             $table->string('national_id')->nullable()->unique(); // الهوية الوطنية (اختياري)
-            $table->string('phone');                             // الجوال
-            $table->string('marital_status');                    // الحالة الاجتماعية: single|married|divorced|widowed
+            $table->string('phone')->nullable();                 // الجوال
+            $table->string('marital_status')->nullable();        // الحالة الاجتماعية: single|married|divorced|widowed
             $table->string('classification')->default('potential'); // التصنيف: potential|confirmed|premium|blocked
             $table->string('national_id_image')->nullable(); // صورة الهوية
             // ── Employment / Worker Request Data (بيانات العاملة) ────────────

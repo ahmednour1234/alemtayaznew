@@ -35,7 +35,7 @@ class WorkerRepository implements WorkerRepositoryInterface
 
     public function findById(int $id): mixed
     {
-        return Worker::with(['nationality', 'client', 'branch'])->findOrFail($id);
+        return Worker::with(['nationality', 'client', 'branch', 'latestContract.client', 'latestContract.originNationality', 'latestContract.agent'])->findOrFail($id);
     }
 
     public function create(array $data): mixed

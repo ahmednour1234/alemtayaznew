@@ -27,6 +27,11 @@ class ContractTemplateExport implements FromArray, WithHeadings, WithStyles, Wit
                 'pending = معلق | partial = جزئي | full = كامل',
                 'رقم (اختياري) — مثال: 5000',
                 'ملاحظات نصية (اختياري)',
+                'تاريخ وصول العاملة — YYYY-MM-DD (اختياري)',
+                '1=جديد | 2=موافقة سفارة | 3=انتظار مكتب | 4=قبول مكتب | 5=انتظار ابروف | 6=قبول العقد | 7=إرسال تأشيرة | 8=تم التأشير | 9=إلغاء | 10=تصريح سفر | 11=انتظار حجز | 12=معاد الوصول | 13=تم الاستلام | 14=رجيع | 15=هروب',
+                'جنسية العاملة كما هي في النظام — مثال: إثيوبية | فلبينية | إندونيسية (اختياري)',
+                'محسوب تلقائياً: تاريخ الوصول + 3 أشهر (اختياري)',
+                'محسوب تلقائياً: تاريخ الوصول + سنتين (اختياري)',
             ],
             // سطر المثال
             [
@@ -41,6 +46,11 @@ class ContractTemplateExport implements FromArray, WithHeadings, WithStyles, Wit
                 'pending',
                 '5500',
                 'عميل مميز — يرجى المتابعة',
+                '2026-03-01',
+                '1',
+                'إثيوبية',
+                '2026-06-01',
+                '2028-03-01',
             ],
         ];
     }
@@ -59,6 +69,11 @@ class ContractTemplateExport implements FromArray, WithHeadings, WithStyles, Wit
             'حالة الدفع *',
             'إجمالي التكلفة (ر.س)',
             'ملاحظات',
+            'تاريخ الوصول (YYYY-MM-DD)',
+            'الحالة (1–15)',
+            'جنسية العاملة',
+            'انتهاء التدريب (YYYY-MM-DD)',
+            'انتهاء الضمان (YYYY-MM-DD)',
         ];
     }
 
@@ -67,28 +82,36 @@ class ContractTemplateExport implements FromArray, WithHeadings, WithStyles, Wit
         return [
             'A' => 22, 'B' => 20, 'C' => 36, 'D' => 18,
             'E' => 18, 'F' => 26, 'G' => 20, 'H' => 20,
-            'I' => 32, 'J' => 22, 'K' => 28,
+            'I' => 32, 'J' => 22, 'K' => 28, 'L' => 26, 'M' => 90, 'N' => 26,
+            'O' => 28, 'P' => 28,
         ];
     }
 
     public function styles(Worksheet $sheet): array
     {
-        // عناوين الأعمدة — خط عريض أزرق داكن
-        $sheet->getStyle('A1:K1')->applyFromArray([
+        $sheet->getStyle('A1:P1')->applyFromArray([
             'font'      => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
             'fill'      => ['fillType' => 'solid', 'startColor' => ['rgb' => '1D4ED8']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true],
         ]);
         // سطر الشرح — خلفية رمادية
-        $sheet->getStyle('A2:K2')->applyFromArray([
+        $sheet->getStyle('A2:P2')->applyFromArray([
             'font'      => ['italic' => true, 'size' => 9, 'color' => ['rgb' => '475569']],
             'fill'      => ['fillType' => 'solid', 'startColor' => ['rgb' => 'F1F5F9']],
             'alignment' => ['wrapText' => true],
         ]);
         // سطر المثال — خلفية صفراء فاتحة
-        $sheet->getStyle('A3:K3')->applyFromArray([
+        $sheet->getStyle('A3:P3')->applyFromArray([
             'font' => ['size' => 10, 'color' => ['rgb' => '1E3A5F']],
             'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'FEF9C3']],
+        ]);
+        // تمييز عمودي التواريخ المحسوبة
+        $sheet->getStyle('O1:P1')->applyFromArray([
+            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '065F46']],
+        ]);
+        $sheet->getStyle('O3:P3')->applyFromArray([
+            'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'D1FAE5']],
+            'font' => ['color' => ['rgb' => '065F46'], 'italic' => true],
         ]);
 
         // تثبيت ارتفاع صفوف الشرح

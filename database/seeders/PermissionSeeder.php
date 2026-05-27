@@ -77,6 +77,9 @@ class PermissionSeeder extends Seeder
             ['name' => 'قائمة الدخل بين الفروع',       'slug' => 'reports.income-statement'],
             ['name' => 'تصدير كشف حساب الفرع',         'slug' => 'reports.branch-statement.export'],
             ['name' => 'تصدير قائمة الدخل بين الفروع', 'slug' => 'reports.income-statement.export'],
+            ['name' => 'إحصائيات العقود',            'slug' => 'reports.contracts-stats'],
+            ['name' => 'تقرير العمالة المستلمة',       'slug' => 'reports.contracts-received'],
+            ['name' => 'تقرير العقود المتأخرة',        'slug' => 'reports.contracts-delayed'],
             // Settings / Admins
             ['name' => 'إدارة المديرين',              'slug' => 'admins.manage'],
             ['name' => 'تفعيل/تعطيل المديرين',        'slug' => 'admins.toggle'],

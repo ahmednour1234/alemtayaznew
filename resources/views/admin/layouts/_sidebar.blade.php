@@ -398,10 +398,16 @@
                 </svg>
             </button>
             <div x-show="c" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
-                @php $contractItems = [
-                    ['r'=>'admin.contracts.index',  'p'=>'admin.contracts.index',  'l'=>'قائمة العقود',    'd'=>'M4 6h16M4 10h16M4 14h8'],
-                    ['r'=>'admin.contracts.create', 'p'=>'admin.contracts.create', 'l'=>'إضافة عقد جديد', 'd'=>'M12 5v14M5 12h14'],
-                ] @endphp
+                @php
+                    $_su   = Auth::guard('admin')->user();
+                    $_sdept = $_su->department;
+                    $sidebarCanCreate = ($_su->isSuperAdmin() || $_su->hasPermission('contracts.create'))
+                                     && ! in_array($_sdept, ['accounts', 'accountant', 'coordination']);
+                    $contractItems = array_filter([
+                        ['r'=>'admin.contracts.index',  'p'=>'admin.contracts.index',  'l'=>'قائمة العقود',    'd'=>'M4 6h16M4 10h16M4 14h8'],
+                        $sidebarCanCreate ? ['r'=>'admin.contracts.create', 'p'=>'admin.contracts.create', 'l'=>'إضافة عقد جديد', 'd'=>'M12 5v14M5 12h14'] : null,
+                    ]);
+                @endphp
                 @foreach($contractItems as $it)
                     @php $on = request()->routeIs($it['p']); @endphp
                     <a href="{{ route($it['r']) }}"
@@ -418,7 +424,16 @@
                     </a>
                 @endforeach
 
-                {{-- ── قسم التقارير (sub-dropdown) ── --}}
+                {{-- ── قسم التقارير (sub-dropdown) — permission-filtered ── --}}
+                @php
+                    $_crAll = [
+                        ['r'=>'admin.reports.contracts-stats',    'perm'=>'reports.contracts-stats',    'l'=>'إحصائيات العقود', 'd'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
+                        ['r'=>'admin.reports.contracts-received', 'perm'=>'reports.contracts-received', 'l'=>'العمالة المستلمة',  'd'=>'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['r'=>'admin.reports.contracts-delayed',  'perm'=>'reports.contracts-delayed',  'l'=>'العقود المتأخرة',   'd'=>'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                    ];
+                    $_crVisible = array_filter($_crAll, fn($it) => $_su->isSuperAdmin() || $_su->hasPermission($it['perm']));
+                @endphp
+                @if(count($_crVisible))
                 <div style="margin-top:4px;">
                     <button @click="cr=!cr"
                             style="width:100%;display:flex;align-items:center;gap:9px;padding:7px 10px;
@@ -438,13 +453,8 @@
                         </svg>
                     </button>
                     <div x-show="cr" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
-                        @php $crItems = [
-                            ['r'=>'admin.reports.contracts-stats',    'p'=>'admin.reports.contracts-stats',    'l'=>'إحصائيات العقود', 'd'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
-                            ['r'=>'admin.reports.contracts-received', 'p'=>'admin.reports.contracts-received', 'l'=>'العمالة المستلمة',  'd'=>'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
-                            ['r'=>'admin.reports.contracts-delayed',  'p'=>'admin.reports.contracts-delayed',  'l'=>'العقود المتأخرة',   'd'=>'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        ] @endphp
-                        @foreach($crItems as $it)
-                            @php $on = request()->routeIs($it['p']); @endphp
+                        @foreach($_crVisible as $it)
+                            @php $on = request()->routeIs($it['r']); @endphp
                             <a href="{{ route($it['r']) }}"
                                style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
                                       border-radius:6px;text-decoration:none;font-size:12px;
@@ -458,6 +468,7 @@
                         @endforeach
                     </div>
                 </div>
+                @endif
             </div>
         </div>
 
