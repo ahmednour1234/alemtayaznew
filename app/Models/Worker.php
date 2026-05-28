@@ -14,7 +14,7 @@ class Worker extends Model
     protected $fillable = [
         'name', 'passport_number', 'nationality_id', 'profession',
         'gender', 'experience', 'religion', 'age', 'phone',
-        'cv_path', 'status', 'client_id', 'branch_id', 'admin_id',
+        'cv_path', 'passport_image', 'status', 'client_id', 'branch_id', 'admin_id',
         'notes', 'active',
     ];
 

@@ -21,6 +21,7 @@ class StoreWorkerRequest extends FormRequest
             'age'             => ['nullable', 'integer', 'min:18', 'max:60'],
             'phone'           => ['nullable', 'string', 'max:30'],
             'cv'              => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'passport_image'  => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
             'status'          => ['nullable', 'in:available,reserved,assigned'],
             'branch_id'       => ['nullable', 'exists:branches,id'],
             'notes'           => ['nullable', 'string', 'max:2000'],

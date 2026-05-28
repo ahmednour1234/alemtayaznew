@@ -114,6 +114,13 @@ class PermissionSeeder extends Seeder
             ['name' => 'حذف مبنى سكن',             'slug' => 'housings.delete'],
             ['name' => 'تفعيل/تعطيل مباني السكن', 'slug' => 'housings.toggle'],
             ['name' => 'استعادة مباني السكن',     'slug' => 'housings.restore'],
+            // Complaints
+            ['name' => 'عرض الشكاوي',                'slug' => 'complaints.view'],
+            ['name' => 'تسجيل شكوى',                  'slug' => 'complaints.create'],
+            ['name' => 'تعديل شكوى',                 'slug' => 'complaints.edit'],
+            ['name' => 'حذف شكوى',                   'slug' => 'complaints.delete'],
+            ['name' => 'استعادة شكوى',                'slug' => 'complaints.restore'],
+            ['name' => 'عرض تقارير الشكاوي',         'slug' => 'complaints.reports'],
             // Marketing — Campaigns
             ['name' => 'عرض الحملات التسويقية',     'slug' => 'campaigns.view'],
             ['name' => 'إنشاء حملة تسويقية',         'slug' => 'campaigns.create'],

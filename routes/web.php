@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\AgentController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BranchController;
 use App\Http\Controllers\Admin\ClientController;
+use App\Http\Controllers\Admin\ComplaintController;
+use App\Http\Controllers\Admin\ComplaintReportsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\ExpenseTypeController;
@@ -78,6 +80,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('housings/{id}/restore', [HousingController::class, 'restore'])->name('housings.restore');
         Route::post('housings/{id}/toggle',  [HousingController::class, 'toggleActive'])->name('housings.toggle');
         Route::resource('housings', HousingController::class)->except('show');
+
+        // Complaints (الشكاوي)
+        Route::get('complaints/reports', [ComplaintReportsController::class, 'index'])->name('complaints.reports');
+        Route::post('complaints/{id}/restore', [ComplaintController::class, 'restore'])->name('complaints.restore');
+        Route::delete('complaints/attachments/{attachmentId}', [ComplaintController::class, 'deleteAttachment'])->name('complaints.attachments.destroy');
+        Route::resource('complaints', ComplaintController::class);
 
         // Incomes
         Route::get('incomes/export',          [IncomeController::class, 'export'])->name('incomes.export');

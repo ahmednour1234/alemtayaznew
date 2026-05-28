@@ -25,10 +25,13 @@ class WorkerService
         return $this->repo->getTrashed();
     }
 
-    public function store(array $data, ?UploadedFile $cv = null): mixed
+    public function store(array $data, ?UploadedFile $cv = null, ?UploadedFile $passportImage = null): mixed
     {
         if ($cv) {
             $data['cv_path'] = $cv->store('workers/cvs', 'public');
+        }
+        if ($passportImage) {
+            $data['passport_image'] = $passportImage->store('workers/passports', 'public');
         }
         return $this->repo->create($data);
     }
@@ -46,7 +49,7 @@ class WorkerService
         return $created;
     }
 
-    public function update(int $id, array $data, ?UploadedFile $cv = null): mixed
+    public function update(int $id, array $data, ?UploadedFile $cv = null, ?UploadedFile $passportImage = null): mixed
     {
         if ($cv) {
             $old = $this->repo->findById($id);
@@ -54,6 +57,13 @@ class WorkerService
                 Storage::disk('public')->delete($old->cv_path);
             }
             $data['cv_path'] = $cv->store('workers/cvs', 'public');
+        }
+        if ($passportImage) {
+            $old = $old ?? $this->repo->findById($id);
+            if ($old->passport_image) {
+                Storage::disk('public')->delete($old->passport_image);
+            }
+            $data['passport_image'] = $passportImage->store('workers/passports', 'public');
         }
         return $this->repo->update($id, $data);
     }

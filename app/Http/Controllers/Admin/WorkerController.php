@@ -57,7 +57,7 @@ class WorkerController extends Controller
             $data['branch_id'] = $me->branch_id;
         }
         $data['status'] = $data['status'] ?? 'available';
-        $this->service->store($data, $request->file('cv'));
+        $this->service->store($data, $request->file('cv'), $request->file('passport_image'));
         return redirect()->route('admin.workers.index')->with('success', 'تم إضافة العاملة بنجاح.');
     }
 
@@ -149,7 +149,7 @@ class WorkerController extends Controller
         if ($me->isBranchAdmin()) {
             $data['branch_id'] = $me->branch_id;
         }
-        $this->service->update($id, $data, $request->file('cv'));
+        $this->service->update($id, $data, $request->file('cv'), $request->file('passport_image'));
         return redirect()->route('admin.workers.index')->with('success', 'تم تحديث بيانات العاملة.');
     }
 

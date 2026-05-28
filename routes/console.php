@@ -13,3 +13,6 @@ Schedule::command('contracts:check-delays')->dailyAt('08:00');
 
 // Notify branch managers about leads not contacted within 24 hours
 Schedule::command('leads:notify-stale')->dailyAt('09:00');
+
+// Notify about complaints still open after 7 days
+Schedule::command('complaints:notify-stale')->dailyAt('09:30');

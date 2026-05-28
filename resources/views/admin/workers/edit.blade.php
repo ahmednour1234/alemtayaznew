@@ -122,6 +122,21 @@
                     @error('cv')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div class="col-span-2 lg:col-span-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">صورة الجواز</label>
+                    @if($worker->passport_image)
+                    <div class="mb-2 flex items-center gap-3">
+                        <a href="{{ Storage::disk('public')->url($worker->passport_image) }}" target="_blank">
+                            <img src="{{ Storage::disk('public')->url($worker->passport_image) }}" alt="جواز السفر" class="h-24 w-auto rounded-lg border border-slate-200 object-cover">
+                        </a>
+                        <span class="text-xs text-slate-400">ارفع صورة جديدة للاستبدال</span>
+                    </div>
+                    @endif
+                    <input type="file" name="passport_image" accept="image/*"
+                           class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 @error('passport_image') border-red-400 @enderror">
+                    <p class="text-xs text-slate-400 mt-1">JPG / PNG — الحد الأقصى 5MB</p>
+                    @error('passport_image')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
+                <div class="col-span-2 lg:col-span-4">
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">ملاحظات</label>
                     <textarea name="notes" rows="2"
                               class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none">{{ old('notes', $worker->notes) }}</textarea>

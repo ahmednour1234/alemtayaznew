@@ -229,7 +229,20 @@ class AutoPermission
         'admin.housings.update'  => 'housings.edit',
         'admin.housings.destroy' => 'housings.delete',
         'admin.housings.toggle'  => 'housings.toggle',
-        'admin.housings.restore' => 'housings.restore',    ];
+        'admin.housings.restore' => 'housings.restore',
+
+        // ── Complaints (الشكاوي) ───────────────────────────────
+        'admin.complaints.index'   => 'complaints.view',
+        'admin.complaints.show'    => 'complaints.view',
+        'admin.complaints.create'  => 'complaints.create',
+        'admin.complaints.store'   => 'complaints.create',
+        'admin.complaints.edit'    => 'complaints.edit',
+        'admin.complaints.update'  => 'complaints.edit',
+        'admin.complaints.destroy' => 'complaints.delete',
+        'admin.complaints.restore' => 'complaints.restore',
+        'admin.complaints.reports' => 'complaints.reports',
+        'admin.complaints.attachments.destroy' => 'complaints.edit',
+    ];
 
     public function handle(Request $request, Closure $next): Response
     {

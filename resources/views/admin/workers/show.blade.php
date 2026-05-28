@@ -193,6 +193,17 @@
             </div>
             @endif
 
+            {{-- Passport image --}}
+            @if($worker->passport_image)
+            <div class="bg-white rounded-xl shadow-sm p-5">
+                <h4 class="text-sm font-semibold text-slate-600 mb-3">صورة الجواز</h4>
+                <a href="{{ Storage::disk('public')->url($worker->passport_image) }}" target="_blank" class="block">
+                    <img src="{{ Storage::disk('public')->url($worker->passport_image) }}" alt="جواز السفر" class="w-full h-auto rounded-xl border border-slate-200 object-cover hover:opacity-90 transition">
+                </a>
+                <p class="text-xs text-slate-400 mt-2 text-center">انقر للتكبير</p>
+            </div>
+            @endif
+
             {{-- Client card --}}
             @if($client)
             <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
