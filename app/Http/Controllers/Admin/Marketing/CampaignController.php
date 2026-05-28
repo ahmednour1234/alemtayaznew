@@ -178,9 +178,9 @@ class CampaignController extends Controller
     {
         // https://docs.google.com/spreadsheets/d/SHEET_ID/edit#gid=0
         // → https://docs.google.com/spreadsheets/d/SHEET_ID/export?format=csv&gid=0
-        if (preg_match('#/spreadsheets/d/([^/]+)#', $url, $m)) {
+        if (preg_match('~/spreadsheets/d/([^/]+)~', $url, $m)) {
             $gid = '';
-            if (preg_match('#[#&]gid=(\d+)#', $url, $g)) {
+            if (preg_match('~[#&]gid=(\d+)~', $url, $g)) {
                 $gid = '&gid=' . $g[1];
             }
             return "https://docs.google.com/spreadsheets/d/{$m[1]}/export?format=csv{$gid}";

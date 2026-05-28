@@ -199,7 +199,37 @@ class AutoPermission
         'admin.contracts.restore'       => 'contracts.edit',
         'admin.contracts.destroy'       => 'contracts.delete',
         'admin.contracts.force-delete'  => 'contracts.delete',
-    ];
+
+        // ── Marketing: Campaigns ──────────────────────────────────────────────
+        'admin.marketing.campaigns.index'         => 'campaigns.view',
+        'admin.marketing.campaigns.show'          => 'campaigns.view',
+        'admin.marketing.campaigns.create'        => 'campaigns.create',
+        'admin.marketing.campaigns.store'         => 'campaigns.create',
+        'admin.marketing.campaigns.edit'          => 'campaigns.edit',
+        'admin.marketing.campaigns.update'        => 'campaigns.edit',
+        'admin.marketing.campaigns.destroy'       => 'campaigns.delete',
+        'admin.marketing.campaigns.import-sheet'  => 'campaigns.import',
+
+        // ── Marketing: Leads ──────────────────────────────────────────────────
+        'admin.marketing.leads.index'   => 'leads.view',
+        'admin.marketing.leads.show'    => 'leads.view',
+        'admin.marketing.leads.store'   => 'leads.create',
+        'admin.marketing.leads.update'  => 'leads.edit',
+        'admin.marketing.leads.destroy' => 'leads.delete',
+        'admin.marketing.leads.call'    => 'leads.call',
+        'admin.marketing.leads.convert' => 'leads.convert',
+
+        // ── Marketing: Reports ────────────────────────────────────────────────
+        'admin.marketing.reports' => 'marketing.reports.view',
+        // ── Housing (السكن) ──────────────────────────────────────
+        'admin.housings.index'   => 'housings.view',
+        'admin.housings.create'  => 'housings.create',
+        'admin.housings.store'   => 'housings.create',
+        'admin.housings.edit'    => 'housings.edit',
+        'admin.housings.update'  => 'housings.edit',
+        'admin.housings.destroy' => 'housings.delete',
+        'admin.housings.toggle'  => 'housings.toggle',
+        'admin.housings.restore' => 'housings.restore',    ];
 
     public function handle(Request $request, Closure $next): Response
     {

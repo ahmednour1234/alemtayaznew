@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Check for delayed contracts every day at 8 AM
 Schedule::command('contracts:check-delays')->dailyAt('08:00');
+
+// Notify branch managers about leads not contacted within 24 hours
+Schedule::command('leads:notify-stale')->dailyAt('09:00');

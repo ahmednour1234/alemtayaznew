@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Housing extends Model
+{
+    use SoftDeletes;
+
+    protected $fillable = [
+        'branch_id', 'admin_id', 'name', 'address', 'capacity', 'description', 'active',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'active'   => 'boolean',
+            'capacity' => 'integer',
+        ];
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function admin(): BelongsTo
+    {
+        return $this->belongsTo(Admin::class);
+    }
+}

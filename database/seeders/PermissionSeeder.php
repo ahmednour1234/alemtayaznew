@@ -107,6 +107,28 @@ class PermissionSeeder extends Seeder
             ['name' => 'إنشاء عقد استقدام',    'slug' => 'contracts.create'],
             ['name' => 'تعديل عقد استقدام',    'slug' => 'contracts.edit'],
             ['name' => 'حذف عقد استقدام',      'slug' => 'contracts.delete'],
+            // Housing
+            ['name' => 'عرض مباني السكن',           'slug' => 'housings.view'],
+            ['name' => 'إنشاء مبنى سكن',           'slug' => 'housings.create'],
+            ['name' => 'تعديل مبنى سكن',           'slug' => 'housings.edit'],
+            ['name' => 'حذف مبنى سكن',             'slug' => 'housings.delete'],
+            ['name' => 'تفعيل/تعطيل مباني السكن', 'slug' => 'housings.toggle'],
+            ['name' => 'استعادة مباني السكن',     'slug' => 'housings.restore'],
+            // Marketing — Campaigns
+            ['name' => 'عرض الحملات التسويقية',     'slug' => 'campaigns.view'],
+            ['name' => 'إنشاء حملة تسويقية',         'slug' => 'campaigns.create'],
+            ['name' => 'تعديل حملة تسويقية',         'slug' => 'campaigns.edit'],
+            ['name' => 'حذف حملة تسويقية',           'slug' => 'campaigns.delete'],
+            ['name' => 'استيراد عملاء من Google Sheets', 'slug' => 'campaigns.import'],
+            // Marketing — Leads
+            ['name' => 'عرض العملاء المحتملين',       'slug' => 'leads.view'],
+            ['name' => 'إنشاء عميل محتمل',             'slug' => 'leads.create'],
+            ['name' => 'تعديل عميل محتمل',             'slug' => 'leads.edit'],
+            ['name' => 'حذف عميل محتمل',               'slug' => 'leads.delete'],
+            ['name' => 'تسجيل مكالمة عميل محتمل',     'slug' => 'leads.call'],
+            ['name' => 'تحويل عميل محتمل لعميل فعلي', 'slug' => 'leads.convert'],
+            // Marketing — Reports
+            ['name' => 'عرض تقارير التسويق', 'slug' => 'marketing.reports.view'],
         ];
 
         foreach ($permissions as $p) {

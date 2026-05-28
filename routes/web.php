@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\ExpenseTypeController;
+use App\Http\Controllers\Admin\HousingController;
 use App\Http\Controllers\Admin\IncomeController;
 use App\Http\Controllers\Admin\IncomeTypeController;
 use App\Http\Controllers\Admin\NationalityController;
@@ -72,6 +73,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('expense-types/{id}/restore', [ExpenseTypeController::class, 'restore'])->name('expense-types.restore');
         Route::post('expense-types/{id}/toggle',  [ExpenseTypeController::class, 'toggleActive'])->name('expense-types.toggle');
         Route::resource('expense-types', ExpenseTypeController::class);
+
+        // Housing (السكن)
+        Route::post('housings/{id}/restore', [HousingController::class, 'restore'])->name('housings.restore');
+        Route::post('housings/{id}/toggle',  [HousingController::class, 'toggleActive'])->name('housings.toggle');
+        Route::resource('housings', HousingController::class)->except('show');
 
         // Incomes
         Route::get('incomes/export',          [IncomeController::class, 'export'])->name('incomes.export');
@@ -162,6 +168,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ->get();
             return view('admin.cities.index', compact('cities'));
         })->name('cities.index');
+
+        // Marketing
+        Route::prefix('marketing')->name('marketing.')->group(function () {
+            Route::post('campaigns/{campaign}/import-sheet', [\App\Http\Controllers\Admin\Marketing\CampaignController::class, 'importSheet'])->name('campaigns.import-sheet');
+            Route::resource('campaigns', \App\Http\Controllers\Admin\Marketing\CampaignController::class);
+
+            Route::post('leads/{lead}/call',    [\App\Http\Controllers\Admin\Marketing\LeadController::class, 'logCall'])->name('leads.call');
+            Route::post('leads/{lead}/convert', [\App\Http\Controllers\Admin\Marketing\LeadController::class, 'convert'])->name('leads.convert');
+            Route::resource('leads', \App\Http\Controllers\Admin\Marketing\LeadController::class)->except(['create', 'edit']);
+
+            Route::get('reports', [\App\Http\Controllers\Admin\Marketing\ReportsController::class, 'index'])->name('reports');
+        });
 
     });
 });

@@ -7,6 +7,7 @@ use App\Models\Lead;
 use App\Models\LeadCallLog;
 use App\Models\Client;
 use App\Models\Admin;
+use App\Models\AdminNotification;
 use App\Models\Branch;
 use App\Models\Nationality;
 use App\Models\Campaign;
@@ -48,11 +49,12 @@ class LeadController extends Controller
     public function show(Lead $lead)
     {
         $lead->load(['campaign', 'branch', 'nationality', 'assignedAdmin', 'referredByAdmin', 'callLogs.admin', 'client']);
-        $callStatuses = LeadCallLog::statuses();
-        $admins       = Admin::where('active', true)->orderBy('name')->get();
-        $branches     = Branch::where('active', true)->get();
+        $callStatuses  = LeadCallLog::statuses();
+        $admins        = Admin::where('active', true)->orderBy('name')->get();
+        $branches      = Branch::where('active', true)->get();
+        $nationalities = Nationality::where('active', true)->orderBy('name')->get();
 
-        return view('admin.marketing.leads.show', compact('lead', 'callStatuses', 'admins', 'branches'));
+        return view('admin.marketing.leads.show', compact('lead', 'callStatuses', 'admins', 'branches', 'nationalities'));
     }
 
     public function store(Request $request)
@@ -98,7 +100,24 @@ class LeadController extends Controller
             'notes'                => 'nullable|string',
         ]);
 
+        $previousAssigned = $lead->assigned_admin_id;
+
         $lead->update($data);
+
+        // Notify the new assignee when assignment changes
+        if (
+            array_key_exists('assigned_admin_id', $data)
+            && $data['assigned_admin_id']
+            && $data['assigned_admin_id'] != $previousAssigned
+        ) {
+            AdminNotification::create([
+                'admin_id' => $data['assigned_admin_id'],
+                'type'     => 'lead_assigned',
+                'title'    => 'تم تعيين عميل محتمل جديد لك',
+                'body'     => 'العميل: ' . $lead->name . ($lead->phone ? ' — ' . $lead->phone : ''),
+                'url'      => route('admin.marketing.leads.show', $lead),
+            ]);
+        }
 
         return back()->with('success', 'تم تحديث بيانات العميل');
     }
@@ -107,12 +126,20 @@ class LeadController extends Controller
     public function logCall(Request $request, Lead $lead)
     {
         $data = $request->validate([
-            'status'       => 'required|in:no_answer,not_suitable,nationality_unavailable,wants_rent,profiles_rejected,need_followup,converted,wrong_number',
-            'notes'        => 'nullable|string',
-            'follow_up_at' => 'nullable|date',
+            'status'         => 'required|in:no_answer,not_suitable,nationality_unavailable,wants_rent,profiles_rejected,need_followup,converted,wrong_number',
+            'notes'          => 'nullable|string',
+            'follow_up_at'   => 'nullable|date',
+            'nationality_id' => 'nullable|exists:nationalities,id',
         ]);
 
         $me = Auth::guard('admin')->user();
+
+        // Update lead's requested nationality if provided & changed
+        if (array_key_exists('nationality_id', $data) && $data['nationality_id'] != $lead->nationality_id) {
+            $lead->update(['nationality_id' => $data['nationality_id']]);
+        }
+        unset($data['nationality_id']);
+
         $data['admin_id'] = $me->id;
         $data['lead_id']  = $lead->id;
 
@@ -131,6 +158,21 @@ class LeadController extends Controller
             'status'           => $leadStatus,
             'last_contacted_at'=> now(),
         ]);
+
+        // Notify assigned admin about follow-up time
+        if (
+            !empty($data['follow_up_at'])
+            && $lead->assigned_admin_id
+            && $lead->assigned_admin_id != $me->id
+        ) {
+            AdminNotification::create([
+                'admin_id' => $lead->assigned_admin_id,
+                'type'     => 'lead_followup',
+                'title'    => 'موعد متابعة لعميل محتمل',
+                'body'     => 'العميل: ' . $lead->name . ' — الموعد: ' . \Carbon\Carbon::parse($data['follow_up_at'])->format('Y-m-d H:i'),
+                'url'      => route('admin.marketing.leads.show', $lead),
+            ]);
+        }
 
         return back()->with('success', 'تم تسجيل المكالمة');
     }
@@ -164,6 +206,37 @@ class LeadController extends Controller
             'status'   => 'converted',
             'notes'    => 'تم التحويل لعميل رقم ' . $client->id,
         ]);
+
+        // Notify branch managers, chairman, super admins, and assigned admin
+        $title = 'تحويل عميل محتمل لعميل فعلي';
+        $body  = $me->name . ' حوّل العميل المحتمل "' . $lead->name . '" إلى عميل فعلي.';
+        $url   = route('admin.clients.show', $client);
+
+        $targets = Admin::query()
+            ->where('active', true)
+            ->where(function ($q) use ($lead) {
+                $q->whereNull('branch_id')                           // super admins
+                  ->orWhereIn('department', ['chairman', 'branch_manager'])
+                  ->orWhere(function ($q2) use ($lead) {
+                      $q2->where('branch_id', $lead->branch_id ?? $lead->client?->branch_id);
+                  });
+            })
+            ->where('id', '!=', $me->id)
+            ->pluck('id');
+
+        if ($lead->assigned_admin_id && $lead->assigned_admin_id != $me->id) {
+            $targets->push($lead->assigned_admin_id);
+        }
+
+        foreach ($targets->unique() as $adminId) {
+            AdminNotification::create([
+                'admin_id' => $adminId,
+                'type'     => 'lead_converted',
+                'title'    => $title,
+                'body'     => $body,
+                'url'      => $url,
+            ]);
+        }
 
         return redirect()->route('admin.clients.show', $client)
             ->with('success', 'تم تحويل العميل المحتمل لعميل فعلي بنجاح');

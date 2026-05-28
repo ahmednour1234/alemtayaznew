@@ -38,6 +38,9 @@ class RoleSeeder extends Seeder
                 'reports.view', 'reports.branch-statement', 'reports.income-statement',
                 'reports.contracts-stats', 'reports.contracts-received', 'reports.contracts-delayed',
                 'contracts.view', 'contracts.edit',
+                'campaigns.view', 'campaigns.create', 'campaigns.edit', 'campaigns.import',
+                'leads.view', 'leads.create', 'leads.edit', 'leads.call', 'leads.convert',
+                'marketing.reports.view',
             ])->pluck('id')
         );
     }
