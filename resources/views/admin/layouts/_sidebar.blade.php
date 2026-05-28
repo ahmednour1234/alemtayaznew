@@ -95,6 +95,7 @@
                     ['r'=>'admin.cities.index',          'p'=>'admin.cities.*',          'l'=>'المدن',               'd'=>'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z'],
                     ['r'=>'admin.nationalities.index',   'p'=>'admin.nationalities.*',   'l'=>'الجنسيات',            'd'=>'M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6H10.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9'],
                     ['r'=>'admin.airports.index',        'p'=>'admin.airports.*',        'l'=>'المطارات',            'd'=>'M2.5 19h19M6.5 12.5L4 19 M17.5 12.5L20 19 M12 3L6.5 12.5h11L12 3z'],
+                    ['r'=>'admin.housings.index',        'p'=>'admin.housings.*',        'l'=>'السكن',               'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14h16V7M9 21V11h6v10'],
                     ['r'=>'admin.settings.roles.index',  'p'=>'admin.settings.roles.*',  'l'=>'الأدوار والصلاحيات', 'd'=>'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'],
                     ['r'=>'admin.settings.admins.index', 'p'=>'admin.settings.admins.*', 'l'=>'المديرين',            'd'=>'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z'],
                 ] @endphp
