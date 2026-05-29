@@ -41,7 +41,7 @@
     <h2 class="text-lg font-bold text-slate-800">إنشاء عقد نقل كفالة جديد</h2>
 </div>
 
-<form method="POST" action="{{ route('admin.sponsorship-transfers.store') }}" class="max-w-3xl">
+<form method="POST" action="{{ route('admin.sponsorship-transfers.store') }}" class="w-full">
     @csrf
     <input type="hidden" name="original_contract_id" id="original_contract_id" value="{{ old('original_contract_id') }}">
 
@@ -64,7 +64,28 @@
             </div>
         </div>
 
-        <div class="p-6 space-y-7">
+        <div class="p-6 space-y-7" x-data="{ tab: 'contract' }">
+
+            {{-- Tab Navigation --}}
+            <div style="display:flex;gap:0;border-bottom:2px solid #f1f5f9;margin-bottom:8px;">
+                <button type="button"
+                        @click="tab='contract'"
+                        :style="tab==='contract' ? 'border-bottom:2px solid #c9a84c;color:#c9a84c;margin-bottom:-2px;' : 'border-bottom:2px solid transparent;color:#94a3b8;margin-bottom:-2px;'"
+                        style="padding:10px 22px;font-size:13px;font-weight:700;font-family:'Cairo',sans-serif;background:none;border:none;border-top:none;border-left:none;border-right:none;cursor:pointer;display:flex;align-items:center;gap:6px;transition:color .15s;">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    بيانات العقد
+                </button>
+                <button type="button"
+                        @click="tab='fees'"
+                        :style="tab==='fees' ? 'border-bottom:2px solid #c9a84c;color:#c9a84c;margin-bottom:-2px;' : 'border-bottom:2px solid transparent;color:#94a3b8;margin-bottom:-2px;'"
+                        style="padding:10px 22px;font-size:13px;font-weight:700;font-family:'Cairo',sans-serif;background:none;border:none;border-top:none;border-left:none;border-right:none;cursor:pointer;display:flex;align-items:center;gap:6px;transition:color .15s;">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    الرسوم والملاحظات
+                </button>
+            </div>
+
+            {{-- TAB 1: بيانات العقد --}}
+            <div x-show="tab==='contract'" class="space-y-7">
 
             {{-- Section: بيانات العاملة --}}
             <div>
@@ -174,6 +195,19 @@
                         <input type="date" name="transfer_date" value="{{ old('transfer_date') }}" class="form-input">
                     </div>
 
+                    {{-- Musaned contract number --}}
+                    <div>
+                        <label class="form-label">
+                            <svg width="14" height="14" fill="none" stroke="#c9a84c" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                            رقم العقد على مساند
+                        </label>
+                        <input type="text" name="musaned_contract_number"
+                               value="{{ old('musaned_contract_number') }}"
+                               placeholder="أدخل رقم العقد على منصة مساند"
+                               class="form-input">
+                        @error('musaned_contract_number')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
                     {{-- Payment status --}}
                     <div>
                         <label class="form-label">
@@ -188,6 +222,20 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Next Tab Button --}}
+            <div class="flex justify-start pt-2">
+                <button type="button" @click="tab='fees'"
+                        style="background:linear-gradient(135deg,#c9a84c,#a88830);color:#fff;border:none;padding:9px 24px;border-radius:9px;font-size:13px;font-weight:700;font-family:'Cairo',sans-serif;cursor:pointer;display:flex;align-items:center;gap:7px;">
+                    التالي — الرسوم والملاحظات
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+            </div>
+
+            </div>{{-- end tab 1 --}}
+
+            {{-- TAB 2: الرسوم والملاحظات --}}
+            <div x-show="tab==='fees'" class="space-y-7">
 
             {{-- Section: الرسوم --}}
             <div>
@@ -245,7 +293,18 @@
                 <textarea name="notes" rows="3" class="form-input" placeholder="أي ملاحظات أو تفاصيل إضافية...">{{ old('notes') }}</textarea>
             </div>
 
-        </div>
+            {{-- Back Button --}}
+            <div class="flex justify-start pt-2">
+                <button type="button" @click="tab='contract'"
+                        style="padding:9px 22px;border-radius:9px;font-size:13px;font-weight:700;color:#64748b;border:1.5px solid #e2e8f0;background:#fff;font-family:'Cairo',sans-serif;cursor:pointer;display:flex;align-items:center;gap:7px;">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                    السابق — بيانات العقد
+                </button>
+            </div>
+
+            </div>{{-- end tab 2 --}}
+
+        </div>{{-- end p-6 --}}
 
         {{-- Footer --}}
         <div style="border-top:1px solid #f1f5f9;padding:16px 24px;display:flex;gap:10px;align-items:center;">
@@ -319,6 +378,18 @@ function calcNet() {
     var v = document.getElementById('worker_select').value;
     if (v) onWorkerChange(v);
     calcNet();
+    // On validation error, open the fees tab if fees fields have errors
+    @if($errors->hasAny(['total_fees','service_fee','loss_amount','notes']))
+    document.addEventListener('alpine:init', function(){
+        // switch to fees tab on error
+        setTimeout(function(){
+            var el = document.querySelector('[x-data]');
+            if (el && el._x_dataStack) {
+                el._x_dataStack[0].tab = 'fees';
+            }
+        }, 0);
+    });
+    @endif
 })();
 </script>
 @endpush

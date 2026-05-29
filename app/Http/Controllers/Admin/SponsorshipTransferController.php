@@ -7,13 +7,18 @@ use App\Models\Branch;
 use App\Models\Client;
 use App\Models\RecruitmentContract;
 use App\Models\Worker;
+use App\Models\SponsorshipTransfer;
+use App\Services\NotificationService;
 use App\Services\SponsorshipTransferService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SponsorshipTransferController extends Controller
 {
-    public function __construct(private readonly SponsorshipTransferService $service) {}
+    public function __construct(
+        private readonly SponsorshipTransferService $service,
+        private readonly NotificationService $notifications,
+    ) {}
 
     private function branchFilter(): ?int
     {
@@ -69,12 +74,13 @@ class SponsorshipTransferController extends Controller
             'to_client_id'        => 'nullable|exists:clients,id',
             'branch_id'           => 'required|exists:branches,id',
             'original_contract_id'=> 'nullable|exists:recruitment_contracts,id',
-            'transfer_date'       => 'nullable|date',
-            'total_fees'          => 'required|numeric|min:0',
-            'service_fee'         => 'required|numeric|min:0',
-            'loss_amount'         => 'required|numeric|min:0',
-            'payment_status'      => 'required|in:pending,partial,full',
-            'notes'               => 'nullable|string|max:1000',
+            'transfer_date'            => 'nullable|date',
+            'musaned_contract_number'  => 'nullable|string|max:100',
+            'total_fees'               => 'required|numeric|min:0',
+            'service_fee'              => 'required|numeric|min:0',
+            'loss_amount'              => 'required|numeric|min:0',
+            'payment_status'           => 'required|in:pending,partial,full',
+            'notes'                    => 'nullable|string|max:1000',
         ]);
 
         if ($bid = $this->branchFilter()) {
@@ -96,8 +102,16 @@ class SponsorshipTransferController extends Controller
         Worker::where('id', $data['worker_id'])
             ->update(['status' => 'sponsorship_transfer']);
 
-        return redirect()->route('admin.sponsorship-transfers.show', $transfer->id)
-            ->with('success', 'تم إنشاء عقد نقل الكفالة بنجاح وتم إيقاف عقد الاستقدام.');
+        $url = route('admin.sponsorship-transfers.show', $transfer->id);
+        $this->notifications->notify(
+            'sponsorship_transfer_created',
+            'عقد نقل كفالة جديد',
+            'تم إنشاء عقد نقل الكفالة رقم ' . $transfer->contract_number,
+            $url,
+            [$transfer->branch_id]
+        );
+
+        return redirect($url)->with('success', 'تم إنشاء عقد نقل الكفالة بنجاح وتم إيقاف عقد الاستقدام.');
     }
 
     public function show(int $id)
@@ -117,13 +131,14 @@ class SponsorshipTransferController extends Controller
     public function update(Request $request, int $id)
     {
         $data = $request->validate([
-            'to_client_id'   => 'nullable|exists:clients,id',
-            'transfer_date'  => 'nullable|date',
-            'total_fees'     => 'required|numeric|min:0',
-            'service_fee'    => 'required|numeric|min:0',
-            'loss_amount'    => 'required|numeric|min:0',
-            'payment_status' => 'required|in:pending,partial,full',
-            'notes'          => 'nullable|string|max:1000',
+            'to_client_id'            => 'nullable|exists:clients,id',
+            'transfer_date'           => 'nullable|date',
+            'musaned_contract_number' => 'nullable|string|max:100',
+            'total_fees'              => 'required|numeric|min:0',
+            'service_fee'             => 'required|numeric|min:0',
+            'loss_amount'             => 'required|numeric|min:0',
+            'payment_status'          => 'required|in:pending,partial,full',
+            'notes'                   => 'nullable|string|max:1000',
         ]);
 
         $this->service->update($id, $data);
@@ -141,11 +156,25 @@ class SponsorshipTransferController extends Controller
     public function updateStatus(Request $request, int $id)
     {
         $request->validate(['action' => 'required|in:forward,complete,cancel']);
-        match ($request->action) {
+        $transfer = match ($request->action) {
             'forward'  => $this->service->forwardToAccounts($id),
             'complete' => $this->service->complete($id),
             'cancel'   => $this->service->cancel($id),
         };
+
+        $titles = [
+            'forward'  => 'تم إحالة عقد نقل الكفالة للحسابات',
+            'complete' => 'اكتمل نقل الكفالة',
+            'cancel'   => 'تم إلغاء عقد نقل الكفالة',
+        ];
+        $this->notifications->notify(
+            'sponsorship_transfer_forwarded',
+            $titles[$request->action],
+            'عقد نقل الكفالة رقم ' . $transfer->contract_number,
+            route('admin.sponsorship-transfers.show', $id),
+            [$transfer->branch_id]
+        );
+
         return back()->with('success', 'تم تحديث حالة العقد.');
     }
 
@@ -153,5 +182,38 @@ class SponsorshipTransferController extends Controller
     {
         $transfer = $this->service->find($id);
         return view('admin.sponsorship-transfers.print', compact('transfer'));
+    }
+
+    public function reports(Request $request)
+    {
+        $branchId = $this->branchFilter();
+        $branches = Branch::where('active', true)->orderBy('name')->get();
+
+        $query = SponsorshipTransfer::query()
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->when($request->filled('branch_id') && !$branchId, fn($q) => $q->where('branch_id', $request->branch_id))
+            ->when($request->filled('date_from'), fn($q) => $q->whereDate('created_at', '>=', $request->date_from))
+            ->when($request->filled('date_to'), fn($q) => $q->whereDate('created_at', '<=', $request->date_to));
+
+        $total           = (clone $query)->count();
+        $statusCounts    = (clone $query)->selectRaw('current_status, count(*) as cnt')->groupBy('current_status')->pluck('cnt', 'current_status');
+        $paymentCounts   = (clone $query)->selectRaw('payment_status, count(*) as cnt')->groupBy('payment_status')->pluck('cnt', 'payment_status');
+        $deptCounts      = (clone $query)->selectRaw('current_department, count(*) as cnt')->groupBy('current_department')->pluck('cnt', 'current_department');
+        $totalFees       = (clone $query)->sum('total_fees');
+        $totalServiceFee = (clone $query)->sum('service_fee');
+        $totalLoss       = (clone $query)->sum('loss_amount');
+        $byBranch        = (clone $query)->with('branch')
+                            ->selectRaw('branch_id, count(*) as cnt, sum(total_fees) as fees')
+                            ->groupBy('branch_id')->get();
+
+        $statuses      = SponsorshipTransfer::statuses();
+        $paymentLabels = SponsorshipTransfer::paymentStatuses();
+        $deptLabels    = SponsorshipTransfer::departments();
+
+        return view('admin.sponsorship-transfers.reports', compact(
+            'total', 'statusCounts', 'paymentCounts', 'deptCounts',
+            'totalFees', 'totalServiceFee', 'totalLoss', 'byBranch',
+            'statuses', 'paymentLabels', 'deptLabels', 'branches', 'branchId'
+        ));
     }
 }

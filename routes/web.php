@@ -207,11 +207,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Trips (الرحلات)
         Route::post('trips/{trip}/workers',                   [TripController::class, 'addWorker'])->name('trips.add-worker');
         Route::delete('trips/{trip}/workers/{worker}',        [TripController::class, 'removeWorker'])->name('trips.remove-worker');
+        Route::get('trips/{trip}/checklist',                  [TripController::class, 'showChecklist'])->name('trips.checklist');
+        Route::post('trips/{trip}/checklist',                 [TripController::class, 'submitChecklist'])->name('trips.checklist.submit');
         Route::patch('trips/{trip}/complete',                 [TripController::class, 'complete'])->name('trips.complete');
         Route::get('trips/{trip}/print',                      [TripController::class, 'print'])->name('trips.print');
         Route::resource('trips', TripController::class);
 
         // Sponsorship Transfers (عقود نقل الكفالة)
+        Route::get('sponsorship-transfers/reports',             [SponsorshipTransferController::class, 'reports'])->name('sponsorship-transfers.reports');
         Route::post('sponsorship-transfers/{id}/update-status', [SponsorshipTransferController::class, 'updateStatus'])->name('sponsorship-transfers.update-status');
         Route::get('sponsorship-transfers/{id}/print',          [SponsorshipTransferController::class, 'print'])->name('sponsorship-transfers.print');
         Route::resource('sponsorship-transfers', SponsorshipTransferController::class);

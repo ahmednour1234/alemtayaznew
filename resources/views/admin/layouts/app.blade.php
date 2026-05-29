@@ -91,8 +91,10 @@
             margin-right: var(--sidebar-w);
             display: flex; flex-direction: column; min-height: 100vh;
             transition: margin-right .25s cubic-bezier(.4,0,.2,1);
+            min-width: 0; overflow-x: hidden;
         }
         #main-wrap.expanded { margin-right: 0; }
+        main { min-width: 0; overflow-x: hidden; }
 
         /* ── Topbar ── */
         #topbar {

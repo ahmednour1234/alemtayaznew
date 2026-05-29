@@ -94,11 +94,7 @@
                     <div class="flex gap-2">
                         <a href="{{ route('admin.trips.show', $trip->id) }}" class="text-blue-600 hover:underline text-xs">تفاصيل</a>
                         @if($trip->status === 'scheduled')
-                        <form method="POST" action="{{ route('admin.trips.complete', $trip->id) }}"
-                              onsubmit="return confirm('تأكيد اكتمال الرحلة؟')">
-                            @csrf @method('PATCH')
-                            <button class="text-green-600 hover:underline text-xs">اكتمل</button>
-                        </form>
+                        <a href="{{ route('admin.trips.checklist', $trip->id) }}" class="text-green-600 hover:underline text-xs">اكتمل</a>
                         @endif
                     </div>
                 </td>

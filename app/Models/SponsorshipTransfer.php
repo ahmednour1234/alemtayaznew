@@ -14,7 +14,7 @@ class SponsorshipTransfer extends Model
     protected $table = 'sponsorship_transfer_contracts';
 
     protected $fillable = [
-        'contract_number', 'worker_id', 'from_client_id', 'to_client_id',
+        'contract_number', 'musaned_contract_number', 'worker_id', 'from_client_id', 'to_client_id',
         'branch_id', 'admin_id', 'original_contract_id', 'transfer_date',
         'total_fees', 'service_fee', 'loss_amount',
         'payment_status', 'current_department', 'current_status',

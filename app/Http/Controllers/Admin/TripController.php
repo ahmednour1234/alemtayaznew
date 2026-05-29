@@ -6,13 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Airport;
 use App\Models\Branch;
 use App\Models\Worker;
+use App\Services\NotificationService;
 use App\Services\TripService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class TripController extends Controller
 {
-    public function __construct(private readonly TripService $service) {}
+    public function __construct(
+        private readonly TripService $service,
+        private readonly NotificationService $notifications,
+    ) {}
 
     private function branchFilter(): ?int
     {
@@ -129,7 +133,46 @@ class TripController extends Controller
     public function complete(int $id)
     {
         $this->service->complete($id);
-        return back()->with('success', 'تم تأكيل اكتمال الرحلة.');
+        return back()->with('success', 'تم تأكيد اكتمال الرحلة.');
+    }
+
+    public function showChecklist(int $id)
+    {
+        $trip = $this->service->find($id);
+        return view('admin.trips.checklist', compact('trip'));
+    }
+
+    public function submitChecklist(Request $request, int $id)
+    {
+        $trip = $this->service->find($id);
+
+        $statuses = $request->input('statuses', []);
+
+        // Update each worker's pivot status
+        foreach ($trip->workers as $worker) {
+            $status = $statuses[$worker->id] ?? 'completed';
+            $trip->workers()->updateExistingPivot($worker->id, ['status' => $status]);
+        }
+
+        // Complete the trip
+        $this->service->complete($id);
+
+        // Collect workers with no_show
+        $noShowWorkers = $trip->workers->filter(fn($w) => ($statuses[$w->id] ?? 'completed') === 'no_show');
+
+        if ($noShowWorkers->isNotEmpty()) {
+            $names = $noShowWorkers->map(fn($w) => $w->name)->implode('، ');
+            $this->notifications->notify(
+                type: 'trip_issue',
+                title: 'تنبيه: عاملات لم تظهر في رحلة ' . $trip->trip_number,
+                body: 'العاملات التاليات لم يظهرن في الرحلة: ' . $names,
+                url: route('admin.trips.show', $trip->id),
+                branchIds: $trip->branch_id ? [$trip->branch_id] : [],
+            );
+        }
+
+        return redirect()->route('admin.trips.show', $trip->id)
+            ->with('success', 'تم تأكيد اكتمال الرحلة بنجاح.');
     }
 
     public function print(int $id)

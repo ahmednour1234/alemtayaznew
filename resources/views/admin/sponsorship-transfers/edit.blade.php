@@ -32,6 +32,14 @@
             </div>
 
             <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">رقم العقد على مساند</label>
+                <input type="text" name="musaned_contract_number"
+                       value="{{ $transfer->musaned_contract_number }}"
+                       placeholder="رقم العقد على منصة مساند"
+                       class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+            </div>
+
+            <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1.5">إجمالي الرسوم <span class="text-red-500">*</span></label>
                 <input type="number" name="total_fees" value="{{ $transfer->total_fees }}" min="0" step="0.01" required
                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">

@@ -49,16 +49,12 @@
         </a>
         @endcan
         @if($trip->status === 'scheduled')
-        <form method="POST" action="{{ route('admin.trips.complete', $trip->id) }}"
-              onsubmit="return confirm('تأكيد اكتمال الرحلة؟')">
-            @csrf @method('PATCH')
-            <button type="submit"
-                    style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;color:#fff;background:#16a34a;border:none;font-family:'Cairo',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;"
-                    onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                تأكيد الاكتمال
-            </button>
-        </form>
+        <a href="{{ route('admin.trips.checklist', $trip->id) }}"
+           style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;color:#fff;background:#16a34a;text-decoration:none;display:flex;align-items:center;gap:6px;font-family:'Cairo',sans-serif;"
+           onmouseover="this.style.background='#15803d'" onmouseout="this.style.background='#16a34a'">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            تأكيد الاكتمال
+        </a>
         @endif
     </div>
 </div>
