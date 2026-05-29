@@ -10,6 +10,7 @@ use App\Repositories\Contracts\ComplaintRepositoryInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ComplaintService
 {
@@ -37,6 +38,7 @@ class ComplaintService
             }
 
             $data['complaint_number'] = Complaint::generateNumber();
+            $data['public_token']     = Str::random(48);
             $data['status']           = $data['status']   ?? 'new';
             $data['priority']         = $data['priority'] ?? 'medium';
             $data['on_musaned']       = !empty($data['on_musaned']);

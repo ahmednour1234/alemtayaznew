@@ -64,30 +64,42 @@ class Worker extends Model
     public function getStatusLabelAttribute(): string
     {
         return match ($this->status) {
-            'available' => 'متاحة',
-            'reserved'  => 'محجوزة',
-            'assigned'  => 'تم التعيين',
-            default     => $this->status,
+            'available'            => 'متاحة',
+            'reserved'             => 'محجوزة',
+            'assigned'             => 'تم التعيين',
+            'in_housing'           => 'في السكن',
+            'sponsorship_transfer' => 'نقل كفالة',
+            'deportation'          => 'تسفير',
+            'returned'             => 'عودة',
+            default                => $this->status,
         };
     }
 
     public function getStatusColorAttribute(): string
     {
         return match ($this->status) {
-            'available' => '#16a34a',
-            'reserved'  => '#ca8a04',
-            'assigned'  => '#2563eb',
-            default     => '#64748b',
+            'available'            => '#16a34a',
+            'reserved'             => '#ca8a04',
+            'assigned'             => '#2563eb',
+            'in_housing'           => '#7c3aed',
+            'sponsorship_transfer' => '#d97706',
+            'deportation'          => '#dc2626',
+            'returned'             => '#64748b',
+            default                => '#64748b',
         };
     }
 
     public function getStatusBgAttribute(): string
     {
         return match ($this->status) {
-            'available' => '#dcfce7',
-            'reserved'  => '#fef9c3',
-            'assigned'  => '#dbeafe',
-            default     => '#f1f5f9',
+            'available'            => '#dcfce7',
+            'reserved'             => '#fef9c3',
+            'assigned'             => '#dbeafe',
+            'in_housing'           => '#ede9fe',
+            'sponsorship_transfer' => '#fef3c7',
+            'deportation'          => '#fee2e2',
+            'returned'             => '#f1f5f9',
+            default                => '#f1f5f9',
         };
     }
 

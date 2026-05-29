@@ -23,6 +23,13 @@
         </div>
         <div class="flex gap-2">
             <a href="{{ route('admin.complaints.edit', $complaint->id) }}" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg">تعديل</a>
+            @if($complaint->public_token)
+            <button type="button" id="copyLinkBtn"
+                onclick="navigator.clipboard.writeText('{{ route('complaint.track', $complaint->public_token) }}').then(()=>{ this.textContent='تم النسخ ✓'; setTimeout(()=>this.textContent='رابط العميل',2000); })"
+                class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg">
+                رابط العميل
+            </button>
+            @endif
             <form action="{{ route('admin.complaints.destroy', $complaint->id) }}" method="POST" onsubmit="return confirm('تأكيد الحذف؟')">
                 @csrf @method('DELETE')
                 <button class="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-lg">حذف</button>

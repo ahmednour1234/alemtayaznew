@@ -11,6 +11,7 @@
     $openCReps      = request()->routeIs(['admin.reports.contracts-*']);
     $openMarketing  = request()->routeIs(['admin.marketing.*']);
     $openComplaints = request()->routeIs(['admin.complaints.*']);
+    $openOperations = request()->routeIs(['admin.housing-assignments.*', 'admin.trips.*', 'admin.sponsorship-transfers.*', 'admin.calendar.*']);
 @endphp
 
 <div x-data="{
@@ -24,25 +25,16 @@
         c: {{ $openContracts  ? 'true' : 'false' }},
         cr: {{ $openCReps     ? 'true' : 'false' }},
         mk: {{ $openMarketing ? 'true' : 'false' }},
-        cp: {{ $openComplaints ? 'true' : 'false' }}
+        cp: {{ $openComplaints ? 'true' : 'false' }},
+        op: {{ $openOperations ? 'true' : 'false' }}
      }"
      style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
 
     {{-- Logo --}}
-    <div style="padding:0 16px;height:64px;display:flex;align-items:center;gap:12px;
-                border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;">
-        <div style="width:36px;height:36px;border-radius:9px;
-                    background:linear-gradient(135deg,#2563eb,#1d4ed8);
-                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L3 7V17L12 22L21 17V7L12 2Z" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-                <path d="M12 2V22M3 7L12 12M21 7L12 12" stroke="white" stroke-width="1.6"/>
-            </svg>
-        </div>
-        <div>
-            <p style="color:#f1f5f9;font-size:13px;font-weight:700;line-height:1.2;margin:0;">نظام الامتياز</p>
-            <p style="color:#475569;font-size:10px;line-height:1.3;margin:0;">للاستقدام</p>
-        </div>
+    <div style="background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+                padding:10px 16px;border-bottom:3px solid #1a2744;">
+        <img src="{{ asset('1759760768-33.webp') }}" alt="شركة الامتياز للاستقدام"
+             style="height:46px;max-width:190px;object-fit:contain;">
     </div>
 
     {{-- Scrollable nav --}}
@@ -53,7 +45,7 @@
         <a href="{{ route('admin.dashboard') }}"
            style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;
                   text-decoration:none;font-size:13px;font-weight:500;margin-bottom:6px;
-                  {{ request()->routeIs('admin.dashboard') ? 'color:#fff;background:#2563eb;' : 'color:#94a3b8;background:transparent;' }}"
+                  {{ request()->routeIs('admin.dashboard') ? 'color:#1a2744;background:#c9a84c;' : 'color:#94a3b8;background:transparent;' }}"
            onmouseover="if(!this.dataset.active){this.style.background='rgba(255,255,255,.06)';this.style.color='#e2e8f0';}"
            onmouseout="if(!this.dataset.active){this.style.background='transparent';this.style.color='#94a3b8';}"
            {{ request()->routeIs('admin.dashboard') ? 'data-active=1' : '' }}>
@@ -106,7 +98,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -177,7 +169,7 @@
                                 <a href="{{ route($it['r']) }}"
                                    style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
                                           border-radius:6px;text-decoration:none;font-size:12px;
-                                          {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                                          {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
                                    onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                                    onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
                                    {{ $on ? 'data-on=1' : '' }}>
@@ -218,7 +210,7 @@
                                 <a href="{{ route($it['r']) }}"
                                    style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
                                           border-radius:6px;text-decoration:none;font-size:12px;
-                                          {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                                          {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
                                    onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                                    onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
                                    {{ $on ? 'data-on=1' : '' }}>
@@ -259,7 +251,7 @@
                                 <a href="{{ route($it['r']) }}"
                                    style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
                                           border-radius:6px;text-decoration:none;font-size:12px;
-                                          {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                                          {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
                                    onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                                    onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
                                    {{ $on ? 'data-on=1' : '' }}>
@@ -312,7 +304,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -364,7 +356,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -416,7 +408,61 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                       onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
+                       onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
+                       {{ $on ? 'data-on=1' : '' }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                            <path d="{{ $it['d'] }}"/>
+                        </svg>
+                        {{ $it['l'] }}
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Section label: الاستلام والسكن والنقل --}}
+        <div style="padding:10px 10px 4px;margin-top:4px;">
+            <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
+                      text-transform:uppercase;color:#334155;margin:0;">الاستلام والسكن والنقل</p>
+        </div>
+
+        {{-- ── GROUP: الاستلام والسكن والنقل ── --}}
+        <div style="margin-bottom:1px;">
+            <button @click="op=!op"
+                    style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
+                           border-radius:8px;border:none;cursor:pointer;text-align:right;
+                           font-family:Cairo,sans-serif;font-size:13px;font-weight:600;
+                           transition:background .15s,color .15s;"
+                    :style="{ color: op ? '#e2e8f0' : '#64748b', background: op ? 'rgba(255,255,255,.05)' : 'transparent' }"
+                    @mouseenter="$el.style.background='rgba(255,255,255,.06)';$el.style.color='#e2e8f0';"
+                    @mouseleave="$el.style.background=op?'rgba(255,255,255,.05)':'transparent';$el.style.color=op?'#e2e8f0':'#64748b';">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+                </svg>
+                <span style="flex:1;">الاستلام والنقل</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                     style="flex-shrink:0;transition:transform .25s;" :style="{ transform: op ? 'rotate(180deg)' : 'none' }">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div x-show="op" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
+                @php $opItems = [
+                    ['r'=>'admin.calendar.index',             'p'=>'admin.calendar.*',             'l'=>'التقويم',
+                     'd'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                    ['r'=>'admin.trips.index',                'p'=>'admin.trips.*',                'l'=>'الرحلات والنقل',
+                     'd'=>'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064'],
+                    ['r'=>'admin.housing-assignments.index',  'p'=>'admin.housing-assignments.*',  'l'=>'تعيينات السكن',
+                     'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14h16V7M9 21V11h6v10'],
+                    ['r'=>'admin.sponsorship-transfers.index','p'=>'admin.sponsorship-transfers.*','l'=>'عقود نقل الكفالة',
+                     'd'=>'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+                ] @endphp
+                @foreach($opItems as $it)
+                    @php $on = request()->routeIs($it['p']); @endphp
+                    <a href="{{ route($it['r']) }}"
+                       style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
+                              border-radius:7px;text-decoration:none;font-size:12.5px;
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -468,7 +514,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -522,7 +568,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -549,9 +595,9 @@
                                    border-radius:7px;border:none;cursor:pointer;text-align:right;
                                    font-family:Cairo,sans-serif;font-size:12.5px;font-weight:600;
                                    transition:background .15s,color .15s;"
-                            :style="{ color: cr ? '#93c5fd' : '#64748b', background: cr ? 'rgba(96,165,250,.08)' : 'transparent' }"
+                            :style="{ color: cr ? '#c9a84c' : '#64748b', background: cr ? 'rgba(96,165,250,.08)' : 'transparent' }"
                             @mouseenter="$el.style.background='rgba(255,255,255,.05)';$el.style.color='#cbd5e1';"
-                            @mouseleave="$el.style.background=cr?'rgba(96,165,250,.08)':'transparent';$el.style.color=cr?'#93c5fd':'#64748b';">
+                            @mouseleave="$el.style.background=cr?'rgba(201,168,76,.12)':'transparent';$el.style.color=cr?'#c9a84c':'#64748b';">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                             <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
@@ -567,7 +613,7 @@
                             <a href="{{ route($it['r']) }}"
                                style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
                                       border-radius:6px;text-decoration:none;font-size:12px;
-                                      {{ $on ? 'color:#60a5fa;background:rgba(96,165,250,.1);border-right:2px solid #2563eb;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
+                                      {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#64748b;background:transparent;border-right:2px solid transparent;' }}"
                                onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                                onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#64748b';}"
                                {{ $on ? 'data-on=1' : '' }}>

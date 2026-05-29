@@ -136,6 +136,23 @@ class PermissionSeeder extends Seeder
             ['name' => 'تحويل عميل محتمل لعميل فعلي', 'slug' => 'leads.convert'],
             // Marketing — Reports
             ['name' => 'عرض تقارير التسويق', 'slug' => 'marketing.reports.view'],
+            // Housing Assignments
+            ['name' => 'عرض تعيينات السكن',   'slug' => 'housing-assignments.view'],
+            ['name' => 'إضافة تعيين سكن',     'slug' => 'housing-assignments.create'],
+            ['name' => 'تعديل تعيين سكن',     'slug' => 'housing-assignments.edit'],
+            ['name' => 'حذف تعيين سكن',       'slug' => 'housing-assignments.delete'],
+            // Trips
+            ['name' => 'عرض الرحلات',         'slug' => 'trips.view'],
+            ['name' => 'إنشاء رحلة',          'slug' => 'trips.create'],
+            ['name' => 'تعديل رحلة',          'slug' => 'trips.edit'],
+            ['name' => 'حذف رحلة',            'slug' => 'trips.delete'],
+            // Sponsorship Transfers
+            ['name' => 'عرض عقود نقل الكفالة',  'slug' => 'sponsorship-transfers.view'],
+            ['name' => 'إنشاء عقد نقل كفالة',  'slug' => 'sponsorship-transfers.create'],
+            ['name' => 'تعديل عقد نقل كفالة',  'slug' => 'sponsorship-transfers.edit'],
+            ['name' => 'حذف عقد نقل كفالة',    'slug' => 'sponsorship-transfers.delete'],
+            // Calendar
+            ['name' => 'عرض التقويم',          'slug' => 'calendar.view'],
         ];
 
         foreach ($permissions as $p) {

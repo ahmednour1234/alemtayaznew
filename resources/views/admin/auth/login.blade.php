@@ -39,7 +39,7 @@
             left: -60px;
             width: 380px;
             height: 380px;
-            background: radial-gradient(circle, rgba(37,99,235,.08), transparent 65%);
+            background: radial-gradient(circle, rgba(201,168,76,.10), transparent 65%);
             pointer-events: none;
         }
 
@@ -53,7 +53,7 @@
             background: #ffffff;
             border: 1px solid #e8edf5;
             border-radius: 24px;
-            box-shadow: 0 12px 60px rgba(37,99,235,.09), 0 3px 12px rgba(0,0,0,.05);
+            box-shadow: 0 12px 60px rgba(201,168,76,.12), 0 3px 12px rgba(0,0,0,.05);
             padding: 48px 48px 36px;
             width: 100%;
             max-width: 480px;
@@ -75,8 +75,8 @@
             direction: rtl;
         }
         .field input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59,130,246,.10);
+            border-color: #c9a84c;
+            box-shadow: 0 0 0 3px rgba(201,168,76,.12);
             background: #fff;
         }
         .field input::placeholder { color: #b8c4d4; }
@@ -106,7 +106,7 @@
         /* ── Buttons ── */
         .btn-login {
             width: 100%;
-            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
+            background: linear-gradient(135deg, #1a2744 0%, #122240 60%, #0e1c36 100%);
             color: #fff;
             font-family: 'Cairo', sans-serif;
             font-weight: 700;
@@ -119,10 +119,10 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            box-shadow: 0 4px 16px rgba(37,99,235,.35);
+            box-shadow: 0 4px 16px rgba(18,34,64,.35);
             transition: opacity .18s, transform .12s, box-shadow .18s;
         }
-        .btn-login:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 6px 22px rgba(37,99,235,.42); }
+        .btn-login:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 6px 22px rgba(18,34,64,.45); }
         .btn-login:active { transform: translateY(0); }
 
         .btn-support {
@@ -161,51 +161,11 @@
 
         <!-- Logo + Title -->
         <div class="relative z-10">
-            <!-- Building logo SVG -->
+            <!-- Company logo -->
             <div class="mb-8">
-                <svg width="68" height="76" viewBox="0 0 68 76" fill="none">
-                    <!-- Main building body -->
-                    <rect x="12" y="28" width="44" height="44" rx="3" fill="url(#bgrad)"/>
-                    <!-- Tower left -->
-                    <rect x="8"  y="16" width="18" height="56" rx="3" fill="url(#bgrad2)"/>
-                    <!-- Tower right -->
-                    <rect x="42" y="22" width="18" height="50" rx="3" fill="url(#bgrad3)"/>
-                    <!-- Windows left tower -->
-                    <rect x="12" y="22" width="5" height="5" rx="1" fill="white" opacity=".7"/>
-                    <rect x="20" y="22" width="5" height="5" rx="1" fill="white" opacity=".7"/>
-                    <rect x="12" y="31" width="5" height="5" rx="1" fill="white" opacity=".5"/>
-                    <rect x="20" y="31" width="5" height="5" rx="1" fill="white" opacity=".5"/>
-                    <!-- Windows right tower -->
-                    <rect x="45" y="28" width="5" height="5" rx="1" fill="white" opacity=".7"/>
-                    <rect x="53" y="28" width="5" height="5" rx="1" fill="white" opacity=".7"/>
-                    <rect x="45" y="37" width="5" height="5" rx="1" fill="white" opacity=".5"/>
-                    <rect x="53" y="37" width="5" height="5" rx="1" fill="white" opacity=".5"/>
-                    <!-- Door -->
-                    <rect x="27" y="56" width="14" height="16" rx="2" fill="white" opacity=".6"/>
-                    <!-- Curved top arch on door -->
-                    <path d="M27 63 Q34 56 41 63" fill="white" opacity=".3"/>
-                    <!-- Arabic ن shape at top -->
-                    <path d="M22 12 Q34 2 46 12 Q40 8 34 8 Q28 8 22 12Z" fill="#1d4ed8" opacity=".9"/>
-                    <defs>
-                        <linearGradient id="bgrad" x1="12" y1="28" x2="56" y2="72" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#2563eb"/>
-                            <stop offset="1" stop-color="#1e40af"/>
-                        </linearGradient>
-                        <linearGradient id="bgrad2" x1="8" y1="16" x2="26" y2="72" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#3b82f6"/>
-                            <stop offset="1" stop-color="#1d4ed8"/>
-                        </linearGradient>
-                        <linearGradient id="bgrad3" x1="42" y1="22" x2="60" y2="72" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#60a5fa"/>
-                            <stop offset="1" stop-color="#2563eb"/>
-                        </linearGradient>
-                    </defs>
-                </svg>
+                <img src="{{ asset('1759760768-33.webp') }}" alt="شركة الامتياز للاستقدام"
+                     style="height:70px;object-fit:contain;">
             </div>
-
-            <h1 style="font-size:34px;font-weight:900;color:#1e293b;line-height:1.25;margin:0 0 10px">
-                شركة <span style="color:#2563eb">الامتياز</span> للاستقدام
-            </h1>
             <p style="color:#64748b;font-size:15px;font-weight:400;margin:0">
                 حلول متكاملة لاستقدام العمالة المنزلية
             </p>
@@ -289,18 +249,9 @@
 
                 <!-- Logo in card -->
                 <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:24px">
-                    <div style="width:60px;height:60px;background:linear-gradient(145deg,#eff6ff,#dbeafe);border:1.5px solid #bfdbfe;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 2px 12px rgba(59,130,246,.12)">
-                        <svg width="30" height="34" viewBox="0 0 68 76" fill="none">
-                            <rect x="12" y="28" width="44" height="44" rx="3" fill="url(#bgrad_c)"/>
-                            <rect x="8"  y="16" width="18" height="56" rx="3" fill="url(#bgrad2_c)"/>
-                            <rect x="42" y="22" width="18" height="50" rx="3" fill="url(#bgrad3_c)"/>
-                            <rect x="27" y="56" width="14" height="16" rx="2" fill="white" opacity=".7"/>
-                            <defs>
-                                <linearGradient id="bgrad_c"  x1="12" y1="28" x2="56" y2="72" gradientUnits="userSpaceOnUse"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#1e40af"/></linearGradient>
-                                <linearGradient id="bgrad2_c" x1="8"  y1="16" x2="26" y2="72" gradientUnits="userSpaceOnUse"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#1d4ed8"/></linearGradient>
-                                <linearGradient id="bgrad3_c" x1="42" y1="22" x2="60" y2="72" gradientUnits="userSpaceOnUse"><stop stop-color="#60a5fa"/><stop offset="1" stop-color="#2563eb"/></linearGradient>
-                            </defs>
-                        </svg>
+                    <div style="margin-bottom:16px;">
+                        <img src="{{ asset('1759760768-33.webp') }}" alt="شركة الامتياز للاستقدام"
+                             style="height:50px;object-fit:contain;">
                     </div>
                     <h2 style="font-size:24px;font-weight:900;color:#0f172a;margin:0 0 6px">مرحباً بك</h2>
                     <p style="font-size:13px;color:#94a3b8;margin:0;text-align:center;line-height:1.6">
@@ -365,11 +316,11 @@
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
                         <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;color:#4b5563;user-select:none">
                             <input type="checkbox" name="remember" id="remember"
-                                   style="width:15px;height:15px;border-radius:4px;accent-color:#2563eb;cursor:pointer">
+                                   style="width:15px;height:15px;border-radius:4px;accent-color:#c9a84c;cursor:pointer">
                             تذكرني
                         </label>
-                        <a href="#" style="font-size:13px;color:#2563eb;font-weight:600;text-decoration:none"
-                           onmouseover="this.style.color='#1d4ed8'" onmouseout="this.style.color='#2563eb'">
+                        <a href="#" style="font-size:13px;color:#c9a84c;font-weight:600;text-decoration:none"
+                           onmouseover="this.style.color='#a88830'" onmouseout="this.style.color='#c9a84c'">
                             نسيت كلمة المرور؟
                         </a>
                     </div>

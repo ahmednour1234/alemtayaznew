@@ -242,6 +242,41 @@ class AutoPermission
         'admin.complaints.restore' => 'complaints.restore',
         'admin.complaints.reports' => 'complaints.reports',
         'admin.complaints.attachments.destroy' => 'complaints.edit',
+
+        // ── Housing Assignments (تعيينات السكن) ──────────────
+        'admin.housing-assignments.index'    => 'housing-assignments.view',
+        'admin.housing-assignments.create'   => 'housing-assignments.create',
+        'admin.housing-assignments.store'    => 'housing-assignments.create',
+        'admin.housing-assignments.checkout' => 'housing-assignments.edit',
+        'admin.housing-assignments.destroy'  => 'housing-assignments.delete',
+
+        // ── Trips (الرحلات والنقل) ────────────────────────────
+        'admin.trips.index'        => 'trips.view',
+        'admin.trips.show'         => 'trips.view',
+        'admin.trips.print'        => 'trips.view',
+        'admin.trips.create'       => 'trips.create',
+        'admin.trips.store'        => 'trips.create',
+        'admin.trips.edit'         => 'trips.edit',
+        'admin.trips.update'       => 'trips.edit',
+        'admin.trips.complete'     => 'trips.edit',
+        'admin.trips.add-worker'   => 'trips.edit',
+        'admin.trips.remove-worker'=> 'trips.edit',
+        'admin.trips.destroy'      => 'trips.delete',
+
+        // ── Sponsorship Transfers (عقود نقل الكفالة) ─────────
+        'admin.sponsorship-transfers.index'         => 'sponsorship-transfers.view',
+        'admin.sponsorship-transfers.show'          => 'sponsorship-transfers.view',
+        'admin.sponsorship-transfers.print'         => 'sponsorship-transfers.view',
+        'admin.sponsorship-transfers.create'        => 'sponsorship-transfers.create',
+        'admin.sponsorship-transfers.store'         => 'sponsorship-transfers.create',
+        'admin.sponsorship-transfers.edit'          => 'sponsorship-transfers.edit',
+        'admin.sponsorship-transfers.update'        => 'sponsorship-transfers.edit',
+        'admin.sponsorship-transfers.update-status' => 'sponsorship-transfers.edit',
+        'admin.sponsorship-transfers.destroy'       => 'sponsorship-transfers.delete',
+
+        // ── Calendar (التقويم) ────────────────────────────────
+        'admin.calendar.index'  => 'calendar.view',
+        'admin.calendar.events' => 'calendar.view',
     ];
 
     public function handle(Request $request, Closure $next): Response

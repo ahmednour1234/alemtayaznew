@@ -14,21 +14,27 @@ use App\Repositories\Contracts\ClientRepositoryInterface;
 use App\Repositories\Contracts\ComplaintRepositoryInterface;
 use App\Repositories\Contracts\ExpenseRepositoryInterface;
 use App\Repositories\Contracts\ExpenseTypeRepositoryInterface;
+use App\Repositories\Contracts\HousingAssignmentRepositoryInterface;
 use App\Repositories\Contracts\HousingRepositoryInterface;
 use App\Repositories\Contracts\IncomeRepositoryInterface;
 use App\Repositories\Contracts\IncomeTypeRepositoryInterface;
 use App\Repositories\Contracts\PermissionRepositoryInterface;
 use App\Repositories\Contracts\RoleRepositoryInterface;
+use App\Repositories\Contracts\SponsorshipTransferRepositoryInterface;
 use App\Repositories\Contracts\TransferRepositoryInterface;
+use App\Repositories\Contracts\TripRepositoryInterface;
 use App\Repositories\ExpenseRepository;
 use App\Repositories\ExpenseTypeRepository;
+use App\Repositories\HousingAssignmentRepository;
 use App\Repositories\HousingRepository;
 use App\Repositories\IncomeRepository;
 use App\Repositories\IncomeTypeRepository;
 use App\Repositories\PermissionRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\Contracts\WorkerRepositoryInterface;
+use App\Repositories\SponsorshipTransferRepository;
 use App\Repositories\TransferRepository;
+use App\Repositories\TripRepository;
 use App\Repositories\WorkerRepository;
 use Illuminate\Support\ServiceProvider;
 
@@ -54,5 +60,8 @@ class RepositoryServiceProvider extends ServiceProvider
             \App\Repositories\Contracts\RecruitmentContractRepositoryInterface::class,
             \App\Repositories\RecruitmentContractRepository::class
         );
+        $this->app->bind(HousingAssignmentRepositoryInterface::class, HousingAssignmentRepository::class);
+        $this->app->bind(TripRepositoryInterface::class, TripRepository::class);
+        $this->app->bind(SponsorshipTransferRepositoryInterface::class, SponsorshipTransferRepository::class);
     }
 }

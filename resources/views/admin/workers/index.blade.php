@@ -36,9 +36,13 @@
                 <label class="block text-xs font-medium text-slate-500 mb-1">الحالة</label>
                 <select name="status" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                     <option value="">كل الحالات</option>
-                    <option value="available" {{ ($filters['status'] ?? '') === 'available' ? 'selected' : '' }}>متاحة</option>
-                    <option value="reserved"  {{ ($filters['status'] ?? '') === 'reserved'  ? 'selected' : '' }}>محجوزة</option>
-                    <option value="assigned"  {{ ($filters['status'] ?? '') === 'assigned'  ? 'selected' : '' }}>تم التعيين</option>
+                    <option value="available"            {{ ($filters['status'] ?? '') === 'available'            ? 'selected' : '' }}>متاحة</option>
+                    <option value="reserved"             {{ ($filters['status'] ?? '') === 'reserved'             ? 'selected' : '' }}>محجوزة</option>
+                    <option value="assigned"             {{ ($filters['status'] ?? '') === 'assigned'             ? 'selected' : '' }}>تم التعيين</option>
+                    <option value="in_housing"           {{ ($filters['status'] ?? '') === 'in_housing'           ? 'selected' : '' }}>في السكن</option>
+                    <option value="sponsorship_transfer" {{ ($filters['status'] ?? '') === 'sponsorship_transfer' ? 'selected' : '' }}>نقل كفالة</option>
+                    <option value="deportation"          {{ ($filters['status'] ?? '') === 'deportation'          ? 'selected' : '' }}>تسفير</option>
+                    <option value="returned"             {{ ($filters['status'] ?? '') === 'returned'             ? 'selected' : '' }}>عودة</option>
                 </select>
             </div>
             <div>

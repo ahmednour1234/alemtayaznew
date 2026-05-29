@@ -1,10 +1,31 @@
 ﻿@extends('admin.layouts.app')
 @section('title', 'لوحة التحكم')
 
+@push('styles')
+<style>
+.dash-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+@media (max-width: 767px) {
+    .dash-2col { grid-template-columns: 1fr !important; gap: 12px !important; }
+    .dash-stat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+    .dash-stat-grid .card { padding: 14px !important; }
+    .dash-stat-grid .card .stat-icon { width: 36px !important; height: 36px !important; }
+    .dash-stat-grid p[style*="22px"] { font-size: 18px !important; }
+}
+@media (max-width: 380px) {
+    .dash-stat-grid { grid-template-columns: 1fr !important; }
+}
+</style>
+@endpush
+
 @section('content')
 
 {{-- ── Stat Cards ─────────────────────────────────────────────────────── --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;">
+<div class="dash-stat-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px;">
 
     {{-- Total Income --}}
     <div class="card" style="padding:20px;display:flex;align-items:center;gap:16px;">
@@ -97,19 +118,19 @@
 </div>
 
 {{-- ── Charts ──────────────────────────────────────────────────────────── --}}
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+<div class="dash-2col">
     <div class="card" style="padding:20px;">
         <p style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:16px;">الدخل مقابل المصاريف ({{ now()->year }})</p>
-        <canvas id="incomeExpenseChart" height="180"></canvas>
+        <div style="position:relative;width:100%;"><canvas id="incomeExpenseChart" height="180" style="max-width:100%;"></canvas></div>
     </div>
     <div class="card" style="padding:20px;">
         <p style="font-size:13px;font-weight:700;color:#0f172a;margin-bottom:16px;">مقارنة الفروع ({{ now()->year }})</p>
-        <canvas id="branchChart" height="180"></canvas>
+        <div style="position:relative;width:100%;"><canvas id="branchChart" height="180" style="max-width:100%;"></canvas></div>
     </div>
 </div>
 
 {{-- ── Recent Tables ────────────────────────────────────────────────────── --}}
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+<div class="dash-2col">
 
     {{-- Recent Incomes --}}
     <div class="card" style="overflow:hidden;">
@@ -265,6 +286,7 @@ new Chart(document.getElementById('incomeExpenseChart'), {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: true,
         interaction: { mode: 'index', intersect: false },
         plugins: { legend: { position: 'top', labels: { usePointStyle: true, pointStyleWidth: 8, padding: 16 } } },
         scales: {
@@ -282,6 +304,7 @@ new Chart(document.getElementById('branchChart'), {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: true,
         interaction: { mode: 'index', intersect: false },
         plugins: { legend: { position: 'top', labels: { usePointStyle: true, pointStyleWidth: 8, padding: 16 } } },
         scales: {

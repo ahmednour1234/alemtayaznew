@@ -12,7 +12,7 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: { DEFAULT: '#2563eb', light: '#eff6ff', dark: '#1d4ed8' },
+                        primary: { DEFAULT: '#c9a84c', light: '#fdf8e8', dark: '#a88830' },
                         surface: '#ffffff',
                         bg: '#f5f7fb',
                         ink: { DEFAULT: '#0f172a', muted: '#64748b', faint: '#94a3b8' },
@@ -31,6 +31,10 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tom Select -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.default.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.1/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
@@ -40,8 +44,8 @@
         :root {
             --sidebar-w: 260px;
             --topbar-h: 60px;
-            --primary: #2563eb;
-            --primary-light: #eff6ff;
+            --primary: #c9a84c;
+            --primary-light: #fdf8e8;
             --surface: #ffffff;
             --bg: #f5f7fb;
             --ink: #0f172a;
@@ -75,11 +79,11 @@
         }
         .nav-link:hover { background: rgba(255,255,255,.06); color: #cbd5e1; }
         .nav-link.active {
-            background: rgba(37,99,235,.18);
-            color: #93c5fd;
+            background: rgba(201,168,76,.18);
+            color: #c9a84c;
             font-weight: 600;
         }
-        .nav-link.active svg { color: #60a5fa; }
+        .nav-link.active svg { color: #c9a84c; }
         .nav-link svg { flex-shrink: 0; width: 16px; height: 16px; transition: color .15s; }
 
         /* ── Main wrapper ── */
@@ -149,7 +153,7 @@
             transition: border-color .15s, background .15s;
             outline: none;
         }
-        .search-input:focus { background: #fff; border-color: var(--primary); }
+        .search-input:focus { background: #fff; border-color: #c9a84c; box-shadow: 0 0 0 3px rgba(201,168,76,.12); }
         .search-input::placeholder { color: var(--ink-faint); }
 
         /* ── Icon button ── */
@@ -183,14 +187,156 @@
         }
         .data-table td { padding: 11px 14px; border-bottom: 1px solid #f1f5f9; color: var(--ink-muted); }
         .data-table tbody tr:last-child td { border-bottom: none; }
-        .data-table tbody tr:hover td { background: #fafbff; }
+        .data-table tbody tr:hover td { background: #fdfbf3; }
+
+        /* ── Responsive ── */
+        #sidebar-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,.55);
+            z-index: 48;
+            opacity: 0; pointer-events: none;
+            transition: opacity .25s;
+        }
+        #sidebar-overlay.active { opacity: 1; pointer-events: all; }
+
+        #bottom-nav { display: none; }
+
+        /* ── Bottom nav items (shared, only visible on mobile) ── */
+        .bnav-item {
+            flex: 1;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 3px;
+            color: #64748b; font-size: 10px; font-weight: 600;
+            text-decoration: none;
+            font-family: 'Cairo', sans-serif;
+            transition: color .15s, background .15s;
+            padding: 4px 2px;
+        }
+        .bnav-item.active { color: #c9a84c; }
+        .bnav-item:active, .bnav-item:hover { color: #e2e8f0; background: rgba(255,255,255,.05); }
+
+        @media (max-width: 767px) {
+            #sidebar {
+                box-shadow: -6px 0 32px rgba(0,0,0,.45);
+            }
+            #main-wrap { margin-right: 0 !important; }
+            #main-wrap.expanded { margin-right: 0 !important; }
+            #topbar { height: 58px !important; padding: 0 10px !important; }
+            .topbar-search-wrap { display: none !important; }
+            .topbar-fullscreen  { display: none !important; }
+            main { padding: 10px 10px 74px !important; }
+            #bottom-nav {
+                display: flex;
+                position: fixed; bottom: 0; left: 0; right: 0;
+                height: 62px;
+                background: #0f172a;
+                border-top: 1px solid rgba(201,168,76,.2);
+                z-index: 55;
+                align-items: stretch;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1023px) {
+            :root { --sidebar-w: 220px; }
+            #topbar { padding: 0 14px !important; }
+            main { padding: 14px !important; }
+        }
+    </style>
+
+    <!-- Tom Select RTL Theme -->
+    <style>
+        .ts-wrapper { direction: rtl; font-family: 'Cairo', sans-serif; }
+        .ts-wrapper .ts-control {
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 6px 10px 6px 32px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 13px;
+            background: #fff;
+            min-height: 38px;
+            cursor: pointer;
+            transition: border-color .15s, box-shadow .15s;
+            gap: 4px;
+        }
+        .ts-wrapper.focus .ts-control {
+            border-color: #c9a84c !important;
+            box-shadow: 0 0 0 3px rgba(201,168,76,.15);
+            outline: none;
+        }
+        .ts-wrapper .ts-control .item { font-size: 13px; }
+        .ts-wrapper .ts-control::after {
+            content: '';
+            position: absolute;
+            left: 10px; top: 50%;
+            transform: translateY(-50%);
+            width: 0; height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 5px solid #94a3b8;
+            pointer-events: none;
+        }
+        .ts-wrapper.open .ts-control::after { border-top: none; border-bottom: 5px solid #c9a84c; }
+        .ts-wrapper .ts-dropdown {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(15,23,42,.13);
+            font-family: 'Cairo', sans-serif;
+            font-size: 13px;
+            direction: rtl;
+            z-index: 9999;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        .ts-wrapper .ts-dropdown .ts-dropdown-content { max-height: 220px; }
+        .ts-wrapper .ts-dropdown .option {
+            padding: 9px 14px;
+            color: #334155;
+            cursor: pointer;
+            transition: background .12s;
+        }
+        .ts-wrapper .ts-dropdown .option:hover,
+        .ts-wrapper .ts-dropdown .option.active   { background: #fdf8e8; color: #92720e; }
+        .ts-wrapper .ts-dropdown .option.selected { background: #fef9e7; color: #c9a84c; font-weight: 600; }
+        .ts-dropdown input.dropdown-input {
+            border: none;
+            border-bottom: 1.5px solid #e8edf5;
+            padding: 8px 12px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 13px;
+            width: 100%;
+            outline: none;
+            direction: rtl;
+            background: #fafafa;
+        }
+        .ts-dropdown input.dropdown-input:focus { border-bottom-color: #c9a84c; background: #fff; }
+        .ts-dropdown .no-results { padding: 10px 14px; color: #94a3b8; font-size: 13px; }
+        /* hide default arrow from original select */
+        select { display: none; }
     </style>
 
     @stack('styles')
 </head>
 <body>
 
-<div x-data="{ open: true }">
+<div x-data="{
+    open: window.innerWidth >= 768,
+    mob: window.innerWidth < 768,
+    init() {
+        window.addEventListener('resize', () => {
+            const isMob = window.innerWidth < 768;
+            if (!isMob && !this.open) this.open = true;
+            if (isMob && this.open) this.open = false;
+            this.mob = isMob;
+        });
+    }
+}">
+
+    <!-- Mobile sidebar overlay backdrop -->
+    <div id="sidebar-overlay"
+         :class="open && mob ? 'active' : ''"
+         @click="open = false"
+         x-cloak></div>
 
     <!-- Sidebar -->
     <div id="sidebar" :class="open ? '' : 'collapsed'">
@@ -234,9 +380,86 @@
             @yield('content')
         </main>
     </div>
+
+    <!-- Bottom navigation bar (mobile only) -->
+    <nav id="bottom-nav">
+        <a href="{{ route('admin.dashboard') }}"
+           class="bnav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+            <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            </svg>
+            الرئيسية
+        </a>
+        <a href="{{ route('admin.contracts.index') }}"
+           class="bnav-item {{ request()->routeIs('admin.contracts.*') ? 'active' : '' }}">
+            <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            العقود
+        </a>
+        <a href="{{ route('admin.incomes.index') }}"
+           class="bnav-item {{ request()->routeIs('admin.incomes.*','admin.expenses.*','admin.transfers.*','admin.reports.*') ? 'active' : '' }}">
+            <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <path d="M2 10h20"/>
+            </svg>
+            المالية
+        </a>
+        <a href="{{ route('admin.clients.index') }}"
+           class="bnav-item {{ request()->routeIs('admin.clients.*','admin.agents.*','admin.workers.*') ? 'active' : '' }}">
+            <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+            </svg>
+            العملاء
+        </a>
+        <a href="#" @click.prevent="open = !open"
+           class="bnav-item" :class="open ? 'active' : ''">
+            <svg width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+                <line x1="3" y1="6"  x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+            القائمة
+        </a>
+    </nav>
 </div>
 
 @stack('scripts')
+<script>
+// Global Tom Select init — runs after Alpine and DOM are ready
+function initTomSelects(root) {
+    root = root || document;
+    root.querySelectorAll('select:not([data-ts-ignore]):not([data-ts-done])').forEach(function(el) {
+        if (el._tomSelect) return;
+        el.setAttribute('data-ts-done', '1');
+        var opts = {
+            allowEmptyOption: true,
+            plugins: [],
+            searchField: ['text'],
+            placeholder: el.options[0] ? el.options[0].text : 'اختر...',
+            render: {
+                no_results: function() {
+                    return '<div class="no-results">لا توجد نتائج</div>';
+                }
+            }
+        };
+        // Disable search for small selects (≤5 options)
+        if (el.options.length <= 5) { opts.controlInput = null; }
+        try { new TomSelect(el, opts); } catch(e) {}
+    });
+}
+document.addEventListener('DOMContentLoaded', function() { initTomSelects(); });
+// Re-init after Alpine finishes (for any dynamically shown elements)
+document.addEventListener('alpine:initialized', function() { initTomSelects(); });
+</script>
 </body>
 </html>
 

@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\HousingAssignmentController;
+use App\Http\Controllers\Admin\TripController;
+use App\Http\Controllers\Admin\SponsorshipTransferController;
+use App\Http\Controllers\Admin\CalendarController;
+use App\Http\Controllers\ComplaintTrackingController;
 use App\Http\Controllers\Admin\AirportController;
 use App\Http\Controllers\Admin\AgentController;
 use App\Http\Controllers\Admin\AuthController;
@@ -31,6 +36,9 @@ Route::get('/', fn() => redirect()->route('admin.login'));
 
 // ── Public contract tracking ──────────────────────────────────────────────────
 Route::get('/track', [RecruitmentContractController::class, 'publicTrack'])->name('contract.track');
+
+// ── Public complaint tracking ──────────────────────────────────────────────────
+Route::get('/complaint/track/{token}', [ComplaintTrackingController::class, 'show'])->name('complaint.track');
 
 // ── Admin Auth ────────────────────────────────────────────────────────────────
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -188,6 +196,29 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::get('reports', [\App\Http\Controllers\Admin\Marketing\ReportsController::class, 'index'])->name('reports');
         });
+
+        // Housing Assignments (تعيينات السكن)
+        Route::get('housing-assignments',                     [HousingAssignmentController::class, 'index'])->name('housing-assignments.index');
+        Route::get('housing-assignments/create',              [HousingAssignmentController::class, 'create'])->name('housing-assignments.create');
+        Route::post('housing-assignments',                    [HousingAssignmentController::class, 'store'])->name('housing-assignments.store');
+        Route::patch('housing-assignments/{id}/checkout',     [HousingAssignmentController::class, 'checkout'])->name('housing-assignments.checkout');
+        Route::delete('housing-assignments/{id}',             [HousingAssignmentController::class, 'destroy'])->name('housing-assignments.destroy');
+
+        // Trips (الرحلات)
+        Route::post('trips/{trip}/workers',                   [TripController::class, 'addWorker'])->name('trips.add-worker');
+        Route::delete('trips/{trip}/workers/{worker}',        [TripController::class, 'removeWorker'])->name('trips.remove-worker');
+        Route::patch('trips/{trip}/complete',                 [TripController::class, 'complete'])->name('trips.complete');
+        Route::get('trips/{trip}/print',                      [TripController::class, 'print'])->name('trips.print');
+        Route::resource('trips', TripController::class);
+
+        // Sponsorship Transfers (عقود نقل الكفالة)
+        Route::post('sponsorship-transfers/{id}/update-status', [SponsorshipTransferController::class, 'updateStatus'])->name('sponsorship-transfers.update-status');
+        Route::get('sponsorship-transfers/{id}/print',          [SponsorshipTransferController::class, 'print'])->name('sponsorship-transfers.print');
+        Route::resource('sponsorship-transfers', SponsorshipTransferController::class);
+
+        // Calendar (التقويم)
+        Route::get('calendar',        [CalendarController::class, 'index'])->name('calendar.index');
+        Route::get('calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
 
     });
 });

@@ -12,7 +12,7 @@ class Complaint extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'complaint_number', 'contract_id', 'contract_type',
+        'complaint_number', 'public_token', 'contract_id', 'contract_type',
         'client_id', 'worker_id', 'branch_id',
         'problem_type', 'description', 'phone',
         'assigned_admin_id', 'priority', 'status',
