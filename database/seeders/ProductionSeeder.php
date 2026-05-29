@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Database\Seeders\Main\AgentMainSeeder;
 use Database\Seeders\Main\BranchMainSeeder;
+use Database\Seeders\Main\CityMainSeeder;
 use Database\Seeders\Main\ExpenseTypeMainSeeder;
 use Database\Seeders\Main\IncomeTypeMainSeeder;
 use Database\Seeders\Main\NationalityMainSeeder;
@@ -54,8 +55,12 @@ class ProductionSeeder extends Seeder
         $this->call(IncomeTypeMainSeeder::class);
 
         // ── 7. أنواع المصروفات ────────────────────────────────────────────────
-        $this->command->info('── [7/7] أنواع المصروفات...');
+        $this->command->info('── [7/8] أنواع المصروفات...');
         $this->call(ExpenseTypeMainSeeder::class);
+
+        // ── 8. المدن ─────────────────────────────────────────────────────────
+        $this->command->info('── [8/8] مدن المملكة العربية السعودية...');
+        $this->call(CityMainSeeder::class);
 
         $this->command->info('');
         $this->command->info('═══════════════════════════════════════');
