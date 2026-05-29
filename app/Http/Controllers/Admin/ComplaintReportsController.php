@@ -46,8 +46,8 @@ class ComplaintReportsController extends Controller
                 DB::raw("SUM(CASE WHEN status='resolved' THEN 1 ELSE 0 END) as resolved"),
                 DB::raw("SUM(CASE WHEN status='closed' THEN 1 ELSE 0 END) as closed"),
                 DB::raw("SUM(CASE WHEN status IN ('new','in_progress') THEN 1 ELSE 0 END) as open"),
-                DB::raw("SUM(CASE WHEN status IN ('new','in_progress') AND created_at <= datetime('now','-7 day') THEN 1 ELSE 0 END) as stale"),
-                DB::raw('AVG(CASE WHEN resolved_at IS NOT NULL THEN (julianday(resolved_at) - julianday(created_at)) END) as avg_resolution_days')
+                DB::raw("SUM(CASE WHEN status IN ('new','in_progress') AND created_at <= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 ELSE 0 END) as stale"),
+                DB::raw('AVG(CASE WHEN resolved_at IS NOT NULL THEN DATEDIFF(resolved_at, created_at) END) as avg_resolution_days')
             )
             ->whereNotNull('branch_id')
             ->groupBy('branch_id')
