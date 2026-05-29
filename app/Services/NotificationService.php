@@ -21,6 +21,7 @@ class NotificationService
         'transfer_rejected'   => 'transfers.view',
         'sponsorship_transfer_created'   => 'sponsorship-transfers.view',
         'sponsorship_transfer_forwarded' => 'sponsorship-transfers.view',
+        'trip_created'        => 'trips.view',
         'trip_completed'      => 'trips.view',
         'trip_issue'          => 'trips.view',
         'branch_created'      => null,

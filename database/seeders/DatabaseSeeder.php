@@ -8,6 +8,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // للبيئة التطويرية (dev/testing) — يشمل بيانات وهمية
         $this->call([
             PermissionSeeder::class,
             RoleSeeder::class,
@@ -17,3 +18,4 @@ class DatabaseSeeder extends Seeder
         ]);
     }
 }
+

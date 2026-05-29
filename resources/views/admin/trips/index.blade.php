@@ -18,10 +18,15 @@
 @endif
 
 <div class="bg-white rounded-xl p-4 shadow-sm mb-4 border border-slate-100">
-    <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-3">
+    <form method="GET" class="grid grid-cols-1 md:grid-cols-6 gap-3">
         <div>
             <label class="block text-xs font-medium text-slate-500 mb-1.5">بحث</label>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="رقم الرحلة / رقم الرحلة الجوية"
+                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1.5">بحث بالعاملة</label>
+            <input type="text" name="worker_search" value="{{ request('worker_search') }}" placeholder="اسم / جواز / رقم ملف"
                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
         </div>
         <div>

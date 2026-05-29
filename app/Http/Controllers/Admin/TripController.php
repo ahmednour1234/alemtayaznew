@@ -26,7 +26,7 @@ class TripController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->only('search', 'trip_type', 'status', 'date_from', 'date_to');
+        $filters = $request->only('search', 'trip_type', 'status', 'date_from', 'date_to', 'worker_search');
         if ($bid = $this->branchFilter()) {
             $filters['branch_id'] = $bid;
         } elseif ($request->filled('branch_id')) {
@@ -67,6 +67,21 @@ class TripController extends Controller
         $data['status']   = 'scheduled';
 
         $trip = $this->service->create($data);
+
+        $typeLabels = [
+            'arrival'         => 'وصول',
+            'departure'       => 'مغادرة',
+            'group_transport' => 'نقل جماعي',
+            'deportation'     => 'ترحيل',
+        ];
+        $this->notifications->notify(
+            'trip_created',
+            'تم إنشاء رحلة جديدة',
+            'رحلة رقم ' . $trip->trip_number . ' — ' . ($typeLabels[$trip->trip_type] ?? $trip->trip_type),
+            route('admin.trips.show', $trip->id),
+            [$trip->branch_id]
+        );
+
         return redirect()->route('admin.trips.show', $trip->id)
             ->with('success', 'تم إنشاء الرحلة بنجاح. يمكنك إضافة العاملات الآن.');
     }

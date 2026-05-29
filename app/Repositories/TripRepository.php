@@ -21,6 +21,13 @@ class TripRepository implements TripRepositoryInterface
                 $q->where('trip_number', 'like', '%' . $filters['search'] . '%')
                   ->orWhere('flight_number', 'like', '%' . $filters['search'] . '%')
             )
+            ->when(!empty($filters['worker_search']), fn($q) =>
+                $q->whereHas('workers', fn($wq) =>
+                    $wq->where('name', 'like', '%' . $filters['worker_search'] . '%')
+                       ->orWhere('passport_number', 'like', '%' . $filters['worker_search'] . '%')
+                       ->orWhere('file_number', 'like', '%' . $filters['worker_search'] . '%')
+                )
+            )
             ->orderByDesc('trip_date')
             ->paginate(20);
     }
