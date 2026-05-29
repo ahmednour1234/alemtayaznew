@@ -83,7 +83,7 @@
                     <div class="flex gap-2">
                         @if(! $a->check_out_date)
                         <form method="POST" action="{{ route('admin.housing-assignments.checkout', $a->id) }}"
-                              x-data="{ open: false }" @submit.prevent="open = true">
+                              x-data="{ open: false }">
                             @csrf @method('PATCH')
                             <button type="button" @click="open = true"
                                     class="text-amber-600 hover:underline text-xs">مغادرة</button>
@@ -104,7 +104,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
                         </form>
                         @endif
                         @can('housing-assignments.delete')

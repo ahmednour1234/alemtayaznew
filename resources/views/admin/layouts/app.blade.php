@@ -41,6 +41,7 @@
 
     <style>
         *, *::before, *::after { box-sizing: border-box; }
+        html, body { overflow-x: hidden; max-width: 100%; }
         :root {
             --sidebar-w: 260px;
             --topbar-h: 60px;

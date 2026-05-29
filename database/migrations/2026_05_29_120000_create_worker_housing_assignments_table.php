@@ -17,6 +17,7 @@ return new class extends Migration
             $table->date('check_in_date');
             $table->date('check_out_date')->nullable();
             $table->text('notes')->nullable();
+            $table->string('reason')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->index(['worker_id', 'check_out_date']);

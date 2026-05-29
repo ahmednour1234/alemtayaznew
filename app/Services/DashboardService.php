@@ -3,11 +3,16 @@
 namespace App\Services;
 
 use App\Models\Branch;
+use App\Models\Client;
 use App\Models\Complaint;
 use App\Models\Expense;
 use App\Models\FinancialTransfer;
+use App\Models\Housing;
+use App\Models\HousingAssignment;
 use App\Models\Income;
 use App\Models\RecruitmentContract;
+use App\Models\SponsorshipTransfer;
+use App\Models\Trip;
 use App\Models\Worker;
 
 class DashboardService
@@ -30,6 +35,7 @@ class DashboardService
         $branchCount   = $branchId ? 1 : Branch::where('active', true)->count();
 
         // New stats for redesigned dashboard
+        $totalClients     = Client::when($branchId, fn($q) => $q->where('branch_id', $branchId))->count();
         $totalWorkers     = Worker::count();
         $activeContracts  = RecruitmentContract::whereNotIn('current_status', [13, 14, 15])->count();
         $pendingContracts = RecruitmentContract::where('current_status', 1)->count();
@@ -55,11 +61,29 @@ class DashboardService
             ->whereYear('date', $lastMonthYear)->whereMonth('date', $lastMonth)->sum('amount');
         $incomeChange    = $incomeLastMonth > 0 ? round((($incomeThisMonth - $incomeLastMonth) / $incomeLastMonth) * 100) : 0;
 
+        // Average completion days: avg days from created_at to last status update for completed contracts
+        $avgCompletionDays = RecruitmentContract::where('current_status', 13)
+            ->whereNotNull('updated_at')
+            ->selectRaw('AVG(JULIANDAY(updated_at) - JULIANDAY(created_at)) as avg_days')
+            ->value('avg_days');
+        $avgCompletionDays = $avgCompletionDays ? round($avgCompletionDays, 1) : '—';
+
         $expensesThisMonth = Expense::where('status', 'approved')->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->whereYear('date', $thisYear)->whereMonth('date', $thisMonth)->sum('amount');
         $expensesLastMonth = Expense::where('status', 'approved')->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->whereYear('date', $lastMonthYear)->whereMonth('date', $lastMonth)->sum('amount');
         $expensesChange    = $expensesLastMonth > 0 ? round((($expensesThisMonth - $expensesLastMonth) / $expensesLastMonth) * 100) : 0;
+
+        // Tomorrow's trips count
+        $tomorrowTripsCount = Trip::whereDate('trip_date', now()->addDay())->where('status', 'scheduled')->count();
+
+        // Housing quick stats
+        $housingCapacity = Housing::where('active', true)->sum('capacity');
+        $housingOccupied = HousingAssignment::whereNull('check_out_date')->count();
+
+        // Musaned open + urgent complaints
+        $musanedOpen      = Complaint::where('on_musaned', true)->whereNotIn('status', ['resolved', 'closed'])->count();
+        $urgentComplaints = Complaint::whereIn('priority', ['high', 'urgent'])->whereNotIn('status', ['resolved', 'closed'])->count();
 
         return [
             'total_income'           => $totalIncome,
@@ -68,8 +92,10 @@ class DashboardService
             'branch_count'           => $branchCount,
             'pending_expenses'       => $pendingExpenses,
             'pending_transfers'      => $pendingTransfers,
+            'total_clients'          => $totalClients,
             'total_workers'          => $totalWorkers,
             'active_contracts'       => $activeContracts,
+            'avg_completion_days'    => $avgCompletionDays,
             'pending_contracts'      => $pendingContracts,
             'contracts_this_month'   => $contractsThisMonth,
             'contracts_change'       => $contractsChange,
@@ -78,6 +104,12 @@ class DashboardService
             'completion_rate'        => $completionRate,
             'income_change'          => $incomeChange,
             'expenses_change'        => $expensesChange,
+            'tomorrow_trips'         => $tomorrowTripsCount,
+            'housing_capacity'       => $housingCapacity,
+            'housing_occupied'       => $housingOccupied,
+            'housing_available'      => max(0, $housingCapacity - $housingOccupied),
+            'musaned_open'           => $musanedOpen,
+            'urgent_complaints'      => $urgentComplaints,
         ];
     }
 
@@ -190,5 +222,64 @@ class DashboardService
             'leads'     => $campaigns->pluck('leads_count')->toArray(),
             'converted' => $campaigns->pluck('converted_count')->toArray(),
         ];
+    }
+
+    /** Monthly sponsorship transfers chart */
+    public function getSponsorshipTransfersChart(): array
+    {
+        $year = now()->year;
+        $months = $new = $completed = [];
+
+        for ($m = 1; $m <= 12; $m++) {
+            $months[]    = \Carbon\Carbon::create($year, $m)->translatedFormat('M');
+            $new[]       = SponsorshipTransfer::whereYear('created_at', $year)->whereMonth('created_at', $m)->count();
+            $completed[] = SponsorshipTransfer::whereYear('created_at', $year)->whereMonth('created_at', $m)
+                ->where('current_status', 3)->count();
+        }
+
+        return compact('months', 'new', 'completed');
+    }
+
+    /** Trips scheduled for tomorrow */
+    public function getTomorrowTrips()
+    {
+        return Trip::with(['airport', 'branch'])
+            ->withCount('workers')
+            ->whereDate('trip_date', now()->addDay())
+            ->where('status', 'scheduled')
+            ->orderBy('trip_time')
+            ->get();
+    }
+
+    /** Housing capacity and occupancy */
+    public function getHousingStats(): array
+    {
+        $capacity = (int) Housing::where('active', true)->sum('capacity');
+        $occupied = HousingAssignment::whereNull('check_out_date')->count();
+
+        return [
+            'houses'    => Housing::where('active', true)->count(),
+            'capacity'  => $capacity,
+            'occupied'  => $occupied,
+            'available' => max(0, $capacity - $occupied),
+            'rate'      => $capacity > 0 ? round(($occupied / $capacity) * 100) : 0,
+        ];
+    }
+
+    /** Monthly complaints — open vs resolved */
+    public function getComplaintsMonthlyData(): array
+    {
+        $year = now()->year;
+        $months = $open = $resolved = [];
+
+        for ($m = 1; $m <= 12; $m++) {
+            $months[]   = \Carbon\Carbon::create($year, $m)->translatedFormat('M');
+            $open[]     = Complaint::whereYear('created_at', $year)->whereMonth('created_at', $m)
+                ->whereNotIn('status', ['resolved', 'closed'])->count();
+            $resolved[] = Complaint::whereYear('created_at', $year)->whereMonth('created_at', $m)
+                ->whereIn('status', ['resolved', 'closed'])->count();
+        }
+
+        return compact('months', 'open', 'resolved');
     }
 }

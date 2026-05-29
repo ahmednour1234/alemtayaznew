@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class FinancialTransfer extends Model
 {
@@ -13,7 +14,7 @@ class FinancialTransfer extends Model
         'amount', 'date', 'status', 'description',
         'rejection_reason', 'approved_at',
     ];
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected function casts(): array
     {

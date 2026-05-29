@@ -28,6 +28,10 @@ class DashboardController extends Controller
         $contractsChart = $this->dashboardService->getContractsMonthlyData();
         $statusChart    = $this->dashboardService->getContractsByStatusData();
         $campaignsChart = $this->dashboardService->getCampaignsChartData();
+        $sponsorshipChart = $this->dashboardService->getSponsorshipTransfersChart();
+        $tomorrowTrips    = $this->dashboardService->getTomorrowTrips();
+        $housingStats     = $this->dashboardService->getHousingStats();
+        $complaintsChart  = $this->dashboardService->getComplaintsMonthlyData();
         $recentIncomes = $this->incomeService->recent(5, $branchId);
         $recentExpenses = $this->expenseService->recent(5, $branchId);
         $pendingExpenses  = $this->expenseService->pending($branchId);
@@ -36,6 +40,7 @@ class DashboardController extends Controller
         return view('admin.dashboard.index', compact(
             'stats', 'chartData', 'branchChart',
             'contractsChart', 'statusChart', 'campaignsChart',
+            'sponsorshipChart', 'tomorrowTrips', 'housingStats', 'complaintsChart',
             'recentIncomes', 'recentExpenses',
             'pendingExpenses', 'pendingTransfers'
         ));
