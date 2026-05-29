@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\GlobalSearchController;
 use App\Http\Controllers\Admin\HousingAssignmentController;
 use App\Http\Controllers\Admin\TripController;
 use App\Http\Controllers\Admin\SponsorshipTransferController;
@@ -50,6 +51,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['auth.admin', 'auto.permission'])->group(function () {
 
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+
+        // Global Search
+        Route::get('search', [GlobalSearchController::class, 'search'])->name('search');
 
         // Dashboard
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

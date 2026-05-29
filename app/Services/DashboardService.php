@@ -136,4 +136,59 @@ class DashboardService
 
         return ['labels' => $months, 'datasets' => $datasets];
     }
+
+    /** Monthly contracts created this year */
+    public function getContractsMonthlyData(): array
+    {
+        $year   = now()->year;
+        $months = [];
+        $counts = [];
+
+        for ($m = 1; $m <= 12; $m++) {
+            $months[] = \Carbon\Carbon::create($year, $m)->translatedFormat('M');
+            $counts[] = RecruitmentContract::whereYear('created_at', $year)
+                ->whereMonth('created_at', $m)
+                ->count();
+        }
+
+        return ['labels' => $months, 'data' => $counts];
+    }
+
+    /** Contracts grouped by status category for donut chart */
+    public function getContractsByStatusData(): array
+    {
+        $statuses = RecruitmentContract::selectRaw('current_status, COUNT(*) as total')
+            ->groupBy('current_status')
+            ->pluck('total', 'current_status')
+            ->toArray();
+
+        $groups = [
+            'جديد'           => $statuses[1]  ?? 0,
+            'قيد المعالجة'  => collect(range(2, 12))->sum(fn($s) => $statuses[$s] ?? 0),
+            'تم الاستلام'   => $statuses[13] ?? 0,
+            'رجيع الضمان'   => $statuses[14] ?? 0,
+            'هروب'           => $statuses[15] ?? 0,
+        ];
+
+        return [
+            'labels' => array_keys($groups),
+            'data'   => array_values($groups),
+            'colors' => ['#f97316', '#2563eb', '#16a34a', '#ef4444', '#9333ea'],
+        ];
+    }
+
+    /** Top campaigns with leads and conversion counts */
+    public function getCampaignsChartData(): array
+    {
+        $campaigns = \App\Models\Campaign::withCount([
+            'leads',
+            'leads as converted_count' => fn($q) => $q->where('status', 'converted'),
+        ])->orderByDesc('leads_count')->limit(8)->get();
+
+        return [
+            'labels'    => $campaigns->pluck('name')->toArray(),
+            'leads'     => $campaigns->pluck('leads_count')->toArray(),
+            'converted' => $campaigns->pluck('converted_count')->toArray(),
+        ];
+    }
 }
