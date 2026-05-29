@@ -126,7 +126,13 @@
                     <div class="text-xs text-slate-400">جواز: {{ $w->passport_number }}</div>
                     @endif
                 </td>
-                <td class="text-sm text-slate-600">{{ $w->nationality?->name ?? '—' }}</td>
+                <td>
+                    @if($w->nationality)
+                    <span style="background:#e0f2fe;color:#0369a1;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;white-space:nowrap;">{{ $w->nationality->name }}</span>
+                    @else
+                    <span class="text-slate-300 text-xs">—</span>
+                    @endif
+                </td>
                 <td class="text-sm text-slate-600">{{ $w->profession_label }}</td>
                 <td class="text-sm text-slate-600">{{ $w->experience_label }}</td>
                 <td>

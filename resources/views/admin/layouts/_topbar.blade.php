@@ -169,12 +169,22 @@
                 async doSearch() {
                     if (this.query.length < 2) { this.results = []; this.open = false; return; }
                     this.loading = true; this.open = true;
-                    const res = await fetch(this.searchUrl + '?q=' + encodeURIComponent(this.query), {
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                    });
-                    const data = await res.json();
-                    this.results = data.results ?? [];
-                    this.loading = false;
+                    try {
+                        const abort = new AbortController();
+                        const timer = setTimeout(() => abort.abort(), 6000);
+                        const res = await fetch(this.searchUrl + '?q=' + encodeURIComponent(this.query), {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                            signal: abort.signal
+                        });
+                        clearTimeout(timer);
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        const data = await res.json();
+                        this.results = data.results ?? [];
+                    } catch(e) {
+                        this.results = [];
+                    } finally {
+                        this.loading = false;
+                    }
                 },
                 onInput() {
                     clearTimeout(this.debounce);
@@ -200,7 +210,7 @@
             <div style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;z-index:1;">
                 <div x-show="loading" class="gs-spinner"></div>
                 <svg x-show="!loading" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/>
+                    <circle cx="11" cy="11" r="8" fill="none"/>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
             </div>
@@ -236,7 +246,7 @@
                 {{-- No results --}}
                 <div x-show="!loading && results.length === 0" class="gs-empty">
                     <svg width="32" height="32" fill="none" stroke="#cbd5e1" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 8px;display:block;">
-                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <circle cx="11" cy="11" r="8" fill="none"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                     </svg>
                     لا توجد نتائج لـ "<span x-text="query" style="color:#334155;font-weight:600;"></span>"
                 </div>

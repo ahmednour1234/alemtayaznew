@@ -75,7 +75,6 @@ class TripController extends Controller
     {
         $trip    = $this->service->find($id);
         $workers = Worker::where('active', true)
-            ->when($trip->branch_id, fn($q) => $q->where('branch_id', $trip->branch_id))
             ->orderBy('name')->get();
         return view('admin.trips.show', compact('trip', 'workers'));
     }

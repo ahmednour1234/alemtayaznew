@@ -51,7 +51,7 @@
     <h2 class="text-lg font-bold text-slate-800">تسكين عاملة جديدة</h2>
 </div>
 
-<form method="POST" action="{{ route('admin.housing-assignments.store') }}" class="max-w-2xl">
+<form method="POST" action="{{ route('admin.housing-assignments.store') }}">
     @csrf
 
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -82,7 +82,7 @@
 
                 <input type="hidden" name="reason" id="reason_val" value="{{ old('reason') }}">
 
-                <div class="grid grid-cols-3 gap-3" id="reason-cards">
+                <div class="grid grid-cols-3 lg:grid-cols-6 gap-3" id="reason-cards">
                     @php
                         $reasons = [
                             'sponsorship_transfer' => ['label'=>'نقل كفالة',  'desc'=>'تحويل عقد الكفالة', 'icon'=>'🔄', 'color'=>'#7c3aed', 'bg'=>'#ede9fe'],
@@ -111,7 +111,7 @@
                     </svg>
                     بيانات العاملة والسكن
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                     {{-- Worker --}}
                     <div>
                         <label class="form-label">

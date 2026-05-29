@@ -160,6 +160,7 @@
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">#</th>
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">الاسم</th>
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">الجنسية</th>
+                <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">رقم الجواز</th>
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">ملاحظات</th>
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">إجراءات</th>
             </tr>
@@ -176,6 +177,9 @@
                     <span style="color:#cbd5e1;">—</span>
                     @endif
                 </td>
+                <td style="padding:12px 16px;color:#64748b;font-size:12px;font-family:monospace;letter-spacing:.03em;">
+                    {{ $worker->passport_number ?: '—' }}
+                </td>
                 <td style="padding:12px 16px;color:#94a3b8;font-size:12px;">{{ $worker->pivot->notes ?: '—' }}</td>
                 <td style="padding:12px 16px;">
                     @if($trip->status === 'scheduled')
@@ -190,7 +194,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="5" style="padding:48px 16px;text-align:center;color:#94a3b8;font-size:13px;">
+                <td colspan="6" style="padding:48px 16px;text-align:center;color:#94a3b8;font-size:13px;">
                     <div style="margin-bottom:8px;font-size:32px;">👥</div>
                     لم تتم إضافة عاملات بعد
                 </td>

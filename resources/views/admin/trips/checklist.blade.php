@@ -131,6 +131,7 @@
                             <th style="padding:9px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;font-family:'Cairo',sans-serif;">#</th>
                             <th style="padding:9px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;font-family:'Cairo',sans-serif;">العاملة</th>
                             <th style="padding:9px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;font-family:'Cairo',sans-serif;">الجنسية</th>
+                            <th style="padding:9px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;font-family:'Cairo',sans-serif;">رقم الجواز</th>
                             <th style="padding:9px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;font-family:'Cairo',sans-serif;">ملاحظات</th>
                             <th style="padding:9px 16px;text-align:center;font-size:11px;font-weight:700;color:#94a3b8;font-family:'Cairo',sans-serif;">الحالة</th>
                         </tr>
@@ -145,8 +146,17 @@
                             <div style="font-size:11px;color:#94a3b8;font-family:'Cairo',sans-serif;margin-top:1px;">{{ $worker->file_number }}</div>
                             @endif
                         </td>
-                        <td style="padding:13px 16px;font-size:13px;color:#475569;font-family:'Cairo',sans-serif;">
-                            {{ $worker->nationality?->name ?? '—' }}
+                        <td style="padding:13px 16px;">
+                            @if($worker->nationality)
+                            <span style="background:#e0f2fe;color:#0369a1;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;">
+                                {{ $worker->nationality->name }}
+                            </span>
+                            @else
+                            <span style="color:#cbd5e1;">—</span>
+                            @endif
+                        </td>
+                        <td style="padding:13px 16px;font-size:12px;color:#334155;font-family:monospace;letter-spacing:.03em;">
+                            {{ $worker->passport_number ?: '—' }}
                         </td>
                         <td style="padding:13px 16px;font-size:13px;color:#64748b;font-family:'Cairo',sans-serif;">
                             {{ $worker->pivot->notes ?? '—' }}

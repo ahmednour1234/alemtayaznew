@@ -66,7 +66,9 @@
             <tr class="hover:bg-slate-50">
                 <td class="px-4 py-3">
                     <div class="font-medium text-slate-800">{{ $a->worker?->name ?? '—' }}</div>
-                    <div class="text-xs text-slate-400">{{ $a->worker?->nationality?->name ?? '' }}</div>
+                    @if($a->worker?->nationality)
+                    <span style="background:#e0f2fe;color:#0369a1;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block;margin-top:2px;">{{ $a->worker->nationality->name }}</span>
+                    @endif
                 </td>
                 <td class="px-4 py-3 text-slate-700">{{ $a->housing?->name ?? '—' }}</td>
                 <td class="px-4 py-3 text-slate-500">{{ $a->branch?->name ?? '—' }}</td>
