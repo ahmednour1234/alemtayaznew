@@ -182,7 +182,7 @@ body {
   {{-- Letter Head --}}
   <div class="letter-head">
     <div class="company-logo">
-      <img src="{{ asset('1759760768-33.webp') }}" alt="شركة الامتياز للاستقدام"
+      <img src="{{ asset('1759760768-33.png') }}" alt="شركة الامتياز للاستقدام"
            style="height:52px;object-fit:contain;">
     </div>
     <div class="ticket-badge">
@@ -407,7 +407,7 @@ body {
       </div>
     </div>
     <div class="footer-seal">
-      <img src="{{ asset('1759760768-33.webp') }}" alt="شركة الامتياز للاستقدام"
+      <img src="{{ asset('1759760768-33.png') }}" alt="شركة الامتياز للاستقدام"
            style="width:64px;height:64px;object-fit:contain;border-radius:50%;background:#fff;padding:4px;">
     </div>
     <div class="footer-sign">

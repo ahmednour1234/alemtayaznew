@@ -64,7 +64,7 @@ class DashboardService
         // Average completion days: avg days from created_at to last status update for completed contracts
         $avgCompletionDays = RecruitmentContract::where('current_status', 13)
             ->whereNotNull('updated_at')
-            ->selectRaw('AVG(DATEDIFF(updated_at, created_at)) as avg_days')
+            ->selectRaw('AVG(JULIANDAY(updated_at) - JULIANDAY(created_at)) as avg_days')
             ->value('avg_days');
         $avgCompletionDays = $avgCompletionDays ? round($avgCompletionDays, 1) : '—';
 

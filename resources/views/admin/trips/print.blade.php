@@ -140,7 +140,7 @@
     {{-- ── Header ── --}}
     <div class="card-top">
         <div class="logo-area">
-            <img src="{{ asset('1759760768-33.webp') }}" alt="شركة الامتياز للاستقدام">
+            <img src="{{ asset('1759760768-33.png') }}" alt="شركة الامتياز للاستقدام">
             <div class="logo-text">
                 <div class="name">شركة الامتياز للاستقدام</div>
                 <div class="sub">ALIMTIAZ RECRUITMENT COMPANY</div>
