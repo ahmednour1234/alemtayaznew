@@ -163,11 +163,27 @@
                 {{-- Current department --}}
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">العقد عند القسم</label>
-                    <select name="current_department" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                    <input type="hidden" name="current_department" id="dept_input_create" value="{{ old('current_department', 'customer_service') }}">
+                    <div class="flex gap-2">
+                        @php
+                            $deptColors = [
+                                'customer_service' => ['active' => 'bg-blue-500 text-white border-blue-500', 'icon' => '👥'],
+                                'accounts'         => ['active' => 'bg-emerald-500 text-white border-emerald-500', 'icon' => '💰'],
+                                'coordination'     => ['active' => 'bg-violet-500 text-white border-violet-500', 'icon' => '🔗'],
+                            ];
+                            $currentDept = old('current_department', 'customer_service');
+                        @endphp
                         @foreach($departments as $key => $label)
-                        <option value="{{ $key }}" {{ old('current_department', 'customer_service') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                        <button type="button"
+                            onclick="document.getElementById('dept_input_create').value='{{ $key }}'; document.querySelectorAll('.dept-tab-create').forEach(b=>b.classList.remove(...b.dataset.active.split(' '))); this.classList.add(...this.dataset.active.split(' '));"
+                            data-active="{{ $deptColors[$key]['active'] }}"
+                            class="dept-tab-create flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-semibold rounded-xl border-2 transition-all
+                                {{ $currentDept === $key ? $deptColors[$key]['active'] : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-slate-300' }}">
+                            <span>{{ $deptColors[$key]['icon'] }}</span>
+                            <span>{{ $label }}</span>
+                        </button>
                         @endforeach
-                    </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -221,10 +237,10 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">محطة الاستلام</label>
-                    <select name="delivery_airport_id" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                    <select name="delivery_city_id" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
                         <option value="">— اختر —</option>
-                        @foreach($airports as $ap)
-                        <option value="{{ $ap->id }}" {{ old('delivery_airport_id') == $ap->id ? 'selected' : '' }}>{{ $ap->name }} ({{ $ap->code }})</option>
+                        @foreach($cities as $city)
+                        <option value="{{ $city->id }}" {{ old('delivery_city_id') == $city->id ? 'selected' : '' }}>{{ $city->name }}</option>
                         @endforeach
                     </select>
                 </div>

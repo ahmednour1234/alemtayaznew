@@ -30,7 +30,9 @@ class HousingAssignmentController extends Controller
         }
 
         $assignments = $this->service->list($filters);
-        $housings    = Housing::where('active', true)->orderBy('name')->get();
+        $housings    = Housing::where('active', true)
+            ->when($bid ?? null, fn($q, $b) => $q->where('branch_id', $b))
+            ->orderBy('name')->get();
         $branches    = Branch::where('active', true)->orderBy('name')->get();
 
         return view('admin.housing-assignments.index', compact('assignments', 'housings', 'branches'));
@@ -45,9 +47,12 @@ class HousingAssignmentController extends Controller
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->orderBy('name')->get();
 
+        $housedWorkerIds = \App\Models\HousingAssignment::whereNull('check_out_date')
+            ->pluck('worker_id');
+
         $workers = Worker::where('active', true)
             ->whereIn('status', ['available', 'assigned', 'reserved'])
-            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->whereNotIn('id', $housedWorkerIds)
             ->orderBy('name')->get();
 
         $branches = $branchId ? null : Branch::where('active', true)->orderBy('name')->get();
@@ -58,11 +63,12 @@ class HousingAssignmentController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'worker_id'     => 'required|exists:workers,id',
-            'housing_id'    => 'required|exists:housings,id',
-            'branch_id'     => 'required|exists:branches,id',
-            'check_in_date' => 'required|date',
-            'notes'         => 'nullable|string|max:500',
+            'worker_id'               => 'required|exists:workers,id',
+            'housing_id'              => 'required|exists:housings,id',
+            'branch_id'               => 'required|exists:branches,id',
+            'check_in_date'           => 'required|date',
+            'expected_check_out_date' => 'nullable|date|after_or_equal:check_in_date',
+            'notes'                   => 'nullable|string|max:500',
         ]);
 
         if ($branchId = $this->branchFilter()) {

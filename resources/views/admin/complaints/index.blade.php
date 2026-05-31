@@ -51,14 +51,20 @@
             @endforeach
         </select>
 
-        @unless(auth('admin')->user()->isBranchAdmin())
+        @php $_me = auth('admin')->user(); @endphp
+        @if($_me->isBranchAdmin())
+        <div class="border border-blue-200 bg-blue-50 rounded-lg px-3 py-2 flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <span class="text-blue-700 text-sm font-medium">{{ $_me->branch?->name ?? 'فرعي' }}</span>
+        </div>
+        @else
         <select name="branch_id" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
             <option value="">— كل الفروع —</option>
             @foreach($branches as $b)
             <option value="{{ $b->id }}" {{ ($filters['branch_id'] ?? '') == $b->id ? 'selected' : '' }}>{{ $b->name }}</option>
             @endforeach
         </select>
-        @endunless
+        @endif
 
         <select name="on_musaned" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
             <option value="">— مساند: الكل —</option>

@@ -50,7 +50,7 @@ class RecruitmentContractRepository implements RecruitmentContractRepositoryInte
     {
         return RecruitmentContract::with([
             'client', 'branch', 'admin', 'worker', 'agent',
-            'arrivalAirport', 'originNationality', 'deliveryAirport',
+            'arrivalAirport', 'originNationality', 'deliveryCity',
             'statusHistories.admin',
         ])->findOrFail($id);
     }
@@ -94,8 +94,16 @@ class RecruitmentContractRepository implements RecruitmentContractRepositoryInte
 
         $contract->update([
             'current_status'     => $status,
-            'current_department' => $department,
+            // Only advance the department forward, never backward
+            'current_department' => $this->advanceDepartment($contract->current_department, $department),
         ]);
+    }
+
+    /** Move department forward only — never allow status update to roll it back */
+    private function advanceDepartment(string $current, string $fromStatus): string
+    {
+        $order = ['customer_service' => 1, 'accounts' => 2, 'coordination' => 3];
+        return ($order[$fromStatus] ?? 0) > ($order[$current] ?? 0) ? $fromStatus : $current;
     }
 
     public function getStatsByBranch(): array

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\City;
 use App\Models\Nationality;
 
 class RecruitmentContract extends Model
@@ -16,7 +17,7 @@ class RecruitmentContract extends Model
     protected $fillable = [
         'contract_number', 'client_id', 'branch_id', 'admin_id', 'request_date',
         'visa_image', 'visa_type', 'visa_number',
-        'arrival_airport_id', 'origin_nationality_id', 'delivery_airport_id',
+        'arrival_airport_id', 'origin_nationality_id', 'delivery_city_id',
         'musaned_number', 'musaned_date', 'musaned_file',
         'worker_id', 'e_doc_number', 'agent_id',
         'current_department', 'current_status',
@@ -148,9 +149,9 @@ class RecruitmentContract extends Model
         return $this->belongsTo(Nationality::class, 'origin_nationality_id');
     }
 
-    public function deliveryAirport(): BelongsTo
+    public function deliveryCity(): BelongsTo
     {
-        return $this->belongsTo(Airport::class, 'delivery_airport_id');
+        return $this->belongsTo(City::class, 'delivery_city_id');
     }
 
     public function statusHistories(): HasMany

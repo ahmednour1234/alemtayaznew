@@ -55,15 +55,34 @@
     @endif
 
     {{-- Department tabs (visual indicator) --}}
-    <div class="grid grid-cols-3 gap-3">
-        @foreach(\App\Models\RecruitmentContract::departments() as $key => $label)
-        <div class="bg-white rounded-xl border-2 {{ $contract->current_department === $key ? 'border-blue-500 bg-blue-50' : 'border-slate-100' }} p-3 text-center">
-            <p class="text-xs font-semibold {{ $contract->current_department === $key ? 'text-blue-600' : 'text-slate-400' }}">{{ $label }}</p>
-            @if($contract->current_department === $key)
-            <p class="text-xs text-blue-400 mt-0.5">العقد هنا الآن</p>
-            @endif
+    @php
+        $deptMeta = [
+            'customer_service' => ['num' => '١', 'color' => 'blue',    'bg' => 'bg-blue-600',    'ring' => 'ring-blue-200',   'light' => 'bg-blue-50 border-blue-200',   'text' => 'text-blue-700',   'badge' => 'bg-blue-100 text-blue-600'],
+            'accounts'         => ['num' => '٢', 'color' => 'emerald', 'bg' => 'bg-emerald-600', 'ring' => 'ring-emerald-200','light' => 'bg-emerald-50 border-emerald-200','text' => 'text-emerald-700','badge' => 'bg-emerald-100 text-emerald-600'],
+            'coordination'     => ['num' => '٣', 'color' => 'indigo',  'bg' => 'bg-indigo-600',  'ring' => 'ring-indigo-200',  'light' => 'bg-indigo-50 border-indigo-200',  'text' => 'text-indigo-700',  'badge' => 'bg-indigo-100 text-indigo-600'],
+        ];
+    @endphp
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="flex">
+            @foreach(\App\Models\RecruitmentContract::departments() as $key => $label)
+            @php $m = $deptMeta[$key]; $active = $contract->current_department === $key; @endphp
+            <div class="flex-1 flex flex-col items-center gap-2 py-4 px-3 relative
+                        {{ $active ? $m['bg'] . ' text-white' : 'text-slate-400' }}">
+                {{-- connector line between tabs --}}
+                @if(!$loop->last)
+                <div class="absolute right-0 top-1/2 -translate-y-1/2 w-px h-8 {{ $active ? 'bg-white/20' : 'bg-slate-100' }}"></div>
+                @endif
+                <span class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
+                             {{ $active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }}">
+                    {{ $m['num'] }}
+                </span>
+                <span class="text-xs font-semibold">{{ $label }}</span>
+                @if($active)
+                <span class="text-xs opacity-80 bg-white/20 px-2 py-0.5 rounded-full">العقد هنا الآن</span>
+                @endif
+            </div>
+            @endforeach
         </div>
-        @endforeach
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
@@ -91,7 +110,7 @@
                     <div><dt class="text-slate-400 text-xs mb-0.5">رقم التأشيرة</dt><dd class="font-mono">{{ $contract->visa_number ?? '—' }}</dd></div>
                     <div><dt class="text-slate-400 text-xs mb-0.5">محطة الوصول</dt><dd>{{ $contract->arrivalAirport->name ?? '—' }}</dd></div>
                     <div><dt class="text-slate-400 text-xs mb-0.5">محطة القدوم</dt><dd>{{ $contract->originNationality->name ?? '—' }}</dd></div>
-                    <div><dt class="text-slate-400 text-xs mb-0.5">محطة الاستلام</dt><dd>{{ $contract->deliveryAirport->name ?? '—' }}</dd></div>
+                    <div><dt class="text-slate-400 text-xs mb-0.5">محطة الاستلام</dt><dd>{{ $contract->deliveryCity->name ?? '—' }}</dd></div>
                     @if($contract->visa_image)
                     <div><dt class="text-slate-400 text-xs mb-0.5">صورة التأشيرة</dt>
                         <dd><a href="{{ Storage::url($contract->visa_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض الملف</a></dd>
@@ -152,7 +171,8 @@
                     @endforeach
                 </div>
 
-                {{-- Quick status update form --}}
+                {{-- Quick status update form — branch manager & coordination only --}}
+                @if($_su->isSuperAdmin() || in_array($_sdept, ['branch_manager', 'chairman', 'coordination']))
                 <form action="{{ route('admin.contracts.update-status', $contract->id) }}" method="POST" class="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
                     @csrf
                     <p class="text-sm font-semibold text-slate-600 mb-3">تحديث الحالة</p>
@@ -177,6 +197,7 @@
                                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                     </div>
                 </form>
+                @endif
             </div>
         </div>
 

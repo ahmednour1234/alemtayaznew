@@ -15,14 +15,15 @@ class HousingAssignment extends Model
 
     protected $fillable = [
         'worker_id', 'housing_id', 'branch_id', 'admin_id',
-        'check_in_date', 'check_out_date', 'notes', 'reason',
+        'check_in_date', 'check_out_date', 'expected_check_out_date', 'notes', 'reason',
     ];
 
     protected function casts(): array
     {
         return [
-            'check_in_date'  => 'date',
-            'check_out_date' => 'date',
+            'check_in_date'           => 'date',
+            'check_out_date'          => 'date',
+            'expected_check_out_date' => 'date',
         ];
     }
 

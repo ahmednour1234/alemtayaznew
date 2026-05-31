@@ -41,7 +41,7 @@
     <h2 class="text-lg font-bold text-slate-800">إنشاء عقد نقل كفالة جديد</h2>
 </div>
 
-<form method="POST" action="{{ route('admin.sponsorship-transfers.store') }}" class="w-full">
+<form method="POST" action="{{ route('admin.sponsorship-transfers.store') }}" enctype="multipart/form-data" class="w-full">
     @csrf
     <input type="hidden" name="original_contract_id" id="original_contract_id" value="{{ old('original_contract_id') }}">
 
@@ -58,9 +58,19 @@
                 <div style="color:#c9a84c;font-size:11px;font-weight:600;letter-spacing:.05em;margin-bottom:2px;">عقد جديد</div>
                 <div style="color:#e2e8f0;font-size:15px;font-weight:700;">نقل كفالة عاملة</div>
             </div>
-            <div style="margin-right:auto;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:6px 14px;text-align:center;">
-                <div style="color:#c9a84c;font-size:10px;font-weight:600;margin-bottom:1px;">ملاحظة</div>
-                <div style="color:#e2e8f0;font-size:11px;">يُوقف عقد الاستقدام تلقائياً</div>
+            <div style="margin-right:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                @php $__me = Auth::guard('admin')->user(); @endphp
+                <div style="background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);border-radius:8px;padding:6px 14px;text-align:center;">
+                    <div style="color:#c9a84c;font-size:10px;font-weight:600;margin-bottom:1px;">ملاحظة</div>
+                    <div style="color:#e2e8f0;font-size:11px;">يُوقف عقد الاستقدام تلقائياً</div>
+                </div>
+                <div style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:8px;padding:6px 14px;">
+                    <div style="color:#a5b4fc;font-size:10px;font-weight:600;margin-bottom:2px;">سيُسجَّل بواسطة</div>
+                    <div style="color:#e2e8f0;font-size:12px;font-weight:700;">{{ $__me->name }}</div>
+                    @if($__me->branch)
+                    <div style="color:#94a3b8;font-size:10px;margin-top:1px;">{{ $__me->branch->name }}</div>
+                    @endif
+                </div>
             </div>
         </div>
 
@@ -206,6 +216,17 @@
                                placeholder="أدخل رقم العقد على منصة مساند"
                                class="form-input">
                         @error('musaned_contract_number')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                    </div>
+
+                    {{-- Musaned contract image --}}
+                    <div>
+                        <label class="form-label">
+                            <svg width="14" height="14" fill="none" stroke="#c9a84c" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            صورة العقد (مساند)
+                        </label>
+                        <input type="file" name="musaned_contract_image" accept="image/*"
+                               class="form-input" style="padding:6px 12px;">
+                        @error('musaned_contract_image')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     {{-- Payment status --}}

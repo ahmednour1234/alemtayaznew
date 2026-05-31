@@ -62,9 +62,13 @@ class DashboardService
         $incomeChange    = $incomeLastMonth > 0 ? round((($incomeThisMonth - $incomeLastMonth) / $incomeLastMonth) * 100) : 0;
 
         // Average completion days: avg days from created_at to last status update for completed contracts
+        $driver = config('database.default');
+        $diffExpr = $driver === 'sqlite'
+            ? 'AVG(CAST((julianday(updated_at) - julianday(created_at)) AS INTEGER)) as avg_days'
+            : 'AVG(DATEDIFF(updated_at, created_at)) as avg_days';
         $avgCompletionDays = RecruitmentContract::where('current_status', 13)
             ->whereNotNull('updated_at')
-            ->selectRaw('AVG(DATEDIFF(updated_at, created_at)) as avg_days')
+            ->selectRaw($diffExpr)
             ->value('avg_days');
         $avgCompletionDays = $avgCompletionDays ? round($avgCompletionDays, 1) : '—';
 

@@ -12,6 +12,7 @@ use App\Services\NotificationService;
 use App\Services\SponsorshipTransferService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class SponsorshipTransferController extends Controller
 {
@@ -76,12 +77,18 @@ class SponsorshipTransferController extends Controller
             'original_contract_id'=> 'nullable|exists:recruitment_contracts,id',
             'transfer_date'            => 'nullable|date',
             'musaned_contract_number'  => 'nullable|string|max:100',
+            'musaned_contract_image'   => 'nullable|image|max:5120',
             'total_fees'               => 'required|numeric|min:0',
             'service_fee'              => 'required|numeric|min:0',
             'loss_amount'              => 'required|numeric|min:0',
             'payment_status'           => 'required|in:pending,partial,full',
             'notes'                    => 'nullable|string|max:1000',
         ]);
+
+        if ($request->hasFile('musaned_contract_image')) {
+            $data['musaned_contract_image'] = $request->file('musaned_contract_image')
+                ->store('sponsorship-contracts', 'public');
+        }
 
         if ($bid = $this->branchFilter()) {
             $data['branch_id'] = $bid;
@@ -134,6 +141,7 @@ class SponsorshipTransferController extends Controller
             'to_client_id'            => 'nullable|exists:clients,id',
             'transfer_date'           => 'nullable|date',
             'musaned_contract_number' => 'nullable|string|max:100',
+            'musaned_contract_image'  => 'nullable|image|max:5120',
             'total_fees'              => 'required|numeric|min:0',
             'service_fee'             => 'required|numeric|min:0',
             'loss_amount'             => 'required|numeric|min:0',
@@ -141,14 +149,48 @@ class SponsorshipTransferController extends Controller
             'notes'                   => 'nullable|string|max:1000',
         ]);
 
+        if ($request->hasFile('musaned_contract_image')) {
+            // Delete old image if exists
+            $transfer = $this->service->find($id);
+            if ($transfer->musaned_contract_image) {
+                Storage::disk('public')->delete($transfer->musaned_contract_image);
+            }
+            $data['musaned_contract_image'] = $request->file('musaned_contract_image')
+                ->store('sponsorship-contracts', 'public');
+        }
+
         $this->service->update($id, $data);
+
+        $transfer = $this->service->find($id);
+        $this->notifications->notify(
+            'sponsorship_transfer_updated',
+            'تحديث عقد نقل كفالة',
+            'حدّث ' . Auth::guard('admin')->user()->name . ' عقد نقل الكفالة رقم ' . $transfer->contract_number,
+            route('admin.sponsorship-transfers.show', $id),
+            [$transfer->branch_id]
+        );
+
         return redirect()->route('admin.sponsorship-transfers.show', $id)
             ->with('success', 'تم تحديث العقد.');
     }
 
     public function destroy(int $id)
     {
+        $transfer       = $this->service->find($id);
+        $contractNumber = $transfer->contract_number;
+        $branchId       = $transfer->branch_id;
+        $adminName      = Auth::guard('admin')->user()->name;
+
         $this->service->delete($id);
+
+        $this->notifications->notify(
+            'sponsorship_transfer_deleted',
+            'تم حذف عقد نقل كفالة',
+            'حذف ' . $adminName . ' عقد نقل الكفالة رقم ' . $contractNumber,
+            route('admin.sponsorship-transfers.index'),
+            [$branchId]
+        );
+
         return redirect()->route('admin.sponsorship-transfers.index')
             ->with('success', 'تم حذف العقد.');
     }

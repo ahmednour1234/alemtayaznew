@@ -24,7 +24,7 @@ class SponsorshipTransferRepository implements SponsorshipTransferRepositoryInte
 
     public function findById(int $id)
     {
-        return SponsorshipTransfer::with(['worker.nationality', 'fromClient', 'toClient', 'branch', 'admin', 'originalContract'])
+        return SponsorshipTransfer::with(['worker.nationality', 'fromClient', 'toClient', 'branch', 'admin.branch', 'originalContract'])
             ->findOrFail($id);
     }
 

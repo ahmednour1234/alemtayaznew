@@ -149,7 +149,7 @@
                     </div>
                     <div style="padding:10px 12px; background:#f0f9ff; border-radius:8px; border:1px solid #bae6fd;">
                         <p style="font-size:10px; color:#0284c7; font-weight:600; margin-bottom:2px;">محطة الاستلام</p>
-                        <p style="font-size:13px; color:#1e293b; font-weight:600;">{{ $contract->deliveryAirport?->name ?? '—' }}</p>
+                        <p style="font-size:13px; color:#1e293b; font-weight:600;">{{ $contract->deliveryCity?->name ?? '—' }}</p>
                     </div>
                 </div>
             </div>

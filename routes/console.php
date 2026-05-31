@@ -19,3 +19,6 @@ Schedule::command('leads:notify-stale')->dailyAt('09:00');
 
 // Notify about complaints still open after 7 days
 Schedule::command('complaints:notify-stale')->dailyAt('09:30');
+
+// Notify about housing assignments past their expected checkout date
+Schedule::command('housing:check-overdue')->dailyAt('08:30');

@@ -16,23 +16,30 @@
 {{-- Filters --}}
 <div class="bg-white rounded-xl p-4 shadow-sm mb-6 border border-slate-100">
     <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-3">
-        @unless($branchId)
         <div>
             <label class="block text-xs font-medium text-slate-500 mb-1.5">الفرع</label>
-            <div class="relative">
-                <select name="branch_id"
-                        class="w-full appearance-none border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition">
-                    <option value="">الكل</option>
-                    @foreach($branches as $b)
-                    <option value="{{ $b->id }}" {{ request('branch_id') == $b->id ? 'selected' : '' }}>{{ $b->name }}</option>
-                    @endforeach
-                </select>
-                <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </span>
-            </div>
+            @if($branchId)
+                {{-- Branch-restricted: locked badge --}}
+                <div class="w-full border border-blue-200 bg-blue-50 rounded-lg px-3 py-2 text-sm text-blue-700 font-medium flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    {{ Auth::guard('admin')->user()->branch?->name ?? 'فرعي' }}
+                </div>
+            @else
+                {{-- Super-admin: dropdown --}}
+                <div class="relative">
+                    <select name="branch_id"
+                            class="w-full appearance-none border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 transition">
+                        <option value="">الكل</option>
+                        @foreach($branches as $b)
+                        <option value="{{ $b->id }}" {{ request('branch_id') == $b->id ? 'selected' : '' }}>{{ $b->name }}</option>
+                        @endforeach
+                    </select>
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </span>
+                </div>
+            @endif
         </div>
-        @endunless
         <div>
             <label class="block text-xs font-medium text-slate-500 mb-1.5">حالة الدفع</label>
             <div class="relative">

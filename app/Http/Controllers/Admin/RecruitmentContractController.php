@@ -10,11 +10,13 @@ use App\Exports\ContractTemplateExport;
 use App\Imports\ContractImport;
 use App\Models\Agent;
 use App\Models\Airport;
+use App\Models\City;
 use App\Models\Branch;
 use App\Models\Client;
 use App\Models\Nationality;
 use App\Models\RecruitmentContract;
 use App\Models\Worker;
+use App\Services\NotificationService;
 use App\Services\RecruitmentContractService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,7 +26,10 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class RecruitmentContractController extends Controller
 {
-    public function __construct(private readonly RecruitmentContractService $service) {}
+    public function __construct(
+        private readonly RecruitmentContractService $service,
+        private readonly NotificationService $notifications,
+    ) {}
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -71,6 +76,7 @@ class RecruitmentContractController extends Controller
             'workers'       => Worker::where('active', true)->where('status', 'available')->orderBy('name')->get(['id', 'name', 'nationality_id']),
             'agents'        => Agent::where('active', true)->orderBy('name')->get(['id', 'name']),
             'airports'      => Airport::where('active', true)->orderBy('name')->get(['id', 'name', 'code']),
+            'cities'        => City::where('active', true)->orderBy('name')->get(['id', 'name']),
             'nationalities' => Nationality::where('active', true)->orderBy('name')->get(['id', 'name']),
             'statuses'      => RecruitmentContract::statuses(),
             'visaTypes'     => RecruitmentContract::visaTypes(),
@@ -137,6 +143,14 @@ class RecruitmentContractController extends Controller
 
         $contract = $this->service->store($data);
 
+        $this->notifications->notify(
+            'contract_created',
+            'عقد استقدام جديد',
+            'أنشأ ' . $me->name . ' العقد ' . $contract->contract_number,
+            route('admin.contracts.show', $contract->id),
+            [$contract->branch_id]
+        );
+
         return redirect()->route('admin.contracts.show', $contract->id)
             ->with('success', "تم إنشاء العقد {$contract->contract_number} بنجاح");
     }
@@ -185,7 +199,7 @@ class RecruitmentContractController extends Controller
         if (!$me->isSuperAdmin()) {
             $csFields      = ['client_id', 'branch_id', 'request_date', 'visa_type', 'visa_image',
                               'visa_number', 'arrival_airport_id', 'origin_nationality_id',
-                              'delivery_airport_id', 'musaned_number', 'musaned_date', 'musaned_file'];
+                              'delivery_city_id', 'musaned_number', 'musaned_date', 'musaned_file'];
             $accountsFields = ['payment_status', 'total_cost'];
             $coordFields    = ['arrival_date', 'trial_end_date', 'contract_end_date',
                                'worker_id', 'e_doc_number', 'agent_id',
@@ -245,6 +259,14 @@ class RecruitmentContractController extends Controller
         unset($data['update_status'], $data['status_date'], $data['whatsapp_message']);
 
         $this->service->update($contract, $data);
+
+        $this->notifications->notify(
+            'contract_updated',
+            'تحديث عقد استقدام',
+            'حدّث ' . $me->name . ' العقد ' . $contract->contract_number,
+            route('admin.contracts.show', $id),
+            [$contract->branch_id]
+        );
 
         $successMsg = match (true) {
             in_array($myDept, ['accounts', 'accountant']) && !$me->isSuperAdmin()
@@ -317,7 +339,19 @@ class RecruitmentContractController extends Controller
             abort(403, 'حذف العقود غير مسموح لقسمك.');
         }
 
+        $contractNumber = $contract->contract_number;
+        $branchId       = $contract->branch_id;
+
         $this->service->delete($id);
+
+        $this->notifications->notify(
+            'contract_deleted',
+            'تم حذف عقد استقدام',
+            'حذف ' . $me->name . ' العقد ' . $contractNumber,
+            route('admin.contracts.index'),
+            [$branchId]
+        );
+
         return redirect()->route('admin.contracts.index')
             ->with('success', 'تم حذف العقد');
     }

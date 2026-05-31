@@ -49,6 +49,15 @@
             <span class="text-slate-700">{{ $transfer->department_label }}</span>
         </div>
         <div class="flex justify-between text-sm">
+            <span class="text-slate-500">سجّله</span>
+            <span class="text-slate-700 text-left text-right">
+                {{ $transfer->admin?->name ?? '—' }}
+                @if($transfer->admin?->branch)
+                <span class="text-xs text-slate-400 mr-1">({{ $transfer->admin->branch->name }})</span>
+                @endif
+            </span>
+        </div>
+        <div class="flex justify-between text-sm">
             <span class="text-slate-500">الحالة</span>
             <span class="inline-block text-xs px-2 py-0.5 rounded-full font-medium"
                   style="background:{{ $transfer->status_color }}20; color:{{ $transfer->status_color }}">

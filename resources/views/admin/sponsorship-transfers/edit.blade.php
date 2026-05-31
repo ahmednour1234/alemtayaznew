@@ -11,7 +11,7 @@
 </div>
 
 <div class="bg-white rounded-xl shadow-sm p-6 max-w-2xl">
-    <form method="POST" action="{{ route('admin.sponsorship-transfers.update', $transfer->id) }}">
+    <form method="POST" action="{{ route('admin.sponsorship-transfers.update', $transfer->id) }}" enctype="multipart/form-data">
         @csrf @method('PUT')
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -37,6 +37,23 @@
                        value="{{ $transfer->musaned_contract_number }}"
                        placeholder="رقم العقد على منصة مساند"
                        class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">صورة العقد (مساند)</label>
+                @if($transfer->musaned_contract_image)
+                <div class="mb-2 flex items-center gap-3">
+                    <a href="{{ Storage::url($transfer->musaned_contract_image) }}" target="_blank"
+                       class="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:underline">
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        عرض الصورة الحالية
+                    </a>
+                    <span class="text-xs text-slate-400">(اختر صورة جديدة للاستبدال)</span>
+                </div>
+                @endif
+                <input type="file" name="musaned_contract_image" accept="image/*"
+                       class="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm">
+                @error('musaned_contract_image')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
             <div>

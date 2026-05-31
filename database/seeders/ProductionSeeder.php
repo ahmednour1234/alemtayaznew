@@ -6,8 +6,10 @@ use Database\Seeders\Main\AgentMainSeeder;
 use Database\Seeders\Main\BranchMainSeeder;
 use Database\Seeders\Main\CityMainSeeder;
 use Database\Seeders\Main\ExpenseTypeMainSeeder;
+use Database\Seeders\Main\HousingMainSeeder;
 use Database\Seeders\Main\IncomeTypeMainSeeder;
 use Database\Seeders\Main\NationalityMainSeeder;
+use Database\Seeders\Main\ProductionUsersSeeder;
 use Illuminate\Database\Seeder;
 
 /**
@@ -59,8 +61,16 @@ class ProductionSeeder extends Seeder
         $this->call(ExpenseTypeMainSeeder::class);
 
         // ── 8. المدن ─────────────────────────────────────────────────────────
-        $this->command->info('── [8/8] مدن المملكة العربية السعودية...');
+        $this->command->info('── [8/9] مدن المملكة العربية السعودية...');
         $this->call(CityMainSeeder::class);
+
+        // ── 9. مستخدمو الإنتاج ───────────────────────────────────────────────
+        $this->command->info('── [9/10] مستخدمو الإنتاج...');
+        $this->call(ProductionUsersSeeder::class);
+
+        // ── 10. السكنات ───────────────────────────────────────────────────────
+        $this->command->info('── [10/10] السكنات (سكن واحد لكل فرع)...');
+        $this->call(HousingMainSeeder::class);
 
         $this->command->info('');
         $this->command->info('═══════════════════════════════════════');

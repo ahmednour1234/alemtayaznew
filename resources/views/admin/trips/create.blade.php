@@ -173,6 +173,16 @@
                     {{-- Branch --}}
                     @if($branchId)
                     <input type="hidden" name="branch_id" value="{{ $branchId }}">
+                    <div>
+                        <label class="form-label">
+                            <svg width="14" height="14" fill="none" stroke="#c9a84c" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            الفرع
+                        </label>
+                        <div class="w-full border border-blue-200 bg-blue-50 rounded-lg px-3 py-2 text-sm text-blue-700 font-medium flex items-center gap-1.5" style="min-height:38px;">
+                            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            {{ Auth::guard('admin')->user()->branch?->name ?? 'فرعي' }}
+                        </div>
+                    </div>
                     @else
                     <div class="sm:col-span-2">
                         <label class="form-label">
