@@ -56,19 +56,23 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
             $rawDate          = $row[0] ?? null;
             $branchValue      = trim((string) ($row[1] ?? ''));
             $typeName         = trim((string) ($row[2] ?? ''));
-            $amount           = $row[3] ?? null;
+            $rawAmount        = $row[3] ?? null;
             $reference        = trim((string) ($row[5] ?? ''));
             $paymentMethodRaw = trim((string) ($row[7] ?? ''));
 
             // Skip completely empty rows
-            if ($branchValue === '' && $typeName === '' && $amount === null) {
+            if ($branchValue === '' && $typeName === '' && $rawAmount === null) {
                 continue;
             }
 
+            // Normalise amount: strip thousands separators (comma) and any trailing currency text
+            $amountStr = trim(str_replace([',', ' ', "\xc2\xa0"], '', (string) $rawAmount));
+            $amount    = is_numeric($amountStr) ? (float) $amountStr : null;
+
             // Skip rows with no usable amount
-            if (! is_numeric($amount) || (float) $amount <= 0) {
+            if ($amount === null || $amount <= 0) {
                 $this->skippedCount++;
-                $this->errors[] = "صف {$rowNum}: المبلغ غير صالح ({$amount})";
+                $this->errors[] = "صف {$rowNum}: المبلغ غير صالح ({$rawAmount})";
                 continue;
             }
 
