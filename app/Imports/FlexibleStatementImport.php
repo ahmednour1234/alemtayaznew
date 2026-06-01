@@ -76,19 +76,33 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
                 continue;
             }
 
-            // Resolve branch (by name or code)
+            // Resolve branch — exact → fuzzy (strip ال prefix) → auto-create
             if (! isset($branchCache[$branchValue])) {
-                $branchCache[$branchValue] = Branch::where('name', $branchValue)->first()
-                    ?? Branch::where('name', 'like', '%' . mb_substr($branchValue, 0, 4) . '%')->first()
-                    ?? Branch::where('code', $branchValue)->first();
+                // 1. Exact match
+                $branch = Branch::where('name', $branchValue)->first();
+
+                if (! $branch) {
+                    // 2. Normalise both sides: strip leading "ال" and compare
+                    $normalised = preg_replace('/^ال/', '', $branchValue);
+                    $branch = Branch::get()->first(function ($b) use ($branchValue, $normalised) {
+                        $dbNorm = preg_replace('/^ال/', '', $b->name);
+                        return $dbNorm === $normalised
+                            || mb_stripos($b->name, $normalised) !== false
+                            || mb_stripos($branchValue, $dbNorm)  !== false;
+                    });
+                }
+
+                if (! $branch) {
+                    // 3. Auto-create the branch so no row is lost
+                    $branch = Branch::create([
+                        'name'   => $branchValue,
+                        'active' => true,
+                    ]);
+                }
+
+                $branchCache[$branchValue] = $branch;
             }
             $branch = $branchCache[$branchValue];
-
-            if (! $branch) {
-                $this->skippedCount++;
-                $this->errors[] = "صف {$rowNum}: الفرع \"{$branchValue}\" غير موجود";
-                continue;
-            }
 
             // Parse date
             try {
