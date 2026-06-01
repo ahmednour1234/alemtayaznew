@@ -76,4 +76,24 @@ class Admin extends Authenticatable
     {
         return $this->department === 'coordination';
     }
+
+    public function isCustomerService(): bool
+    {
+        return $this->department === 'customer_service';
+    }
+
+    /**
+     * Returns true for departments that should NOT see financial data
+     * (revenues, expenses, profits, pending approvals).
+     * Uses an allowlist: only known financial departments can see data;
+     * any unknown / custom department is hidden by default.
+     */
+    public function hideFinancials(): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return false;
+        }
+        $allowed = ['accounts', 'accountant', 'branch_manager', 'chairman'];
+        return ! in_array($this->department, $allowed, true);
+    }
 }

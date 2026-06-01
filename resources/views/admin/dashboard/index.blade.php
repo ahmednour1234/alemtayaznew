@@ -524,7 +524,22 @@
         <div class="dash-welcome-text">
             <p class="dash-welcome-date">{{ now()->locale('ar')->isoFormat('dddd، D MMMM YYYY') }}</p>
             <h1 class="dash-welcome-title">مرحباً، {{ auth('admin')->user()->name ?? 'المدير' }}</h1>
-            <p class="dash-welcome-sub">لوحة تحكم شركة الامتياز للاستقدام</p>
+            <p class="dash-welcome-sub">
+                @if(auth('admin')->user()->isBranchAdmin() && auth('admin')->user()->branch)
+                    {{ auth('admin')->user()->department_label }} — فرع {{ auth('admin')->user()->branch->name }}
+                @else
+                    لوحة تحكم شركة الامتياز للاستقدام
+                @endif
+            </p>
+            @unless(auth('admin')->user()->hideFinancials())
+            <a href="{{ route('admin.dashboard.import-statement') }}"
+               style="display:inline-flex;align-items:center;gap:7px;margin-top:14px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:10px;padding:8px 16px;font-size:12.5px;font-weight:700;text-decoration:none;font-family:Cairo,sans-serif;transition:.2s;"
+               onmouseover="this.style.background='rgba(255,255,255,.2)'"
+               onmouseout="this.style.background='rgba(255,255,255,.12)'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                استيراد إيرادات ومصروفات
+            </a>
+            @endunless
         </div>
         <div class="dash-banner-pills">
             <div class="dash-banner-pill">
@@ -535,7 +550,7 @@
                 <span class="dash-banner-pill-val">{{ number_format($stats['total_clients'] ?? 0) }}</span>
                 <span class="dash-banner-pill-lbl">عميل</span>
             </div>
-            @unless(auth('admin')->user()->isCoordination())
+            @unless(auth('admin')->user()->hideFinancials())
             <div class="dash-banner-pill">
                 <span class="dash-banner-pill-val">{{ ($stats['pending_expenses'] ?? 0) + ($stats['pending_transfers'] ?? 0) }}</span>
                 <span class="dash-banner-pill-lbl">طلب معلق</span>
@@ -574,7 +589,7 @@
             <div class="stat-change up">↑ 8% عن الشهر الماضي</div>
         </a>
 
-        @unless(auth('admin')->user()->isCoordination())
+        @unless(auth('admin')->user()->hideFinancials())
         <a href="{{ route('admin.incomes.index') }}" class="stat-card" style="--accent:#059669;--soft:#ecfdf5;">
             <div class="stat-row">
                 <div>
@@ -638,8 +653,8 @@
     </div>
 
     {{-- مخططات بيانية --}}
-    <div class="dash-charts-row" @if(auth('admin')->user()->isCoordination()) style="grid-template-columns:1fr;" @endif>
-        @unless(auth('admin')->user()->isCoordination())
+    <div class="dash-charts-row" @if(auth('admin')->user()->hideFinancials()) style="grid-template-columns:1fr;" @endif>
+        @unless(auth('admin')->user()->hideFinancials())
         <div class="chart-card">
             <div class="chart-card-header">
                 <h3 class="chart-card-title">
@@ -666,7 +681,7 @@
     </div>
 
     {{-- نقل كفالة + عقود الاستقدام الشهرية --}}
-    @unless(auth('admin')->user()->isCoordination())
+    @unless(auth('admin')->user()->hideFinancials())
     <div class="dash-charts-row" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr);">
         <div class="chart-card">
             <div class="chart-card-header">
@@ -790,7 +805,7 @@
     </div>
 
     {{-- جدولين فوق: الإيرادات + المصروفات --}}
-    @unless(auth('admin')->user()->isCoordination())
+    @unless(auth('admin')->user()->hideFinancials())
     <div class="dash-main-grid">
 
         {{-- أحدث الإيرادات --}}
@@ -882,7 +897,7 @@
     @endunless
 
     {{-- جدول كبير تحتهم: طلبات الموافقة المعلقة --}}
-    @unless(auth('admin')->user()->isCoordination())
+    @unless(auth('admin')->user()->hideFinancials())
     <div class="table-card pending-card">
         <div class="table-card-header">
             <h3 class="table-title">
