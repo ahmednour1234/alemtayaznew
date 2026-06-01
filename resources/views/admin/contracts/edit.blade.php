@@ -722,9 +722,11 @@ function contractForm() {
                 const data = await res.json();
                 if (data.id) {
                     const select = document.getElementById('clientSelect');
-                    if (select._tomSelect) {
-                        select._tomSelect.addOption({ value: String(data.id), text: data.name });
-                        select._tomSelect.setValue(String(data.id));
+                    const ts = select.tomselect;
+                    if (ts) {
+                        ts.addOption({ value: String(data.id), text: data.name });
+                        ts.refreshOptions(false);
+                        ts.setValue(String(data.id));
                     } else {
                         select.appendChild(new Option(data.name, data.id, true, true));
                         select.value = data.id;
@@ -747,9 +749,11 @@ function contractForm() {
                 const data = await res.json();
                 if (data.id) {
                     const select = document.getElementById('workerSelect');
-                    if (select._tomSelect) {
-                        select._tomSelect.addOption({ value: String(data.id), text: data.name });
-                        select._tomSelect.setValue(String(data.id));
+                    const ts = select.tomselect;
+                    if (ts) {
+                        ts.addOption({ value: String(data.id), text: data.name });
+                        ts.refreshOptions(false);
+                        ts.setValue(String(data.id));
                     } else {
                         select.appendChild(new Option(data.name, data.id, true, true));
                         select.value = data.id;
