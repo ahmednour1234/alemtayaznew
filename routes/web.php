@@ -205,6 +205,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::get('reports', [\App\Http\Controllers\Admin\Marketing\ReportsController::class, 'index'])->name('reports');
             Route::get('staff-performance', [\App\Http\Controllers\Admin\Marketing\StaffPerformanceController::class, 'index'])->name('staff-performance');
+
+            // Leads board (branch-grouped dashboard + auto-assign)
+            Route::get('leads-board', [\App\Http\Controllers\Admin\Marketing\LeadsBoardController::class, 'index'])->name('leads-board');
+            Route::post('leads-board/{branch}/auto-assign', [\App\Http\Controllers\Admin\Marketing\LeadsBoardController::class, 'autoAssign'])->name('leads-board.auto-assign');
         });
 
         // Housing Assignments (تعيينات السكن)

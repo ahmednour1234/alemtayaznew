@@ -14,8 +14,11 @@ Schedule::command('contracts:check-delays')->dailyAt('08:00');
 // Check arrival dates — notify 1 day before and alert on overdue
 Schedule::command('contracts:check-arrivals')->dailyAt('07:00');
 
-// Notify branch managers about leads not contacted within 24 hours
+// Notify about leads not contacted within 24 hours (+ 4-day critical warning to super admins)
 Schedule::command('leads:notify-stale')->dailyAt('09:00');
+
+// Notify CS staff about follow-ups due today or overdue
+Schedule::command('leads:notify-followups')->hourly();
 
 // Notify about complaints still open after 7 days
 Schedule::command('complaints:notify-stale')->dailyAt('09:30');

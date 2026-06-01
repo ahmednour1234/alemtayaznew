@@ -62,5 +62,46 @@ class NotifyStaleLeads extends Command
         }
 
         $this->info('Stale lead notifications sent.');
+
+        // ── 4-day critical warning → super admins ─────────────────────────────
+        $critical = Lead::whereIn('status', ['new', 'in_progress'])
+            ->where('created_at', '<=', now()->subDays(4))
+            ->whereNull('last_contacted_at')
+            ->with('branch')
+            ->get();
+
+        if ($critical->isNotEmpty()) {
+            $groupedCritical = $critical->groupBy('branch_id');
+
+            $superAdmins = Admin::where('active', true)
+                ->whereNull('branch_id')
+                ->get();
+
+            foreach ($groupedCritical as $branchId => $cLeads) {
+                $count   = $cLeads->count();
+                $bLabel  = $cLeads->first()->branch?->name ?? 'غير محدد';
+                $url     = route('admin.marketing.leads.index', ['branch_id' => $branchId, 'status' => 'new']);
+
+                foreach ($superAdmins as $admin) {
+                    $exists = AdminNotification::where('admin_id', $admin->id)
+                        ->where('type', 'critical_lead_warning')
+                        ->where('url', $url)
+                        ->whereDate('created_at', today())
+                        ->exists();
+
+                    if (! $exists) {
+                        AdminNotification::create([
+                            'admin_id' => $admin->id,
+                            'type'     => 'critical_lead_warning',
+                            'title'    => '⚠️ تحذير عاجل — عملاء محتملون بدون تواصل منذ 4 أيام',
+                            'body'     => "فرع {$bLabel}: {$count} عميل محتمل لم يتم التواصل معهم منذ أكثر من 4 أيام! يرجى التدخل الفوري.",
+                            'url'      => $url,
+                        ]);
+                    }
+                }
+            }
+
+            $this->warn('Critical lead warnings sent to super admins.');
+        }
     }
 }

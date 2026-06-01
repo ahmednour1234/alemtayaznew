@@ -79,6 +79,32 @@ class LeadController extends Controller
 
         $lead = Lead::create($data);
 
+        // Auto-assign to least-busy CS staff in the branch if not manually assigned
+        if (! $lead->assigned_admin_id && $lead->branch_id) {
+            $csStaff = Admin::where('branch_id', $lead->branch_id)
+                ->where('department', 'customer_service')
+                ->where('active', true)
+                ->get();
+
+            if ($csStaff->isNotEmpty()) {
+                $assignee = $csStaff->sortBy(fn($admin) =>
+                    Lead::where('assigned_admin_id', $admin->id)
+                        ->whereIn('status', ['new', 'in_progress'])
+                        ->count()
+                )->first();
+
+                $lead->update(['assigned_admin_id' => $assignee->id]);
+
+                AdminNotification::create([
+                    'admin_id' => $assignee->id,
+                    'type'     => 'lead_assigned',
+                    'title'    => 'تم تعيين عميل محتمل جديد لك',
+                    'body'     => 'العميل: ' . $lead->name . ($lead->phone ? ' — ' . $lead->phone : ''),
+                    'url'      => route('admin.marketing.leads.show', $lead),
+                ]);
+            }
+        }
+
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'lead' => $lead]);
         }
