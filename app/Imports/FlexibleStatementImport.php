@@ -134,8 +134,7 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
 
             // Determine record type by keyword in type name
             $isIncome  = mb_strpos($typeName, 'إيراد') !== false;
-            $isExpense = mb_strpos($typeName, 'مصروف') !== false
-                      || mb_strpos($typeName, 'مصاريف') !== false;
+            $isExpense = ! $isIncome; // anything that isn't income is treated as an expense
 
             if ($isIncome) {
                 // Resolve income type
@@ -192,9 +191,6 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
 
                 $this->expenseCount++;
 
-            } else {
-                $this->skippedCount++;
-                $this->errors[] = "صف {$rowNum}: لا يمكن تحديد نوع السجل من \"{$typeName}\"";
             }
         }
     }
