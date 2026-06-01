@@ -535,10 +535,12 @@
                 <span class="dash-banner-pill-val">{{ number_format($stats['total_clients'] ?? 0) }}</span>
                 <span class="dash-banner-pill-lbl">عميل</span>
             </div>
+            @unless(auth('admin')->user()->isCoordination())
             <div class="dash-banner-pill">
                 <span class="dash-banner-pill-val">{{ ($stats['pending_expenses'] ?? 0) + ($stats['pending_transfers'] ?? 0) }}</span>
                 <span class="dash-banner-pill-lbl">طلب معلق</span>
             </div>
+            @endunless
         </div>
     </div>
 
@@ -572,6 +574,7 @@
             <div class="stat-change up">↑ 8% عن الشهر الماضي</div>
         </a>
 
+        @unless(auth('admin')->user()->isCoordination())
         <a href="{{ route('admin.incomes.index') }}" class="stat-card" style="--accent:#059669;--soft:#ecfdf5;">
             <div class="stat-row">
                 <div>
@@ -617,6 +620,7 @@
             </div>
             <div class="stat-change up">↑ 10% عن الشهر الماضي</div>
         </div>
+        @endunless
 
         <div class="stat-card" style="--accent:#3b82f6;--soft:#eff6ff;">
             <div class="stat-row">
@@ -634,7 +638,8 @@
     </div>
 
     {{-- مخططات بيانية --}}
-    <div class="dash-charts-row">
+    <div class="dash-charts-row" @if(auth('admin')->user()->isCoordination()) style="grid-template-columns:1fr;" @endif>
+        @unless(auth('admin')->user()->isCoordination())
         <div class="chart-card">
             <div class="chart-card-header">
                 <h3 class="chart-card-title">
@@ -648,6 +653,7 @@
             </div>
             <div class="chart-body"><canvas id="revenueChart"></canvas></div>
         </div>
+        @endunless
         <div class="chart-card">
             <div class="chart-card-header">
                 <h3 class="chart-card-title">
@@ -660,6 +666,7 @@
     </div>
 
     {{-- نقل كفالة + عقود الاستقدام الشهرية --}}
+    @unless(auth('admin')->user()->isCoordination())
     <div class="dash-charts-row" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr);">
         <div class="chart-card">
             <div class="chart-card-header">
@@ -684,6 +691,7 @@
             <div class="chart-body"><canvas id="contractsBarChart"></canvas></div>
         </div>
     </div>
+    @endunless
 
     {{-- رحلات غداً + الشكاوى والمشاكل --}}
     <div class="dash-charts-row" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr);">
@@ -782,6 +790,7 @@
     </div>
 
     {{-- جدولين فوق: الإيرادات + المصروفات --}}
+    @unless(auth('admin')->user()->isCoordination())
     <div class="dash-main-grid">
 
         {{-- أحدث الإيرادات --}}
@@ -870,8 +879,10 @@
             </div>
         </div>
     </div>
+    @endunless
 
     {{-- جدول كبير تحتهم: طلبات الموافقة المعلقة --}}
+    @unless(auth('admin')->user()->isCoordination())
     <div class="table-card pending-card">
         <div class="table-card-header">
             <h3 class="table-title">
@@ -951,6 +962,7 @@
             </table>
         </div>
     </div>
+    @endunless
 
 </div>
 @endsection

@@ -71,4 +71,9 @@ class Admin extends Authenticatable
     {
         return $this->roles->where('slug', 'super-admin')->isNotEmpty();
     }
+
+    public function isCoordination(): bool
+    {
+        return $this->department === 'coordination';
+    }
 }
