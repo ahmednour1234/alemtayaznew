@@ -288,26 +288,28 @@ class CampaignController extends Controller
             return back()->with('success', 'جميع العملاء موزّعون بالفعل');
         }
 
-        // Pre-load all branches and CS staff once
-        $allBranches = Branch::where('active', true)->get();
-        $csStaffByBranch = [];  // branch_id → Collection<Admin>
-        $loadCache = [];        // admin_id → active lead count
+        // Pre-load all active branches and CS staff
+        $allBranches     = Branch::where('active', true)->get();
+        $csStaffByBranch = [];   // branch_id → Collection<Admin>
+        $loadCache       = [];   // admin_id  → active lead count
 
-        $count   = 0;
-        $skipped = 0;
+        // Fallback pool: all active CS staff across all branches (for unmatched cities)
+        $allCsStaff = Admin::where('department', 'customer_service')
+            ->where('active', true)
+            ->get();
+
+        $count = 0;
 
         foreach ($unassigned as $lead) {
             // ── 1. Resolve branch ────────────────────────────────────────────
             $branchId = $lead->branch_id ?? $campaign->branch_id;
 
             if (! $branchId && $lead->city) {
-                // Match lead city → branch by branch.city or branch.name
                 $leadCity = preg_replace('/^ال/', '', trim($lead->city));
-                $matched  = $allBranches->first(function ($b) use ($leadCity, $lead) {
+                $matched  = $allBranches->first(function ($b) use ($leadCity) {
                     $bCity = preg_replace('/^ال/', '', trim($b->city ?? ''));
                     $bName = preg_replace('/^ال/', '', trim($b->name));
-                    return mb_stripos($bCity, $leadCity) !== false
-                        || mb_stripos($leadCity, $bCity) !== false
+                    return ($bCity !== '' && (mb_stripos($bCity, $leadCity) !== false || mb_stripos($leadCity, $bCity) !== false))
                         || mb_stripos($bName, $leadCity) !== false
                         || mb_stripos($leadCity, $bName) !== false;
                 });
@@ -317,27 +319,31 @@ class CampaignController extends Controller
                 }
             }
 
-            if (! $branchId) {
-                $skipped++;
-                continue; // can't assign without a branch
+            // ── 2. Pick CS staff pool ─────────────────────────────────────────
+            if ($branchId) {
+                if (! isset($csStaffByBranch[$branchId])) {
+                    $csStaffByBranch[$branchId] = Admin::where('branch_id', $branchId)
+                        ->where('department', 'customer_service')
+                        ->where('active', true)
+                        ->get();
+                }
+                $pool = $csStaffByBranch[$branchId];
+
+                // If branch has no CS staff, fall back to global pool
+                if ($pool->isEmpty()) {
+                    $pool = $allCsStaff;
+                }
+            } else {
+                // No branch matched at all → use global pool (random distribution)
+                $pool = $allCsStaff;
             }
 
-            // ── 2. Get CS staff for this branch (cached) ─────────────────────
-            if (! isset($csStaffByBranch[$branchId])) {
-                $csStaffByBranch[$branchId] = Admin::where('branch_id', $branchId)
-                    ->where('department', 'customer_service')
-                    ->where('active', true)
-                    ->get();
-            }
-            $csStaff = $csStaffByBranch[$branchId];
-
-            if ($csStaff->isEmpty()) {
-                $skipped++;
-                continue;
+            if ($pool->isEmpty()) {
+                continue; // no staff anywhere — truly nothing to do
             }
 
-            // ── 3. Assign to least-busy staff ────────────────────────────────
-            $assignee = $csStaff->sortBy(function ($admin) use (&$loadCache) {
+            // ── 3. Assign to least-busy staff in the pool ────────────────────
+            $assignee = $pool->sortBy(function ($admin) use (&$loadCache) {
                 if (! isset($loadCache[$admin->id])) {
                     $loadCache[$admin->id] = Lead::where('assigned_admin_id', $admin->id)
                         ->whereIn('status', ['new', 'in_progress'])
@@ -360,11 +366,6 @@ class CampaignController extends Controller
             $count++;
         }
 
-        $msg = "تم توزيع {$count} عميل محتمل على موظفي خدمة العملاء";
-        if ($skipped > 0) {
-            $msg .= " (تعذّر توزيع {$skipped} بسبب عدم تطابق المدينة أو غياب الموظفين)";
-        }
-
-        return back()->with('success', $msg);
+        return back()->with('success', "تم توزيع {$count} عميل محتمل على موظفي خدمة العملاء");
     }
 }
