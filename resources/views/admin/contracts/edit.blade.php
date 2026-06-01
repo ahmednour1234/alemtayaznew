@@ -722,8 +722,13 @@ function contractForm() {
                 const data = await res.json();
                 if (data.id) {
                     const select = document.getElementById('clientSelect');
-                    select.appendChild(new Option(data.name, data.id, true, true));
-                    select.value = data.id;
+                    if (select._tomSelect) {
+                        select._tomSelect.addOption({ value: String(data.id), text: data.name });
+                        select._tomSelect.setValue(String(data.id));
+                    } else {
+                        select.appendChild(new Option(data.name, data.id, true, true));
+                        select.value = data.id;
+                    }
                     this.clientModal = { open: false, name: '', phone: '', loading: false, error: '' };
                 } else { this.clientModal.error = data.message || 'حدث خطأ'; }
             } catch (e) { this.clientModal.error = 'تعذّر الاتصال بالخادم'; }
@@ -742,8 +747,13 @@ function contractForm() {
                 const data = await res.json();
                 if (data.id) {
                     const select = document.getElementById('workerSelect');
-                    select.appendChild(new Option(data.name, data.id, true, true));
-                    select.value = data.id;
+                    if (select._tomSelect) {
+                        select._tomSelect.addOption({ value: String(data.id), text: data.name });
+                        select._tomSelect.setValue(String(data.id));
+                    } else {
+                        select.appendChild(new Option(data.name, data.id, true, true));
+                        select.value = data.id;
+                    }
                     this.workerModal = { open: false, name: '', nationality_id: '', passport_number: '', loading: false, error: '' };
                 } else { this.workerModal.error = data.message || 'حدث خطأ'; }
             } catch (e) { this.workerModal.error = 'تعذّر الاتصال بالخادم'; }

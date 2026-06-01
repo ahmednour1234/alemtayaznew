@@ -671,9 +671,14 @@ function contractForm() {
                 const data = await res.json();
                 if (data.id) {
                     const select = document.getElementById('clientSelect');
-                    const opt = new Option(data.name, data.id, true, true);
-                    select.appendChild(opt);
-                    select.value = data.id;
+                    if (select._tomSelect) {
+                        select._tomSelect.addOption({ value: String(data.id), text: data.name });
+                        select._tomSelect.setValue(String(data.id));
+                    } else {
+                        const opt = new Option(data.name, data.id, true, true);
+                        select.appendChild(opt);
+                        select.value = data.id;
+                    }
                     this.clientModal = { open: false, name: '', phone: '', national_id: '', loading: false, error: '' };
                 } else {
                     this.clientModal.error = data.message || 'حدث خطأ';
@@ -704,9 +709,14 @@ function contractForm() {
                 const data = await res.json();
                 if (data.id) {
                     const select = document.getElementById('workerSelect');
-                    const opt = new Option(data.name, data.id, true, true);
-                    select.appendChild(opt);
-                    select.value = data.id;
+                    if (select._tomSelect) {
+                        select._tomSelect.addOption({ value: String(data.id), text: data.name });
+                        select._tomSelect.setValue(String(data.id));
+                    } else {
+                        const opt = new Option(data.name, data.id, true, true);
+                        select.appendChild(opt);
+                        select.value = data.id;
+                    }
                     this.workerModal = { open: false, name: '', nationality_id: '', passport_number: '', loading: false, error: '' };
                 } else {
                     this.workerModal.error = data.message || 'حدث خطأ';
