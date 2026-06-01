@@ -133,7 +133,16 @@ class CampaignController extends Controller
 
             $rows    = array_filter(explode("\n", $response->body()));
             $imported = 0;
+            $skipped  = 0;
             $me      = Auth::guard('admin')->user();
+
+            // Build a set of phones already in this campaign for fast O(1) lookup
+            $existingPhones = Lead::where('campaign_id', $campaign->id)
+                ->whereNotNull('phone')
+                ->pluck('phone')
+                ->map(fn($p) => preg_replace('/\D/', '', $p)) // digits only
+                ->flip()
+                ->toArray();
 
             foreach (array_slice($rows, 1) as $line) { // skip header row
                 $cols = str_getcsv(trim($line));
@@ -144,22 +153,42 @@ class CampaignController extends Controller
                 $city     = trim($cols[2] ?? '') ?: null;
                 $natName  = trim($cols[3] ?? '') ?: null;
 
+                // ── Duplicate guard ─────────────────────────────────────────
+                if ($phone) {
+                    $digitsOnly = preg_replace('/\D/', '', $phone);
+                    if (isset($existingPhones[$digitsOnly])) {
+                        $skipped++;
+                        continue;
+                    }
+                    // Mark as seen so duplicates within the same sheet are also skipped
+                    $existingPhones[$digitsOnly] = true;
+                }
+                // ────────────────────────────────────────────────────────────
+
                 $natId = null;
                 if ($natName) {
                     $natId = \App\Models\Nationality::where('name', 'like', "%{$natName}%")
                         ->value('id');
                 }
 
-                Lead::create([
+                $branchId = $campaign->branch_id ?? ($me->isBranchAdmin() ? $me->branch_id : null);
+
+                $lead = Lead::create([
                     'campaign_id'  => $campaign->id,
                     'name'         => $name,
                     'phone'        => $phone,
                     'city'         => $city,
                     'nationality_id' => $natId,
-                    'branch_id'    => $campaign->branch_id ?? ($me->isBranchAdmin() ? $me->branch_id : null),
+                    'branch_id'    => $branchId,
                     'source'       => 'sheet',
                     'status'       => 'new',
                 ]);
+
+                // Auto-assign to least-busy CS staff in the branch
+                if ($branchId && ! $lead->assigned_admin_id) {
+                    $this->autoAssignLead($lead, $branchId);
+                }
+
                 $imported++;
             }
 
@@ -168,7 +197,12 @@ class CampaignController extends Controller
                 $this->notifyBranchAdmins($campaign, $imported);
             }
 
-            return back()->with('success', "تم استيراد {$imported} عميل محتمل بنجاح");
+            $msg = "تم استيراد {$imported} عميل محتمل بنجاح";
+            if ($skipped > 0) {
+                $msg .= " (تم تجاهل {$skipped} مكرر)";
+            }
+
+            return back()->with('success', $msg);
         } catch (\Throwable $e) {
             return back()->withErrors(['sheet_url' => 'حدث خطأ أثناء الاستيراد: ' . $e->getMessage()]);
         }
@@ -203,5 +237,92 @@ class CampaignController extends Controller
                 'url'      => route('admin.marketing.campaigns.show', $campaign->id),
             ]);
         }
+    }
+
+    /**
+     * Auto-assign a single lead to the least-busy CS staff in the branch.
+     */
+    private function autoAssignLead(Lead $lead, int $branchId): void
+    {
+        static $staffCache = [];
+
+        if (! isset($staffCache[$branchId])) {
+            $staffCache[$branchId] = Admin::where('branch_id', $branchId)
+                ->where('department', 'customer_service')
+                ->where('active', true)
+                ->get();
+        }
+
+        $csStaff = $staffCache[$branchId];
+        if ($csStaff->isEmpty()) return;
+
+        $assignee = $csStaff->sortBy(fn($admin) =>
+            Lead::where('assigned_admin_id', $admin->id)
+                ->whereIn('status', ['new', 'in_progress'])
+                ->count()
+        )->first();
+
+        $lead->update(['assigned_admin_id' => $assignee->id]);
+
+        \App\Models\AdminNotification::create([
+            'admin_id' => $assignee->id,
+            'type'     => 'lead_assigned',
+            'title'    => 'تم تعيين عميل محتمل جديد لك',
+            'body'     => 'العميل: ' . $lead->name . ($lead->phone ? ' — ' . $lead->phone : ''),
+            'url'      => route('admin.marketing.leads.show', $lead),
+        ]);
+    }
+
+    /**
+     * Re-assign all unassigned leads in this campaign to CS staff.
+     * POST campaigns/{campaign}/reassign-unassigned
+     */
+    public function reassignUnassigned(Campaign $campaign)
+    {
+        $branchId = $campaign->branch_id;
+        if (! $branchId) {
+            return back()->with('error', 'الحملة ليس لها فرع محدد');
+        }
+
+        $unassigned = Lead::where('campaign_id', $campaign->id)
+            ->whereIn('status', ['new', 'in_progress'])
+            ->whereNull('assigned_admin_id')
+            ->get();
+
+        if ($unassigned->isEmpty()) {
+            return back()->with('success', 'جميع العملاء موزّعون بالفعل');
+        }
+
+        $csStaff = Admin::where('branch_id', $branchId)
+            ->where('department', 'customer_service')
+            ->where('active', true)
+            ->get();
+
+        if ($csStaff->isEmpty()) {
+            return back()->with('error', 'لا يوجد موظفو خدمة عملاء في فرع الحملة');
+        }
+
+        $count = 0;
+        foreach ($unassigned as $lead) {
+            $assignee = $csStaff->sortBy(fn($admin) =>
+                Lead::where('assigned_admin_id', $admin->id)
+                    ->whereIn('status', ['new', 'in_progress'])
+                    ->count()
+            )->first();
+
+            $lead->update(['assigned_admin_id' => $assignee->id]);
+
+            \App\Models\AdminNotification::create([
+                'admin_id' => $assignee->id,
+                'type'     => 'lead_assigned',
+                'title'    => 'تم تعيين عميل محتمل لك',
+                'body'     => 'العميل: ' . $lead->name . ($lead->phone ? ' — ' . $lead->phone : ''),
+                'url'      => route('admin.marketing.leads.show', $lead),
+            ]);
+
+            $count++;
+        }
+
+        return back()->with('success', "تم توزيع {$count} عميل محتمل على موظفي خدمة العملاء");
     }
 }

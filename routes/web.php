@@ -197,6 +197,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Marketing
         Route::prefix('marketing')->name('marketing.')->group(function () {
             Route::post('campaigns/{campaign}/import-sheet', [\App\Http\Controllers\Admin\Marketing\CampaignController::class, 'importSheet'])->name('campaigns.import-sheet');
+            Route::post('campaigns/{campaign}/reassign-unassigned', [\App\Http\Controllers\Admin\Marketing\CampaignController::class, 'reassignUnassigned'])->name('campaigns.reassign-unassigned');
             Route::resource('campaigns', \App\Http\Controllers\Admin\Marketing\CampaignController::class);
 
             Route::post('leads/{lead}/call',    [\App\Http\Controllers\Admin\Marketing\LeadController::class, 'logCall'])->name('leads.call');

@@ -208,7 +208,8 @@ class AutoPermission
         'admin.marketing.campaigns.edit'          => 'campaigns.edit',
         'admin.marketing.campaigns.update'        => 'campaigns.edit',
         'admin.marketing.campaigns.destroy'       => 'campaigns.delete',
-        'admin.marketing.campaigns.import-sheet'  => 'campaigns.import',
+        'admin.marketing.campaigns.import-sheet'      => 'campaigns.import',
+        'admin.marketing.campaigns.reassign-unassigned' => 'leads.create',
 
         // ── Marketing: Leads ──────────────────────────────────────────────────
         'admin.marketing.leads.index'   => 'leads.view',
