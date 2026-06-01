@@ -57,6 +57,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Dashboard
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::post('dashboard/reject-all-pending', [DashboardController::class, 'rejectAllPending'])->name('dashboard.reject-all-pending');
 
         // Notifications
         Route::get('notifications',           [NotificationController::class, 'index'])->name('notifications.index');

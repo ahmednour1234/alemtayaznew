@@ -891,9 +891,26 @@
                 </span>
                 طلبات الموافقة المعلقة
             </h3>
+            @php
+                $pendingTotal = $pendingExpenses->sum('amount') + $pendingTransfers->sum('amount');
+                $pendingCount = $pendingExpenses->count() + $pendingTransfers->count();
+            @endphp
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                <span class="badge orange">{{ ($pendingExpenses->count() ?? 0) + ($pendingTransfers->count() ?? 0) }} طلب</span>
+                <span class="badge orange">{{ $pendingCount }} طلب</span>
+                <span style="background:#fef9c3;color:#92400e;border:1px solid #fde68a;border-radius:999px;padding:5px 13px;font-size:12px;font-weight:900;">
+                    الإجمالي: {{ number_format($pendingTotal, 0) }} ريال
+                </span>
                 <a href="{{ route('admin.expenses.index') }}" class="table-link" style="--link-color:#d97706;--link-bg:#fffbeb;--link-border:#fde68a;">عرض الكل</a>
+                @if($pendingCount > 0)
+                <form action="{{ route('admin.dashboard.reject-all-pending') }}" method="POST" style="display:inline;"
+                      onsubmit="return confirm('هل أنت متأكد من رفض جميع الطلبات المعلقة ({{ $pendingCount }} طلب)؟')">
+                    @csrf
+                    <button type="submit" class="btn-approve" style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-left:4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        رفض الكل
+                    </button>
+                </form>
+                @endif
             </div>
         </div>
         <div class="dash-table-wrap">
@@ -928,6 +945,9 @@
                                         @csrf
                                         <button type="submit" class="btn-approve">موافقة</button>
                                     </form>
+                                    <button type="button" class="btn-soft"
+                                        style="background:#fee2e2;color:#dc2626;"
+                                        onclick="openRejectModal('{{ route('admin.expenses.reject', $expense->id) }}')">رفض</button>
                                     <a href="{{ route('admin.expenses.show', $expense->id) }}" class="btn-soft">عرض</a>
                                 </div>
                             </td>
@@ -953,6 +973,9 @@
                                         @csrf
                                         <button type="submit" class="btn-approve">موافقة</button>
                                     </form>
+                                    <button type="button" class="btn-soft"
+                                        style="background:#fee2e2;color:#dc2626;"
+                                        onclick="openRejectModal('{{ route('admin.transfers.reject', $transfer->id) }}')">رفض</button>
                                     <a href="{{ route('admin.transfers.show', $transfer->id) }}" class="btn-soft">عرض</a>
                                 </div>
                             </td>
@@ -965,6 +988,47 @@
     @endunless
 
 </div>
+
+{{-- ── Modal رفض الطلب ─────────────────────────────────────── --}}
+<div id="rejectModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.45);align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:18px;padding:28px 28px 22px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(15,23,42,.2);direction:rtl;font-family:Cairo,sans-serif;">
+        <h4 style="margin:0 0 6px;color:#0f172a;font-size:17px;font-weight:900;">رفض الطلب</h4>
+        <p style="margin:0 0 16px;color:#64748b;font-size:13px;">يرجى كتابة سبب الرفض</p>
+        <form id="rejectForm" method="POST">
+            @csrf
+            <input name="_method" type="hidden" value="POST">
+            <textarea name="rejection_reason" rows="3" required
+                placeholder="اكتب سبب الرفض هنا..."
+                style="width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:10px 13px;font-family:Cairo,sans-serif;font-size:13px;resize:vertical;outline:none;box-sizing:border-box;"></textarea>
+            <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+                <button type="button" onclick="closeRejectModal()"
+                    style="border:1px solid #e2e8f0;background:#f8fafc;color:#475569;border-radius:9px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">
+                    إلغاء
+                </button>
+                <button type="submit"
+                    style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:0;border-radius:9px;padding:8px 20px;font-size:13px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">
+                    تأكيد الرفض
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    function openRejectModal(action) {
+        document.getElementById('rejectForm').action = action;
+        document.getElementById('rejectForm').querySelector('textarea').value = '';
+        const m = document.getElementById('rejectModal');
+        m.style.display = 'flex';
+        setTimeout(() => m.querySelector('textarea').focus(), 50);
+    }
+    function closeRejectModal() {
+        document.getElementById('rejectModal').style.display = 'none';
+    }
+    document.getElementById('rejectModal').addEventListener('click', function(e) {
+        if (e.target === this) closeRejectModal();
+    });
+</script>
+
 @endsection
 
 @push('scripts')

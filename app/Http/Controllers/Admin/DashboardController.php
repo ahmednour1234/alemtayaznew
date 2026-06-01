@@ -7,6 +7,7 @@ use App\Services\DashboardService;
 use App\Services\ExpenseService;
 use App\Services\IncomeService;
 use App\Services\TransferService;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -44,5 +45,34 @@ class DashboardController extends Controller
             'recentIncomes', 'recentExpenses',
             'pendingExpenses', 'pendingTransfers'
         ));
+    }
+
+    public function rejectAllPending()
+    {
+        $admin = Auth::guard('admin')->user();
+        if (! $admin->isSuperAdmin() && ! $admin->hasPermission('expenses.approve')) {
+            abort(403, 'ليس لديك صلاحية رفض الطلبات.');
+        }
+
+        $branchId = $admin->isBranchAdmin() ? $admin->branch_id : null;
+        $reason   = 'رفض جماعي من لوحة التحكم';
+
+        foreach ($this->expenseService->pending($branchId) as $expense) {
+            try {
+                $this->expenseService->reject($expense->id, $admin, $reason);
+            } catch (\RuntimeException) {
+                // already processed — skip
+            }
+        }
+
+        foreach ($this->transferService->pending($branchId) as $transfer) {
+            try {
+                $this->transferService->reject($transfer->id, $admin, $reason);
+            } catch (\RuntimeException) {
+                // already processed — skip
+            }
+        }
+
+        return back()->with('success', 'تم رفض جميع الطلبات المعلقة.');
     }
 }
