@@ -487,9 +487,17 @@
                      'd'=>'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z M22 11h-6 M19 8v6'],
                     ['r'=>'admin.marketing.reports',         'p'=>'admin.marketing.reports',     'l'=>'تقارير التسويق',   'perm'=>'marketing.reports.view',
                      'd'=>'M3 3v18h18 M7 14l4-4 4 4 5-5'],
+                    ['r'=>'admin.marketing.staff-performance','p'=>'admin.marketing.staff-performance','l'=>'أداء الموظفين','perm'=>'marketing.reports.view','mgr'=>true,
+                     'd'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
                 ] @endphp
                 @foreach($mkItems as $it)
-                    @if($can($it['perm']))
+                    @php
+                        $showItem = $can($it['perm']);
+                        if ($showItem && ($it['mgr'] ?? false)) {
+                            $showItem = $admin->isSuperAdmin() || in_array($admin->department, ['branch_manager', 'chairman']);
+                        }
+                    @endphp
+                    @if($showItem)
                     @php $on = request()->routeIs($it['p']); @endphp
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;

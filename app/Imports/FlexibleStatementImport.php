@@ -20,13 +20,12 @@ use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
  *   0 = التاريخ      (date)
  *   1 = الفرع        (branch name)
  *   2 = النوع        (type name — contains keyword "إيراد" or "مصروف"/"مصاريف")
- *   3 = النوع (2nd)  (ignored — may be duplicate)
- *   4 = المبلغ       (amount)
- *   5 = العملة       (ignored)
- *   6 = المرجع       (reference_number)
- *   7 = المستلم      (ignored)
- *   8 = طريقة الدفع  (payment_method — defaults to cash if empty)
- *   9 = الحالة       (ignored)
+ *   3 = المبلغ       (amount)
+ *   4 = العملة       (currency — ignored)
+ *   5 = المرجع       (reference_number)
+ *   6 = المستلم      (ignored)
+ *   7 = طريقة الدفع  (payment_method — defaults to cash if empty)
+ *   8 = الحالة       (ignored)
  */
 class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
 {
@@ -57,9 +56,9 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
             $rawDate          = $row[0] ?? null;
             $branchValue      = trim((string) ($row[1] ?? ''));
             $typeName         = trim((string) ($row[2] ?? ''));
-            $amount           = $row[4] ?? null;
-            $reference        = trim((string) ($row[6] ?? ''));
-            $paymentMethodRaw = trim((string) ($row[8] ?? ''));
+            $amount           = $row[3] ?? null;
+            $reference        = trim((string) ($row[5] ?? ''));
+            $paymentMethodRaw = trim((string) ($row[7] ?? ''));
 
             // Skip completely empty rows
             if ($branchValue === '' && $typeName === '' && $amount === null) {

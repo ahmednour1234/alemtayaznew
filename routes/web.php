@@ -204,6 +204,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('leads', \App\Http\Controllers\Admin\Marketing\LeadController::class)->except(['create', 'edit']);
 
             Route::get('reports', [\App\Http\Controllers\Admin\Marketing\ReportsController::class, 'index'])->name('reports');
+            Route::get('staff-performance', [\App\Http\Controllers\Admin\Marketing\StaffPerformanceController::class, 'index'])->name('staff-performance');
         });
 
         // Housing Assignments (تعيينات السكن)

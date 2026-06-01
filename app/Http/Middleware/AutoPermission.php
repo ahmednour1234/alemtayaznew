@@ -220,7 +220,8 @@ class AutoPermission
         'admin.marketing.leads.convert' => 'leads.convert',
 
         // ── Marketing: Reports ────────────────────────────────────────────────
-        'admin.marketing.reports' => 'marketing.reports.view',
+        'admin.marketing.reports'            => 'marketing.reports.view',
+        'admin.marketing.staff-performance'  => 'marketing.reports.view',
         // ── Housing (السكن) ──────────────────────────────────────
         'admin.housings.index'   => 'housings.view',
         'admin.housings.create'  => 'housings.create',
