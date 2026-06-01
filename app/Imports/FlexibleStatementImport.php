@@ -94,8 +94,12 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
 
                 if (! $branch) {
                     // 3. Auto-create the branch so no row is lost
+                    // Generate a unique code from the name (e.g. "الوكالات الرحالية" → "branch-XXXX")
+                    $slug = mb_substr(preg_replace('/\s+/', '-', $branchValue), 0, 20);
+                    $code = $slug . '-' . substr(md5($branchValue), 0, 4);
                     $branch = Branch::create([
                         'name'   => $branchValue,
+                        'code'   => $code,
                         'active' => true,
                     ]);
                 }
