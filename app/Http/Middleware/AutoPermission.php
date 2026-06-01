@@ -151,7 +151,7 @@ class AutoPermission
         'admin.clients.show'        => 'clients.view',
         'admin.clients.create'      => 'clients.create',
         'admin.clients.store'       => 'clients.create',
-        'admin.clients.quick-store' => 'clients.create',
+        'admin.clients.quick-store' => ['clients.create', 'contracts.create', 'contracts.edit'],
         'admin.clients.edit'        => 'clients.edit',
         'admin.clients.update'      => 'clients.edit',
         'admin.clients.destroy'     => 'clients.delete',
@@ -297,7 +297,13 @@ class AutoPermission
 
         $admin = Auth::guard('admin')->user();
 
-        if (! $admin || (! $admin->isSuperAdmin() && ! $admin->hasPermission($required))) {
+        $hasPermission = $admin && ($admin->isSuperAdmin() || (
+            is_array($required)
+                ? collect($required)->contains(fn($p) => $admin->hasPermission($p))
+                : $admin->hasPermission($required)
+        ));
+
+        if (! $hasPermission) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'ليس لديك صلاحية لهذا الإجراء.'], 403);
             }
