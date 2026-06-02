@@ -87,13 +87,18 @@ class WorkerService
                 }
             }
 
-            $data                    = $commonData;
-            $data['cv_path']         = $file->store('workers/cvs', 'public');
+            $data                     = $commonData;
+            $data['cv_path']          = $file->store('workers/cvs', 'public');
             $data['original_cv_name'] = $originalName;
-            $data['name']            = pathinfo($originalName, PATHINFO_FILENAME);
-            $worker                  = $this->repo->create($data);
-            $this->sendCvUploadNotifications($worker);
-            $created[] = $worker;
+            $data['name']             = pathinfo($originalName, PATHINFO_FILENAME);
+            $created[]                = $this->repo->create($data);
+        }
+
+        // One grouped notification for the whole batch
+        if (! empty($created)) {
+            // Reload first worker with nationality for the label
+            $firstWorker = \App\Models\Worker::with('nationality')->find($created[0]->id);
+            $this->sendBulkCvUploadNotification($created, $commonData, $firstWorker);
         }
 
         return compact('created', 'duplicates');
@@ -236,12 +241,48 @@ class WorkerService
         $title = 'CV عاملة جديدة';
         $body  = "تم رفع CV جديدة للعاملة «{$worker->name}»";
 
-        // Notify: customer_service, branch_manager of same branch, chairman/super-admin
         $recipients = Admin::where('active', true)
             ->where(function ($q) use ($worker) {
-                $q->whereNull('branch_id')                          // super admin
+                $q->whereNull('branch_id')
                   ->orWhere(function ($q2) use ($worker) {
                       $q2->where('branch_id', $worker->branch_id)
+                         ->whereIn('department', ['customer_service', 'branch_manager']);
+                  })
+                  ->orWhere('department', 'chairman');
+            })
+            ->get();
+
+        foreach ($recipients as $admin) {
+            $this->createNotification($admin->id, 'worker_cv_uploaded', $title, $body, $url);
+        }
+    }
+
+    /**
+     * Send one grouped notification for a bulk-upload batch.
+     *
+     * @param Worker[] $workers
+     */
+    private function sendBulkCvUploadNotification(array $workers, array $commonData, ?Worker $firstWorker = null): void
+    {
+        $count      = count($workers);
+        $branchId   = $commonData['branch_id'] ?? ($workers[0]->branch_id ?? null);
+        $url        = route('admin.workers.index');
+
+        // Build label: nationality + profession if available
+        $natName    = $firstWorker?->nationality?->name ?? null;
+        $profession = isset($commonData['profession'])
+            ? (Worker::professions()[$commonData['profession']] ?? null)
+            : null;
+
+        $detail = implode(' - ', array_filter([$natName, $profession]));
+        $title  = "تم رفع {$count} CV جديدة";
+        $body   = "تم رفع {$count} CV" . ($detail ? " ({$detail})" : '');
+
+        $recipients = Admin::where('active', true)
+            ->where(function ($q) use ($branchId) {
+                $q->whereNull('branch_id')
+                  ->orWhere(function ($q2) use ($branchId) {
+                      $q2->where('branch_id', $branchId)
                          ->whereIn('department', ['customer_service', 'branch_manager']);
                   })
                   ->orWhere('department', 'chairman');
