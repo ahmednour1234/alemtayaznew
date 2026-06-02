@@ -55,8 +55,10 @@ class SponsorshipTransferController extends Controller
             ->whereIn('status', ['in_housing', 'sponsorship_transfer'])
             ->get();
 
-        // Group 2: وصلت من عقود الاستقدام (assigned — مع أو بدون عقد)
+        // Group 2: وصلت من عقود الاستقدام (assigned + has a recruitment contract)
         $contractWorkers = (clone $baseQuery)
+            ->where('status', 'assigned')
+            ->whereHas('latestContract')
             ->get();
 
         $workers = $housingWorkers->merge($contractWorkers);
