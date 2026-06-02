@@ -58,7 +58,6 @@ class SponsorshipTransferController extends Controller
 
         // Group 2: وصلت من عقود الاستقدام (assigned — مع أو بدون عقد)
         $contractWorkers = (clone $baseQuery)
-            ->where('status', 'assigned')
             ->get();
 
         $workers = $housingWorkers->merge($contractWorkers);
