@@ -249,6 +249,14 @@ class TripController extends Controller
     public function print(int $id)
     {
         $trip = $this->service->find($id);
-        return view('admin.trips.print', compact('trip'));
+        $trip->load([
+            'workers.nationality',
+            'workers.recruitmentContracts' => fn($q) => $q->with('client', 'branch'),
+        ]);
+        // attach the contract that belongs to this trip to each worker pivot
+        $contractIds = $trip->workers->pluck('pivot.contract_id')->filter()->unique()->toArray();
+        $contracts = \App\Models\RecruitmentContract::with('client', 'branch')
+            ->whereIn('id', $contractIds)->get()->keyBy('id');
+        return view('admin.trips.print', compact('trip', 'contracts'));
     }
 }
