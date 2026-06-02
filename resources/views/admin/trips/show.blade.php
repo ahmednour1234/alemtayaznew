@@ -132,11 +132,9 @@
     </div>
 
     @if($contracts->isNotEmpty() || request('contract_search'))
-    <form method="POST" action="{{ route('admin.trips.add-workers-bulk', $trip->id) }}" id="bulk-form">
-        @csrf
-        {{-- Search bar --}}
-        <div style="padding:12px 16px;background:#fff;border-bottom:1px solid #f1f5f9;">
-            <form method="GET" action="{{ route('admin.trips.show', $trip->id) }}" style="display:flex;gap:8px;align-items:center;">
+    {{-- Search bar (outside bulk form) --}}
+    <div style="padding:12px 16px;background:#fff;border-bottom:1px solid #f1f5f9;">
+        <form method="GET" action="{{ route('admin.trips.show', $trip->id) }}" style="display:flex;gap:8px;align-items:center;">
                 <input type="text" name="contract_search" value="{{ request('contract_search') }}"
                        placeholder="ابحث باسم العميل أو العاملة أو رقم العقد..."
                        style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;font-family:'Cairo',sans-serif;outline:none;"
@@ -152,6 +150,8 @@
                 @endif
             </form>
         </div>
+    <form method="POST" action="{{ route('admin.trips.add-workers-bulk', $trip->id) }}" id="bulk-form">
+        @csrf
         <div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:600;color:#475569;font-family:'Cairo',sans-serif;">
                 <input type="checkbox" id="select-all" style="width:16px;height:16px;accent-color:#c9a84c;cursor:pointer;">
