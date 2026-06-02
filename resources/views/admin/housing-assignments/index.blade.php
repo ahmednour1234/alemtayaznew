@@ -38,11 +38,9 @@
             <label class="block text-xs font-medium text-slate-500 mb-1.5">سبب السكن</label>
             <select name="reason" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
                 <option value="">الكل</option>
-                <option value="new_arrival"    {{ request('reason') === 'new_arrival'    ? 'selected' : '' }}>وصول جديد</option>
-                <option value="pending_client" {{ request('reason') === 'pending_client' ? 'selected' : '' }}>انتظار عميل</option>
-                <option value="complaint"      {{ request('reason') === 'complaint'      ? 'selected' : '' }}>شكوى</option>
-                <option value="returned"       {{ request('reason') === 'returned'       ? 'selected' : '' }}>إعادة</option>
-                <option value="other"          {{ request('reason') === 'other'          ? 'selected' : '' }}>أخرى</option>
+                <option value="sponsorship_transfer" {{ request('reason') === 'sponsorship_transfer' ? 'selected' : '' }}>نقل كفالة</option>
+                <option value="deportation"          {{ request('reason') === 'deportation'          ? 'selected' : '' }}>تسفير</option>
+                <option value="handover"             {{ request('reason') === 'handover'             ? 'selected' : '' }}>تسليم</option>
             </select>
         </div>
         <div>
@@ -87,11 +85,9 @@
                 <td class="px-4 py-3">
                     @php
                         $reasonLabels = [
-                            'new_arrival'    => ['label' => 'وصول جديد',    'bg' => '#dbeafe', 'color' => '#1d4ed8'],
-                            'pending_client' => ['label' => 'انتظار عميل', 'bg' => '#fef9c3', 'color' => '#92400e'],
-                            'complaint'      => ['label' => 'شكوى',         'bg' => '#fee2e2', 'color' => '#b91c1c'],
-                            'returned'       => ['label' => 'إعادة',         'bg' => '#ede9fe', 'color' => '#6d28d9'],
-                            'other'          => ['label' => 'أخرى',          'bg' => '#f1f5f9', 'color' => '#475569'],
+                            'sponsorship_transfer' => ['label' => 'نقل كفالة', 'bg' => '#ede9fe', 'color' => '#7c3aed'],
+                            'deportation'          => ['label' => 'تسفير',      'bg' => '#fee2e2', 'color' => '#b91c1c'],
+                            'handover'             => ['label' => 'تسليم',      'bg' => '#dcfce7', 'color' => '#16a34a'],
                         ];
                         $r = $reasonLabels[$a->reason] ?? null;
                     @endphp
