@@ -52,6 +52,7 @@ class NationalityAirportSeeder extends Seeder
             ['name' => 'مطار عرعر الإقليمي',                         'code' => 'RAE', 'city' => 'عرعر'],
             ['name' => 'مطار سكاكا الإقليمي',                        'code' => 'AJF', 'city' => 'الجوف'],
             ['name' => 'مطار بيشة الإقليمي',                         'code' => 'BHH', 'city' => 'بيشة'],
+            ['name' => 'مطار القيصومة المحلي',                       'code' => 'AQQ', 'city' => 'القيصومة'],
         ];
 
         foreach ($airports as $airport) {
