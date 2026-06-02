@@ -127,13 +127,31 @@
             </div>
         </div>
         <span style="color:#64748b;font-size:12px;font-family:'Cairo',sans-serif;">
-            العقود في المرحلة 11–12 (جاهزة للسفر)
+            عقود الاستقدام المرتبطة بهذا الفرع
         </span>
     </div>
 
-    @if($contracts->isNotEmpty())
+    @if($contracts->isNotEmpty() || request('contract_search'))
     <form method="POST" action="{{ route('admin.trips.add-workers-bulk', $trip->id) }}" id="bulk-form">
         @csrf
+        {{-- Search bar --}}
+        <div style="padding:12px 16px;background:#fff;border-bottom:1px solid #f1f5f9;">
+            <form method="GET" action="{{ route('admin.trips.show', $trip->id) }}" style="display:flex;gap:8px;align-items:center;">
+                <input type="text" name="contract_search" value="{{ request('contract_search') }}"
+                       placeholder="ابحث باسم العميل أو العاملة أو رقم العقد..."
+                       style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;font-family:'Cairo',sans-serif;outline:none;"
+                       onfocus="this.style.borderColor='#c9a84c'" onblur="this.style.borderColor='#e2e8f0'">
+                <button type="submit"
+                        style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;color:#fff;background:#64748b;border:none;font-family:'Cairo',sans-serif;cursor:pointer;display:flex;align-items:center;gap:5px;">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    بحث
+                </button>
+                @if(request('contract_search'))
+                <a href="{{ route('admin.trips.show', $trip->id) }}"
+                   style="padding:8px 12px;border-radius:8px;font-size:13px;color:#94a3b8;border:1.5px solid #e2e8f0;text-decoration:none;font-family:'Cairo',sans-serif;">مسح</a>
+                @endif
+            </form>
+        </div>
         <div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:600;color:#475569;font-family:'Cairo',sans-serif;">
                 <input type="checkbox" id="select-all" style="width:16px;height:16px;accent-color:#c9a84c;cursor:pointer;">
@@ -197,7 +215,7 @@
                     </td>
                     <td style="padding:10px 16px;">
                         @php $statusLabel = \App\Models\RecruitmentContract::statuses()[$contract->current_status]['label'] ?? "مرحلة {$contract->current_status}"; @endphp
-                        <span style="background:#fef9c3;color:#a16207;font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;">
+                        <span style="background:#f1f5f9;color:#64748b;font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;">
                             {{ $statusLabel }}
                         </span>
                     </td>
@@ -210,8 +228,10 @@
     @else
     <div style="padding:40px 16px;text-align:center;color:#94a3b8;font-size:13px;font-family:'Cairo',sans-serif;">
         <div style="font-size:32px;margin-bottom:10px;">📋</div>
-        لا توجد عقود جاهزة للإضافة<br>
-        <span style="font-size:12px;">(العقود في المرحلة 11–12 لهذا الفرع{{ $trip->originNationality ? ' — '.$trip->originNationality->name : '' }})</span>
+        لا توجد عقود متاحة
+        @if(request('contract_search'))
+        <br><a href="{{ route('admin.trips.show', $trip->id) }}" style="font-size:12px;color:#c9a84c;">مسح البحث</a>
+        @endif
     </div>
     @endif
 </div>

@@ -97,12 +97,20 @@ class TripController extends Controller
         // Workers already in this trip
         $assignedWorkerIds = $trip->workers->pluck('id');
 
-        // Contracts ready for arrival (status 11 or 12), same branch, worker not yet in trip
+        // Contracts for this branch, worker not yet in trip
         $contractsQuery = RecruitmentContract::with(['client', 'worker.nationality', 'originNationality'])
             ->where('branch_id', $trip->branch_id)
-            ->whereIn('current_status', [11, 12])
             ->whereNotNull('worker_id')
             ->whereNotIn('worker_id', $assignedWorkerIds);
+
+        // Search filter
+        if ($search = request('contract_search')) {
+            $contractsQuery->where(function ($q) use ($search) {
+                $q->where('contract_number', 'like', "%{$search}%")
+                  ->orWhereHas('client', fn($q2) => $q2->where('name', 'like', "%{$search}%"))
+                  ->orWhereHas('worker', fn($q2) => $q2->where('name', 'like', "%{$search}%"));
+            });
+        }
 
         // Filter by origin nationality if set on the trip
         if ($trip->origin_nationality_id) {
