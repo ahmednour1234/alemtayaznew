@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -154,6 +155,11 @@ class Worker extends Model
     public function latestContract(): HasOne
     {
         return $this->hasOne(\App\Models\RecruitmentContract::class)->latest();
+    }
+
+    public function recruitmentContracts(): HasMany
+    {
+        return $this->hasMany(\App\Models\RecruitmentContract::class);
     }
 
     public function activeHousingAssignment(): HasOne
