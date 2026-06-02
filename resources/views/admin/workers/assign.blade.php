@@ -56,24 +56,51 @@
             <form action="{{ route('admin.workers.do-assign', $worker->id) }}" method="POST">
                 @csrf
 
-                {{-- Select client --}}
+                {{-- Select client / lead --}}
                 <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">اختر العميل</h3>
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                        <h3 class="text-sm font-semibold text-slate-600">اختر العميل</h3>
+                        <a href="{{ route('admin.clients.create') }}" target="_blank"
+                           class="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            إضافة عميل جديد
+                        </a>
+                    </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1.5">العميل <span class="text-red-500">*</span></label>
-                        <select name="client_id" required
-                                class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 @error('client_id') border-red-400 @enderror">
-                            <option value="">اختر عميلاً...</option>
-                            @foreach($clients as $client)
-                            <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
-                                {{ $client->name }}
-                                @if($client->phone) — {{ $client->phone }} @endif
-                            </option>
-                            @endforeach
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">العميل أو العميل المحتمل <span class="text-red-500">*</span></label>
+                        <select name="assignee" id="assigneeSelect" required
+                                class="w-full border border-slate-300 rounded-lg text-sm @error('assignee') border-red-400 @enderror">
+                            <option value="">ابحث أو اختر...</option>
+                            @if($clients->isNotEmpty())
+                            <optgroup label="✅ عملاء مؤكدون ({{ $clients->count() }})">
+                                @foreach($clients as $client)
+                                <option value="client:{{ $client->id }}"
+                                        {{ old('assignee') === 'client:'.$client->id ? 'selected' : '' }}>
+                                    {{ $client->name }}{{ $client->phone ? ' — '.$client->phone : '' }}
+                                </option>
+                                @endforeach
+                            </optgroup>
+                            @endif
+                            @if($leads->isNotEmpty())
+                            <optgroup label="🔶 عملاء محتملون ({{ $leads->count() }})">
+                                @foreach($leads as $lead)
+                                <option value="lead:{{ $lead->id }}"
+                                        {{ old('assignee') === 'lead:'.$lead->id ? 'selected' : '' }}>
+                                    {{ $lead->name }}{{ $lead->phone ? ' — '.$lead->phone : '' }}
+                                    (محتمل)
+                                </option>
+                                @endforeach
+                            </optgroup>
+                            @endif
                         </select>
-                        @error('client_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                        @if($clients->isEmpty())
-                        <p class="text-amber-600 text-xs mt-2">لا يوجد عملاء مؤكدون. يرجى إضافة عميل مؤكد أولاً.</p>
+                        @error('assignee')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                        @if($clients->isEmpty() && $leads->isEmpty())
+                        <p class="text-amber-600 text-xs mt-2">لا يوجد عملاء أو عملاء محتملون. يرجى إضافة عميل أولاً.</p>
+                        @endif
+                        @if($clients->isEmpty() && $leads->isNotEmpty())
+                        <p class="text-blue-600 text-xs mt-2">اختيار عميل محتمل سيحوله تلقائياً إلى عميل مؤكد عند التعيين.</p>
                         @endif
                     </div>
                 </div>
@@ -112,7 +139,7 @@
                 </div>
 
                 <div class="flex gap-3">
-                    <button type="submit" @if($clients->isEmpty()) disabled @endif
+                    <button type="submit" @if($clients->isEmpty() && $leads->isEmpty()) disabled @endif
                             class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm px-6 py-2.5 rounded-lg font-medium">
                         تعيين العاملة للعميل
                     </button>
@@ -122,4 +149,20 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const el = document.getElementById('assigneeSelect');
+    if (el && !el._tomSelect) {
+        new TomSelect(el, {
+            placeholder: 'ابحث بالاسم أو الهاتف...',
+            searchField: ['text'],
+            allowEmptyOption: true,
+            maxOptions: 200,
+        });
+    }
+});
+</script>
+@endpush
 @endsection

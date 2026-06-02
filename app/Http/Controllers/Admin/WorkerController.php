@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreWorkerRequest;
 use App\Http\Requests\Admin\UpdateWorkerRequest;
 use App\Models\Client;
+use App\Models\Lead;
 use App\Models\Nationality;
 use App\Models\Worker;
 use App\Services\BranchService;
@@ -195,18 +196,64 @@ class WorkerController extends Controller
     // ── Assign to Client ──────────────────────────────────────────────────────
     public function assign(int $id)
     {
-        $worker  = $this->service->find($id);
-        $clients = Client::where('active', true)
-                         ->whereIn('classification', ['confirmed', 'premium'])
-                         ->orderBy('name')->get();
-        return view('admin.workers.assign', compact('worker', 'clients'));
+        $me     = Auth::guard('admin')->user();
+        $worker = $this->service->find($id);
+
+        $clientsQuery = Client::where('active', true)
+            ->whereIn('classification', ['confirmed', 'premium'])
+            ->orderBy('name');
+        $leadsQuery = Lead::whereIn('status', ['new', 'in_progress'])
+            ->orderBy('name');
+
+        if ($me->isBranchAdmin()) {
+            $clientsQuery->where('branch_id', $me->branch_id);
+            $leadsQuery->where('branch_id', $me->branch_id);
+        }
+
+        $clients = $clientsQuery->get();
+        $leads   = $leadsQuery->get();
+
+        return view('admin.workers.assign', compact('worker', 'clients', 'leads'));
     }
 
     public function doAssign(Request $request, int $id)
     {
         $request->validate([
-            'client_id' => ['required', 'exists:clients,id'],
+            'assignee' => ['required', 'string'],
         ]);
+
+        // Resolve client_id — either a direct client or a lead to convert
+        $assignee = $request->input('assignee'); // format: "client:123" or "lead:456"
+        [$type, $rawId] = explode(':', $assignee);
+        $clientId = null;
+
+        if ($type === 'client') {
+            $client = Client::findOrFail((int) $rawId);
+            $clientId = $client->id;
+        } elseif ($type === 'lead') {
+            $lead = Lead::findOrFail((int) $rawId);
+
+            // If lead was already converted, reuse its client
+            if ($lead->client_id) {
+                $clientId = $lead->client_id;
+            } else {
+                // Convert lead → client
+                $me = Auth::guard('admin')->user();
+                $newClient = Client::create([
+                    'name'           => $lead->name,
+                    'phone'          => $lead->phone,
+                    'classification' => 'confirmed',
+                    'branch_id'      => $lead->branch_id ?? $me->branch_id,
+                    'admin_id'       => $me->id,
+                    'active'         => true,
+                ]);
+                $lead->update(['status' => 'converted', 'client_id' => $newClient->id]);
+                $clientId = $newClient->id;
+            }
+        } else {
+            return back()->withErrors(['assignee' => 'اختيار غير صالح.']);
+        }
+
         // Update worker details if provided
         $data = array_filter($request->only(
             'name', 'passport_number', 'nationality_id', 'profession',
@@ -220,9 +267,9 @@ class WorkerController extends Controller
         $me = Auth::guard('admin')->user();
 
         try {
-            $this->service->assignToClient($id, (int) $request->client_id, $me->id);
+            $this->service->assignToClient($id, $clientId, $me->id);
         } catch (\RuntimeException $e) {
-            return back()->withErrors(['client_id' => $e->getMessage()]);
+            return back()->withErrors(['assignee' => $e->getMessage()]);
         }
 
         return redirect()->route('admin.workers.index')
