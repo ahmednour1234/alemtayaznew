@@ -46,11 +46,23 @@ class SponsorshipTransferController extends Controller
     {
         $branchId = $this->branchFilter();
 
-        $workers = Worker::where('active', true)
-            ->whereIn('status', ['in_housing', 'sponsorship_transfer', 'assigned'])
+        $baseQuery = Worker::where('active', true)
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->with(['nationality', 'client', 'latestContract'])
-            ->orderBy('name')->get();
+            ->orderBy('name');
+
+        // Group 1: في السكن / نقل كفالة مباشر
+        $housingWorkers = (clone $baseQuery)
+            ->whereIn('status', ['in_housing', 'sponsorship_transfer'])
+            ->get();
+
+        // Group 2: وصلت من عقود الاستقدام (assigned + has a recruitment contract)
+        $contractWorkers = (clone $baseQuery)
+            ->where('status', 'assigned')
+            ->whereHas('latestContract')
+            ->get();
+
+        $workers = $housingWorkers->merge($contractWorkers);
 
         // Map worker data for JS auto-fill
         $workersJson = $workers->map(fn($w) => [
@@ -64,7 +76,10 @@ class SponsorshipTransferController extends Controller
         $clients  = Client::where('active', true)->orderBy('name')->get();
         $branches = $branchId ? null : Branch::where('active', true)->orderBy('name')->get();
 
-        return view('admin.sponsorship-transfers.create', compact('workers', 'workersJson', 'clients', 'branches', 'branchId'));
+        return view('admin.sponsorship-transfers.create', compact(
+            'workers', 'workersJson', 'clients', 'branches', 'branchId',
+            'housingWorkers', 'contractWorkers'
+        ));
     }
 
     public function store(Request $request)

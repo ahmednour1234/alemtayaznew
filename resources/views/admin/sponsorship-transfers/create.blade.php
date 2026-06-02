@@ -115,13 +115,25 @@
                         </label>
                         <select name="worker_id" id="worker_select" required class="form-input" style="padding:0"
                                 onchange="onWorkerChange(this.value)">
-                            <option value="">اختر عاملة وصلت وفي السكن</option>
-                            @foreach($workers as $w)
-                            <option value="{{ $w->id }}" {{ old('worker_id') == $w->id ? 'selected' : '' }}>
-                                {{ $w->name }}{{ $w->nationality ? ' — '.$w->nationality->name : '' }}
-                                ({{ $w->status_label }})
-                            </option>
-                            @endforeach
+                            <option value="">اختر عاملة...</option>
+                            @if($housingWorkers->isNotEmpty())
+                            <optgroup label="🏠 عاملات في السكن">
+                                @foreach($housingWorkers as $w)
+                                <option value="{{ $w->id }}" {{ old('worker_id') == $w->id ? 'selected' : '' }}>
+                                    {{ $w->name }}{{ $w->nationality ? ' — '.$w->nationality->name : '' }}
+                                </option>
+                                @endforeach
+                            </optgroup>
+                            @endif
+                            @if($contractWorkers->isNotEmpty())
+                            <optgroup label="📋 وصلت من عقود الاستقدام">
+                                @foreach($contractWorkers as $w)
+                                <option value="{{ $w->id }}" {{ old('worker_id') == $w->id ? 'selected' : '' }}>
+                                    {{ $w->name }}{{ $w->nationality ? ' — '.$w->nationality->name : '' }}
+                                </option>
+                                @endforeach
+                            </optgroup>
+                            @endif
                         </select>
                         @error('worker_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
