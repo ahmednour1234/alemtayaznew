@@ -37,12 +37,19 @@
                         </div>
                     </div>
                     <div class="flex gap-3">
-                        <button type="submit" name="force_upload" value="1"
-                                x-bind:disabled="files.length === 0"
-                                class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-4 py-2 rounded-lg font-medium">
-                            رفع الكل على أي حال
-                        </button>
-                        <a href="{{ route('admin.workers.bulk') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-4 py-2 rounded-lg font-medium">إلغاء</a>
+                        {{-- Separate mini-form so it posts without needing files --}}
+                        <form action="{{ route('admin.workers.bulk-store') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="force_upload" value="1">
+                            <input type="hidden" name="nationality_id" value="{{ old('nationality_id') }}">
+                            <input type="hidden" name="profession" value="{{ old('profession') }}">
+                            <input type="hidden" name="status" value="{{ old('status', 'available') }}">
+                            <button type="submit"
+                                    class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-4 py-2 rounded-lg font-medium">
+                                رفع الكل على أي حال
+                            </button>
+                        </form>
+                        <a href="{{ route('admin.workers.bulk') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-4 py-2 rounded-lg font-medium self-center">إلغاء</a>
                     </div>
                 </div>
                 @endif

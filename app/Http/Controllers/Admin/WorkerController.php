@@ -13,6 +13,7 @@ use App\Services\BranchService;
 use App\Services\WorkerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class WorkerController extends Controller
 {
@@ -110,14 +111,6 @@ class WorkerController extends Controller
 
     public function bulkStore(Request $request)
     {
-        $request->validate([
-            'nationality_id' => ['nullable', 'exists:nationalities,id'],
-            'profession'     => ['nullable', 'string', 'max:100'],
-            'status'         => ['nullable', 'in:available,reserved'],
-            'cvs'            => ['required', 'array', 'min:1'],
-            'cvs.*'          => ['file', 'mimes:pdf', 'max:10240'],
-        ]);
-
         $me   = Auth::guard('admin')->user();
         $data = [
             'nationality_id' => $request->nationality_id,
@@ -128,12 +121,44 @@ class WorkerController extends Controller
             'active'         => true,
         ];
 
-        $skipDuplicates = $request->boolean('force_upload');
-        $result         = $this->service->bulkStore($data, $request->file('cvs'), $skipDuplicates);
+        // ── Force-upload path: process previously saved temp files ────────────
+        if ($request->boolean('force_upload')) {
+            $tempPaths = session('cv_temp_files', []);
+            if (empty($tempPaths)) {
+                return redirect()->route('admin.workers.bulk')
+                    ->with('error', 'انتهت صلاحية الجلسة. يرجى رفع الملفات مجدداً.');
+            }
+            $result = $this->service->bulkStoreFromTempPaths($data, $tempPaths);
+            session()->forget('cv_temp_files');
+            $count = count($result['created']);
+            return redirect()->route('admin.workers.index')
+                ->with('success', "تم رفع {$count} CV بنجاح.");
+        }
 
-        if (! empty($result['duplicates']) && ! $skipDuplicates) {
+        // ── Normal upload path ────────────────────────────────────────────────
+        $request->validate([
+            'nationality_id' => ['nullable', 'exists:nationalities,id'],
+            'profession'     => ['nullable', 'string', 'max:100'],
+            'status'         => ['nullable', 'in:available,reserved'],
+            'cvs'            => ['required', 'array', 'min:1'],
+            'cvs.*'          => ['file', 'mimes:pdf', 'max:10240'],
+        ]);
+
+        $result = $this->service->bulkStore($data, $request->file('cvs'), false);
+
+        if (! empty($result['duplicates'])) {
+            // Save duplicate files to temp storage (persists across requests)
+            $sessionKey = 'bulk_temp_' . session()->getId();
+            $tempPaths  = [];
+            foreach ($request->file('cvs') as $file) {
+                if (in_array($file->getClientOriginalName(), $result['duplicates'])) {
+                    $path = $file->storeAs('temp_bulk/' . $sessionKey, $file->getClientOriginalName());
+                    $tempPaths[$file->getClientOriginalName()] = $path;
+                }
+            }
+            session()->put('cv_temp_files', $tempPaths);
+
             return back()
-                ->withInput()
                 ->with('cv_duplicate_warning', true)
                 ->with('cv_duplicate_files', $result['duplicates'])
                 ->with('cv_created_count', count($result['created']));

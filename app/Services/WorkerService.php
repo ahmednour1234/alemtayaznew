@@ -104,6 +104,44 @@ class WorkerService
         return compact('created', 'duplicates');
     }
 
+    /**
+     * Process duplicate files previously saved to temp storage.
+     * $tempPaths: ['originalName.pdf' => 'temp_bulk/key/originalName.pdf']
+     */
+    public function bulkStoreFromTempPaths(array $commonData, array $tempPaths): array
+    {
+        $created = [];
+
+        foreach ($tempPaths as $originalName => $tempPath) {
+            if (! Storage::exists($tempPath)) {
+                continue;
+            }
+
+            $finalPath = 'workers/cvs/' . uniqid() . '_' . $originalName;
+            Storage::disk('public')->put($finalPath, Storage::get($tempPath));
+            Storage::delete($tempPath);
+
+            $data                     = $commonData;
+            $data['cv_path']          = $finalPath;
+            $data['original_cv_name'] = $originalName;
+            $data['name']             = pathinfo($originalName, PATHINFO_FILENAME);
+            $created[]                = $this->repo->create($data);
+        }
+
+        // Clean up temp directory
+        if (! empty($tempPaths)) {
+            $dir = dirname(reset($tempPaths));
+            Storage::deleteDirectory($dir);
+        }
+
+        if (! empty($created)) {
+            $firstWorker = \App\Models\Worker::with('nationality')->find($created[0]->id);
+            $this->sendBulkCvUploadNotification($created, $commonData, $firstWorker);
+        }
+
+        return compact('created');
+    }
+
     // ── Update ────────────────────────────────────────────────────────────────
 
     public function update(int $id, array $data, ?UploadedFile $cv = null, ?UploadedFile $passportImage = null): mixed
