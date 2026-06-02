@@ -7,7 +7,7 @@
         <h2 class="text-xl font-bold text-slate-800">تقرير العمالة المستلمة</h2>
         <p class="text-sm text-slate-500 mt-0.5">العقود التي وصلت إلى مرحلة «تم الاستلام» (المرحلة 13)</p>
     </div>
-    <span class="bg-green-100 text-green-700 text-sm font-semibold px-4 py-1.5 rounded-full">
+    <span class="bg-green-100 text-green-700 text-sm font-semibold px-4 py-1.5 rounded-full" id="countBadge">
         {{ $contracts->count() }} عقد
     </span>
 </div>
@@ -45,6 +45,19 @@
     </form>
 </div>
 
+{{-- Search --}}
+<div class="bg-white rounded-xl border border-slate-100 shadow-sm p-4 mb-5">
+    <div class="relative">
+        <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z"/>
+        </svg>
+        <input type="text" id="tableSearch"
+               placeholder="ابحث باسم العاملة، اسم العميل، رقم الجواز، رقم العقد، أو رقم مساند..."
+               value="{{ request('search') }}"
+               class="w-full border border-slate-200 rounded-lg pr-9 pl-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+    </div>
+</div>
+
 {{-- Table --}}
 <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-x-auto">
     <table class="w-full text-sm text-right">
@@ -66,8 +79,15 @@
             @php
                 $receivedHistory = $c->statusHistories->firstWhere('status', 13);
                 $payColors = ['full' => 'bg-green-100 text-green-700', 'partial' => 'bg-yellow-100 text-yellow-700', 'pending' => 'bg-slate-100 text-slate-500'];
+                $searchText = implode(' ', array_filter([
+                    $c->worker->name ?? '',
+                    $c->worker->passport_number ?? '',
+                    $c->client->name ?? '',
+                    $c->contract_number ?? '',
+                    $c->musaned_number ?? '',
+                ]));
             @endphp
-            <tr class="hover:bg-slate-50 transition">
+            <tr class="hover:bg-slate-50 transition" data-search="{{ strtolower($searchText) }}">
                 <td class="px-4 py-3">
                     <a href="{{ route('admin.contracts.show', $c->id) }}" class="font-mono text-blue-600 hover:underline">{{ $c->contract_number }}</a>
                     @if($c->musaned_number)
@@ -99,5 +119,28 @@
         </tbody>
     </table>
 </div>
+
+@push('scripts')
+<script>
+(function () {
+    const input   = document.getElementById('tableSearch');
+    const badge   = document.getElementById('countBadge');
+    const rows    = Array.from(document.querySelectorAll('tbody tr[data-search]'));
+    const emptyRow = document.querySelector('tbody tr td[colspan]')?.closest('tr');
+
+    input.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        let visible = 0;
+        rows.forEach(function (row) {
+            const match = !q || row.dataset.search.includes(q);
+            row.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+        if (badge) badge.textContent = visible + ' عقد';
+        if (emptyRow) emptyRow.style.display = (visible === 0 && rows.length > 0) ? '' : 'none';
+    });
+})();
+</script>
+@endpush
 
 @endsection
