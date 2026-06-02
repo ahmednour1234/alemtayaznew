@@ -41,6 +41,12 @@ Route::get('/track', [RecruitmentContractController::class, 'publicTrack'])->nam
 // ── Public complaint tracking ──────────────────────────────────────────────────
 Route::get('/complaint/track/{token}', [ComplaintTrackingController::class, 'show'])->name('complaint.track');
 
+// ── Public worker CV/passport (sent via WhatsApp) ────────────────────────────
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('workers/{id}/cv',       [WorkerController::class, 'serveCV'])->name('workers.cv');
+    Route::get('workers/{id}/passport', [WorkerController::class, 'servePassport'])->name('workers.passport');
+});
+
 // ── Admin Auth ────────────────────────────────────────────────────────────────
 Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -169,8 +175,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('workers/{id}/assign',       [WorkerController::class, 'assign'])->name('workers.assign');
         Route::post('workers/{id}/assign',      [WorkerController::class, 'doAssign'])->name('workers.do-assign');
         Route::post('workers/{id}/unassign',    [WorkerController::class, 'unassign'])->name('workers.unassign');
-        Route::get('workers/{id}/cv',           [WorkerController::class, 'serveCV'])->name('workers.cv');
-        Route::get('workers/{id}/passport',     [WorkerController::class, 'servePassport'])->name('workers.passport');
+
         Route::resource('workers', WorkerController::class);
 
         // Recruitment Contracts

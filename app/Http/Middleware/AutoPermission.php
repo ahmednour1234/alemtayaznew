@@ -169,8 +169,6 @@ class AutoPermission
         // ── Workers ───────────────────────────────────────────────────────────
         'admin.workers.index'         => 'workers.view',
         'admin.workers.show'          => 'workers.view',
-        'admin.workers.cv'            => 'workers.view',
-        'admin.workers.passport'      => 'workers.view',
         'admin.workers.create'        => 'workers.create',
         'admin.workers.store'         => 'workers.create',
         'admin.workers.bulk'          => 'workers.create',
