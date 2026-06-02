@@ -210,7 +210,28 @@ class WorkerService
             );
         }
 
+        // Capture info before unassign
+        $clientName = $worker->client?->name ?? 'عميل';
+        $branchId   = $worker->branch_id;
+        $workerName = $worker->name ?: 'عاملة';
+        $url        = route('admin.workers.show', $worker->id);
+
         $this->repo->unassign($id);
+
+        // Notify coordination + branch manager
+        $title = 'إلغاء تعيين عاملة';
+        $body  = "تم إلغاء تعيين العاملة «{$workerName}» من العميل «{$clientName}» بواسطة {$actor->name}";
+
+        $branchAdmins = Admin::where('active', true)
+            ->where('branch_id', $branchId)
+            ->whereIn('department', ['coordination', 'branch_manager'])
+            ->get();
+
+        foreach ($branchAdmins as $admin) {
+            if ($admin->id !== $actor->id) {
+                $this->createNotification($admin->id, 'worker_unassigned', $title, $body, $url);
+            }
+        }
     }
 
     // ── WhatsApp ──────────────────────────────────────────────────────────────

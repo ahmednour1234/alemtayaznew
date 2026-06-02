@@ -37,6 +37,7 @@ class NotificationService
         'agent_created'       => 'agents.view',
         'worker_cv_uploaded'         => 'workers.view',
         'worker_assigned'            => 'workers.view',
+        'worker_unassigned'          => 'workers.view',
         'worker_no_contract'         => 'workers.view',
         'worker_no_contract_warning' => 'workers.view',
         'worker_assignment_cancelled'=> 'workers.view',
