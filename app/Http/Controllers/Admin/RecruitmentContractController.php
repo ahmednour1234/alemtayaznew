@@ -93,16 +93,8 @@ class RecruitmentContractController extends Controller
         $filters  = $request->only(['search', 'department', 'status', 'payment_status', 'branch_id', 'origin_nationality_id']);
         $branchId = $this->branchFilter();
 
-        // Non-super-admin: restrict to their department view
-        if (! $me->isSuperAdmin() && $me->department && ! isset($filters['department'])) {
-            $dept = match ($me->department) {
-                'customer_service' => 'customer_service',
-                'accounts', 'accountant' => 'accounts',
-                'coordination'     => 'coordination',
-                default            => null,
-            };
-            if ($dept) $filters['department'] = $dept;
-        }
+        // No auto-filter by department — users see all branch contracts by default.
+        // They can filter manually via the department tabs.
 
         $contracts     = $this->service->getList($filters, $branchId);
         $statuses      = RecruitmentContract::statuses();
