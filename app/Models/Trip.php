@@ -15,7 +15,7 @@ class Trip extends Model
 
     protected $fillable = [
         'trip_number', 'trip_type', 'trip_date', 'trip_time',
-        'airport_id', 'flight_number', 'branch_id', 'admin_id',
+        'airport_id', 'origin_nationality_id', 'flight_number', 'branch_id', 'admin_id',
         'notes', 'status',
     ];
 
@@ -92,6 +92,11 @@ class Trip extends Model
     public function airport(): BelongsTo
     {
         return $this->belongsTo(Airport::class);
+    }
+
+    public function originNationality(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Nationality::class, 'origin_nationality_id');
     }
 
     public function branch(): BelongsTo

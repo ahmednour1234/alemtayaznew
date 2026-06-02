@@ -170,6 +170,19 @@
                         <input type="text" name="flight_number" value="{{ old('flight_number') }}" placeholder="مثال: SV205" class="form-input">
                     </div>
 
+                    {{-- Origin Nationality --}}
+                    <div>
+                        <label class="form-label">
+                            🌍 بلد المنشأ (اختياري)
+                        </label>
+                        <select name="origin_nationality_id" class="form-input" style="padding:0">
+                            <option value="">-- كل الجنسيات --</option>
+                            @foreach($nationalities ?? [] as $nat)
+                            <option value="{{ $nat->id }}" {{ old('origin_nationality_id') == $nat->id ? 'selected' : '' }}>{{ $nat->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     {{-- Branch --}}
                     @if($branchId)
                     <input type="hidden" name="branch_id" value="{{ $branchId }}">

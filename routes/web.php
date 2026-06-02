@@ -228,6 +228,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Trips (الرحلات)
         Route::post('trips/{trip}/workers',                   [TripController::class, 'addWorker'])->name('trips.add-worker');
+        Route::post('trips/{trip}/workers/bulk',              [TripController::class, 'addWorkersBulk'])->name('trips.add-workers-bulk');
         Route::delete('trips/{trip}/workers/{worker}',        [TripController::class, 'removeWorker'])->name('trips.remove-worker');
         Route::get('trips/{trip}/checklist',                  [TripController::class, 'showChecklist'])->name('trips.checklist');
         Route::post('trips/{trip}/checklist',                 [TripController::class, 'submitChecklist'])->name('trips.checklist.submit');

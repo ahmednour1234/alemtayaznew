@@ -109,39 +109,111 @@
     </div>
 </div>
 
-{{-- Add worker section --}}
+{{-- Contracts selection table (add from recruitment contracts) --}}
 @if($trip->status === 'scheduled')
 <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-6">
-    <div style="background:linear-gradient(135deg,#0f172a 0%,#1a2744 100%);padding:14px 20px;display:flex;align-items:center;gap:10px;">
-        <div style="width:32px;height:32px;border-radius:8px;background:rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="16" height="16" fill="none" stroke="#c9a84c" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+    <div style="background:linear-gradient(135deg,#0f172a 0%,#1a2744 100%);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:32px;height:32px;border-radius:8px;background:rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="16" height="16" fill="none" stroke="#c9a84c" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            </div>
+            <div>
+                <span style="color:#e2e8f0;font-size:14px;font-weight:700;font-family:'Cairo',sans-serif;">إضافة من عقود الاستقدام</span>
+                @if($trip->originNationality)
+                <span style="margin-right:8px;background:rgba(201,168,76,.2);color:#c9a84c;font-size:11px;padding:2px 8px;border-radius:12px;font-weight:600;">
+                    🌍 {{ $trip->originNationality->name }}
+                </span>
+                @endif
+            </div>
         </div>
-        <span style="color:#e2e8f0;font-size:14px;font-weight:700;font-family:'Cairo',sans-serif;">إضافة عاملة للرحلة</span>
+        <span style="color:#64748b;font-size:12px;font-family:'Cairo',sans-serif;">
+            العقود في المرحلة 11–12 (جاهزة للسفر)
+        </span>
     </div>
-    <div class="p-5">
-        <form method="POST" action="{{ route('admin.trips.add-worker', $trip->id) }}" class="flex flex-wrap gap-3 items-end">
-            @csrf
-            <div class="flex-1" style="min-width:200px">
-                <label style="font-size:11px;color:#94a3b8;font-weight:600;display:block;margin-bottom:5px;">اختر عاملة</label>
-                <select name="worker_id" required class="form-input-sm" style="padding:0">
-                    <option value="">-- اختر --</option>
-                    @foreach($workers as $w)
-                    <option value="{{ $w->id }}">{{ $w->name }}{{ $w->nationality ? ' — '.$w->nationality->name : '' }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="flex-1" style="min-width:200px">
-                <label style="font-size:11px;color:#94a3b8;font-weight:600;display:block;margin-bottom:5px;">ملاحظات (اختياري)</label>
-                <input type="text" name="notes" placeholder="اختياري" class="form-input-sm">
-            </div>
-            <button type="submit"
-                    style="padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,#c9a84c,#a88830);border:none;font-family:'Cairo',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;"
+
+    @if($contracts->isNotEmpty())
+    <form method="POST" action="{{ route('admin.trips.add-workers-bulk', $trip->id) }}" id="bulk-form">
+        @csrf
+        <div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:600;color:#475569;font-family:'Cairo',sans-serif;">
+                <input type="checkbox" id="select-all" style="width:16px;height:16px;accent-color:#c9a84c;cursor:pointer;">
+                تحديد الكل
+            </label>
+            <button type="submit" id="bulk-submit"
+                    style="padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,#c9a84c,#a88830);border:none;font-family:'Cairo',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;"
                     onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                إضافة
+                إضافة المحددات للرحلة
             </button>
-        </form>
+        </div>
+        <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr style="background:#f8fafc;border-bottom:1px solid #f1f5f9;">
+                    <th style="padding:10px 12px;width:36px;"></th>
+                    <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">#</th>
+                    <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">العميل</th>
+                    <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">العاملة</th>
+                    <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">الجنسية / البلد</th>
+                    <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">رقم العقد</th>
+                    <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">المرحلة</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($contracts as $i => $contract)
+                <tr class="worker-row" style="border-bottom:1px solid #f1f5f9;">
+                    <td style="padding:10px 12px;text-align:center;">
+                        <input type="checkbox" name="contract_ids[]" value="{{ $contract->id }}"
+                               class="contract-checkbox" style="width:16px;height:16px;accent-color:#c9a84c;cursor:pointer;">
+                    </td>
+                    <td style="padding:10px 16px;color:#94a3b8;font-size:12px;">{{ $i + 1 }}</td>
+                    <td style="padding:10px 16px;">
+                        <div style="font-weight:700;color:#0f172a;font-size:13px;">{{ $contract->client?->name ?? '—' }}</div>
+                        @if($contract->client?->phone)
+                        <div style="font-size:11px;color:#94a3b8;margin-top:2px;">{{ $contract->client->phone }}</div>
+                        @endif
+                    </td>
+                    <td style="padding:10px 16px;">
+                        <div style="font-weight:600;color:#1e293b;font-size:13px;">{{ $contract->worker?->name ?? '—' }}</div>
+                        @if($contract->worker?->passport_number)
+                        <div style="font-size:11px;color:#94a3b8;font-family:monospace;margin-top:2px;">{{ $contract->worker->passport_number }}</div>
+                        @endif
+                    </td>
+                    <td style="padding:10px 16px;">
+                        @if($contract->originNationality)
+                        <span style="background:#ede9fe;color:#7c3aed;font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;">
+                            🌍 {{ $contract->originNationality->name }}
+                        </span>
+                        @elseif($contract->worker?->nationality)
+                        <span style="background:#f1f5f9;color:#475569;font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;">
+                            {{ $contract->worker->nationality->name }}
+                        </span>
+                        @else
+                        <span style="color:#cbd5e1;">—</span>
+                        @endif
+                    </td>
+                    <td style="padding:10px 16px;color:#64748b;font-size:12px;font-family:monospace;">
+                        {{ $contract->contract_number }}
+                    </td>
+                    <td style="padding:10px 16px;">
+                        @php $statusLabel = \App\Models\RecruitmentContract::statuses()[$contract->current_status]['label'] ?? "مرحلة {$contract->current_status}"; @endphp
+                        <span style="background:#fef9c3;color:#a16207;font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;">
+                            {{ $statusLabel }}
+                        </span>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+        </div>
+    </form>
+    @else
+    <div style="padding:40px 16px;text-align:center;color:#94a3b8;font-size:13px;font-family:'Cairo',sans-serif;">
+        <div style="font-size:32px;margin-bottom:10px;">📋</div>
+        لا توجد عقود جاهزة للإضافة<br>
+        <span style="font-size:12px;">(العقود في المرحلة 11–12 لهذا الفرع{{ $trip->originNationality ? ' — '.$trip->originNationality->name : '' }})</span>
     </div>
+    @endif
 </div>
 @endif
 
@@ -159,6 +231,7 @@
             <tr style="background:#f8fafc;border-bottom:1px solid #f1f5f9;">
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">#</th>
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">الاسم</th>
+                <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">العميل</th>
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">الجنسية</th>
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">رقم الجواز</th>
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">ملاحظات</th>
@@ -170,6 +243,14 @@
             <tr class="worker-row" style="border-bottom:1px solid #f1f5f9;">
                 <td style="padding:12px 16px;color:#94a3b8;font-size:12px;">{{ $i + 1 }}</td>
                 <td style="padding:12px 16px;font-weight:700;color:#0f172a;">{{ $worker->name }}</td>
+                <td style="padding:12px 16px;color:#475569;font-size:12px;">
+                    @php
+                        $wContract = $trip->workers()->where('worker_id', $worker->id)->first()?->pivot?->contract_id
+                            ? \App\Models\RecruitmentContract::with('client')->find($worker->pivot->contract_id)
+                            : null;
+                    @endphp
+                    {{ $wContract?->client?->name ?? '—' }}
+                </td>
                 <td style="padding:12px 16px;">
                     @if($worker->nationality)
                     <span style="background:#f1f5f9;color:#475569;font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;">{{ $worker->nationality->name }}</span>
@@ -194,7 +275,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="6" style="padding:48px 16px;text-align:center;color:#94a3b8;font-size:13px;">
+                <td colspan="7" style="padding:48px 16px;text-align:center;color:#94a3b8;font-size:13px;">
                     <div style="margin-bottom:8px;font-size:32px;">👥</div>
                     لم تتم إضافة عاملات بعد
                 </td>
@@ -203,4 +284,33 @@
         </tbody>
     </table>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('.contract-checkbox');
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        });
+        checkboxes.forEach(cb => cb.addEventListener('change', function () {
+            selectAll.checked = [...checkboxes].every(c => c.checked);
+        }));
+    }
+
+    const bulkForm = document.getElementById('bulk-form');
+    if (bulkForm) {
+        bulkForm.addEventListener('submit', function (e) {
+            const selected = document.querySelectorAll('.contract-checkbox:checked');
+            if (selected.length === 0) {
+                e.preventDefault();
+                alert('يرجى تحديد عاملة واحدة على الأقل');
+            }
+        });
+    }
+});
+</script>
+@endpush
 @endsection

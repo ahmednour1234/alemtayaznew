@@ -53,6 +53,16 @@
             </div>
 
             <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">🌍 بلد المنشأ (اختياري)</label>
+                <select name="origin_nationality_id" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                    <option value="">-- كل الجنسيات --</option>
+                    @foreach($nationalities ?? [] as $nat)
+                    <option value="{{ $nat->id }}" {{ $trip->origin_nationality_id == $nat->id ? 'selected' : '' }}>{{ $nat->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1.5">الفرع <span class="text-red-500">*</span></label>
                 <select name="branch_id" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
                     @foreach($branches as $b)

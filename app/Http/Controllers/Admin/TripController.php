@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Airport;
 use App\Models\Branch;
+use App\Models\Nationality;
+use App\Models\RecruitmentContract;
 use App\Models\Worker;
 use App\Services\NotificationService;
 use App\Services\TripService;
@@ -41,22 +43,24 @@ class TripController extends Controller
 
     public function create()
     {
-        $airports = Airport::orderBy('name')->get();
-        $branches = Branch::where('active', true)->orderBy('name')->get();
-        $branchId = $this->branchFilter();
-        return view('admin.trips.create', compact('airports', 'branches', 'branchId'));
+        $airports      = Airport::orderBy('name')->get();
+        $branches      = Branch::where('active', true)->orderBy('name')->get();
+        $nationalities = Nationality::where('active', true)->orderBy('name')->get();
+        $branchId      = $this->branchFilter();
+        return view('admin.trips.create', compact('airports', 'branches', 'nationalities', 'branchId'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'trip_type'     => 'required|in:arrival,departure,group_transport,deportation',
-            'trip_date'     => 'required|date',
-            'trip_time'     => 'nullable|date_format:H:i',
-            'airport_id'    => 'nullable|exists:airports,id',
-            'flight_number' => 'nullable|string|max:50',
-            'branch_id'     => 'required|exists:branches,id',
-            'notes'         => 'nullable|string|max:1000',
+            'trip_type'              => 'required|in:arrival,departure,group_transport,deportation',
+            'trip_date'              => 'required|date',
+            'trip_time'              => 'nullable|date_format:H:i',
+            'airport_id'             => 'nullable|exists:airports,id',
+            'origin_nationality_id'  => 'nullable|exists:nationalities,id',
+            'flight_number'          => 'nullable|string|max:50',
+            'branch_id'              => 'required|exists:branches,id',
+            'notes'                  => 'nullable|string|max:1000',
         ]);
 
         if ($bid = $this->branchFilter()) {
@@ -88,30 +92,50 @@ class TripController extends Controller
 
     public function show(int $id)
     {
-        $trip    = $this->service->find($id);
-        $workers = Worker::where('active', true)
-            ->orderBy('name')->get();
-        return view('admin.trips.show', compact('trip', 'workers'));
+        $trip = $this->service->find($id);
+
+        // Workers already in this trip
+        $assignedWorkerIds = $trip->workers->pluck('id');
+
+        // Contracts ready for arrival (status 11 or 12), same branch, worker not yet in trip
+        $contractsQuery = RecruitmentContract::with(['client', 'worker.nationality', 'originNationality'])
+            ->where('branch_id', $trip->branch_id)
+            ->whereIn('current_status', [11, 12])
+            ->whereNotNull('worker_id')
+            ->whereNotIn('worker_id', $assignedWorkerIds);
+
+        // Filter by origin nationality if set on the trip
+        if ($trip->origin_nationality_id) {
+            $contractsQuery->where('origin_nationality_id', $trip->origin_nationality_id);
+        }
+
+        $contracts = $contractsQuery->orderBy('id')->get();
+
+        $nationalities = Nationality::where('active', true)->orderBy('name')->get();
+
+        return view('admin.trips.show', compact('trip', 'contracts', 'nationalities'));
     }
 
     public function edit(int $id)
     {
-        $trip     = $this->service->find($id);
-        $airports = Airport::orderBy('name')->get();
-        $branches = Branch::where('active', true)->orderBy('name')->get();
-        return view('admin.trips.edit', compact('trip', 'airports', 'branches'));
+        $trip          = $this->service->find($id);
+        $airports      = Airport::orderBy('name')->get();
+        $branches      = Branch::where('active', true)->orderBy('name')->get();
+        $nationalities = Nationality::where('active', true)->orderBy('name')->get();
+        return view('admin.trips.edit', compact('trip', 'airports', 'branches', 'nationalities'));
     }
 
     public function update(Request $request, int $id)
     {
         $data = $request->validate([
-            'trip_type'     => 'required|in:arrival,departure,group_transport,deportation',
-            'trip_date'     => 'required|date',
-            'trip_time'     => 'nullable|date_format:H:i',
-            'airport_id'    => 'nullable|exists:airports,id',
-            'flight_number' => 'nullable|string|max:50',
-            'branch_id'     => 'required|exists:branches,id',
-            'notes'         => 'nullable|string|max:1000',
+            'trip_type'              => 'required|in:arrival,departure,group_transport,deportation',
+            'trip_date'              => 'required|date',
+            'trip_time'              => 'nullable|date_format:H:i',
+            'airport_id'             => 'nullable|exists:airports,id',
+            'origin_nationality_id'  => 'nullable|exists:nationalities,id',
+            'flight_number'          => 'nullable|string|max:50',
+            'branch_id'              => 'required|exists:branches,id',
+            'notes'                  => 'nullable|string|max:1000',
         ]);
 
         $this->service->update($id, $data);
@@ -135,6 +159,31 @@ class TripController extends Controller
         $trip = $this->service->find($tripId);
         $this->service->addWorker($trip, $request->worker_id, $request->contract_id, $request->notes);
         return back()->with('success', 'تم إضافة العاملة إلى الرحلة.');
+    }
+
+    public function addWorkersBulk(Request $request, int $tripId)
+    {
+        $request->validate([
+            'contract_ids'   => 'required|array|min:1',
+            'contract_ids.*' => 'exists:recruitment_contracts,id',
+        ]);
+
+        $trip = $this->service->find($tripId);
+        $added = 0;
+
+        foreach ($request->contract_ids as $contractId) {
+            $contract = RecruitmentContract::with('worker')->find($contractId);
+            if ($contract && $contract->worker_id) {
+                // Skip if already in trip
+                if ($trip->workers()->where('worker_id', $contract->worker_id)->exists()) {
+                    continue;
+                }
+                $this->service->addWorker($trip, $contract->worker_id, $contract->id, null);
+                $added++;
+            }
+        }
+
+        return back()->with('success', "تم إضافة {$added} عاملة إلى الرحلة.");
     }
 
     public function removeWorker(int $tripId, int $workerId)
