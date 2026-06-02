@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.app')
+@extends('admin.layouts.app')
 @section('title', 'ØªØ¹ÙŠÙŠÙ† Ø¹Ø§Ù…Ù„Ø© Ù„Ø¹Ù…ÙŠÙ„')
 @section('content')
 <div class="w-full">
