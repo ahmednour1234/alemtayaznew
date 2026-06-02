@@ -57,7 +57,22 @@ class WorkerController extends Controller
             $data['branch_id'] = $me->branch_id;
         }
         $data['status'] = $data['status'] ?? 'available';
-        $this->service->store($data, $request->file('cv'), $request->file('passport_image'));
+
+        // ── Duplicate CV check ────────────────────────────────────────────────
+        $cvFile       = $request->file('cv');
+        $passportNum  = $data['passport_number'] ?? null;
+        $originalName = $cvFile ? $cvFile->getClientOriginalName() : null;
+        $duplicate    = $this->service->findDuplicate($passportNum, $originalName);
+
+        if ($duplicate && ! $request->boolean('force_upload')) {
+            return back()
+                ->withInput()
+                ->with('cv_duplicate_warning', true)
+                ->with('cv_duplicate_name', $duplicate->name ?? $duplicate->passport_number)
+                ->with('cv_duplicate_id', $duplicate->id);
+        }
+
+        $this->service->store($data, $cvFile, $request->file('passport_image'));
         return redirect()->route('admin.workers.index')->with('success', 'تم إضافة العاملة بنجاح.');
     }
 
@@ -112,7 +127,18 @@ class WorkerController extends Controller
             'active'         => true,
         ];
 
-        $count = count($this->service->bulkStore($data, $request->file('cvs')));
+        $skipDuplicates = $request->boolean('force_upload');
+        $result         = $this->service->bulkStore($data, $request->file('cvs'), $skipDuplicates);
+
+        if (! empty($result['duplicates']) && ! $skipDuplicates) {
+            return back()
+                ->withInput()
+                ->with('cv_duplicate_warning', true)
+                ->with('cv_duplicate_files', $result['duplicates'])
+                ->with('cv_created_count', count($result['created']));
+        }
+
+        $count = count($result['created']);
         return redirect()->route('admin.workers.index')
             ->with('success', "تم رفع {$count} CV بنجاح.");
     }
@@ -191,7 +217,14 @@ class WorkerController extends Controller
             $this->service->update($id, $data);
         }
 
-        $this->service->assignToClient($id, (int) $request->client_id);
+        $me = Auth::guard('admin')->user();
+
+        try {
+            $this->service->assignToClient($id, (int) $request->client_id, $me->id);
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['client_id' => $e->getMessage()]);
+        }
+
         return redirect()->route('admin.workers.index')
             ->with('success', 'تم تعيين العاملة للعميل بنجاح.');
     }
@@ -199,7 +232,14 @@ class WorkerController extends Controller
     // ── Unassign ──────────────────────────────────────────────────────────────
     public function unassign(int $id)
     {
-        $this->service->unassign($id);
+        $me = Auth::guard('admin')->user();
+
+        try {
+            $this->service->unassign($id, $me);
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['permission' => $e->getMessage()]);
+        }
+
         return back()->with('success', 'تم إلغاء تعيين العاملة وأصبحت متاحة.');
     }
 

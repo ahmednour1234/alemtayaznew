@@ -11,6 +11,35 @@
 
     <form action="{{ route('admin.workers.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
         @csrf
+
+        {{-- ── Duplicate CV warning ───────────────────────────────────────── --}}
+        @if(session('cv_duplicate_warning'))
+        <div class="bg-amber-50 border border-amber-300 rounded-xl p-4 flex flex-col gap-3">
+            <div class="flex items-start gap-3">
+                <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+                <div>
+                    <p class="text-sm font-semibold text-amber-800">تحذير: CV مرفوعة مسبقاً</p>
+                    <p class="text-xs text-amber-700 mt-0.5">
+                        يوجد سجل مطابق مسبقاً
+                        @if(session('cv_duplicate_name'))
+                            (<strong>{{ session('cv_duplicate_name') }}</strong>)
+                        @endif
+                        بنفس رقم الجواز أو اسم الملف.
+                        <a href="{{ route('admin.workers.show', session('cv_duplicate_id')) }}" target="_blank" class="underline text-amber-800">عرض السجل الموجود</a>
+                    </p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button type="submit" name="force_upload" value="1"
+                        class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-4 py-2 rounded-lg font-medium">
+                    رفع على أي حال
+                </button>
+                <a href="{{ route('admin.workers.create') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-4 py-2 rounded-lg font-medium">إلغاء</a>
+            </div>
+        </div>
+        @endif
         <div class="bg-white rounded-xl shadow-sm p-6">
             <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">البيانات الأساسية</h3>
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">

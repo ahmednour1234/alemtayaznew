@@ -15,13 +15,18 @@ class Worker extends Model
     protected $fillable = [
         'name', 'passport_number', 'nationality_id', 'profession',
         'gender', 'experience', 'religion', 'age', 'phone',
-        'cv_path', 'passport_image', 'status', 'client_id', 'branch_id', 'admin_id',
+        'cv_path', 'original_cv_name', 'passport_image',
+        'status', 'client_id', 'branch_id', 'admin_id',
+        'assigned_by_admin_id', 'assigned_at',
         'notes', 'active',
     ];
 
     protected function casts(): array
     {
-        return ['active' => 'boolean'];
+        return [
+            'active'      => 'boolean',
+            'assigned_at' => 'datetime',
+        ];
     }
 
     // ── Static option lists ──────────────────────────────────────────────────
@@ -141,8 +146,19 @@ class Worker extends Model
         return $this->belongsTo(Admin::class);
     }
 
+    public function assignedBy(): BelongsTo
+    {
+        return $this->belongsTo(Admin::class, 'assigned_by_admin_id');
+    }
+
     public function latestContract(): HasOne
     {
         return $this->hasOne(\App\Models\RecruitmentContract::class)->latest();
+    }
+
+    /** True if the worker has an active contract for a specific client */
+    public function hasContractForClient(int $clientId): bool
+    {
+        return $this->latestContract()->where('client_id', $clientId)->exists();
     }
 }

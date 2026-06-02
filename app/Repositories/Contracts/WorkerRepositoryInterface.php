@@ -11,6 +11,7 @@ interface WorkerRepositoryInterface
     public function delete(int $id): void;
     public function restore(int $id): void;
     public function getTrashed(): mixed;
-    public function assignToClient(int $id, int $clientId): void;
+    public function assignToClient(int $id, int $clientId, int $assignedByAdminId): void;
     public function unassign(int $id): void;
+    public function findDuplicateCv(?string $passportNumber, ?string $originalCvName): mixed;
 }

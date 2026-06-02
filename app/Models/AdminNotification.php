@@ -64,6 +64,11 @@ class AdminNotification extends Model
             'lead_followup_due'    => '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>',
             'stale_lead'           => '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
             'critical_lead_warning'=> '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+            'worker_cv_uploaded'         => '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>',
+            'worker_assigned'            => '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>',
+            'worker_no_contract'         => '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>',
+            'worker_assignment_cancelled'=> '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+            'worker_no_contract_warning' => '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
             default               => '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
         };
     }
@@ -97,6 +102,11 @@ class AdminNotification extends Model
             'lead_followup_due'    => '#f59e0b',
             'stale_lead'           => '#f97316',
             'critical_lead_warning'=> '#dc2626',
+            'worker_cv_uploaded'         => '#0891b2',
+            'worker_assigned'            => '#6366f1',
+            'worker_no_contract'         => '#f59e0b',
+            'worker_no_contract_warning' => '#dc2626',
+            'worker_assignment_cancelled'=> '#ef4444',
             default            => '#64748b',
         };
     }
@@ -128,6 +138,11 @@ class AdminNotification extends Model
             'lead_followup_due'    => '#fef3c7',
             'stale_lead'           => '#ffedd5',
             'critical_lead_warning'=> '#fee2e2',
+            'worker_cv_uploaded'         => '#e0f2fe',
+            'worker_assigned'            => '#e0e7ff',
+            'worker_no_contract'         => '#fef3c7',
+            'worker_no_contract_warning' => '#fee2e2',
+            'worker_assignment_cancelled'=> '#fee2e2',
             default            => '#f1f5f9',
         };
     }

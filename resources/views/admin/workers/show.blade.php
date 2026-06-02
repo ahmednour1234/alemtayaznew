@@ -7,6 +7,13 @@
 @endphp
 <div class="w-full space-y-5">
 
+    @error('permission')
+    <div class="bg-red-50 border border-red-300 rounded-xl p-4 flex items-center gap-3">
+        <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        <p class="text-sm text-red-700">{{ $message }}</p>
+    </div>
+    @enderror
+
     {{-- Header --}}
     <div class="flex items-center gap-3">
         <a href="{{ route('admin.workers.index') }}" class="text-slate-400 hover:text-slate-600">
@@ -27,11 +34,22 @@
             <a href="{{ route('admin.workers.assign', $worker->id) }}"
                class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg">تعيين لعميل</a>
             @else
+            @php
+                $me = Auth::guard('admin')->user();
+                $canUnassign = $me->isSuperAdmin()
+                    || $me->department === 'branch_manager'
+                    || $me->id === $worker->assigned_by_admin_id;
+            @endphp
+            @if($canUnassign)
             <form action="{{ route('admin.workers.unassign', $worker->id) }}" method="POST">
                 @csrf
                 <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white text-sm px-4 py-2 rounded-lg"
                         onclick="return confirm('إلغاء التعيين وإرجاع العاملة متاحة؟')">إلغاء التعيين</button>
             </form>
+            @else
+            <span class="text-xs text-slate-400 px-3 py-2 rounded-lg bg-slate-100 cursor-not-allowed"
+                  title="فقط مدير الفرع أو الموظف الذي أجرى التعيين يمكنه إلغاءه">إلغاء التعيين (غير مسموح)</span>
+            @endif
             @endif
         </div>
     </div>

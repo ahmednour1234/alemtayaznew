@@ -65,19 +65,37 @@ class WorkerRepository implements WorkerRepositoryInterface
         return Worker::onlyTrashed()->with('nationality')->get();
     }
 
-    public function assignToClient(int $id, int $clientId): void
+    public function assignToClient(int $id, int $clientId, int $assignedByAdminId): void
     {
         Worker::findOrFail($id)->update([
-            'client_id' => $clientId,
-            'status'    => 'assigned',
+            'client_id'             => $clientId,
+            'status'                => 'assigned',
+            'assigned_by_admin_id'  => $assignedByAdminId,
+            'assigned_at'           => now(),
         ]);
     }
 
     public function unassign(int $id): void
     {
         Worker::findOrFail($id)->update([
-            'client_id' => null,
-            'status'    => 'available',
+            'client_id'             => null,
+            'status'                => 'available',
+            'assigned_by_admin_id'  => null,
+            'assigned_at'           => null,
         ]);
+    }
+
+    public function findDuplicateCv(?string $passportNumber, ?string $originalCvName): mixed
+    {
+        $q = Worker::where('active', true);
+        $q->where(function ($sub) use ($passportNumber, $originalCvName) {
+            if ($passportNumber) {
+                $sub->orWhere('passport_number', $passportNumber);
+            }
+            if ($originalCvName) {
+                $sub->orWhere('original_cv_name', $originalCvName);
+            }
+        });
+        return $q->first();
     }
 }

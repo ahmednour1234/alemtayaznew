@@ -16,6 +16,37 @@
                   x-data="{ files: [], dropped: false }" class="space-y-5">
                 @csrf
 
+                {{-- ── Duplicate CV warning ───────────────────────────────── --}}
+                @if(session('cv_duplicate_warning'))
+                <div class="bg-amber-50 border border-amber-300 rounded-xl p-4 flex flex-col gap-3">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-semibold text-amber-800">تحذير: ملفات مرفوعة مسبقاً</p>
+                            @if(session('cv_created_count') > 0)
+                            <p class="text-xs text-amber-700 mt-0.5">تم رفع {{ session('cv_created_count') }} ملف جديد بنجاح.</p>
+                            @endif
+                            <p class="text-xs text-amber-700 mt-1">الملفات التالية موجودة مسبقاً:</p>
+                            <ul class="list-disc list-inside text-xs text-amber-800 mt-1 space-y-0.5">
+                                @foreach(session('cv_duplicate_files', []) as $fname)
+                                <li>{{ $fname }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="submit" name="force_upload" value="1"
+                                x-bind:disabled="files.length === 0"
+                                class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-4 py-2 rounded-lg font-medium">
+                            رفع الكل على أي حال
+                        </button>
+                        <a href="{{ route('admin.workers.bulk') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-4 py-2 rounded-lg font-medium">إلغاء</a>
+                    </div>
+                </div>
+                @endif
+
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">بيانات مشتركة لكل CVs</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">

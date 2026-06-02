@@ -141,6 +141,16 @@ class RecruitmentContractController extends Controller
             abort(403, 'لا يمكنك إضافة عقود لفرع غير فرعك. فرعك المخصص: ' . $me->branch?->name);
         }
 
+        // ── CV → Client lock ──────────────────────────────────────────────────
+        if (! empty($data['worker_id'])) {
+            $worker = Worker::find($data['worker_id']);
+            if ($worker && $worker->client_id && (int)$worker->client_id !== (int)($data['client_id'] ?? 0)) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['worker_id' => 'هذه العاملة مُعيَّنة لعميل آخر. يجب أن يكون العقد للعميل نفسه المُعيَّنة له العاملة.']);
+            }
+        }
+
         $contract = $this->service->store($data);
 
         $this->notifications->notify(
