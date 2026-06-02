@@ -193,6 +193,31 @@ class WorkerController extends Controller
         return back()->with('success', 'تم استعادة العاملة.');
     }
 
+    // ── Serve CV / Passport files (no symlink needed) ─────────────────────────
+    public function serveCV(int $id)
+    {
+        $worker = $this->service->find($id);
+        abort_if(! $worker->cv_path, 404);
+        $path = storage_path('app/public/' . $worker->cv_path);
+        abort_if(! file_exists($path), 404);
+        return response()->file($path, [
+            'Content-Type'        => mime_content_type($path) ?: 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . basename($worker->cv_path) . '"',
+        ]);
+    }
+
+    public function servePassport(int $id)
+    {
+        $worker = $this->service->find($id);
+        abort_if(! $worker->passport_image, 404);
+        $path = storage_path('app/public/' . $worker->passport_image);
+        abort_if(! file_exists($path), 404);
+        return response()->file($path, [
+            'Content-Type'        => mime_content_type($path) ?: 'image/jpeg',
+            'Content-Disposition' => 'inline; filename="' . basename($worker->passport_image) . '"',
+        ]);
+    }
+
     // ── Assign to Client ──────────────────────────────────────────────────────
     public function assign(int $id)
     {
@@ -202,7 +227,11 @@ class WorkerController extends Controller
         $clientsQuery = Client::where('active', true)
             ->whereIn('classification', ['confirmed', 'premium'])
             ->orderBy('name');
+        // Only leads not yet converted to clients
         $leadsQuery = Lead::whereIn('status', ['new', 'in_progress'])
+            ->whereNull('client_id')
+            ->whereNotNull('name')
+            ->where('name', '!=', '')
             ->orderBy('name');
 
         if ($me->isBranchAdmin()) {
@@ -210,10 +239,11 @@ class WorkerController extends Controller
             $leadsQuery->where('branch_id', $me->branch_id);
         }
 
-        $clients = $clientsQuery->get();
-        $leads   = $leadsQuery->get();
+        $clients        = $clientsQuery->get();
+        $leads          = $leadsQuery->get();
+        $existingClient = $worker->client_id ? Client::find($worker->client_id) : null;
 
-        return view('admin.workers.assign', compact('worker', 'clients', 'leads'));
+        return view('admin.workers.assign', compact('worker', 'clients', 'leads', 'existingClient'));
     }
 
     public function doAssign(Request $request, int $id)
