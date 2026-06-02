@@ -200,7 +200,7 @@
             @if($worker->cv_path)
             <div class="bg-white rounded-xl shadow-sm p-5">
                 <h4 class="text-sm font-semibold text-slate-600 mb-3">ملف CV</h4>
-                <a href="{{ Storage::disk('public')->url($worker->cv_path) }}" target="_blank"
+                <a href="{{ route('admin.workers.cv', $worker->id) }}" target="_blank"
                    class="flex items-center gap-3 p-3 bg-red-50 hover:bg-red-100 rounded-xl transition-colors">
                     <svg class="w-8 h-8 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                     <div>
@@ -215,8 +215,8 @@
             @if($worker->passport_image)
             <div class="bg-white rounded-xl shadow-sm p-5">
                 <h4 class="text-sm font-semibold text-slate-600 mb-3">صورة الجواز</h4>
-                <a href="{{ Storage::disk('public')->url($worker->passport_image) }}" target="_blank" class="block">
-                    <img src="{{ Storage::disk('public')->url($worker->passport_image) }}" alt="جواز السفر" class="w-full h-auto rounded-xl border border-slate-200 object-cover hover:opacity-90 transition">
+                <a href="{{ route('admin.workers.passport', $worker->id) }}" target="_blank" class="block">
+                    <img src="{{ route('admin.workers.passport', $worker->id) }}" alt="جواز السفر" class="w-full h-auto rounded-xl border border-slate-200 object-cover hover:opacity-90 transition">
                 </a>
                 <p class="text-xs text-slate-400 mt-2 text-center">انقر للتكبير</p>
             </div>

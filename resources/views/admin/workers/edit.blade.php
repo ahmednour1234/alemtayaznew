@@ -113,7 +113,7 @@
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">ملف CV (PDF)</label>
                     @if($worker->cv_path)
                     <div class="mb-2">
-                        <a href="{{ Storage::disk('public')->url($worker->cv_path) }}" target="_blank"
+                        <a href="{{ route('admin.workers.cv', $worker->id) }}" target="_blank"
                            class="inline-flex items-center gap-1.5 text-sm text-red-600 hover:text-red-800 bg-red-50 px-3 py-1.5 rounded-lg">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                             CV الحالي — انقر للعرض
@@ -129,8 +129,8 @@
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">صورة الجواز</label>
                     @if($worker->passport_image)
                     <div class="mb-2 flex items-center gap-3">
-                        <a href="{{ Storage::disk('public')->url($worker->passport_image) }}" target="_blank">
-                            <img src="{{ Storage::disk('public')->url($worker->passport_image) }}" alt="جواز السفر" class="h-24 w-auto rounded-lg border border-slate-200 object-cover">
+                        <a href="{{ route('admin.workers.passport', $worker->id) }}" target="_blank">
+                            <img src="{{ route('admin.workers.passport', $worker->id) }}" alt="جواز السفر" class="h-24 w-auto rounded-lg border border-slate-200 object-cover">
                         </a>
                         <span class="text-xs text-slate-400">ارفع صورة جديدة للاستبدال</span>
                     </div>

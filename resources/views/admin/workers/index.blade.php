@@ -146,7 +146,7 @@
                 </td>
                 <td>
                     @if($w->cv_path)
-                    <a href="{{ Storage::disk('public')->url($w->cv_path) }}" target="_blank"
+                    <a href="{{ route('admin.workers.cv', $w->id) }}" target="_blank"
                        class="inline-flex items-center gap-1 text-xs text-red-600 hover:text-red-800 bg-red-50 px-2 py-1 rounded-lg">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                         PDF
@@ -231,7 +231,7 @@ $workerCvMap = $workers->map(fn($w) => [
     'id'          => $w->id,
     'name'        => $w->name,
     'nationality' => $w->nationality?->name,
-    'cv_url'      => $w->cv_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($w->cv_path) : null,
+    'cv_url'      => $w->cv_path ? route('admin.workers.cv', $w->id) : null,
 ])->values();
 @endphp
 
