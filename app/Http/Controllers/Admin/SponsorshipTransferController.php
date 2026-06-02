@@ -47,7 +47,6 @@ class SponsorshipTransferController extends Controller
         $branchId = $this->branchFilter();
 
         $baseQuery = Worker::where('active', true)
-            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->with(['nationality', 'client', 'latestContract'])
             ->orderBy('name');
 
