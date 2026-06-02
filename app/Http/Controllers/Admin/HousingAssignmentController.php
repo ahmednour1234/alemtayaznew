@@ -22,7 +22,7 @@ class HousingAssignmentController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->only('search', 'housing_id', 'active');
+        $filters = $request->only('search', 'housing_id', 'active', 'reason');
         if ($bid = $this->branchFilter()) {
             $filters['branch_id'] = $bid;
         } elseif ($request->filled('branch_id')) {

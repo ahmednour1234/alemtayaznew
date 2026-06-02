@@ -19,7 +19,7 @@
 
 <!-- Filters -->
 <div class="bg-white rounded-xl p-4 shadow-sm mb-4 border border-slate-100">
-    <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+    <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-3">
         <div>
             <label class="block text-xs font-medium text-slate-500 mb-1.5">بحث عاملة</label>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="اسم العاملة"
@@ -32,6 +32,17 @@
                 @foreach($housings as $h)
                 <option value="{{ $h->id }}" {{ request('housing_id') == $h->id ? 'selected' : '' }}>{{ $h->name }}</option>
                 @endforeach
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1.5">سبب السكن</label>
+            <select name="reason" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                <option value="">الكل</option>
+                <option value="new_arrival"    {{ request('reason') === 'new_arrival'    ? 'selected' : '' }}>وصول جديد</option>
+                <option value="pending_client" {{ request('reason') === 'pending_client' ? 'selected' : '' }}>انتظار عميل</option>
+                <option value="complaint"      {{ request('reason') === 'complaint'      ? 'selected' : '' }}>شكوى</option>
+                <option value="returned"       {{ request('reason') === 'returned'       ? 'selected' : '' }}>إعادة</option>
+                <option value="other"          {{ request('reason') === 'other'          ? 'selected' : '' }}>أخرى</option>
             </select>
         </div>
         <div>
@@ -55,6 +66,7 @@
                 <th class="px-4 py-3 text-right font-medium">العاملة</th>
                 <th class="px-4 py-3 text-right font-medium">السكن</th>
                 <th class="px-4 py-3 text-right font-medium">الفرع</th>
+                <th class="px-4 py-3 text-right font-medium">سبب السكن</th>
                 <th class="px-4 py-3 text-right font-medium">تاريخ الدخول</th>
                 <th class="px-4 py-3 text-right font-medium">تاريخ المغادرة</th>
                 <th class="px-4 py-3 text-right font-medium">مدة الإقامة</th>
@@ -72,6 +84,25 @@
                 </td>
                 <td class="px-4 py-3 text-slate-700">{{ $a->housing?->name ?? '—' }}</td>
                 <td class="px-4 py-3 text-slate-500">{{ $a->branch?->name ?? '—' }}</td>
+                <td class="px-4 py-3">
+                    @php
+                        $reasonLabels = [
+                            'new_arrival'    => ['label' => 'وصول جديد',    'bg' => '#dbeafe', 'color' => '#1d4ed8'],
+                            'pending_client' => ['label' => 'انتظار عميل', 'bg' => '#fef9c3', 'color' => '#92400e'],
+                            'complaint'      => ['label' => 'شكوى',         'bg' => '#fee2e2', 'color' => '#b91c1c'],
+                            'returned'       => ['label' => 'إعادة',         'bg' => '#ede9fe', 'color' => '#6d28d9'],
+                            'other'          => ['label' => 'أخرى',          'bg' => '#f1f5f9', 'color' => '#475569'],
+                        ];
+                        $r = $reasonLabels[$a->reason] ?? null;
+                    @endphp
+                    @if($r)
+                        <span style="background:{{ $r['bg'] }};color:{{ $r['color'] }};font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block;">{{ $r['label'] }}</span>
+                    @elseif($a->reason)
+                        <span class="text-xs text-slate-500">{{ $a->reason }}</span>
+                    @else
+                        <span class="text-slate-300 text-xs">—</span>
+                    @endif
+                </td>
                 <td class="px-4 py-3 text-slate-700">{{ $a->check_in_date }}</td>
                 <td class="px-4 py-3">
                     @if($a->check_out_date)
@@ -119,7 +150,7 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="7" class="px-4 py-10 text-center text-slate-400">لا توجد سجلات</td></tr>
+            <tr><td colspan="8" class="px-4 py-10 text-center text-slate-400">لا توجد سجلات</td></tr>
             @endforelse
         </tbody>
     </table>
