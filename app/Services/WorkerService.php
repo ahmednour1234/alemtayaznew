@@ -355,9 +355,10 @@ class WorkerService
 
     private function createNotification(int $adminId, string $type, string $title, string $body, string $url): void
     {
-        // Avoid duplicate same-day notifications
+        // Avoid duplicate notifications: same admin, type, title and url on the same day
         $exists = AdminNotification::where('admin_id', $adminId)
             ->where('type', $type)
+            ->where('title', $title)
             ->where('url', $url)
             ->whereDate('created_at', today())
             ->exists();
