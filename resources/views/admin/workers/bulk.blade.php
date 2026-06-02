@@ -41,9 +41,6 @@
                         <form action="{{ route('admin.workers.bulk-store') }}" method="POST">
                             @csrf
                             <input type="hidden" name="force_upload" value="1">
-                            <input type="hidden" name="nationality_id" value="{{ old('nationality_id') }}">
-                            <input type="hidden" name="profession" value="{{ old('profession') }}">
-                            <input type="hidden" name="status" value="{{ old('status', 'available') }}">
                             <button type="submit"
                                     class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-4 py-2 rounded-lg font-medium">
                                 رفع الكل على أي حال

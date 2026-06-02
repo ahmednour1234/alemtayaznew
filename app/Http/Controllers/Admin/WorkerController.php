@@ -123,13 +123,18 @@ class WorkerController extends Controller
 
         // ── Force-upload path: process previously saved temp files ────────────
         if ($request->boolean('force_upload')) {
-            $tempPaths = session('cv_temp_files', []);
+            $tempPaths  = session('cv_temp_files', []);
+            $savedData  = session('cv_temp_data', []);
             if (empty($tempPaths)) {
                 return redirect()->route('admin.workers.bulk')
                     ->with('error', 'انتهت صلاحية الجلسة. يرجى رفع الملفات مجدداً.');
             }
+            // Use saved common data (nationality, profession, status) from the original upload
+            if (! empty($savedData)) {
+                $data = array_merge($data, $savedData);
+            }
             $result = $this->service->bulkStoreFromTempPaths($data, $tempPaths);
-            session()->forget('cv_temp_files');
+            session()->forget(['cv_temp_files', 'cv_temp_data']);
             $count = count($result['created']);
             return redirect()->route('admin.workers.index')
                 ->with('success', "تم رفع {$count} CV بنجاح.");
@@ -157,6 +162,12 @@ class WorkerController extends Controller
                 }
             }
             session()->put('cv_temp_files', $tempPaths);
+            // Save common data so force_upload can use the exact same nationality/profession/status
+            session()->put('cv_temp_data', [
+                'nationality_id' => $request->nationality_id,
+                'profession'     => $request->profession,
+                'status'         => $request->status ?? 'available',
+            ]);
 
             return back()
                 ->with('cv_duplicate_warning', true)
