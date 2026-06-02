@@ -172,8 +172,10 @@
                     <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">#</th>
                     <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">العميل</th>
                     <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">العاملة</th>
+                    <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">رقم الجواز</th>
                     <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">الجنسية / البلد</th>
                     <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">رقم العقد</th>
+                    <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">الفرع</th>
                     <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;">المرحلة</th>
                 </tr>
             </thead>
@@ -193,9 +195,9 @@
                     </td>
                     <td style="padding:10px 16px;">
                         <div style="font-weight:600;color:#1e293b;font-size:13px;">{{ $contract->worker?->name ?? '—' }}</div>
-                        @if($contract->worker?->passport_number)
-                        <div style="font-size:11px;color:#94a3b8;font-family:monospace;margin-top:2px;">{{ $contract->worker->passport_number }}</div>
-                        @endif
+                    </td>
+                    <td style="padding:10px 16px;color:#475569;font-size:12px;font-family:monospace;">
+                        {{ $contract->worker?->passport_number ?? '—' }}
                     </td>
                     <td style="padding:10px 16px;">
                         @if($contract->originNationality)
@@ -212,6 +214,15 @@
                     </td>
                     <td style="padding:10px 16px;color:#64748b;font-size:12px;font-family:monospace;">
                         {{ $contract->contract_number }}
+                    </td>
+                    <td style="padding:10px 16px;">
+                        @if($contract->branch)
+                        <span style="background:#f0fdf4;color:#16a34a;font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;">
+                            {{ $contract->branch->name }}
+                        </span>
+                        @else
+                        <span style="color:#cbd5e1;">—</span>
+                        @endif
                     </td>
                     <td style="padding:10px 16px;">
                         @php $statusLabel = \App\Models\RecruitmentContract::statuses()[$contract->current_status]['label'] ?? "مرحلة {$contract->current_status}"; @endphp
