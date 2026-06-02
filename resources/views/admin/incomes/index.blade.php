@@ -223,7 +223,7 @@
 <!-- Import Modal -->
 <div id="importModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-        <h3 class="text-lg font-semibold mb-4">استيراد إيرادات من Excel</h3>
+        <h3 class="text-lg font-semibold mb-4">استيراد إيرادات ومصروفات من Excel</h3>
         <form action="{{ route('admin.incomes.import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
             <div>
@@ -231,6 +231,7 @@
                 <input type="file" name="file" accept=".xlsx,.xls,.csv" required
                        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
                 <p class="text-xs text-slate-400 mt-1">
+                    استخدم أعمدة: record_type, branch_name, type_name, amount, date, payment_method.
                     <a href="{{ route('admin.incomes.template') }}" class="text-blue-600 hover:underline">تحميل القالب</a>
                 </p>
             </div>
@@ -244,4 +245,3 @@
 </div>
 
 @endsection
-

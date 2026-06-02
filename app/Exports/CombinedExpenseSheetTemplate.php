@@ -3,10 +3,10 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithTitle;
-use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class CombinedExpenseSheetTemplate implements FromArray, WithHeadings, WithTitle, WithStyles, WithColumnWidths
@@ -19,8 +19,8 @@ class CombinedExpenseSheetTemplate implements FromArray, WithHeadings, WithTitle
     public function headings(): array
     {
         return [
-            'branch_code',
-            'expense_type_name',
+            'branch_name',
+            'type_name',
             'amount',
             'date',
             'payment_method',
@@ -32,8 +32,8 @@ class CombinedExpenseSheetTemplate implements FromArray, WithHeadings, WithTitle
     public function array(): array
     {
         return [
-            ['BRANCH-001', 'مصروف رواتب',   '5000.00', '2026-01-15', 'bank_transfer', 'REF-010', 'مثال مصروف'],
-            ['BRANCH-002', 'مصروف إيجار',   '3000.00', '2026-01-20', 'cash',          'REF-011', ''],
+            ['الرياض', 'مصروف رواتب', '5000.00', '2026-01-15', 'bank_transfer', 'REF-010', 'مثال مصروف'],
+            ['مركز الاتصال', 'مصروف إيجار', '3000.00', '2026-01-20', 'cash', 'REF-011', ''],
         ];
     }
 
@@ -41,8 +41,8 @@ class CombinedExpenseSheetTemplate implements FromArray, WithHeadings, WithTitle
     {
         return [
             1 => [
-                'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                'fill'      => ['fillType' => 'solid', 'startColor' => ['rgb' => 'dc2626']],
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'dc2626']],
                 'alignment' => ['horizontal' => 'center'],
             ],
         ];
@@ -51,8 +51,8 @@ class CombinedExpenseSheetTemplate implements FromArray, WithHeadings, WithTitle
     public function columnWidths(): array
     {
         return [
-            'A' => 18,
-            'B' => 22,
+            'A' => 22,
+            'B' => 26,
             'C' => 14,
             'D' => 14,
             'E' => 18,

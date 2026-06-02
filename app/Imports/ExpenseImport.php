@@ -15,8 +15,16 @@ class ExpenseImport implements ToModel, WithHeadingRow, WithValidation
 {
     public function model(array $row)
     {
-        $branch = Branch::where('code', $row['branch_code'])->first();
-        $type   = ExpenseType::where('name', $row['expense_type_name'])->first();
+        $branchName = trim((string) ($row['branch_name'] ?? ''));
+        $branchCode = trim((string) ($row['branch_code'] ?? ''));
+        $typeName   = trim((string) ($row['type_name'] ?? $row['expense_type_name'] ?? ''));
+
+        $branch = $branchName !== '' ? Branch::where('name', $branchName)->first() : null;
+        if (! $branch && $branchCode !== '') {
+            $branch = Branch::where('code', $branchCode)->first();
+        }
+
+        $type = $typeName !== '' ? ExpenseType::firstOrCreate(['name' => $typeName], ['active' => true]) : null;
 
         if (! $branch || ! $type) {
             return null;
@@ -39,8 +47,10 @@ class ExpenseImport implements ToModel, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            'branch_code'       => ['required'],
-            'expense_type_name' => ['required'],
+            'branch_name'       => ['nullable'],
+            'branch_code'       => ['nullable'],
+            'type_name'         => ['nullable'],
+            'expense_type_name' => ['nullable'],
             'amount'            => ['required', 'numeric', 'min:0.01'],
             'date'              => ['required', 'date'],
             'payment_method'    => ['required'],

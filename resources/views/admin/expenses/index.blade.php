@@ -228,11 +228,18 @@
 <!-- Import Modal -->
 <div id="importModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
-        <h3 class="text-lg font-semibold mb-4">استيراد مصاريف من Excel</h3>
+        <h3 class="text-lg font-semibold mb-4">استيراد إيرادات ومصروفات من Excel</h3>
         <form action="{{ route('admin.expenses.import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
             @csrf
-            <input type="file" name="file" accept=".xlsx,.xls,.csv" required
-                   class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">ملف Excel</label>
+                <input type="file" name="file" accept=".xlsx,.xls,.csv" required
+                       class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                <p class="text-xs text-slate-400 mt-1">
+                    استخدم أعمدة: record_type, branch_name, type_name, amount, date, payment_method.
+                    <a href="{{ route('admin.expenses.template') }}" class="text-blue-600 hover:underline">تحميل القالب</a>
+                </p>
+            </div>
             <div class="flex gap-3">
                 <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white text-sm px-5 py-2 rounded-lg">استيراد</button>
                 <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')"
@@ -243,4 +250,3 @@
 </div>
 
 @endsection
-

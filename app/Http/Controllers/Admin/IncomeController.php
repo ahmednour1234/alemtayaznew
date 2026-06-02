@@ -12,8 +12,9 @@ use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\FinancialTransactionTemplateExport;
 use App\Exports\IncomeExport;
-use App\Imports\IncomeImport;
+use App\Imports\FinancialTransactionImport;
 
 class IncomeController extends Controller
 {
@@ -121,13 +122,24 @@ class IncomeController extends Controller
 
     public function importTemplate()
     {
-        return Excel::download(new \App\Exports\IncomeTemplateExport(), 'incomes_template.xlsx');
+        return Excel::download(new FinancialTransactionTemplateExport(), 'financial_transactions_template.xlsx');
     }
 
     public function import(Request $request)
     {
         $request->validate(['file' => ['required', 'file', 'mimes:xlsx,xls,csv']]);
-        Excel::import(new IncomeImport(), $request->file('file'));
-        return back()->with('success', 'تم استيراد البيانات بنجاح.');
+        $import = new FinancialTransactionImport();
+        Excel::import($import, $request->file('file'));
+
+        $message = "تم استيراد {$import->incomeCount} إيراد و {$import->expenseCount} مصروف بنجاح.";
+        if ($import->skippedCount > 0) {
+            $message .= " تم تخطي {$import->skippedCount} صف.";
+        }
+
+        $response = back()->with('success', $message);
+
+        return $import->skippedCount > 0
+            ? $response->withErrors(array_slice($import->errors, 0, 5))
+            : $response;
     }
 }

@@ -15,8 +15,16 @@ class IncomeImport implements ToModel, WithHeadingRow, WithValidation
 {
     public function model(array $row)
     {
-        $branch = Branch::where('code', $row['branch_code'])->first();
-        $type   = IncomeType::where('name', $row['income_type_name'])->first();
+        $branchName = trim((string) ($row['branch_name'] ?? ''));
+        $branchCode = trim((string) ($row['branch_code'] ?? ''));
+        $typeName   = trim((string) ($row['type_name'] ?? $row['income_type_name'] ?? ''));
+
+        $branch = $branchName !== '' ? Branch::where('name', $branchName)->first() : null;
+        if (! $branch && $branchCode !== '') {
+            $branch = Branch::where('code', $branchCode)->first();
+        }
+
+        $type = $typeName !== '' ? IncomeType::firstOrCreate(['name' => $typeName], ['active' => true]) : null;
 
         if (! $branch || ! $type) {
             return null;
@@ -38,8 +46,10 @@ class IncomeImport implements ToModel, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            'branch_code'       => ['required'],
-            'income_type_name'  => ['required'],
+            'branch_name'       => ['nullable'],
+            'branch_code'       => ['nullable'],
+            'type_name'         => ['nullable'],
+            'income_type_name'  => ['nullable'],
             'amount'            => ['required', 'numeric', 'min:0.01'],
             'date'              => ['required', 'date'],
             'payment_method'    => ['required'],

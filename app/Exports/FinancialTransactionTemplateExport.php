@@ -6,19 +6,14 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class CombinedIncomeSheetTemplate implements FromArray, WithHeadings, WithTitle, WithStyles, WithColumnWidths
+class FinancialTransactionTemplateExport implements FromArray, WithColumnWidths, WithHeadings, WithStyles
 {
-    public function title(): string
-    {
-        return 'إيرادات';
-    }
-
     public function headings(): array
     {
         return [
+            'record_type',
             'branch_name',
             'type_name',
             'amount',
@@ -32,8 +27,8 @@ class CombinedIncomeSheetTemplate implements FromArray, WithHeadings, WithTitle,
     public function array(): array
     {
         return [
-            ['الرياض', 'إيراد مبيعات', '1500.00', '2026-01-15', 'cash', 'REF-001', 'مثال إيراد'],
-            ['مركز الاتصال', 'إيرادات الاستقدام', '2000.00', '2026-01-20', 'bank_transfer', 'REF-002', ''],
+            ['income', 'الرياض', 'إيرادات الاستقدام', '3500.00', '2026-06-02', 'cash', 'REF-001', 'مثال إيراد'],
+            ['expense', 'الرياض', 'مصروف رواتب', '1200.00', '2026-06-02', 'bank_transfer', 'REF-002', 'مثال مصروف'],
         ];
     }
 
@@ -42,7 +37,7 @@ class CombinedIncomeSheetTemplate implements FromArray, WithHeadings, WithTitle,
         return [
             1 => [
                 'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '059669']],
+                'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '334155']],
                 'alignment' => ['horizontal' => 'center'],
             ],
         ];
@@ -51,13 +46,14 @@ class CombinedIncomeSheetTemplate implements FromArray, WithHeadings, WithTitle,
     public function columnWidths(): array
     {
         return [
-            'A' => 22,
-            'B' => 26,
-            'C' => 14,
+            'A' => 16,
+            'B' => 22,
+            'C' => 26,
             'D' => 14,
-            'E' => 18,
+            'E' => 14,
             'F' => 18,
-            'G' => 28,
+            'G' => 20,
+            'H' => 32,
         ];
     }
 }
