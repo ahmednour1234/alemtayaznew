@@ -39,7 +39,7 @@ class LeadController extends Controller
         $branches    = Branch::where('active', true)->get();
         $nationalities = Nationality::where('active', true)->orderBy('name')->get();
         $campaigns   = Campaign::orderBy('name')->get();
-        $admins      = Admin::where('active', true)->orderBy('name')->get();
+        $admins      = Admin::where('active', true)->where('department', 'customer_service')->orderBy('name')->get();
 
         return view('admin.marketing.leads.index', compact(
             'leads', 'statuses', 'branches', 'nationalities', 'campaigns', 'admins'
@@ -50,7 +50,7 @@ class LeadController extends Controller
     {
         $lead->load(['campaign', 'branch', 'nationality', 'assignedAdmin', 'referredByAdmin', 'callLogs.admin', 'client']);
         $callStatuses  = LeadCallLog::statuses();
-        $admins        = Admin::where('active', true)->orderBy('name')->get();
+        $admins        = Admin::where('active', true)->where('department', 'customer_service')->orderBy('name')->get();
         $branches      = Branch::where('active', true)->get();
         $nationalities = Nationality::where('active', true)->orderBy('name')->get();
 
