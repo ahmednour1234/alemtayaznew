@@ -71,28 +71,37 @@ class ClientController extends Controller
         return redirect()->route('admin.clients.index')->with('success', 'تم إضافة العميل بنجاح.');
     }
 
-    // ── Quick store (popup from contracts form) ────────────────────────────────
+    // ── Quick store (popup from contracts form / worker assign) ────────────────
     public function quickStore(Request $request)
     {
         $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
-            'phone'       => ['nullable', 'string', 'max:20'],
-            'national_id' => ['nullable', 'string', 'max:20'],
+            'name'           => ['required', 'string', 'max:255'],
+            'phone'          => ['nullable', 'string', 'max:20'],
+            'national_id'    => ['nullable', 'string', 'max:20'],
+            'classification' => ['nullable', 'string', 'in:potential,confirmed,premium'],
         ]);
 
-        $me = Auth::guard('admin')->user();
+        $me             = Auth::guard('admin')->user();
+        $classification = $request->classification
+            ?? (filled($request->national_id) ? 'confirmed' : 'potential');
+
         $client = \App\Models\Client::create([
             'name'           => $request->name,
             'phone'          => $request->phone,
             'national_id'    => $request->national_id,
             'marital_status' => 'single',
-            'classification' => 'potential',
+            'classification' => $classification,
             'branch_id'      => $me->branch_id,
             'admin_id'       => $me->id,
             'active'         => true,
         ]);
 
-        return response()->json(['id' => $client->id, 'name' => $client->name]);
+        return response()->json([
+            'id'          => $client->id,
+            'name'        => $client->name,
+            'phone'       => $client->phone,
+            'national_id' => $client->national_id,
+        ]);
     }
 
     public function show(int $id)
