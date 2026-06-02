@@ -47,18 +47,19 @@ class SponsorshipTransferController extends Controller
         $branchId = $this->branchFilter();
 
         $baseQuery = Worker::where('active', true)
-            ->with(['nationality', 'client', 'latestContract'])
+            ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
+            ->with(['nationality', 'client', 'latestContract', 'activeHousingAssignment'])
             ->orderBy('name');
 
-        // Group 1: في السكن / نقل كفالة مباشر
+        // Group 1: في السكن بسبب نقل كفالة (reason = sponsorship_transfer)
         $housingWorkers = (clone $baseQuery)
             ->whereIn('status', ['in_housing', 'sponsorship_transfer'])
+            ->whereHas('activeHousingAssignment', fn($q) => $q->where('reason', 'sponsorship_transfer'))
             ->get();
 
-        // Group 2: وصلت من عقود الاستقدام (assigned + has a recruitment contract)
+        // Group 2: وصلت من عقود الاستقدام (assigned — مع أو بدون عقد)
         $contractWorkers = (clone $baseQuery)
             ->where('status', 'assigned')
-            ->whereHas('latestContract')
             ->get();
 
         $workers = $housingWorkers->merge($contractWorkers);

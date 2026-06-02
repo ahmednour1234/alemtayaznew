@@ -156,6 +156,11 @@ class Worker extends Model
         return $this->hasOne(\App\Models\RecruitmentContract::class)->latest();
     }
 
+    public function activeHousingAssignment(): HasOne
+    {
+        return $this->hasOne(\App\Models\HousingAssignment::class)->whereNull('check_out_date')->latest();
+    }
+
     /** True if the worker has an active contract for a specific client */
     public function hasContractForClient(int $clientId): bool
     {
