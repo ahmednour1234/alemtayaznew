@@ -68,6 +68,7 @@ class HousingAssignmentController extends Controller
             'branch_id'               => 'required|exists:branches,id',
             'check_in_date'           => 'required|date',
             'expected_check_out_date' => 'nullable|date|after_or_equal:check_in_date',
+            'reason'                  => 'nullable|in:sponsorship_transfer,deportation,handover',
             'notes'                   => 'nullable|string|max:500',
         ]);
 
