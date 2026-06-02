@@ -489,7 +489,7 @@
                      'd'=>'M3 3v18h18 M7 14l4-4 4 4 5-5'],
                     ['r'=>'admin.marketing.staff-performance','p'=>'admin.marketing.staff-performance','l'=>'أداء الموظفين','perm'=>'marketing.reports.view','mgr'=>true,
                      'd'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
-                    ['r'=>'admin.marketing.leads-board',     'p'=>'admin.marketing.leads-board',  'l'=>'لوحة الفروع',     'perm'=>'leads.view',
+                    ['r'=>'admin.marketing.leads-board',     'p'=>'admin.marketing.leads-board',  'l'=>'لوحة الفروع',     'perm'=>'leads-board.view',
                      'd'=>'M3 5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5zM9 9h6M9 13h6M9 17h4'],
                 ] @endphp
                 @foreach($mkItems as $it)

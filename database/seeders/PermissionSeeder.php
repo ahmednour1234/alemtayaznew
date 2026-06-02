@@ -129,6 +129,7 @@ class PermissionSeeder extends Seeder
             ['name' => 'استيراد عملاء من Google Sheets', 'slug' => 'campaigns.import'],
             // Marketing — Leads
             ['name' => 'عرض العملاء المحتملين',       'slug' => 'leads.view'],
+            ['name' => 'عرض لوحة الفروع',              'slug' => 'leads-board.view'],
             ['name' => 'إنشاء عميل محتمل',             'slug' => 'leads.create'],
             ['name' => 'تعديل عميل محتمل',             'slug' => 'leads.edit'],
             ['name' => 'حذف عميل محتمل',               'slug' => 'leads.delete'],

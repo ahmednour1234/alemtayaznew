@@ -223,7 +223,7 @@ class AutoPermission
         // ── Marketing: Reports ────────────────────────────────────────────────
         'admin.marketing.reports'            => 'marketing.reports.view',
         'admin.marketing.staff-performance'  => 'marketing.reports.view',
-        'admin.marketing.leads-board'        => 'leads.view',
+        'admin.marketing.leads-board'        => 'leads-board.view',
         'admin.marketing.leads-board.auto-assign' => 'leads.create',
         // ── Housing (السكن) ──────────────────────────────────────
         'admin.housings.index'   => 'housings.view',

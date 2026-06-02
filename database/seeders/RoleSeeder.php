@@ -66,6 +66,7 @@ class RoleSeeder extends Seeder
         )->permissions()->sync($perms([
             'campaigns.view', 'campaigns.create', 'campaigns.edit', 'campaigns.delete', 'campaigns.import',
             'leads.view', 'leads.create', 'leads.edit', 'leads.delete', 'leads.call', 'leads.convert',
+            'leads-board.view',
             'marketing.reports.view',
             'calendar.view',
             'clients.view', 'clients.create',
@@ -155,6 +156,7 @@ class RoleSeeder extends Seeder
             'sponsorship-transfers.view',
             'campaigns.view', 'campaigns.create', 'campaigns.edit', 'campaigns.import',
             'leads.view', 'leads.create', 'leads.edit', 'leads.call', 'leads.convert',
+            'leads-board.view',
             'marketing.reports.view',
         ]));
     }
