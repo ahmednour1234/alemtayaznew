@@ -27,7 +27,7 @@ class HousingReportsController extends Controller
     {
         [$branchId, $branches] = $this->resolveBranch($request);
 
-        $rentals = HousingRental::with(['worker.nationality', 'client', 'branch'])
+        $rentals = HousingRental::with(['worker.nationality', 'worker.recruitmentContracts', 'client', 'branch', 'assignment'])
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->when($request->client_id, fn($q) => $q->where('client_id', $request->client_id))
             ->when($request->date_from, fn($q) => $q->whereDate('rent_start_date', '>=', $request->date_from))
@@ -45,7 +45,7 @@ class HousingReportsController extends Controller
     {
         [$branchId, $branches] = $this->resolveBranch($request);
 
-        $settlements = HousingSettlement::with(['worker.nationality', 'client', 'branch'])
+        $settlements = HousingSettlement::with(['worker.nationality', 'worker.recruitmentContracts', 'client', 'branch', 'assignment'])
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
             ->when($request->client_id, fn($q) => $q->where('client_id', $request->client_id))
             ->when($request->date_from, fn($q) => $q->whereDate('settlement_date', '>=', $request->date_from))

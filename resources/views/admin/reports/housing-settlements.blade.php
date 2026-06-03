@@ -54,6 +54,8 @@
             <tr>
                 <th class="px-4 py-3 font-semibold text-slate-600">العاملة</th>
                 <th class="px-4 py-3 font-semibold text-slate-600">الجنسية</th>
+                <th class="px-4 py-3 font-semibold text-slate-600">حالة العمالة</th>
+                <th class="px-4 py-3 font-semibold text-slate-600">الضمان</th>
                 <th class="px-4 py-3 font-semibold text-slate-600">العميل</th>
                 <th class="px-4 py-3 font-semibold text-slate-600">الفرع</th>
                 <th class="px-4 py-3 font-semibold text-slate-600">رقم المرجع</th>
@@ -65,10 +67,24 @@
         </thead>
         <tbody class="divide-y divide-slate-100">
             @forelse($settlements as $s)
-            @php $types = \App\Models\HousingSettlement::types(); @endphp
+            @php
+                $types   = \App\Models\HousingSettlement::types();
+                $ws      = \App\Models\HousingAssignment::workerStatuses()[$s->assignment?->worker_status ?? 'normal'] ?? ['label'=>'نظامية','bg'=>'#dcfce7','color'=>'#16a34a'];
+                $inGuar  = $s->assignment?->isInGuaranteePeriod() ?? false;
+            @endphp
             <tr class="hover:bg-slate-50">
                 <td class="px-4 py-3 font-medium text-slate-800">{{ $s->worker?->name ?? '—' }}</td>
                 <td class="px-4 py-3 text-slate-500">{{ $s->worker?->nationality?->name ?? '—' }}</td>
+                <td class="px-4 py-3">
+                    <span style="background:{{ $ws['bg'] }};color:{{ $ws['color'] }};font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;display:inline-block;">{{ $ws['label'] }}</span>
+                </td>
+                <td class="px-4 py-3">
+                    @if($inGuar)
+                    <span style="background:#ede9fe;color:#7c3aed;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;display:inline-block;">⏱ ضمان</span>
+                    @else
+                    <span class="text-slate-300 text-xs">—</span>
+                    @endif
+                </td>
                 <td class="px-4 py-3 text-slate-700">
                     <div>{{ $s->client?->name ?? '—' }}</div>
                     @if($s->client?->phone)
@@ -93,7 +109,7 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="9" class="px-4 py-10 text-center text-slate-400">لا توجد سجلات</td></tr>
+            <tr><td colspan="11" class="px-4 py-10 text-center text-slate-400">لا توجد سجلات</td></tr>
             @endforelse
         </tbody>
     </table>
