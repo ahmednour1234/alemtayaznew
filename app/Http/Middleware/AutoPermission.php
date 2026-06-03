@@ -123,8 +123,8 @@ class AutoPermission
         'admin.reports.income-statement.export'  => 'reports.income-statement.export',
         'admin.reports.contracts-stats'          => 'reports.contracts-stats',
         'admin.reports.contracts-received'       => 'reports.contracts-received',
-        'admin.reports.contracts-delayed'        => 'reports.contracts-delayed',
-
+        'admin.reports.contracts-delayed'        => 'reports.contracts-delayed',        'admin.reports.housing-rentals'          => 'housing-rentals.reports',
+        'admin.reports.housing-settlements'      => 'housing-settlements.reports',
         // ── Settings: Admins ──────────────────────────
         'admin.settings.admins.index'   => 'admins.manage',
         'admin.settings.admins.create'  => 'admins.manage',

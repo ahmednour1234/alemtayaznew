@@ -31,17 +31,19 @@
                 @php
                     $grouped = $permissions->groupBy(fn($p) => explode('.', $p->slug)[0]);
                     $groupLabels = [
-                        'branches'       => 'الفروع',
-                        'income-types'   => 'أنواع الدخل',
-                        'expense-types'  => 'أنواع المصاريف',
-                        'nationalities'  => 'الجنسيات',
-                        'airports'       => 'المطارات',
-                        'incomes'        => 'الإيرادات',
-                        'expenses'       => 'المصاريف',
-                        'transfers'      => 'التحويلات',
-                        'reports'        => 'التقارير',
-                        'admins'         => 'المديرين',
-                        'roles'          => 'الأدوار والصلاحيات',
+                        'branches'           => 'الفروع',
+                        'income-types'       => 'أنواع الدخل',
+                        'expense-types'      => 'أنواع المصاريف',
+                        'nationalities'      => 'الجنسيات',
+                        'airports'           => 'المطارات',
+                        'incomes'            => 'الإيرادات',
+                        'expenses'           => 'المصاريف',
+                        'transfers'          => 'التحويلات',
+                        'reports'            => 'التقارير',
+                        'admins'             => 'المديرين',
+                        'roles'              => 'الأدوار والصلاحيات',
+                        'housing-rentals'    => 'تأجير العاملات',
+                        'housing-settlements'=> 'التسويات',
                     ];
                 @endphp
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

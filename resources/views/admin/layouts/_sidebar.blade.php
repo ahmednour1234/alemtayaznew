@@ -17,7 +17,7 @@
     $can = fn(string $perm) => $admin->isSuperAdmin() || $admin->hasPermission($perm);
     // Section group visibility
     $showSettingsGroup   = $can('branches.view')||$can('nationalities.view')||$can('airports.view')||$can('housings.view')||$can('roles.manage')||$can('admins.manage')||$can('income-types.view')||$can('expense-types.view');
-    $showFinanceGroup    = $can('incomes.view')||$can('expenses.view')||$can('transfers.view')||$can('reports.view')||$can('income-types.view')||$can('expense-types.view')||$can('reports.branch-statement')||$can('reports.income-statement');
+    $showFinanceGroup    = $can('incomes.view')||$can('expenses.view')||$can('transfers.view')||$can('reports.view')||$can('income-types.view')||$can('expense-types.view')||$can('reports.branch-statement')||$can('reports.income-statement')||$can('housing-rentals.reports')||$can('housing-settlements.reports');
     $showPeopleGroup     = $can('clients.view')||$can('agents.view');
     $showMarketingGroup  = $can('campaigns.view')||$can('leads.view')||$can('marketing.reports.view')||$can('calendar.view');
     $showComplaintsGroup = $can('complaints.view');
@@ -407,7 +407,7 @@
                     </div>
                     @endif
 
-                    @if($can('reports.branch-statement') || $can('reports.income-statement') || $can('reports.view'))
+                    @if($can('reports.branch-statement') || $can('reports.income-statement') || $can('reports.view') || $can('housing-rentals.reports') || $can('housing-settlements.reports'))
                     {{-- SUB 3: التقارير --}}
                     <div style="margin-bottom:1px;">
                         <button @click="r=!r"
@@ -432,6 +432,8 @@
                             @php $repItems = [
                                 ['r'=>'admin.reports.branch-statement',   'p'=>'admin.reports.branch-statement',   'l'=>'كشف حساب الفرع',       'd'=>'M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v14a2 2 0 002 2z', 'perm'=>'reports.branch-statement'],
                                 ['r'=>'admin.reports.income-statement',   'p'=>'admin.reports.income-statement',   'l'=>'قائمة دخل كل الفروع', 'd'=>'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z',                                      'perm'=>'reports.income-statement'],
+                                ['r'=>'admin.reports.housing-rentals',    'p'=>'admin.reports.housing-rentals',    'l'=>'تقرير العمالة المؤجرة', 'd'=>'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', 'perm'=>'housing-rentals.reports'],
+                                ['r'=>'admin.reports.housing-settlements','p'=>'admin.reports.housing-settlements','l'=>'تقرير التسويات',        'd'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4', 'perm'=>'housing-settlements.reports'],
                             ] @endphp
                             @foreach($repItems as $it)
                                 @if($can($it['perm']))

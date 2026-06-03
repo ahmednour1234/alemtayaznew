@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\NationalityController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\Reports\BranchStatementController;
 use App\Http\Controllers\Admin\Reports\ContractReportsController;
+use App\Http\Controllers\Admin\Reports\HousingReportsController;
 use App\Http\Controllers\Admin\Reports\IncomeStatementController;
 use App\Http\Controllers\Admin\Settings\AdminController as SettingsAdminController;
 use App\Http\Controllers\Admin\Settings\PermissionController;
@@ -142,6 +143,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('contracts-received',      [ContractReportsController::class, 'received'])->name('contracts-received');
             Route::get('contracts-delayed',       [ContractReportsController::class, 'delayed'])->name('contracts-delayed');
             Route::get('contracts-stats',         [ContractReportsController::class, 'stats'])->name('contracts-stats');
+            Route::get('housing-rentals',         [HousingReportsController::class, 'rentals'])->name('housing-rentals');
+            Route::get('housing-settlements',     [HousingReportsController::class, 'settlements'])->name('housing-settlements');
         });
 
         // Settings
