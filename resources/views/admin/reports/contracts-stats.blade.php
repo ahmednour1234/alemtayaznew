@@ -80,6 +80,9 @@
         </div>
         <p class="text-2xl font-black text-orange-500">{{ number_format($stats['delayed']) }}</p>
         <p class="text-xs text-slate-500 mt-0.5">متأخرة</p>
+        <p class="text-[11px] text-orange-600 mt-1 leading-5">
+            عقود نشطة تجاوزت المدة المحددة للمرحلة الحالية بأكثر من يومين.
+        </p>
     </a>
 
     {{-- Returned --}}

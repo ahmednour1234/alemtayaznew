@@ -229,23 +229,14 @@ class ReportService
     }
     public function getReceivedContracts(?string $dateFrom, ?string $dateTo, ?int $branchId): \Illuminate\Support\Collection
     {
-        $today = Carbon::today();
-
         return RecruitmentContract::with(['client', 'worker.nationality', 'branch', 'statusHistories'])
             ->where('current_status', 13)
+            ->whereNotNull('arrival_date')
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
-            ->orderByDesc('updated_at')
-            ->get()
-            ->filter(function ($c) use ($dateFrom, $dateTo) {
-                $history = $c->statusHistories->firstWhere('status', 13);
-                if (! $history || ! $history->status_date) {
-                    return ! $dateFrom && ! $dateTo; // show only if no date filter
-                }
-                if ($dateFrom && $history->status_date->lt(Carbon::parse($dateFrom)->startOfDay())) return false;
-                if ($dateTo   && $history->status_date->gt(Carbon::parse($dateTo)->endOfDay()))   return false;
-                return true;
-            })
-            ->values();
+            ->when($dateFrom, fn($q) => $q->whereDate('arrival_date', '>=', $dateFrom))
+            ->when($dateTo, fn($q) => $q->whereDate('arrival_date', '<=', $dateTo))
+            ->orderByDesc('arrival_date')
+            ->get();
     }
 
     // ── تقرير العقود المتأخرة ─────────────────────────────────────────────────

@@ -5,7 +5,7 @@
 <div class="flex justify-between items-center mb-5">
     <div>
         <h2 class="text-xl font-bold text-slate-800">تقرير العمالة المستلمة</h2>
-        <p class="text-sm text-slate-500 mt-0.5">العقود التي وصلت إلى مرحلة «تم الاستلام» (المرحلة 13)</p>
+        <p class="text-sm text-slate-500 mt-0.5">العقود التي وصلت إلى مرحلة «تم الاستلام» (المرحلة 13) مع عرض تاريخ الوصول</p>
     </div>
     <span class="bg-green-100 text-green-700 text-sm font-semibold px-4 py-1.5 rounded-full" id="countBadge">
         {{ $contracts->count() }} عقد
@@ -29,7 +29,7 @@
         @endif
         @endauth
         <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">تاريخ الاستلام من</label>
+            <label class="block text-xs font-medium text-slate-600 mb-1">تاريخ الوصول من</label>
             <input type="date" name="date_from" value="{{ request('date_from') }}"
                    class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
         </div>
@@ -69,7 +69,7 @@
                 <th class="px-4 py-3 font-semibold text-slate-600">الجنسية</th>
                 <th class="px-4 py-3 font-semibold text-slate-600">الفرع</th>
                 <th class="px-4 py-3 font-semibold text-slate-600">تاريخ الطلب</th>
-                <th class="px-4 py-3 font-semibold text-slate-600">تاريخ الاستلام</th>
+                <th class="px-4 py-3 font-semibold text-slate-600">تاريخ الوصول</th>
                 <th class="px-4 py-3 font-semibold text-slate-600">الدفع</th>
                 <th class="px-4 py-3 font-semibold text-slate-600">إجراءات</th>
             </tr>
@@ -77,7 +77,6 @@
         <tbody class="divide-y divide-slate-50">
             @forelse($contracts as $c)
             @php
-                $receivedHistory = $c->statusHistories->firstWhere('status', 13);
                 $payColors = ['full' => 'bg-green-100 text-green-700', 'partial' => 'bg-yellow-100 text-yellow-700', 'pending' => 'bg-slate-100 text-slate-500'];
                 $searchText = implode(' ', array_filter([
                     $c->worker->name ?? '',
@@ -100,7 +99,7 @@
                 <td class="px-4 py-3 text-slate-500">{{ $c->branch->name ?? '—' }}</td>
                 <td class="px-4 py-3 text-slate-400 text-xs">{{ $c->request_date?->format('Y/m/d') ?? '—' }}</td>
                 <td class="px-4 py-3 text-green-600 text-xs font-medium">
-                    {{ $receivedHistory?->status_date?->format('Y/m/d') ?? '—' }}
+                    {{ $c->arrival_date?->format('Y/m/d') ?? '—' }}
                 </td>
                 <td class="px-4 py-3">
                     <span class="inline-block px-2.5 py-1 rounded-full text-xs {{ $payColors[$c->payment_status] ?? '' }}">
