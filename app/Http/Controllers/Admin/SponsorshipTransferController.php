@@ -48,7 +48,7 @@ class SponsorshipTransferController extends Controller
 
         $baseQuery = Worker::where('active', true)
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId))
-            ->with(['nationality', 'client', 'latestContract', 'activeHousingAssignment'])
+            ->with(['nationality', 'client', 'latestContract.client', 'activeHousingAssignment'])
             ->orderBy('name');
 
         // Group 1: في السكن بسبب نقل كفالة (reason = sponsorship_transfer)
@@ -65,13 +65,18 @@ class SponsorshipTransferController extends Controller
         $workers = $housingWorkers->merge($contractWorkers);
 
         // Map worker data for JS auto-fill
-        $workersJson = $workers->map(fn($w) => [
-            'id'          => $w->id,
-            'client_id'   => $w->client_id,
-            'client_name' => $w->client?->name ?? '',
-            'contract_id' => $w->latestContract?->id,
-            'status'      => $w->status,
-        ]);
+        $workersJson = $workers->map(function ($w) {
+            // العاملة القادمة من عقد استقدام يكون كفيلها الحالي على العقد وليس على عمود client_id
+            $client = $w->client ?? $w->latestContract?->client;
+
+            return [
+                'id'          => $w->id,
+                'client_id'   => $client?->id,
+                'client_name' => $client?->name ?? '',
+                'contract_id' => $w->latestContract?->id,
+                'status'      => $w->status,
+            ];
+        });
 
         $clients  = Client::where('active', true)->orderBy('name')->get();
         $branches = $branchId ? null : Branch::where('active', true)->orderBy('name')->get();
