@@ -112,7 +112,7 @@
 
                 <input type="hidden" name="reason" id="reason_val" value="{{ old('reason') }}">
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="reason-cards">
+                <div class="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-5 gap-4" id="reason-cards">
                     @php
                         $reasons = [
                             'sponsorship_transfer' => [
@@ -135,6 +135,20 @@
                                 'icon'  => '🤝',
                                 'color' => '#16a34a',
                                 'bg'    => 'linear-gradient(135deg,#dcfce7,#bbf7d0)',
+                            ],
+                            'rental' => [
+                                'label' => 'تأجير',
+                                'desc'  => 'العاملة متاحة للتأجير وتعمل في السكن',
+                                'icon'  => '🏷️',
+                                'color' => '#0891b2',
+                                'bg'    => 'linear-gradient(135deg,#cffafe,#a5f3fc)',
+                            ],
+                            'settlement' => [
+                                'label' => 'تسوية',
+                                'desc'  => 'تسوية وضع العاملة مع الكفيل أو الجهة',
+                                'icon'  => '⚖️',
+                                'color' => '#b45309',
+                                'bg'    => 'linear-gradient(135deg,#fef3c7,#fde68a)',
                             ],
                         ];
                     @endphp
@@ -297,6 +311,8 @@ const reasonColors = {
     sponsorship_transfer: '#7c3aed',
     deportation: '#dc2626',
     handover: '#16a34a',
+    rental: '#0891b2',
+    settlement: '#b45309',
 };
 function selectReason(val) {
     document.getElementById('reason_val').value = val;

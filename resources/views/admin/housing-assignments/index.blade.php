@@ -104,6 +104,8 @@
                                     'sponsorship_transfer' => ['label' => 'نقل كفالة', 'bg' => '#ede9fe', 'color' => '#7c3aed'],
                                     'deportation'          => ['label' => 'تسفير',      'bg' => '#fee2e2', 'color' => '#b91c1c'],
                                     'handover'             => ['label' => 'تسليم',      'bg' => '#dcfce7', 'color' => '#16a34a'],
+                                    'rental'               => ['label' => 'تأجير',      'bg' => '#cffafe', 'color' => '#0891b2'],
+                                    'settlement'           => ['label' => 'تسوية',      'bg' => '#fef3c7', 'color' => '#b45309'],
                                 ];
                                 $rl = $reasonLabels2[$a->reason] ?? null;
                             @endphp
@@ -200,6 +202,8 @@
                             'sponsorship_transfer' => ['label' => 'نقل كفالة', 'bg' => '#ede9fe', 'color' => '#7c3aed'],
                             'deportation'          => ['label' => 'تسفير',      'bg' => '#fee2e2', 'color' => '#b91c1c'],
                             'handover'             => ['label' => 'تسليم',      'bg' => '#dcfce7', 'color' => '#16a34a'],
+                            'rental'               => ['label' => 'تأجير',      'bg' => '#cffafe', 'color' => '#0891b2'],
+                            'settlement'           => ['label' => 'تسوية',      'bg' => '#fef3c7', 'color' => '#b45309'],
                         ];
                         $r = $reasonLabels[$a->reason] ?? null;
                     @endphp
@@ -226,24 +230,129 @@
                                 class="text-blue-600 hover:underline text-xs">عرض</button>
                         @if(! $a->check_out_date)
                         <form method="POST" action="{{ route('admin.housing-assignments.checkout', $a->id) }}"
-                              x-data="{ open: false }">
+                              enctype="multipart/form-data"
+                              x-data="{ open: false, disp: '{{ $a->reason === 'rental' ? 'rental' : '' }}' }">
                             @csrf @method('PATCH')
                             <button type="button" @click="open = true"
                                     class="text-amber-600 hover:underline text-xs">مغادرة</button>
-                            <div x-show="open" x-cloak class="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-                                 @click.self="open = false">
-                                <div class="bg-white rounded-xl p-6 w-80 shadow-xl">
-                                    <h3 class="font-semibold text-slate-800 mb-4">تسجيل مغادرة — {{ $a->worker?->name }}</h3>
-                                    <input type="date" name="check_out_date" required
-                                           value="{{ date('Y-m-d') }}"
-                                           class="w-full border rounded-lg px-3 py-2 text-sm mb-3">
-                                    <textarea name="notes" placeholder="ملاحظات (اختياري)" rows="2"
-                                              class="w-full border rounded-lg px-3 py-2 text-sm mb-4"></textarea>
-                                    <div class="flex gap-2 justify-end">
+                            <div x-show="open" x-cloak class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 overflow-y-auto"
+                                 @click.self="open = false" @keydown.escape.window="open = false">
+                                <div class="bg-white rounded-2xl shadow-xl w-full max-w-md my-8">
+                                    <div class="px-6 pt-5 pb-3 border-b border-slate-100">
+                                        <h3 class="font-bold text-slate-800">تسجيل مغادرة — {{ $a->worker?->name }}</h3>
+                                        <p class="text-xs text-slate-500 mt-0.5">حدد وجهة العاملة عند المغادرة وسجّل بياناتها.</p>
+                                    </div>
+                                    <div class="p-6 space-y-4 max-h-[65vh] overflow-y-auto">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">تاريخ المغادرة <span class="text-red-500">*</span></label>
+                                            <input type="date" name="check_out_date" required value="{{ date('Y-m-d') }}"
+                                                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                        </div>
+
+                                        {{-- اختيار الوجهة --}}
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">الوجهة</label>
+                                            <div class="grid grid-cols-3 gap-2">
+                                                <button type="button" @click="disp = ''"
+                                                        :class="disp === '' ? 'border-slate-800 bg-slate-50 text-slate-800' : 'border-slate-200 text-slate-500'"
+                                                        class="border rounded-lg py-2 text-xs font-semibold transition">مغادرة عادية</button>
+                                                <button type="button" @click="disp = 'rental'"
+                                                        :class="disp === 'rental' ? 'border-cyan-600 bg-cyan-50 text-cyan-700' : 'border-slate-200 text-slate-500'"
+                                                        class="border rounded-lg py-2 text-xs font-semibold transition">تأجير</button>
+                                                <button type="button" @click="disp = 'settlement'"
+                                                        :class="disp === 'settlement' ? 'border-amber-600 bg-amber-50 text-amber-700' : 'border-slate-200 text-slate-500'"
+                                                        class="border rounded-lg py-2 text-xs font-semibold transition">تسوية</button>
+                                            </div>
+                                            <input type="hidden" name="disposition" :value="disp">
+                                        </div>
+
+                                        {{-- بيانات التأجير --}}
+                                        <div x-show="disp === 'rental'" x-cloak class="space-y-3 border border-cyan-100 bg-cyan-50/40 rounded-xl p-3">
+                                            <div class="text-xs font-bold text-cyan-700">بيانات التأجير</div>
+                                            <div>
+                                                <label class="block text-xs text-slate-500 mb-1">العميل (المستأجر) <span class="text-red-500">*</span></label>
+                                                <select name="rental_client_id" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                    <option value="">اختر عميل</option>
+                                                    @foreach($clients as $c)
+                                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label class="block text-xs text-slate-500 mb-1">رقم العقد</label>
+                                                    <input type="text" name="rental_contract_number" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs text-slate-500 mb-1">قيمة الإيجار</label>
+                                                    <input type="number" step="0.01" min="0" name="rent_value" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs text-slate-500 mb-1">بداية الإيجار</label>
+                                                    <input type="date" name="rent_start_date" value="{{ date('Y-m-d') }}" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs text-slate-500 mb-1">انتهاء الإيجار</label>
+                                                    <input type="date" name="rent_end_date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs text-slate-500 mb-1">صورة العقد</label>
+                                                <input type="file" name="rental_contract_image" accept="image/*" class="w-full text-xs">
+                                            </div>
+                                            <textarea name="rental_notes" rows="2" placeholder="ملاحظات التأجير" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"></textarea>
+                                        </div>
+
+                                        {{-- بيانات التسوية --}}
+                                        <div x-show="disp === 'settlement'" x-cloak class="space-y-3 border border-amber-100 bg-amber-50/40 rounded-xl p-3">
+                                            <div class="text-xs font-bold text-amber-700">بيانات التسوية</div>
+                                            <div>
+                                                <label class="block text-xs text-slate-500 mb-1">العميل <span class="text-red-500">*</span></label>
+                                                <select name="settlement_client_id" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                    <option value="">اختر عميل</option>
+                                                    @foreach($clients as $c)
+                                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label class="block text-xs text-slate-500 mb-1">مبلغ التسوية</label>
+                                                    <input type="number" step="0.01" min="0" name="settlement_amount" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs text-slate-500 mb-1">نوع التسوية</label>
+                                                    <select name="settlement_type" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                        <option value="">—</option>
+                                                        @foreach(\App\Models\HousingSettlement::types() as $val => $label)
+                                                        <option value="{{ $val }}">{{ $label }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs text-slate-500 mb-1">الرقم المرجعي</label>
+                                                    <input type="text" name="settlement_reference" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs text-slate-500 mb-1">تاريخ التسوية</label>
+                                                    <input type="date" name="settlement_date" value="{{ date('Y-m-d') }}" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs text-slate-500 mb-1">صورة المستند</label>
+                                                <input type="file" name="settlement_document_image" accept="image/*" class="w-full text-xs">
+                                            </div>
+                                            <textarea name="settlement_notes" rows="2" placeholder="ملاحظات التسوية" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"></textarea>
+                                        </div>
+
+                                        <textarea name="notes" placeholder="ملاحظات عامة (اختياري)" rows="2"
+                                                  class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"></textarea>
+                                    </div>
+                                    <div class="px-6 py-4 border-t border-slate-100 flex gap-2 justify-end">
                                         <button type="button" @click="open = false"
                                                 class="text-slate-500 text-sm px-4 py-2">إلغاء</button>
                                         <button type="submit"
-                                                class="bg-amber-600 text-white text-sm px-4 py-2 rounded-lg">تأكيد</button>
+                                                class="bg-amber-600 hover:bg-amber-700 text-white text-sm px-5 py-2 rounded-lg">تأكيد المغادرة</button>
                                     </div>
                                 </div>
                             </div>

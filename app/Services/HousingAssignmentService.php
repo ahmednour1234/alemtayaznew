@@ -5,8 +5,11 @@ namespace App\Services;
 use App\Models\Admin;
 use App\Models\AdminNotification;
 use App\Models\HousingAssignment;
+use App\Models\HousingRental;
+use App\Models\HousingSettlement;
 use App\Models\Worker;
 use App\Repositories\Contracts\HousingAssignmentRepositoryInterface;
+use Illuminate\Support\Facades\Auth;
 
 class HousingAssignmentService
 {
@@ -34,8 +37,9 @@ class HousingAssignmentService
     {
         $assignment = $this->repo->create($data);
 
-        // Update worker status to in_housing
-        Worker::where('id', $data['worker_id'])->update(['status' => 'in_housing']);
+        // عاملة التأجير تبقى "للتأجير" وتعمل في السكن، وغيرها "في السكن"
+        $workerStatus = ($data['reason'] ?? null) === 'rental' ? 'for_rent' : 'in_housing';
+        Worker::where('id', $data['worker_id'])->update(['status' => $workerStatus]);
 
         // ── Notifications ────────────────────────────────────────────────────
         $worker  = $assignment->worker ?? Worker::find($data['worker_id']);
@@ -68,12 +72,51 @@ class HousingAssignmentService
         return $assignment;
     }
 
-    public function checkout(int $id, string $checkOutDate, ?string $notes = null): HousingAssignment
+    /**
+     * تسجيل مغادرة العاملة من السكن مع تحديد وجهتها (تأجير / تسوية) وبياناتها.
+     *
+     * @param array $data check_out_date, notes, disposition, و بيانات التأجير/التسوية
+     */
+    public function checkout(int $id, array $data): HousingAssignment
     {
+        $current = $this->repo->findById($id);
+
         $assignment = $this->repo->update($id, [
-            'check_out_date' => $checkOutDate,
-            'notes'          => $notes ?? $this->repo->findById($id)->notes,
+            'check_out_date' => $data['check_out_date'],
+            'notes'          => $data['notes'] ?? $current->notes,
         ]);
+
+        $disposition = $data['disposition'] ?? null;
+
+        if ($disposition === 'rental') {
+            HousingRental::create([
+                'housing_assignment_id' => $assignment->id,
+                'worker_id'             => $assignment->worker_id,
+                'branch_id'             => $assignment->branch_id,
+                'client_id'             => $data['rental_client_id'] ?? null,
+                'admin_id'              => Auth::guard('admin')->id(),
+                'contract_number'       => $data['rental_contract_number'] ?? null,
+                'rent_value'            => $data['rent_value'] ?? 0,
+                'rent_start_date'       => $data['rent_start_date'] ?? $data['check_out_date'],
+                'rent_end_date'         => $data['rent_end_date'] ?? null,
+                'contract_image'        => $data['rental_contract_image'] ?? null,
+                'notes'                 => $data['rental_notes'] ?? null,
+            ]);
+        } elseif ($disposition === 'settlement') {
+            HousingSettlement::create([
+                'housing_assignment_id' => $assignment->id,
+                'worker_id'             => $assignment->worker_id,
+                'branch_id'             => $assignment->branch_id,
+                'client_id'             => $data['settlement_client_id'] ?? null,
+                'admin_id'              => Auth::guard('admin')->id(),
+                'reference_number'      => $data['settlement_reference'] ?? null,
+                'settlement_amount'     => $data['settlement_amount'] ?? 0,
+                'settlement_type'       => $data['settlement_type'] ?? null,
+                'settlement_date'       => $data['settlement_date'] ?? $data['check_out_date'],
+                'document_image'        => $data['settlement_document_image'] ?? null,
+                'notes'                 => $data['settlement_notes'] ?? null,
+            ]);
+        }
 
         // Revert worker status to available if no other active assignment
         $hasOtherActive = HousingAssignment::where('worker_id', $assignment->worker_id)
@@ -83,7 +126,7 @@ class HousingAssignmentService
 
         if (! $hasOtherActive) {
             Worker::where('id', $assignment->worker_id)
-                ->where('status', 'in_housing')
+                ->whereIn('status', ['in_housing', 'for_rent'])
                 ->update(['status' => 'available']);
         }
 

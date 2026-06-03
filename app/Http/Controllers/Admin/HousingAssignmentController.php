@@ -34,8 +34,9 @@ class HousingAssignmentController extends Controller
             ->when($bid ?? null, fn($q, $b) => $q->where('branch_id', $b))
             ->orderBy('name')->get();
         $branches    = Branch::where('active', true)->orderBy('name')->get();
+        $clients     = \App\Models\Client::where('active', true)->orderBy('name')->get();
 
-        return view('admin.housing-assignments.index', compact('assignments', 'housings', 'branches'));
+        return view('admin.housing-assignments.index', compact('assignments', 'housings', 'branches', 'clients'));
     }
 
     public function create()
@@ -68,7 +69,7 @@ class HousingAssignmentController extends Controller
             'branch_id'               => 'required|exists:branches,id',
             'check_in_date'           => 'required|date',
             'expected_check_out_date' => 'nullable|date|after_or_equal:check_in_date',
-            'reason'                  => 'nullable|in:sponsorship_transfer,deportation,handover',
+            'reason'                  => 'nullable|in:sponsorship_transfer,deportation,handover,rental,settlement',
             'notes'                   => 'nullable|string|max:500',
         ]);
 
@@ -85,8 +86,40 @@ class HousingAssignmentController extends Controller
 
     public function checkout(int $id, Request $request)
     {
-        $request->validate(['check_out_date' => 'required|date']);
-        $this->service->checkout($id, $request->check_out_date, $request->notes);
+        $data = $request->validate([
+            'check_out_date' => 'required|date',
+            'notes'          => 'nullable|string|max:500',
+            'disposition'    => 'nullable|in:rental,settlement',
+
+            // بيانات التأجير
+            'rental_client_id'         => 'required_if:disposition,rental|nullable|exists:clients,id',
+            'rental_contract_number'   => 'nullable|string|max:100',
+            'rent_value'               => 'nullable|numeric|min:0',
+            'rent_start_date'          => 'nullable|date',
+            'rent_end_date'            => 'nullable|date|after_or_equal:rent_start_date',
+            'rental_contract_image'    => 'nullable|image|max:5120',
+            'rental_notes'             => 'nullable|string|max:1000',
+
+            // بيانات التسوية
+            'settlement_client_id'     => 'required_if:disposition,settlement|nullable|exists:clients,id',
+            'settlement_reference'     => 'nullable|string|max:100',
+            'settlement_amount'        => 'nullable|numeric|min:0',
+            'settlement_type'          => 'nullable|string|max:50',
+            'settlement_date'          => 'nullable|date',
+            'settlement_document_image'=> 'nullable|image|max:5120',
+            'settlement_notes'         => 'nullable|string|max:1000',
+        ]);
+
+        if ($request->hasFile('rental_contract_image')) {
+            $data['rental_contract_image'] = $request->file('rental_contract_image')
+                ->store('housing-rentals', 'public');
+        }
+        if ($request->hasFile('settlement_document_image')) {
+            $data['settlement_document_image'] = $request->file('settlement_document_image')
+                ->store('housing-settlements', 'public');
+        }
+
+        $this->service->checkout($id, $data);
         return back()->with('success', 'تم تسجيل مغادرة العاملة من السكن.');
     }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -25,6 +26,32 @@ class HousingAssignment extends Model
             'check_out_date'          => 'date',
             'expected_check_out_date' => 'date',
         ];
+    }
+
+    /** أسباب التسكين المتاحة */
+    public static function reasons(): array
+    {
+        return [
+            'sponsorship_transfer' => 'نقل كفالة',
+            'deportation'          => 'تسفير',
+            'handover'             => 'تسليم',
+            'rental'               => 'تأجير',
+            'settlement'           => 'تسوية',
+        ];
+    }
+
+    /** خيارات وجهة العاملة عند المغادرة */
+    public static function dispositions(): array
+    {
+        return [
+            'rental'     => 'تأجير',
+            'settlement' => 'تسوية',
+        ];
+    }
+
+    public function getReasonLabelAttribute(): string
+    {
+        return self::reasons()[$this->reason] ?? ($this->reason ?? '—');
     }
 
     // ── Scopes ──────────────────────────────────────────────────────────────
@@ -59,6 +86,16 @@ class HousingAssignment extends Model
     public function admin(): BelongsTo
     {
         return $this->belongsTo(Admin::class);
+    }
+
+    public function rental(): HasOne
+    {
+        return $this->hasOne(HousingRental::class);
+    }
+
+    public function settlement(): HasOne
+    {
+        return $this->hasOne(HousingSettlement::class);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
