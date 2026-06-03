@@ -1,7 +1,7 @@
 @php
     $admin = auth('admin')->user();
     $openSettings   = request()->routeIs(['admin.branches.*', 'admin.cities.*', 'admin.settings.*', 'admin.nationalities.*', 'admin.airports.*']);
-    $openFinance    = request()->routeIs(['admin.income-types.*','admin.expense-types.*','admin.incomes.*','admin.expenses.*','admin.transfers.*','admin.reports.*']);
+    $openFinance    = request()->routeIs(['admin.income-types.*','admin.expense-types.*','admin.incomes.*','admin.expenses.*','admin.transfers.*','admin.reports.branch-statement','admin.reports.branch-statement.export','admin.reports.income-statement','admin.reports.income-statement.export']);
     $openAccounting = request()->routeIs(['admin.income-types.*', 'admin.expense-types.*']);
     $openMoney      = request()->routeIs(['admin.incomes.*', 'admin.expenses.*', 'admin.transfers.*']);
     $openReports    = request()->routeIs(['admin.reports.*']);
@@ -12,16 +12,17 @@
     $openMarketing  = request()->routeIs(['admin.marketing.*']);
     $openComplaints = request()->routeIs(['admin.complaints.*']);
     $openST         = request()->routeIs(['admin.sponsorship-transfers.*']);
-    $openOperations = request()->routeIs(['admin.housing-assignments.*', 'admin.housing-visits.*', 'admin.trips.*', 'admin.calendar.*']);
+    $openOperations = request()->routeIs(['admin.housing-assignments.*', 'admin.housing-visits.*', 'admin.trips.*', 'admin.calendar.*', 'admin.reports.housing-rentals', 'admin.reports.housing-settlements']);
+    $openOpsReports = request()->routeIs(['admin.reports.housing-rentals', 'admin.reports.housing-settlements']);
     // Permission helper (arrow fn auto-captures $admin)
     $can = fn(string $perm) => $admin->isSuperAdmin() || $admin->hasPermission($perm);
     // Section group visibility
     $showSettingsGroup   = $can('branches.view')||$can('nationalities.view')||$can('airports.view')||$can('housings.view')||$can('roles.manage')||$can('admins.manage')||$can('income-types.view')||$can('expense-types.view');
-    $showFinanceGroup    = $can('incomes.view')||$can('expenses.view')||$can('transfers.view')||$can('reports.view')||$can('income-types.view')||$can('expense-types.view')||$can('reports.branch-statement')||$can('reports.income-statement')||$can('housing-rentals.reports')||$can('housing-settlements.reports');
+    $showFinanceGroup    = $can('incomes.view')||$can('expenses.view')||$can('transfers.view')||$can('reports.view')||$can('income-types.view')||$can('expense-types.view')||$can('reports.branch-statement')||$can('reports.income-statement');
     $showPeopleGroup     = $can('clients.view')||$can('agents.view');
     $showMarketingGroup  = $can('campaigns.view')||$can('leads.view')||$can('marketing.reports.view')||$can('calendar.view');
     $showComplaintsGroup = $can('complaints.view');
-    $showOpsGroup        = $can('trips.view')||$can('housing-assignments.view')||$can('housing-visits.view')||$can('housing-visits.reports')||$can('calendar.view');
+    $showOpsGroup        = $can('trips.view')||$can('housing-assignments.view')||$can('housing-visits.view')||$can('housing-visits.reports')||$can('calendar.view')||$can('housing-rentals.reports')||$can('housing-settlements.reports');
     $showSTGroup         = $can('sponsorship-transfers.view');
     $showWorkersGroup    = $can('workers.view')||$can('workers.create');
     $showContractsGroup  = $can('contracts.view');
@@ -40,6 +41,7 @@
         mk: {{ $openMarketing ? 'true' : 'false' }},
         cp: {{ $openComplaints ? 'true' : 'false' }},
         op: {{ $openOperations ? 'true' : 'false' }},
+        opr: {{ $openOpsReports ? 'true' : 'false' }},
         st: {{ $openST ? 'true' : 'false' }}
      }"
      style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
@@ -284,6 +286,53 @@
                     </a>
                     @endif
                 @endforeach
+
+                @if($can('housing-rentals.reports') || $can('housing-settlements.reports'))
+                {{-- SUB: تقارير الإسكان --}}
+                <div style="margin-bottom:1px;margin-top:4px;">
+                    <button @click="opr=!opr"
+                            style="width:100%;display:flex;align-items:center;gap:9px;padding:7px 10px;
+                                   border-radius:7px;border:none;cursor:pointer;text-align:right;
+                                   font-family:Cairo,sans-serif;font-size:12.5px;font-weight:600;
+                                   transition:background .15s,color .15s;"
+                            :style="{ color: opr ? '#cbd5e1' : '#c8d4e3', background: opr ? 'rgba(255,255,255,.04)' : 'transparent' }"
+                            @mouseenter="$el.style.background='rgba(255,255,255,.05)';$el.style.color='#cbd5e1';"
+                            @mouseleave="$el.style.background=opr?'rgba(255,255,255,.04)':'transparent';$el.style.color=opr?'#cbd5e1':'#c8d4e3';">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                        <span style="flex:1;">التقارير</span>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                             style="flex-shrink:0;transition:transform .25s;" :style="{ transform: opr ? 'rotate(180deg)' : 'none' }">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                    <div x-show="opr" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
+                        @php $opsRepItems = [
+                            ['r'=>'admin.reports.housing-rentals',    'p'=>'admin.reports.housing-rentals',    'l'=>'تقرير العمالة المؤجرة', 'perm'=>'housing-rentals.reports',
+                             'd'=>'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
+                            ['r'=>'admin.reports.housing-settlements','p'=>'admin.reports.housing-settlements','l'=>'تقرير التسويات',        'perm'=>'housing-settlements.reports',
+                             'd'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'],
+                        ] @endphp
+                        @foreach($opsRepItems as $it)
+                            @if($can($it['perm']))
+                            @php $on = request()->routeIs($it['p']); @endphp
+                            <a href="{{ route($it['r']) }}"
+                               style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
+                                      border-radius:6px;text-decoration:none;font-size:12px;
+                                      {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                               onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
+                               onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
+                               {{ $on ? 'data-on=1' : '' }}>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;"><path d="{{ $it['d'] }}"/></svg>
+                                {{ $it['l'] }}
+                            </a>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+                @endif
             </div>
         </div>
         @endif
@@ -407,7 +456,7 @@
                     </div>
                     @endif
 
-                    @if($can('reports.branch-statement') || $can('reports.income-statement') || $can('reports.view') || $can('housing-rentals.reports') || $can('housing-settlements.reports'))
+                    @if($can('reports.branch-statement') || $can('reports.income-statement') || $can('reports.view'))
                     {{-- SUB 3: التقارير --}}
                     <div style="margin-bottom:1px;">
                         <button @click="r=!r"
@@ -432,8 +481,6 @@
                             @php $repItems = [
                                 ['r'=>'admin.reports.branch-statement',   'p'=>'admin.reports.branch-statement',   'l'=>'كشف حساب الفرع',       'd'=>'M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v14a2 2 0 002 2z', 'perm'=>'reports.branch-statement'],
                                 ['r'=>'admin.reports.income-statement',   'p'=>'admin.reports.income-statement',   'l'=>'قائمة دخل كل الفروع', 'd'=>'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z',                                      'perm'=>'reports.income-statement'],
-                                ['r'=>'admin.reports.housing-rentals',    'p'=>'admin.reports.housing-rentals',    'l'=>'تقرير العمالة المؤجرة', 'd'=>'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', 'perm'=>'housing-rentals.reports'],
-                                ['r'=>'admin.reports.housing-settlements','p'=>'admin.reports.housing-settlements','l'=>'تقرير التسويات',        'd'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4', 'perm'=>'housing-settlements.reports'],
                             ] @endphp
                             @foreach($repItems as $it)
                                 @if($can($it['perm']))
