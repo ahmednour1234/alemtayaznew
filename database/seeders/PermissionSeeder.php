@@ -727,11 +727,19 @@ class PermissionSeeder extends Seeder
 );
 
         $permissions = array_merge($permissions, [
-            ['name' => 'عرض زيارات السكن', 'slug' => 'housing-visits.view', 'description' => null],
-            ['name' => 'إنشاء زيارات السكن', 'slug' => 'housing-visits.create', 'description' => null],
-            ['name' => 'تعديل زيارات السكن', 'slug' => 'housing-visits.edit', 'description' => null],
-            ['name' => 'حذف زيارات السكن', 'slug' => 'housing-visits.delete', 'description' => null],
-            ['name' => 'تقارير زيارات السكن', 'slug' => 'housing-visits.reports', 'description' => null],
+            ['name' => 'عرض زيارات السكن',         'slug' => 'housing-visits.view',           'description' => null],
+            ['name' => 'إنشاء زيارات السكن',        'slug' => 'housing-visits.create',         'description' => null],
+            ['name' => 'تعديل زيارات السكن',        'slug' => 'housing-visits.edit',           'description' => null],
+            ['name' => 'حذف زيارات السكن',          'slug' => 'housing-visits.delete',         'description' => null],
+            ['name' => 'تقارير زيارات السكن',       'slug' => 'housing-visits.reports',        'description' => null],
+            // ── تأجير العاملات ────────────────────────
+            ['name' => 'عرض تأجير العاملات',        'slug' => 'housing-rentals.view',          'description' => null],
+            ['name' => 'إنشاء تأجير عاملة',         'slug' => 'housing-rentals.create',        'description' => null],
+            ['name' => 'تقرير تأجير العاملات',      'slug' => 'housing-rentals.reports',       'description' => null],
+            // ── التسويات ──────────────────────────────
+            ['name' => 'عرض التسويات',              'slug' => 'housing-settlements.view',      'description' => null],
+            ['name' => 'إنشاء تسوية',               'slug' => 'housing-settlements.create',    'description' => null],
+            ['name' => 'تقرير التسويات',            'slug' => 'housing-settlements.reports',   'description' => null],
         ]);
 
         foreach ($permissions as $permission) {
