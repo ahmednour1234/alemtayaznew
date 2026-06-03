@@ -13,7 +13,7 @@
     $openComplaints = request()->routeIs(['admin.complaints.*']);
     $openST         = request()->routeIs(['admin.sponsorship-transfers.*']);
     $openOperations = request()->routeIs(['admin.housing-assignments.*', 'admin.housing-visits.*', 'admin.trips.*', 'admin.calendar.*', 'admin.reports.housing-rentals', 'admin.reports.housing-settlements']);
-    $openOpsReports = request()->routeIs(['admin.reports.housing-rentals', 'admin.reports.housing-settlements']);
+    $openOpsReports = request()->routeIs(['admin.reports.housing-rentals', 'admin.reports.housing-settlements', 'admin.housing-visits.reports', 'admin.calendar.index']);
     // Permission helper (arrow fn auto-captures $admin)
     $can = fn(string $perm) => $admin->isSuperAdmin() || $admin->hasPermission($perm);
     // Section group visibility
@@ -258,16 +258,12 @@
             </button>
             <div x-show="op" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                 @php $opItems = [
-                    ['r'=>'admin.calendar.index',             'p'=>'admin.calendar.*',             'l'=>'التقويم',          'perm'=>'calendar.view',
-                     'd'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
                     ['r'=>'admin.trips.index',                'p'=>'admin.trips.*',                'l'=>'الرحلات الدولية',   'perm'=>'trips.view',
                      'd'=>'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064'],
                     ['r'=>'admin.housing-assignments.index',  'p'=>'admin.housing-assignments.*',  'l'=>'الإسكان والتوزيع', 'perm'=>'housing-assignments.view',
                      'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14h16V7M9 21V11h6v10'],
                     ['r'=>'admin.housing-visits.index',       'p'=>'admin.housing-visits.index',    'l'=>'زيارات السكن', 'perm'=>'housing-visits.view',
                      'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14h16V7M8 13h8M8 17h5'],
-                    ['r'=>'admin.housing-visits.reports',     'p'=>'admin.housing-visits.reports',  'l'=>'تقرير زيارات السكن', 'perm'=>'housing-visits.reports',
-                     'd'=>'M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v14a2 2 0 002 2z'],
                 ] @endphp
                 @foreach($opItems as $it)
                     @if($can($it['perm']))
@@ -287,7 +283,7 @@
                     @endif
                 @endforeach
 
-                @if($can('housing-rentals.reports') || $can('housing-settlements.reports'))
+                @if($can('housing-rentals.reports') || $can('housing-settlements.reports') || $can('housing-visits.reports') || $can('calendar.view'))
                 {{-- SUB: تقارير الإسكان --}}
                 <div style="margin-bottom:1px;margin-top:4px;">
                     <button @click="opr=!opr"
@@ -310,9 +306,13 @@
                     </button>
                     <div x-show="opr" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                         @php $opsRepItems = [
+                            ['r'=>'admin.calendar.index',             'p'=>'admin.calendar.*',             'l'=>'التقويم',               'perm'=>'calendar.view',
+                             'd'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                            ['r'=>'admin.housing-visits.reports',     'p'=>'admin.housing-visits.reports', 'l'=>'تقرير زيارات السكن',    'perm'=>'housing-visits.reports',
+                             'd'=>'M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v14a2 2 0 002 2z'],
                             ['r'=>'admin.reports.housing-rentals',    'p'=>'admin.reports.housing-rentals',    'l'=>'تقرير العمالة المؤجرة', 'perm'=>'housing-rentals.reports',
                              'd'=>'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
-                            ['r'=>'admin.reports.housing-settlements','p'=>'admin.reports.housing-settlements','l'=>'تقرير التسويات',        'perm'=>'housing-settlements.reports',
+                            ['r'=>'admin.reports.housing-settlements','p'=>'admin.reports.housing-settlements','l'=>'تقرير التسويات',      'perm'=>'housing-settlements.reports',
                              'd'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'],
                         ] @endphp
                         @foreach($opsRepItems as $it)
