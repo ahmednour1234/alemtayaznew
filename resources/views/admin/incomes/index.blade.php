@@ -137,6 +137,7 @@
                     <th class="px-4 py-3 text-right">#</th>
                     <th class="px-4 py-3 text-right">الفرع</th>
                     <th class="px-4 py-3 text-right">النوع</th>
+                    <th class="px-4 py-3 text-right">البيان</th>
                     <th class="px-4 py-3 text-right">المبلغ</th>
                     <th class="px-4 py-3 text-right">التاريخ</th>
                     <th class="px-4 py-3 text-right">طريقة الدفع</th>
@@ -150,6 +151,11 @@
                     <td class="px-4 py-3 text-slate-400">{{ $incomes->firstItem() + $loop->index }}</td>
                     <td class="px-4 py-3">{{ $income->branch?->name }}</td>
                     <td class="px-4 py-3">{{ $income->incomeType?->name }}</td>
+                    <td class="px-4 py-3 text-slate-600 max-w-[260px]">
+                        <div class="line-clamp-2" title="{{ $income->description }}">
+                            {{ $income->description ?: '—' }}
+                        </div>
+                    </td>
                     <td class="px-4 py-3 font-semibold text-green-600">{{ number_format($income->amount, 2) }}</td>
                     <td class="px-4 py-3">{{ $income->date?->format('Y-m-d') }}</td>
                     <td class="px-4 py-3 text-xs">
@@ -176,7 +182,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">لا توجد إيرادات</td></tr>
+                <tr><td colspan="9" class="px-4 py-8 text-center text-slate-400">لا توجد إيرادات</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -195,6 +201,7 @@
             <thead class="bg-red-50 text-xs text-slate-500 border-b">
                 <tr>
                     <th class="px-4 py-2 text-right">الفرع</th>
+                    <th class="px-4 py-2 text-right">البيان</th>
                     <th class="px-4 py-2 text-right">المبلغ</th>
                     <th class="px-4 py-2 text-right">التاريخ</th>
                     <th class="px-4 py-2 text-right">استعادة</th>
@@ -204,6 +211,7 @@
                 @foreach($trashed as $income)
                 <tr>
                     <td class="px-4 py-2 text-slate-400">{{ $income->branch?->name }}</td>
+                    <td class="px-4 py-2 text-slate-400">{{ $income->description ?: '—' }}</td>
                     <td class="px-4 py-2 text-slate-400">{{ number_format($income->amount, 2) }}</td>
                     <td class="px-4 py-2 text-xs text-slate-400">{{ $income->date?->format('Y-m-d') }}</td>
                     <td class="px-4 py-2">

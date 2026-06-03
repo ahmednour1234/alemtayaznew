@@ -135,6 +135,7 @@
                     <th class="px-4 py-3 text-right">#</th>
                     <th class="px-4 py-3 text-right">الفرع</th>
                     <th class="px-4 py-3 text-right">النوع</th>
+                    <th class="px-4 py-3 text-right">البيان</th>
                     <th class="px-4 py-3 text-right">المبلغ</th>
                     <th class="px-4 py-3 text-right">التاريخ</th>
                     <th class="px-4 py-3 text-right">الحالة</th>
@@ -147,6 +148,11 @@
                     <td class="px-4 py-3 text-slate-400">{{ $expenses->firstItem() + $loop->index }}</td>
                     <td class="px-4 py-3">{{ $expense->branch?->name }}</td>
                     <td class="px-4 py-3">{{ $expense->expenseType?->name }}</td>
+                    <td class="px-4 py-3 text-slate-600 max-w-[260px]">
+                        <div class="line-clamp-2" title="{{ $expense->description }}">
+                            {{ $expense->description ?: '—' }}
+                        </div>
+                    </td>
                     <td class="px-4 py-3 font-semibold text-red-600">{{ number_format($expense->amount, 2) }}</td>
                     <td class="px-4 py-3">{{ $expense->date?->format('Y-m-d') }}</td>
                     <td class="px-4 py-3">
@@ -183,7 +189,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="px-4 py-8 text-center text-slate-400">لا توجد مصاريف</td></tr>
+                <tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">لا توجد مصاريف</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -202,6 +208,7 @@
             <thead class="bg-red-50 text-xs text-slate-500 border-b">
                 <tr>
                     <th class="px-4 py-2 text-right">الفرع</th>
+                    <th class="px-4 py-2 text-right">البيان</th>
                     <th class="px-4 py-2 text-right">المبلغ</th>
                     <th class="px-4 py-2 text-right">استعادة</th>
                 </tr>
@@ -210,6 +217,7 @@
                 @foreach($trashed as $expense)
                 <tr>
                     <td class="px-4 py-2 text-slate-400">{{ $expense->branch?->name }}</td>
+                    <td class="px-4 py-2 text-slate-400">{{ $expense->description ?: '—' }}</td>
                     <td class="px-4 py-2 text-slate-400">{{ number_format($expense->amount, 2) }}</td>
                     <td class="px-4 py-2">
                         <form action="{{ route('admin.expenses.restore', $expense->id) }}" method="POST" class="inline">
