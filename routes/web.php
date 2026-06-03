@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\GlobalSearchController;
 use App\Http\Controllers\Admin\HousingAssignmentController;
+use App\Http\Controllers\Admin\HousingVisitController;
 use App\Http\Controllers\Admin\TripController;
 use App\Http\Controllers\Admin\SponsorshipTransferController;
 use App\Http\Controllers\Admin\CalendarController;
@@ -225,6 +226,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('housing-assignments',                    [HousingAssignmentController::class, 'store'])->name('housing-assignments.store');
         Route::patch('housing-assignments/{id}/checkout',     [HousingAssignmentController::class, 'checkout'])->name('housing-assignments.checkout');
         Route::delete('housing-assignments/{id}',             [HousingAssignmentController::class, 'destroy'])->name('housing-assignments.destroy');
+        Route::get('housing-visits/reports',                  [HousingVisitController::class, 'reports'])->name('housing-visits.reports');
+        Route::resource('housing-visits', HousingVisitController::class);
 
         // Trips (الرحلات)
         Route::post('trips/{trip}/workers',                   [TripController::class, 'addWorker'])->name('trips.add-worker');
@@ -248,4 +251,3 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     });
 });
-

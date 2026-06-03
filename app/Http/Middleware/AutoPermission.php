@@ -254,6 +254,15 @@ class AutoPermission
         'admin.housing-assignments.checkout' => 'housing-assignments.edit',
         'admin.housing-assignments.destroy'  => 'housing-assignments.delete',
 
+        'admin.housing-visits.index'   => 'housing-visits.view',
+        'admin.housing-visits.show'    => 'housing-visits.view',
+        'admin.housing-visits.create'  => 'housing-visits.create',
+        'admin.housing-visits.store'   => 'housing-visits.create',
+        'admin.housing-visits.edit'    => 'housing-visits.edit',
+        'admin.housing-visits.update'  => 'housing-visits.edit',
+        'admin.housing-visits.destroy' => 'housing-visits.delete',
+        'admin.housing-visits.reports' => 'housing-visits.reports',
+
         // ── Trips (الرحلات والنقل) ────────────────────────────
         'admin.trips.index'        => 'trips.view',
         'admin.trips.show'         => 'trips.view',

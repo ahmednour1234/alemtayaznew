@@ -12,7 +12,7 @@
     $openMarketing  = request()->routeIs(['admin.marketing.*']);
     $openComplaints = request()->routeIs(['admin.complaints.*']);
     $openST         = request()->routeIs(['admin.sponsorship-transfers.*']);
-    $openOperations = request()->routeIs(['admin.housing-assignments.*', 'admin.trips.*', 'admin.calendar.*']);
+    $openOperations = request()->routeIs(['admin.housing-assignments.*', 'admin.housing-visits.*', 'admin.trips.*', 'admin.calendar.*']);
     // Permission helper (arrow fn auto-captures $admin)
     $can = fn(string $perm) => $admin->isSuperAdmin() || $admin->hasPermission($perm);
     // Section group visibility
@@ -21,7 +21,7 @@
     $showPeopleGroup     = $can('clients.view')||$can('agents.view');
     $showMarketingGroup  = $can('campaigns.view')||$can('leads.view')||$can('marketing.reports.view')||$can('calendar.view');
     $showComplaintsGroup = $can('complaints.view');
-    $showOpsGroup        = $can('trips.view')||$can('housing-assignments.view')||$can('calendar.view');
+    $showOpsGroup        = $can('trips.view')||$can('housing-assignments.view')||$can('housing-visits.view')||$can('housing-visits.reports')||$can('calendar.view');
     $showSTGroup         = $can('sponsorship-transfers.view');
     $showWorkersGroup    = $can('workers.view')||$can('workers.create');
     $showContractsGroup  = $can('contracts.view');
@@ -262,6 +262,10 @@
                      'd'=>'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064'],
                     ['r'=>'admin.housing-assignments.index',  'p'=>'admin.housing-assignments.*',  'l'=>'الإسكان والتوزيع', 'perm'=>'housing-assignments.view',
                      'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14h16V7M9 21V11h6v10'],
+                    ['r'=>'admin.housing-visits.index',       'p'=>'admin.housing-visits.index',    'l'=>'زيارات السكن', 'perm'=>'housing-visits.view',
+                     'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14h16V7M8 13h8M8 17h5'],
+                    ['r'=>'admin.housing-visits.reports',     'p'=>'admin.housing-visits.reports',  'l'=>'تقرير زيارات السكن', 'perm'=>'housing-visits.reports',
+                     'd'=>'M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v14a2 2 0 002 2z'],
                 ] @endphp
                 @foreach($opItems as $it)
                     @if($can($it['perm']))

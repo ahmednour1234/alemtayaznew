@@ -31,6 +31,8 @@ class NotificationService
         'sponsorship_transfer_deleted' => 'sponsorship-transfers.view',
         'housing_assignment_created'   => 'housing-assignments.view',
         'housing_assignment_overdue'   => 'housing-assignments.view',
+        'housing_visit_created'        => 'housing-visits.view',
+        'housing_visit_updated'        => 'housing-visits.view',
         'branch_created'      => null,
         'admin_created'       => null,
         'client_created'      => 'clients.view',

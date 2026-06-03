@@ -726,6 +726,14 @@ class PermissionSeeder extends Seeder
   ),
 );
 
+        $permissions = array_merge($permissions, [
+            ['name' => 'عرض زيارات السكن', 'slug' => 'housing-visits.view', 'description' => null],
+            ['name' => 'إنشاء زيارات السكن', 'slug' => 'housing-visits.create', 'description' => null],
+            ['name' => 'تعديل زيارات السكن', 'slug' => 'housing-visits.edit', 'description' => null],
+            ['name' => 'حذف زيارات السكن', 'slug' => 'housing-visits.delete', 'description' => null],
+            ['name' => 'تقارير زيارات السكن', 'slug' => 'housing-visits.reports', 'description' => null],
+        ]);
+
         foreach ($permissions as $permission) {
             Permission::updateOrCreate(
                 ['slug' => $permission['slug']],

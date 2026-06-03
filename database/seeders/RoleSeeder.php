@@ -510,6 +510,25 @@ class RoleSeeder extends Seeder
   ),
 );
 
+        $housingVisitPermissions = [
+            'housing-visits.view',
+            'housing-visits.create',
+            'housing-visits.edit',
+            'housing-visits.delete',
+            'housing-visits.reports',
+        ];
+
+        foreach ($roles as &$roleData) {
+            $permissions = $roleData['permissions'];
+            $isSuperAdmin = $roleData['slug'] === 'super-admin';
+            $isHousingRole = in_array('housing-assignments.view', $permissions, true);
+
+            if ($isSuperAdmin || $isHousingRole) {
+                $roleData['permissions'] = array_values(array_unique(array_merge($permissions, $housingVisitPermissions)));
+            }
+        }
+        unset($roleData);
+
         $permissionIdsBySlug = Permission::query()->pluck('id', 'slug');
 
         foreach ($roles as $roleData) {
