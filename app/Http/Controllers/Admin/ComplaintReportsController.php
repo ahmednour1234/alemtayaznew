@@ -24,6 +24,8 @@ class ComplaintReportsController extends Controller
             ->whereDate('created_at', '<=', $dateTo)
             ->when($branchId, fn($q) => $q->where('branch_id', $branchId));
 
+        $staleCutoff = now()->subDays(7);
+
         // ── Summary ──────────────────────────────────────────────────────────
         $summary = [
             'total'       => (clone $base)->count(),
@@ -34,25 +36,35 @@ class ComplaintReportsController extends Controller
             'escalated'   => (clone $base)->where('status', 'escalated')->count(),
             'on_musaned'  => (clone $base)->where('on_musaned', true)->count(),
             'stale'       => (clone $base)->whereIn('status', ['new', 'in_progress'])
-                                          ->where('created_at', '<=', now()->subDays(7))
+                                          ->where('created_at', '<=', $staleCutoff)
                                           ->count(),
         ];
 
         // ── Branch performance ───────────────────────────────────────────────
         $branchPerformance = (clone $base)
-            ->select(
-                'branch_id',
-                DB::raw('COUNT(*) as total'),
-                DB::raw("SUM(CASE WHEN status='resolved' THEN 1 ELSE 0 END) as resolved"),
-                DB::raw("SUM(CASE WHEN status='closed' THEN 1 ELSE 0 END) as closed"),
-                DB::raw("SUM(CASE WHEN status IN ('new','in_progress') THEN 1 ELSE 0 END) as open"),
-                DB::raw("SUM(CASE WHEN status IN ('new','in_progress') AND created_at <= DATE('now', '-7 days') THEN 1 ELSE 0 END) as stale"),
-                DB::raw('AVG(CASE WHEN resolved_at IS NOT NULL THEN (JULIANDAY(resolved_at) - JULIANDAY(created_at)) END) as avg_resolution_days')
-            )
-            ->whereNotNull('branch_id')
-            ->groupBy('branch_id')
             ->with('branch:id,name')
-            ->get();
+            ->whereNotNull('branch_id')
+            ->get(['id', 'branch_id', 'status', 'created_at', 'resolved_at'])
+            ->groupBy('branch_id')
+            ->map(function ($complaints) use ($staleCutoff) {
+                $resolvedDurations = $complaints
+                    ->filter(fn($complaint) => $complaint->resolved_at !== null)
+                    ->map(fn($complaint) => $complaint->created_at->diffInDays($complaint->resolved_at));
+
+                return (object) [
+                    'branch' => $complaints->first()->branch,
+                    'total' => $complaints->count(),
+                    'resolved' => $complaints->where('status', 'resolved')->count(),
+                    'closed' => $complaints->where('status', 'closed')->count(),
+                    'open' => $complaints->whereIn('status', ['new', 'in_progress'])->count(),
+                    'stale' => $complaints
+                        ->whereIn('status', ['new', 'in_progress'])
+                        ->filter(fn($complaint) => $complaint->created_at->lte($staleCutoff))
+                        ->count(),
+                    'avg_resolution_days' => $resolvedDurations->isNotEmpty() ? $resolvedDurations->avg() : null,
+                ];
+            })
+            ->values();
 
         // ── By problem type ──────────────────────────────────────────────────
         $byProblem = (clone $base)
