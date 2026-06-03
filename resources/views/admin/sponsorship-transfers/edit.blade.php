@@ -84,6 +84,30 @@
             </div>
         </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+            <input type="hidden" name="needs_medical_exam" value="0">
+            <label class="border border-slate-200 rounded-xl p-4 flex items-start gap-3 cursor-pointer hover:bg-slate-50">
+                <input type="checkbox" name="needs_medical_exam" value="1"
+                       class="mt-1 h-4 w-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500"
+                       @checked(old('needs_medical_exam', $transfer->needs_medical_exam))>
+                <span>
+                    <span class="block text-sm font-semibold text-slate-800">العاملة تحتاج فحص طبي</span>
+                    <span class="block text-xs text-slate-400 mt-1">متابعة الفحص الطبي ضمن إجراءات نقل الكفالة.</span>
+                </span>
+            </label>
+
+            <input type="hidden" name="needs_iqama" value="0">
+            <label class="border border-slate-200 rounded-xl p-4 flex items-start gap-3 cursor-pointer hover:bg-slate-50">
+                <input type="checkbox" name="needs_iqama" value="1"
+                       class="mt-1 h-4 w-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500"
+                       @checked(old('needs_iqama', $transfer->needs_iqama))>
+                <span>
+                    <span class="block text-sm font-semibold text-slate-800">العاملة تحتاج إقامة</span>
+                    <span class="block text-xs text-slate-400 mt-1">إصدار أو متابعة الإقامة الخاصة بالعقد.</span>
+                </span>
+            </label>
+        </div>
+
         <div class="mt-5">
             <label class="block text-sm font-medium text-slate-700 mb-1.5">ملاحظات</label>
             <textarea name="notes" rows="3" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">{{ $transfer->notes }}</textarea>

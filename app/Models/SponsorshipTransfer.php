@@ -18,7 +18,8 @@ class SponsorshipTransfer extends Model
         'contract_number', 'musaned_contract_number', 'musaned_contract_image', 'worker_id', 'from_client_id', 'to_client_id',
         'branch_id', 'admin_id', 'original_contract_id', 'transfer_date',
         'total_fees', 'service_fee', 'loss_amount',
-        'payment_status', 'current_department', 'current_status',
+        'payment_status', 'needs_medical_exam', 'needs_iqama',
+        'current_department', 'current_status',
         'notes', 'active',
     ];
 
@@ -29,6 +30,8 @@ class SponsorshipTransfer extends Model
             'total_fees'    => 'decimal:2',
             'service_fee'   => 'decimal:2',
             'loss_amount'   => 'decimal:2',
+            'needs_medical_exam' => 'boolean',
+            'needs_iqama'        => 'boolean',
             'active'        => 'boolean',
         ];
     }

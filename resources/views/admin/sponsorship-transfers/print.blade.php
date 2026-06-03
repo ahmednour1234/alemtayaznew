@@ -210,6 +210,27 @@
             <div class="worker-status">نقل كفالة</div>
         </div>
 
+        {{-- Worker requirements --}}
+        <div class="section-title">متطلبات العاملة</div>
+        <div class="grid-2" style="margin-bottom:24px;">
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="info-label">تحتاج فحص طبي</span>
+                    <span class="info-value" style="color:{{ $transfer->needs_medical_exam ? '#d97706' : '#64748b' }};">
+                        {{ $transfer->needs_medical_exam ? 'نعم' : 'لا' }}
+                    </span>
+                </div>
+            </div>
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="info-label">تحتاج إقامة</span>
+                    <span class="info-value" style="color:{{ $transfer->needs_iqama ? '#2563eb' : '#64748b' }};">
+                        {{ $transfer->needs_iqama ? 'نعم' : 'لا' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
         {{-- Sponsors grid --}}
         <div class="section-title">بيانات الكفلاء</div>
         <div class="grid-2" style="margin-bottom:24px;">

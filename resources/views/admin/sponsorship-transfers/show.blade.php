@@ -45,6 +45,18 @@
             <span class="text-slate-700">{{ $transfer->transfer_date ?? '—' }}</span>
         </div>
         <div class="flex justify-between text-sm">
+            <span class="text-slate-500">تحتاج فحص طبي</span>
+            <span class="inline-block text-xs px-2 py-0.5 rounded-full font-medium {{ $transfer->needs_medical_exam ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500' }}">
+                {{ $transfer->needs_medical_exam ? 'نعم' : 'لا' }}
+            </span>
+        </div>
+        <div class="flex justify-between text-sm">
+            <span class="text-slate-500">تحتاج إقامة</span>
+            <span class="inline-block text-xs px-2 py-0.5 rounded-full font-medium {{ $transfer->needs_iqama ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500' }}">
+                {{ $transfer->needs_iqama ? 'نعم' : 'لا' }}
+            </span>
+        </div>
+        <div class="flex justify-between text-sm">
             <span class="text-slate-500">القسم الحالي</span>
             <span class="text-slate-700">{{ $transfer->department_label }}</span>
         </div>

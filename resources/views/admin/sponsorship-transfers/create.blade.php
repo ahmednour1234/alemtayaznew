@@ -22,8 +22,18 @@
     padding: 12px 16px; display: none;
 }
 .worker-info-box.visible { display: flex; align-items: center; gap: 12px; }
+.requirement-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.requirement-option {
+    border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 13px 14px;
+    display: flex; align-items: center; gap: 10px; cursor: pointer; background: #fff;
+    transition: border-color .15s, background .15s;
+}
+.requirement-option:hover { border-color: #c9a84c; background: #fffdf5; }
+.requirement-option input { width: 18px; height: 18px; accent-color: #c9a84c; flex-shrink: 0; }
+.requirement-option-title { font-size: 13px; font-weight: 700; color: #0f172a; }
+.requirement-option-hint { font-size: 11px; color: #94a3b8; margin-top: 2px; }
 .fee-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-@media(max-width:640px){ .fee-row { grid-template-columns: 1fr; } }
+@media(max-width:640px){ .fee-row, .requirement-grid { grid-template-columns: 1fr; } }
 </style>
 @endpush
 
@@ -166,6 +176,26 @@
                         <div style="font-size:11px;color:#94a3b8;font-weight:600;margin-bottom:2px;">الكفيل الحالي (تم الجلب تلقائياً من عقد الاستقدام)</div>
                         <div style="font-size:13px;font-weight:700;color:#92400e;" id="current_sponsor_name">—</div>
                     </div>
+                </div>
+
+                <div class="requirement-grid">
+                    <input type="hidden" name="needs_medical_exam" value="0">
+                    <label class="requirement-option">
+                        <input type="checkbox" name="needs_medical_exam" value="1" @checked(old('needs_medical_exam'))>
+                        <span>
+                            <span class="requirement-option-title">العاملة تحتاج فحص طبي</span>
+                            <span class="requirement-option-hint">حددها لو مطلوب متابعة الفحص الطبي ضمن نقل الكفالة.</span>
+                        </span>
+                    </label>
+
+                    <input type="hidden" name="needs_iqama" value="0">
+                    <label class="requirement-option">
+                        <input type="checkbox" name="needs_iqama" value="1" @checked(old('needs_iqama'))>
+                        <span>
+                            <span class="requirement-option-title">العاملة تحتاج إقامة</span>
+                            <span class="requirement-option-hint">حددها لو مطلوب إصدار أو متابعة الإقامة للعقد.</span>
+                        </span>
+                    </label>
                 </div>
             </div>
 

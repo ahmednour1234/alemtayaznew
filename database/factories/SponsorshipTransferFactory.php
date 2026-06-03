@@ -27,6 +27,8 @@ class SponsorshipTransferFactory extends Factory
             'service_fee'             => fake()->randomFloat(2, 0, 5000),
             'loss_amount'             => fake()->randomFloat(2, 0, 3000),
             'payment_status'          => fake()->randomElement(['pending', 'partial', 'full']),
+            'needs_medical_exam'      => fake()->boolean(35),
+            'needs_iqama'             => fake()->boolean(35),
             'current_department'      => fake()->randomElement(['customer_service', 'accounts']),
             'current_status'          => fake()->numberBetween(1, 4),
             'notes'                   => fake()->optional()->sentence(),

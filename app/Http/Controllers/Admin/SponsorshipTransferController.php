@@ -97,8 +97,13 @@ class SponsorshipTransferController extends Controller
             'service_fee'              => 'required|numeric|min:0',
             'loss_amount'              => 'required|numeric|min:0',
             'payment_status'           => 'required|in:pending,partial,full',
+            'needs_medical_exam'       => 'nullable|boolean',
+            'needs_iqama'              => 'nullable|boolean',
             'notes'                    => 'nullable|string|max:1000',
         ]);
+
+        $data['needs_medical_exam'] = $request->boolean('needs_medical_exam');
+        $data['needs_iqama']        = $request->boolean('needs_iqama');
 
         if ($request->hasFile('musaned_contract_image')) {
             $data['musaned_contract_image'] = $request->file('musaned_contract_image')
@@ -161,8 +166,13 @@ class SponsorshipTransferController extends Controller
             'service_fee'             => 'required|numeric|min:0',
             'loss_amount'             => 'required|numeric|min:0',
             'payment_status'          => 'required|in:pending,partial,full',
+            'needs_medical_exam'      => 'nullable|boolean',
+            'needs_iqama'             => 'nullable|boolean',
             'notes'                   => 'nullable|string|max:1000',
         ]);
+
+        $data['needs_medical_exam'] = $request->boolean('needs_medical_exam');
+        $data['needs_iqama']        = $request->boolean('needs_iqama');
 
         if ($request->hasFile('musaned_contract_image')) {
             // Delete old image if exists
