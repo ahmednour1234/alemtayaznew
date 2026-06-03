@@ -18,13 +18,21 @@
         @auth('admin')
         @if(! Auth::guard('admin')->user()->isBranchAdmin())
         <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">الفرع</label>
-            <select name="branch_id" class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 min-w-44">
-                <option value="">— كل الفروع —</option>
-                @foreach($branches as $br)
-                <option value="{{ $br->id }}" {{ $branchId == $br->id ? 'selected' : '' }}>{{ $br->name }}</option>
-                @endforeach
-            </select>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">الفرع</label>
+            <div class="relative">
+                <select name="branch_id"
+                    class="appearance-none w-full min-w-52 bg-white border border-slate-200 rounded-xl ps-4 pe-10 py-2.5 text-sm text-slate-700 shadow-sm cursor-pointer transition hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-400/60 focus:border-blue-400">
+                    <option value="">— كل الفروع —</option>
+                    @foreach($branches as $br)
+                    <option value="{{ $br->id }}" {{ $branchId == $br->id ? 'selected' : '' }}>{{ $br->name }}</option>
+                    @endforeach
+                </select>
+                <span class="pointer-events-none absolute inset-y-0 start-3 flex items-center text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </span>
+            </div>
         </div>
         @endif
         @endauth
