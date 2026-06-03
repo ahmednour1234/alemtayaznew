@@ -62,6 +62,7 @@
         <thead class="bg-slate-50 text-slate-500 text-xs">
             <tr>
                 <th class="px-4 py-3 text-right font-medium">العاملة</th>
+                <th class="px-4 py-3 text-right font-medium">الكفيل</th>
                 <th class="px-4 py-3 text-right font-medium">السكن</th>
                 <th class="px-4 py-3 text-right font-medium">الفرع</th>
                 <th class="px-4 py-3 text-right font-medium">سبب السكن</th>
@@ -119,6 +120,18 @@
                                     <div class="font-semibold text-slate-800">{{ $a->housing?->name ?? '—' }}</div>
                                     <div class="text-xs text-slate-500 mt-0.5">{{ $a->branch?->name ?? '—' }}</div>
                                 </div>
+                                @php $sponsor = $a->worker?->client ?? $a->worker?->latestContract?->client; @endphp
+                                <div class="bg-slate-50 rounded-xl p-3 col-span-2">
+                                    <div class="text-xs text-slate-400 mb-1">الكفيل</div>
+                                    @if($sponsor)
+                                        <div class="font-semibold text-slate-800">{{ $sponsor->name }}</div>
+                                        @if($sponsor->phone)
+                                        <a href="tel:{{ $sponsor->phone }}" class="text-xs text-blue-600" dir="ltr">{{ $sponsor->phone }}</a>
+                                        @endif
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </div>
                                 <div class="bg-slate-50 rounded-xl p-3">
                                     <div class="text-xs text-slate-400 mb-1">سبب السكن</div>
                                     @if($rl)
@@ -166,6 +179,17 @@
                     <div class="font-medium text-slate-800">{{ $a->worker?->name ?? '—' }}</div>
                     @if($a->worker?->nationality)
                     <span style="background:#e0f2fe;color:#0369a1;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block;margin-top:2px;">{{ $a->worker->nationality->name }}</span>
+                    @endif
+                </td>
+                @php $sponsor = $a->worker?->client ?? $a->worker?->latestContract?->client; @endphp
+                <td class="px-4 py-3">
+                    @if($sponsor)
+                        <div class="font-medium text-slate-800">{{ $sponsor->name }}</div>
+                        @if($sponsor->phone)
+                        <a href="tel:{{ $sponsor->phone }}" class="text-xs text-slate-500 hover:text-blue-600" dir="ltr">{{ $sponsor->phone }}</a>
+                        @endif
+                    @else
+                        <span class="text-slate-300 text-xs">—</span>
                     @endif
                 </td>
                 <td class="px-4 py-3 text-slate-700">{{ $a->housing?->name ?? '—' }}</td>
@@ -236,7 +260,7 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="8" class="px-4 py-10 text-center text-slate-400">لا توجد سجلات</td></tr>
+            <tr><td colspan="9" class="px-4 py-10 text-center text-slate-400">لا توجد سجلات</td></tr>
             @endforelse
         </tbody>
     </table>
