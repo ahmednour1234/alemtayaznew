@@ -127,7 +127,7 @@
             </div>
         </div>
         <span style="color:#64748b;font-size:12px;font-family:'Cairo',sans-serif;">
-            عقود الاستقدام المرتبطة بهذا الفرع
+            عقود الاستقدام المتاحة من كل الفروع، ويظهر فرع كل عقد في الجدول
         </span>
     </div>
 
@@ -263,6 +263,7 @@
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">#</th>
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">الاسم</th>
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">العميل</th>
+                <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">فرع العقد</th>
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">الجنسية</th>
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">رقم الجواز</th>
                 <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:.04em;">ملاحظات</th>
@@ -276,11 +277,20 @@
                 <td style="padding:12px 16px;font-weight:700;color:#0f172a;">{{ $worker->name }}</td>
                 <td style="padding:12px 16px;color:#475569;font-size:12px;">
                     @php
-                        $wContract = $trip->workers()->where('worker_id', $worker->id)->first()?->pivot?->contract_id
-                            ? \App\Models\RecruitmentContract::with('client')->find($worker->pivot->contract_id)
+                        $wContract = $worker->pivot->contract_id
+                            ? ($tripWorkerContracts[$worker->pivot->contract_id] ?? null)
                             : null;
                     @endphp
                     {{ $wContract?->client?->name ?? '—' }}
+                </td>
+                <td style="padding:12px 16px;">
+                    @if($wContract?->branch)
+                    <span style="background:#f0fdf4;color:#16a34a;font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;">
+                        {{ $wContract->branch->name }}
+                    </span>
+                    @else
+                    <span style="color:#cbd5e1;">—</span>
+                    @endif
                 </td>
                 <td style="padding:12px 16px;">
                     @if($worker->nationality)
@@ -306,7 +316,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="7" style="padding:48px 16px;text-align:center;color:#94a3b8;font-size:13px;">
+                <td colspan="8" style="padding:48px 16px;text-align:center;color:#94a3b8;font-size:13px;">
                     <div style="margin-bottom:8px;font-size:32px;">👥</div>
                     لم تتم إضافة عاملات بعد
                 </td>

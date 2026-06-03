@@ -97,9 +97,9 @@ class TripController extends Controller
         // Workers already in this trip
         $assignedWorkerIds = $trip->workers->pluck('id');
 
-        // Contracts for this branch, worker not yet in trip
-        $contractsQuery = RecruitmentContract::with(['client', 'worker.nationality', 'originNationality'])
-            ->where('branch_id', $trip->branch_id)
+        // Contracts are not limited to the trip branch; workers can arrive together
+        // while each contract keeps and displays its own branch.
+        $contractsQuery = RecruitmentContract::with(['branch', 'client', 'worker.nationality', 'originNationality'])
             ->whereNotNull('worker_id')
             ->whereNotIn('worker_id', $assignedWorkerIds);
 
@@ -119,9 +119,14 @@ class TripController extends Controller
 
         $contracts = $contractsQuery->orderBy('id')->get();
 
+        $tripWorkerContracts = RecruitmentContract::with(['branch', 'client'])
+            ->whereIn('id', $trip->workers->pluck('pivot.contract_id')->filter()->unique())
+            ->get()
+            ->keyBy('id');
+
         $nationalities = Nationality::where('active', true)->orderBy('name')->get();
 
-        return view('admin.trips.show', compact('trip', 'contracts', 'nationalities'));
+        return view('admin.trips.show', compact('trip', 'contracts', 'tripWorkerContracts', 'nationalities'));
     }
 
     public function edit(int $id)
