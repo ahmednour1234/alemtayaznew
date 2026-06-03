@@ -19,7 +19,7 @@
 
 <!-- Filters -->
 <div class="bg-white rounded-xl p-4 shadow-sm mb-4 border border-slate-100">
-    <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-3">
+    <form method="GET" class="grid grid-cols-1 md:grid-cols-6 gap-3">
         <div>
             <label class="block text-xs font-medium text-slate-500 mb-1.5">بحث عاملة</label>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="اسم العاملة"
@@ -32,6 +32,15 @@
                 @foreach($housings as $h)
                 <option value="{{ $h->id }}" {{ request('housing_id') == $h->id ? 'selected' : '' }}>{{ $h->name }}</option>
                 @endforeach
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1.5">حالة العمالة</label>
+            <select name="worker_status" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                <option value="">الكل</option>
+                <option value="normal"  {{ request('worker_status') === 'normal'  ? 'selected' : '' }}>نظامية</option>
+                <option value="escaped" {{ request('worker_status') === 'escaped' ? 'selected' : '' }}>هاربة</option>
+                <option value="sick"    {{ request('worker_status') === 'sick'    ? 'selected' : '' }}>مريضة</option>
             </select>
         </div>
         <div>
@@ -65,6 +74,7 @@
                 <th class="px-4 py-3 text-right font-medium">الكفيل</th>
                 <th class="px-4 py-3 text-right font-medium">السكن</th>
                 <th class="px-4 py-3 text-right font-medium">الفرع</th>
+                <th class="px-4 py-3 text-right font-medium">حالة العمالة</th>
                 <th class="px-4 py-3 text-right font-medium">سبب السكن</th>
                 <th class="px-4 py-3 text-right font-medium">تاريخ الدخول</th>
                 <th class="px-4 py-3 text-right font-medium">تاريخ المغادرة</th>
@@ -196,6 +206,16 @@
                 </td>
                 <td class="px-4 py-3 text-slate-700">{{ $a->housing?->name ?? '—' }}</td>
                 <td class="px-4 py-3 text-slate-500">{{ $a->branch?->name ?? '—' }}</td>
+                {{-- حالة العمالة + فترة الضمان --}}
+                <td class="px-4 py-3">
+                    @php
+                        $ws = \App\Models\HousingAssignment::workerStatuses()[$a->worker_status ?? 'normal'] ?? ['label'=>'نظامية','bg'=>'#dcfce7','color'=>'#16a34a'];
+                    @endphp
+                    <span style="background:{{ $ws['bg'] }};color:{{ $ws['color'] }};font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block;">{{ $ws['label'] }}</span>
+                    @if($a->isActive() && $a->isInGuaranteePeriod())
+                    <span style="background:#ede9fe;color:#7c3aed;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;display:inline-block;margin-top:3px;" title="وصلت منذ أقل من 3 أشهر">⏱ ضمان</span>
+                    @endif
+                </td>
                 <td class="px-4 py-3">
                     @php
                         $reasonLabels = [

@@ -17,6 +17,7 @@ class HousingAssignment extends Model
     protected $fillable = [
         'worker_id', 'housing_id', 'branch_id', 'admin_id',
         'check_in_date', 'check_out_date', 'expected_check_out_date', 'notes', 'reason',
+        'worker_status',
     ];
 
     protected function casts(): array
@@ -26,6 +27,36 @@ class HousingAssignment extends Model
             'check_out_date'          => 'date',
             'expected_check_out_date' => 'date',
         ];
+    }
+
+    /** حالات العمالة المتاحة */
+    public static function workerStatuses(): array
+    {
+        return [
+            'normal'  => ['label' => 'نظامية', 'bg' => '#dcfce7', 'color' => '#16a34a'],
+            'escaped' => ['label' => 'هاربة',  'bg' => '#fee2e2', 'color' => '#b91c1c'],
+            'sick'    => ['label' => 'مريضة',  'bg' => '#fef3c7', 'color' => '#b45309'],
+        ];
+    }
+
+    public function getWorkerStatusLabelAttribute(): string
+    {
+        return self::workerStatuses()[$this->worker_status]['label'] ?? $this->worker_status;
+    }
+
+    /** هل العاملة في فترة الضمان؟ (عقد استقدام وصل منذ أقل من 3 أشهر) */
+    public function isInGuaranteePeriod(): bool
+    {
+        $contract = $this->worker?->recruitmentContracts()
+            ->whereNotNull('arrival_date')
+            ->latest('arrival_date')
+            ->first();
+
+        if (! $contract || ! $contract->arrival_date) {
+            return false;
+        }
+
+        return $contract->arrival_date->diffInDays(now()) <= 90;
     }
 
     /** أسباب التسكين المتاحة */

@@ -26,5 +26,11 @@ Schedule::command('complaints:notify-stale')->dailyAt('09:30');
 // Notify about housing assignments past their expected checkout date
 Schedule::command('housing:check-overdue')->dailyAt('08:30');
 
+// Notify about workers in guarantee period (وصلن خلال 90 يوم) in housing – runs weekly on Sunday
+Schedule::command('housing:check-guarantee')->weeklyOn(0, '09:00');
+
+// Notify about rental expiry (7 days before and already expired) – runs daily
+Schedule::command('housing:check-rental-expiry')->dailyAt('08:45');
+
 // Remind assigners of workers with no contract; auto-cancel after 4 days
 Schedule::command('workers:notify-uncontracted')->dailyAt('09:00');

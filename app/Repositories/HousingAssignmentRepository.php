@@ -10,9 +10,10 @@ class HousingAssignmentRepository implements HousingAssignmentRepositoryInterfac
     public function getAll(array $filters = [])
     {
         return HousingAssignment::with(['worker.nationality', 'worker.client', 'worker.latestContract.client', 'housing', 'branch', 'admin'])
-            ->when(!empty($filters['branch_id']),  fn($q) => $q->where('branch_id', $filters['branch_id']))
-            ->when(!empty($filters['housing_id']), fn($q) => $q->where('housing_id', $filters['housing_id']))
-            ->when(!empty($filters['reason']),     fn($q) => $q->where('reason', $filters['reason']))
+            ->when(!empty($filters['branch_id']),     fn($q) => $q->where('branch_id', $filters['branch_id']))
+            ->when(!empty($filters['housing_id']),    fn($q) => $q->where('housing_id', $filters['housing_id']))
+            ->when(!empty($filters['reason']),        fn($q) => $q->where('reason', $filters['reason']))
+            ->when(!empty($filters['worker_status']), fn($q) => $q->where('worker_status', $filters['worker_status']))
             ->when(isset($filters['active']) && $filters['active'] !== '', function ($q) use ($filters) {
                 $filters['active'] ? $q->whereNull('check_out_date') : $q->whereNotNull('check_out_date');
             })

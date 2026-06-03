@@ -22,7 +22,7 @@ class HousingAssignmentController extends Controller
 
     public function index(Request $request)
     {
-        $filters = $request->only('search', 'housing_id', 'active', 'reason');
+        $filters = $request->only('search', 'housing_id', 'active', 'reason', 'worker_status');
         if ($bid = $this->branchFilter()) {
             $filters['branch_id'] = $bid;
         } elseif ($request->filled('branch_id')) {
@@ -70,6 +70,7 @@ class HousingAssignmentController extends Controller
             'check_in_date'           => 'required|date',
             'expected_check_out_date' => 'nullable|date|after_or_equal:check_in_date',
             'reason'                  => 'nullable|in:sponsorship_transfer,deportation,handover,rental,settlement',
+            'worker_status'           => 'nullable|in:normal,escaped,sick',
             'notes'                   => 'nullable|string|max:500',
         ]);
 

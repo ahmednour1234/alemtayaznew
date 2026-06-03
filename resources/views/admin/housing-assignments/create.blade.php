@@ -272,6 +272,27 @@
                     </div>
                 </div>
 
+            {{-- حالة العمالة --}}
+            <div>
+                <div class="section-header">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="flex-shrink:0">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    حالة العمالة
+                </div>
+                <input type="hidden" name="worker_status" id="worker_status_val" value="{{ old('worker_status', 'normal') }}">
+                <div class="flex gap-3 flex-wrap">
+                    @foreach(\App\Models\HousingAssignment::workerStatuses() as $val => $meta)
+                    <div onclick="selectWorkerStatus('{{ $val }}')"
+                         id="ws_card_{{ $val }}"
+                         style="cursor:pointer;border:2px solid {{ old('worker_status','normal') === $val ? $meta['color'] : '#e2e8f0' }};border-radius:12px;padding:12px 22px;background:{{ old('worker_status','normal') === $val ? $meta['bg'] : '#fff' }};transition:all .18s;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:{{ old('worker_status','normal') === $val ? $meta['color'] : '#64748b' }};">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+                        {{ $meta['label'] }}
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
             {{-- ملاحظات --}}
             <div>
                 <div class="section-header">
@@ -323,6 +344,21 @@ function selectReason(val) {
     });
 }
 (function(){ var v = document.getElementById('reason_val').value; if (v) selectReason(v); })();
+
+// حالة العمالة
+var wsColors = { normal: '#16a34a', escaped: '#b91c1c', sick: '#b45309' };
+var wsBg     = { normal: '#dcfce7', escaped: '#fee2e2', sick: '#fef3c7' };
+function selectWorkerStatus(val) {
+    document.getElementById('worker_status_val').value = val;
+    ['normal','escaped','sick'].forEach(function(s) {
+        var el = document.getElementById('ws_card_' + s);
+        if (!el) return;
+        var active = s === val;
+        el.style.borderColor  = active ? wsColors[s] : '#e2e8f0';
+        el.style.background   = active ? wsBg[s]     : '#fff';
+        el.style.color        = active ? wsColors[s]  : '#64748b';
+    });
+}
 </script>
 @endpush
 
