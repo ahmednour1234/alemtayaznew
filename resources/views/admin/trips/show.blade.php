@@ -135,10 +135,10 @@
     {{-- Search bar (outside bulk form) --}}
     <div style="padding:12px 16px;background:#fff;border-bottom:1px solid #f1f5f9;">
         <form method="GET" action="{{ route('admin.trips.show', $trip->id) }}" style="display:flex;gap:8px;align-items:center;">
-                <input type="text" name="contract_search" value="{{ request('contract_search') }}"
-                       placeholder="ابحث برقم الجواز أو رقم هوية العميل أو رقم التأشيرة أو اسم العاملة..."
-                       style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;font-family:'Cairo',sans-serif;outline:none;"
-                       onfocus="this.style.borderColor='#c9a84c'" onblur="this.style.borderColor='#e2e8f0'">
+                <textarea name="contract_search" rows="2"
+                       placeholder="ابحث برقم جواز أو هوية أو تأشيرة... يمكن لصق أكثر من رقم معاً (مفصولة بمسافة أو سطر جديد)"
+                       style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;font-family:'Cairo',sans-serif;outline:none;resize:vertical;min-height:42px;"
+                       onfocus="this.style.borderColor='#c9a84c'" onblur="this.style.borderColor='#e2e8f0'">{{ request('contract_search') }}</textarea>
                 <button type="submit"
                         style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;color:#fff;background:#64748b;border:none;font-family:'Cairo',sans-serif;cursor:pointer;display:flex;align-items:center;gap:5px;">
                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>

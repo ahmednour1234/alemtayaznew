@@ -104,16 +104,22 @@ class TripController extends Controller
             ->whereNotIn('worker_id', $assignedWorkerIds)
             ->where('current_status', '!=', 13); // exclude تم الاستلام
 
-        // Search filter: passport number, client national ID, visa number, name, contract number
+        // Search filter: supports multiple terms separated by spaces/newlines
         if ($search = request('contract_search')) {
-            $contractsQuery->where(function ($q) use ($search) {
-                $q->where('contract_number', 'like', "%{$search}%")
-                  ->orWhere('visa_number', 'like', "%{$search}%")
-                  ->orWhereHas('client', fn($q2) => $q2->where('name', 'like', "%{$search}%")
-                      ->orWhere('national_id', 'like', "%{$search}%"))
-                  ->orWhereHas('worker', fn($q2) => $q2->where('name', 'like', "%{$search}%")
-                      ->orWhere('passport_number', 'like', "%{$search}%"));
-            });
+            // Split by whitespace and filter empty
+            $terms = array_values(array_filter(preg_split('/[\s,]+/', trim($search))));
+            if (! empty($terms)) {
+                $contractsQuery->where(function ($q) use ($terms) {
+                    foreach ($terms as $term) {
+                        $q->orWhere('contract_number', 'like', "%{$term}%")
+                          ->orWhere('visa_number', 'like', "%{$term}%")
+                          ->orWhereHas('client', fn($q2) => $q2->where('name', 'like', "%{$term}%")
+                              ->orWhere('national_id', 'like', "%{$term}%"))
+                          ->orWhereHas('worker', fn($q2) => $q2->where('name', 'like', "%{$term}%")
+                              ->orWhere('passport_number', 'like', "%{$term}%"));
+                    }
+                });
+            }
         }
 
         // Filter by origin nationality if set on the trip
