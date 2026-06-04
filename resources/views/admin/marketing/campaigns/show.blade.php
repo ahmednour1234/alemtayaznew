@@ -74,11 +74,10 @@
             @endif
         </h3>
         <div class="flex items-center gap-3">
-            @if($unassignedCount > 0)
             <form method="POST" action="{{ route('admin.marketing.campaigns.reassign-unassigned', $campaign) }}">
                 @csrf
                 <button type="submit"
-                        onclick="return confirm('توزيع {{ $unassignedCount }} عميل محتمل غير موزّع على موظفي خدمة العملاء؟')"
+                        onclick="return confirm('إعادة توزيع جميع العملاء المحتملين على موظفي خدمة العملاء؟')"
                         class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-sm transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 3M21 7.5H7.5" />
@@ -86,7 +85,6 @@
                     إعادة توزيع
                 </button>
             </form>
-            @endif
             <a href="{{ route('admin.marketing.leads.index', ['campaign_id' => $campaign->id]) }}"
                class="text-xs text-blue-600 hover:underline">عرض الكل</a>
         </div>

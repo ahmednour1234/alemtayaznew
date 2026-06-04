@@ -279,13 +279,12 @@ class CampaignController extends Controller
      */
     public function reassignUnassigned(Campaign $campaign)
     {
-        $unassigned = Lead::where('campaign_id', $campaign->id)
+        $leads = Lead::where('campaign_id', $campaign->id)
             ->whereIn('status', ['new', 'in_progress'])
-            ->whereNull('assigned_admin_id')
             ->get();
 
-        if ($unassigned->isEmpty()) {
-            return back()->with('success', 'جميع العملاء موزّعون بالفعل');
+        if ($leads->isEmpty()) {
+            return back()->with('success', 'لا يوجد عملاء نشطون لإعادة التوزيع');
         }
 
         // All active CS staff across all branches — distribute without city/branch filtering
@@ -300,7 +299,7 @@ class CampaignController extends Controller
         $loadCache = [];   // admin_id → active lead count
         $count = 0;
 
-        foreach ($unassigned as $lead) {
+        foreach ($leads as $lead) {
             // Assign to least-busy CS staff across all branches
             $assignee = $allCsStaff->sortBy(function ($admin) use (&$loadCache) {
                 if (! isset($loadCache[$admin->id])) {
