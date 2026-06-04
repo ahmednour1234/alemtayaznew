@@ -57,10 +57,11 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
             $rawDate          = $row[0] ?? null;
             $branchValue      = trim((string) ($row[1] ?? ''));
             $typeName         = trim((string) ($row[2] ?? ''));
-            $rawAmount        = $row[4] ?? null;
-            $reference        = trim((string) ($row[6] ?? ''));
-            $recipient        = trim((string) ($row[7] ?? '')) ?: null;
-            $paymentMethodRaw = trim((string) ($row[8] ?? ''));
+            $rawAmount        = $row[3] ?? null;  // D = النوع الثاني = المبلغ الفعلي
+            $referenceNumber  = trim((string) ($row[5] ?? ''));  // F = رقم المرجع
+            $description      = trim((string) ($row[6] ?? ''));  // G = نص المرجع/الوصف
+            $recipient        = trim((string) ($row[7] ?? '')) ?: null;  // H = المستلم/ملاحظات
+            $paymentMethodRaw = trim((string) ($row[8] ?? ''));  // I = طريقة الدفع
 
             // Skip completely empty rows
             if ($branchValue === '' && $typeName === '' && $rawAmount === null) {
@@ -159,8 +160,8 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
                     'amount'           => (float) $amount,
                     'date'             => $date,
                     'payment_method'   => $paymentMethod,
-                    'reference_number' => $reference ?: null,
-                    'description'      => $reference ?: null,
+                    'reference_number' => $referenceNumber ?: null,
+                    'description'      => $description ?: null,
                     'recipient'        => $recipient,
                 ]);
 
@@ -188,8 +189,8 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
                     'date'             => $date,
                     'payment_method'   => $paymentMethod,
                     'status'           => 'approved',
-                    'reference_number' => $reference ?: null,
-                    'description'      => $reference ?: null,
+                    'reference_number' => $referenceNumber ?: null,
+                    'description'      => $description ?: null,
                     'recipient'        => $recipient,
                 ]);
 
