@@ -157,16 +157,70 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
         $branchName = trim((string) ($row['branch_name'] ?? ''));
         $branchCode = trim((string) ($row['branch_code'] ?? ''));
 
-        if ($branchName !== '') {
-            return Branch::where('name', $branchName)->first()
-                ?? Branch::where('name', 'like', '%' . $branchName . '%')->first();
+        // 1. Exact code from branch_code column
+        if ($branchCode !== '') {
+            $branch = Branch::where('code', $branchCode)->first();
+            if ($branch) return $branch;
         }
 
-        if ($branchCode !== '') {
-            return Branch::where('code', $branchCode)->first();
+        // 2. branch_name might actually be a code (e.g. HFR-001, RYD-001)
+        if ($branchName !== '') {
+            $branch = Branch::where('code', $branchName)->first();
+            if ($branch) return $branch;
+        }
+
+        // 3. Exact name
+        if ($branchName !== '') {
+            $branch = Branch::where('name', $branchName)->first();
+            if ($branch) return $branch;
+        }
+
+        // 4. Fuzzy: normalize (strip ال) + sorted chars + 70% similarity + code fuzzy 85%
+        if ($branchName !== '') {
+            $normInput   = $this->normalizeBranchName($branchName);
+            $sortedInput = $this->sortedChars($normInput);
+
+            $branch = Branch::all()->first(function ($b) use ($normInput, $sortedInput) {
+                similar_text($normInput, $b->code ?? '', $pctCode);
+                if ($pctCode >= 85) return true;
+                $normDb = $this->normalizeBranchName($b->name);
+                if ($normDb === $normInput) return true;
+                if ($this->sortedChars($normDb) === $sortedInput) return true;
+                similar_text($normInput, $normDb, $pct);
+                return $pct >= 70;
+            });
+            if ($branch) return $branch;
+        }
+
+        // 5. Not found — create new branch automatically
+        if ($branchName !== '' || $branchCode !== '') {
+            $name = $branchName ?: $branchCode;
+            $code = $branchCode ?: $this->generateBranchCode();
+            return Branch::create(['name' => $name, 'code' => $code, 'active' => true]);
         }
 
         return null;
+    }
+
+    private function normalizeBranchName(string $name): string
+    {
+        $words = array_filter(preg_split('/\s+/u', trim($name)));
+        $words = array_map(fn($w) => preg_replace('/^ال/u', '', $w), $words);
+        return implode(' ', $words);
+    }
+
+    private function sortedChars(string $str): string
+    {
+        $str   = str_replace(' ', '', $str);
+        $chars = preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
+        sort($chars);
+        return implode('', $chars);
+    }
+
+    private function generateBranchCode(): string
+    {
+        $max = Branch::withTrashed()->max('id') ?? 0;
+        return 'BR' . str_pad($max + 1, 4, '0', STR_PAD_LEFT);
     }
 
     private function amount(mixed $value): ?float
