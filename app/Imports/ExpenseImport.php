@@ -62,18 +62,27 @@ class ExpenseImport implements ToModel, WithHeadingRow, WithValidation
             if ($branch) return $branch;
         }
 
-        // 2. By exact name
+        // 2. branch_name value might actually be a code (e.g. HFR-001)
+        if ($branchName !== '') {
+            $branch = Branch::where('code', $branchName)->first();
+            if ($branch) return $branch;
+        }
+
+        // 3. By exact name
         if ($branchName !== '') {
             $branch = Branch::where('name', $branchName)->first();
             if ($branch) return $branch;
         }
 
-        // 3. Fuzzy match: normalized + sorted chars + 70% similarity
+        // 4. Fuzzy match: normalized + sorted chars + 70% similarity
         if ($branchName !== '') {
             $normInput   = $this->normalizeBranchName($branchName);
             $sortedInput = $this->sortedChars($normInput);
 
             $branch = Branch::all()->first(function ($b) use ($normInput, $sortedInput) {
+                // also try code fuzzy match
+                similar_text($normInput, $b->code ?? '', $pctCode);
+                if ($pctCode >= 85) return true;
                 $normDb   = $this->normalizeBranchName($b->name);
                 // a) normalized exact match (حفر باطن = حفر الباطن)
                 if ($normDb === $normInput) return true;
