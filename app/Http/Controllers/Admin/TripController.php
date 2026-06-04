@@ -101,14 +101,18 @@ class TripController extends Controller
         // while each contract keeps and displays its own branch.
         $contractsQuery = RecruitmentContract::with(['branch', 'client', 'worker.nationality', 'originNationality'])
             ->whereNotNull('worker_id')
-            ->whereNotIn('worker_id', $assignedWorkerIds);
+            ->whereNotIn('worker_id', $assignedWorkerIds)
+            ->where('current_status', '!=', 13); // exclude تم الاستلام
 
-        // Search filter
+        // Search filter: passport number, client national ID, visa number, name, contract number
         if ($search = request('contract_search')) {
             $contractsQuery->where(function ($q) use ($search) {
                 $q->where('contract_number', 'like', "%{$search}%")
-                  ->orWhereHas('client', fn($q2) => $q2->where('name', 'like', "%{$search}%"))
-                  ->orWhereHas('worker', fn($q2) => $q2->where('name', 'like', "%{$search}%"));
+                  ->orWhere('visa_number', 'like', "%{$search}%")
+                  ->orWhereHas('client', fn($q2) => $q2->where('name', 'like', "%{$search}%")
+                      ->orWhere('national_id', 'like', "%{$search}%"))
+                  ->orWhereHas('worker', fn($q2) => $q2->where('name', 'like', "%{$search}%")
+                      ->orWhere('passport_number', 'like', "%{$search}%"));
             });
         }
 
@@ -170,8 +174,26 @@ class TripController extends Controller
         ]);
 
         $trip = $this->service->find($tripId);
-        $this->service->addWorker($trip, $request->worker_id, $request->contract_id, $request->notes);
-        return back()->with('success', 'تم إضافة العاملة إلى الرحلة.');
+
+        $previousStatus = null;
+        if ($request->contract_id) {
+            $contract = RecruitmentContract::find($request->contract_id);
+            if ($contract) {
+                $previousStatus = $contract->current_status;
+                $contract->update(['current_status' => 12]);
+
+                $this->notifications->notify(
+                    'contract_status_updated',
+                    'تم تحديث حالة العقد إلى: معاد الوصول',
+                    'العقد: ' . $contract->contract_number,
+                    route('admin.contracts.show', $contract->id),
+                    $contract->branch_id ? [$contract->branch_id] : []
+                );
+            }
+        }
+
+        $this->service->addWorker($trip, $request->worker_id, $request->contract_id, $request->notes, $previousStatus);
+        return back()->with('success', 'تم إضافة العاملة إلى الرحلة وتحديث حالة العقد.');
     }
 
     public function addWorkersBulk(Request $request, int $tripId)
@@ -191,19 +213,52 @@ class TripController extends Controller
                 if ($trip->workers()->where('worker_id', $contract->worker_id)->exists()) {
                     continue;
                 }
-                $this->service->addWorker($trip, $contract->worker_id, $contract->id, null);
+
+                $previousStatus = $contract->current_status;
+
+                // Update contract status to 12 (معاد الوصول)
+                $contract->update(['current_status' => 12]);
+
+                $this->notifications->notify(
+                    'contract_status_updated',
+                    'تم تحديث حالة العقد إلى: معاد الوصول',
+                    'العقد: ' . $contract->contract_number,
+                    route('admin.contracts.show', $contract->id),
+                    $contract->branch_id ? [$contract->branch_id] : []
+                );
+
+                $this->service->addWorker($trip, $contract->worker_id, $contract->id, null, $previousStatus);
                 $added++;
             }
         }
 
-        return back()->with('success', "تم إضافة {$added} عاملة إلى الرحلة.");
+        return back()->with('success', "تم إضافة {$added} عاملة إلى الرحلة وتحديث حالات عقودهن.");
     }
 
     public function removeWorker(int $tripId, int $workerId)
     {
         $trip = $this->service->find($tripId);
+
+        // Revert contract status to previous before removal
+        $pivot = $trip->workers()->where('worker_id', $workerId)->first()?->pivot;
+        if ($pivot && $pivot->contract_id) {
+            $contract = RecruitmentContract::find($pivot->contract_id);
+            if ($contract) {
+                $revertTo = $pivot->previous_contract_status ?? 11;
+                $contract->update(['current_status' => $revertTo]);
+
+                $this->notifications->notify(
+                    'contract_status_updated',
+                    'تم إرجاع حالة العقد بعد إزالة العاملة من الرحلة',
+                    'العقد: ' . $contract->contract_number,
+                    route('admin.contracts.show', $contract->id),
+                    $contract->branch_id ? [$contract->branch_id] : []
+                );
+            }
+        }
+
         $this->service->removeWorker($trip, $workerId);
-        return back()->with('success', 'تم إزالة العاملة من الرحلة.');
+        return back()->with('success', 'تم إزالة العاملة من الرحلة وإرجاع حالة العقد.');
     }
 
     public function complete(int $id)

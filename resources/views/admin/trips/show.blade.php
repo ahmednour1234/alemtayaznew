@@ -136,7 +136,7 @@
     <div style="padding:12px 16px;background:#fff;border-bottom:1px solid #f1f5f9;">
         <form method="GET" action="{{ route('admin.trips.show', $trip->id) }}" style="display:flex;gap:8px;align-items:center;">
                 <input type="text" name="contract_search" value="{{ request('contract_search') }}"
-                       placeholder="ابحث باسم العميل أو العاملة أو رقم العقد..."
+                       placeholder="ابحث برقم الجواز أو رقم هوية العميل أو رقم التأشيرة أو اسم العاملة..."
                        style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;font-family:'Cairo',sans-serif;outline:none;"
                        onfocus="this.style.borderColor='#c9a84c'" onblur="this.style.borderColor='#e2e8f0'">
                 <button type="submit"
