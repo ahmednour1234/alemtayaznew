@@ -25,6 +25,9 @@ class RecruitmentStatementImport implements ToCollection, WithHeadingRow, WithCa
     /** @var array<int, string> */
     public array $errors = [];
 
+    /** Branch name extracted from the title row (e.g. "شركة الامتياز للاستقدام") */
+    private ?string $titleBranch = null;
+
     // Known brand aliases -> real branch name
     private const BRANCH_ALIASES = [
         'امتياز'   => 'الرياض',
@@ -37,19 +40,41 @@ class RecruitmentStatementImport implements ToCollection, WithHeadingRow, WithCa
         'الإنجاز'  => 'حفر الباطن',
     ];
 
+    /**
+     * Row 2 is the real heading (row 1 is the company title like "شركة الامتياز للاستقدام").
+     */
+    public function headingRow(): int
+    {
+        return 2;
+    }
+
     public function collection(Collection $rows): void
     {
         $adminId = Auth::guard('admin')->id() ?? Admin::query()->value('id');
 
+        // Extract branch from title row (row 1) by scanning aliases in the first row's values
+        if ($this->titleBranch === null && $rows->isNotEmpty()) {
+            $firstRow = $rows->first();
+            foreach ($firstRow->toArray() as $cell) {
+                $cell = trim((string) $cell);
+                foreach (self::BRANCH_ALIASES as $alias => $real) {
+                    if (mb_strpos($cell, $alias) !== false) {
+                        $this->titleBranch = $real;
+                        break 2;
+                    }
+                }
+            }
+        }
+
         foreach ($rows as $index => $row) {
-            $rowNumber = $index + 2; // +2 because row 1 is heading
+            $rowNumber = $index + 3; // heading=row2, data starts row3
             $data = $row->toArray();
 
             if ($this->isEmptyRow($data)) {
                 continue;
             }
 
-            // --- Resolve branch ---
+            // --- Resolve branch (with title fallback) ---
             $branch = $this->resolveBranch($data);
             if (! $branch) {
                 $this->skip($rowNumber, 'Branch was not found.');
@@ -148,15 +173,20 @@ class RecruitmentStatementImport implements ToCollection, WithHeadingRow, WithCa
     private function resolveBranch(array $data): ?Branch
     {
         $name = trim((string) (
-            $data['الفرع']      ?? $data['فرع']         ??
-            $data['المكتب']     ?? $data['مكتب']        ??
-            $data['branch_name']?? $data['branch']      ?? ''
+            $data['الفرع']       ?? $data['فرع']        ??
+            $data['المكتب']      ?? $data['مكتب']       ??
+            $data['branch_name'] ?? $data['branch']     ?? ''
         ));
         $code = trim((string) ($data['branch_code'] ?? $data['كود_الفرع'] ?? ''));
 
-        // Apply alias
+        // Apply alias mapping
         if (isset(self::BRANCH_ALIASES[$name])) {
             $name = self::BRANCH_ALIASES[$name];
+        }
+
+        // If still empty, fall back to branch extracted from title row (row 1 company name)
+        if ($name === '' && $code === '' && $this->titleBranch !== null) {
+            $name = $this->titleBranch;
         }
 
         // 1. Exact code
