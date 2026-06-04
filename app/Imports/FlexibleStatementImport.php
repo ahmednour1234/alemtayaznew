@@ -122,8 +122,9 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
         $typeColIdx = ($colMap['النوع'] ?? [null])[0];
 
         // Recipient column
-        $recipientHeaders    = ['المستلم / ملاحظات', 'المستلم', 'ملاحظات', 'المستلم/ملاحظات'];
+        $recipientHeaders     = ['المستلم / ملاحظات', 'المستلم', 'ملاحظات', 'المستلم/ملاحظات'];
         $paymentMethodHeaders = ['طريقة الدفع', 'طريقة الدفع'];
+        $statusHeaders        = ['الحالة', 'الحاله', 'حالة', 'حاله'];
         $dateHeaders          = ['التاريخ', 'تاريخ', 'ت'];
         $branchHeaders        = ['الفرع', 'فرع', 'اسم الفرع'];
 
@@ -146,6 +147,7 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
 
             $recipient        = trim((string) $get($data, $recipientHeaders)) ?: null;
             $paymentMethodRaw = trim((string) $get($data, $paymentMethodHeaders)) ?: '';
+            $statusRaw        = trim((string) $get($data, $statusHeaders)) ?: '';
 
             // Skip completely empty rows
             if ($branchValue === '' && $typeName === '' && $rawAmount === null) {
@@ -265,6 +267,12 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
                     $expenseTypeCache[$typeName] = $type;
                 }
 
+                $expenseStatus = match (true) {
+                    str_contains($statusRaw, 'انتظار') || str_contains($statusRaw, 'pending') => 'pending',
+                    str_contains($statusRaw, 'رفض')   || str_contains($statusRaw, 'rejected') => 'rejected',
+                    default                                                                     => 'approved',
+                };
+
                 Expense::create([
                     'branch_id'        => $branch->id,
                     'expense_type_id'  => $type->id,
@@ -272,7 +280,7 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
                     'amount'           => (float) $amount,
                     'date'             => $date,
                     'payment_method'   => $paymentMethod,
-                    'status'           => 'approved',
+                    'status'           => $expenseStatus,
                     'reference_number' => $referenceNumber ?: null,
                     'description'      => $description ?: null,
                     'recipient'        => $recipient,
