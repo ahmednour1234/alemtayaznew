@@ -281,7 +281,8 @@
                     <th class="px-4 py-3 font-semibold text-slate-600">الحالة</th>
                     <th class="px-4 py-3 font-semibold text-slate-600">القسم</th>
                     <th class="px-4 py-3 font-semibold text-slate-600">الدفع</th>
-                    <th class="px-4 py-3 font-semibold text-slate-600">التاريخ</th>
+                    <th class="px-4 py-3 font-semibold text-slate-600">تاريخ الطلب</th>
+                    <th class="px-4 py-3 font-semibold text-slate-600">تاريخ الوصول</th>
                     <th class="px-4 py-3 font-semibold text-slate-600">إجراءات</th>
                 </tr>
             </thead>
@@ -319,6 +320,7 @@
                         <span class="inline-block px-2.5 py-1 rounded-full text-xs {{ $payColors[$c->payment_status] ?? '' }}">{{ $c->payment_label }}</span>
                     </td>
                     <td class="px-4 py-3 text-slate-400 text-xs">{{ $c->request_date?->format('Y/m/d') }}</td>
+                    <td class="px-4 py-3 text-slate-400 text-xs">{{ $c->arrival_date?->format('Y/m/d') ?? '—' }}</td>
                     <td class="px-4 py-3">
                         <div class="flex gap-2 items-center flex-wrap">
                             <a href="{{ route('admin.contracts.show', $c->id) }}" class="text-blue-600 hover:text-blue-800 text-xs">عرض</a>
