@@ -288,62 +288,21 @@ class CampaignController extends Controller
             return back()->with('success', 'جميع العملاء موزّعون بالفعل');
         }
 
-        // Pre-load all active branches and CS staff
-        $allBranches     = Branch::where('active', true)->get();
-        $csStaffByBranch = [];   // branch_id → Collection<Admin>
-        $loadCache       = [];   // admin_id  → active lead count
-
-        // Fallback pool: all active CS staff across all branches (for unmatched cities)
+        // All active CS staff across all branches — distribute without city/branch filtering
         $allCsStaff = Admin::where('department', 'customer_service')
             ->where('active', true)
             ->get();
 
+        if ($allCsStaff->isEmpty()) {
+            return back()->with('error', 'لا يوجد موظفو خدمة عملاء نشطون');
+        }
+
+        $loadCache = [];   // admin_id → active lead count
         $count = 0;
 
         foreach ($unassigned as $lead) {
-            // ── 1. Resolve branch ────────────────────────────────────────────
-            $branchId = $lead->branch_id ?? $campaign->branch_id;
-
-            if (! $branchId && $lead->city) {
-                $leadCity = preg_replace('/^ال/', '', trim($lead->city));
-                $matched  = $allBranches->first(function ($b) use ($leadCity) {
-                    $bCity = preg_replace('/^ال/', '', trim($b->city ?? ''));
-                    $bName = preg_replace('/^ال/', '', trim($b->name));
-                    return ($bCity !== '' && (mb_stripos($bCity, $leadCity) !== false || mb_stripos($leadCity, $bCity) !== false))
-                        || mb_stripos($bName, $leadCity) !== false
-                        || mb_stripos($leadCity, $bName) !== false;
-                });
-                if ($matched) {
-                    $branchId = $matched->id;
-                    $lead->update(['branch_id' => $branchId]);
-                }
-            }
-
-            // ── 2. Pick CS staff pool ─────────────────────────────────────────
-            if ($branchId) {
-                if (! isset($csStaffByBranch[$branchId])) {
-                    $csStaffByBranch[$branchId] = Admin::where('branch_id', $branchId)
-                        ->where('department', 'customer_service')
-                        ->where('active', true)
-                        ->get();
-                }
-                $pool = $csStaffByBranch[$branchId];
-
-                // If branch has no CS staff, fall back to global pool
-                if ($pool->isEmpty()) {
-                    $pool = $allCsStaff;
-                }
-            } else {
-                // No branch matched at all → use global pool (random distribution)
-                $pool = $allCsStaff;
-            }
-
-            if ($pool->isEmpty()) {
-                continue; // no staff anywhere — truly nothing to do
-            }
-
-            // ── 3. Assign to least-busy staff in the pool ────────────────────
-            $assignee = $pool->sortBy(function ($admin) use (&$loadCache) {
+            // Assign to least-busy CS staff across all branches
+            $assignee = $allCsStaff->sortBy(function ($admin) use (&$loadCache) {
                 if (! isset($loadCache[$admin->id])) {
                     $loadCache[$admin->id] = Lead::where('assigned_admin_id', $admin->id)
                         ->whereIn('status', ['new', 'in_progress'])
