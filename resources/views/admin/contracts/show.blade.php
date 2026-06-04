@@ -130,15 +130,18 @@
                         <dd><a href="{{ Storage::url($contract->musaned_file) }}" target="_blank" class="text-blue-600 hover:underline text-xs">تحميل الملف</a></dd>
                     </div>
                     @endif
-                    @if($contract->musaned_number)
+                    @php
+                        $trackUrl = $contract->musaned_number
+                            ? url('/track?musaned_number=' . $contract->musaned_number)
+                            : url('/track?contract_number=' . $contract->contract_number);
+                    @endphp
                     <div class="col-span-2">
                         <dt class="text-slate-400 text-xs mb-1">رابط التتبع العام للعميل</dt>
-                        <dd class="flex items-center gap-2">
-                            <span class="font-mono text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded px-2 py-1">{{ url('/track?musaned_number=' . $contract->musaned_number) }}</span>
-                            <button onclick="navigator.clipboard.writeText('{{ url('/track?musaned_number=' . $contract->musaned_number) }}')" class="text-xs text-blue-500 hover:text-blue-700">نسخ</button>
+                        <dd class="flex items-center gap-2 flex-wrap">
+                            <span class="font-mono text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded px-2 py-1 break-all">{{ $trackUrl }}</span>
+                            <button onclick="navigator.clipboard.writeText('{{ $trackUrl }}')" class="text-xs text-blue-500 hover:text-blue-700 whitespace-nowrap">نسخ</button>
                         </dd>
                     </div>
-                    @endif
                 </dl>
             </div>
 

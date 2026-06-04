@@ -476,12 +476,16 @@ class RecruitmentContractController extends Controller
         $historyMap  = collect();
         $statuses    = RecruitmentContract::statuses();
         $musanedNum  = $request->query('musaned_number', '');
+        $contractNum = $request->query('contract_number', '');
 
         if ($musanedNum) {
-            $contract   = $this->service->findByMusanedNumber(trim($musanedNum));
-            if ($contract) {
-                $historyMap = $contract->statusHistories->keyBy('status');
-            }
+            $contract = $this->service->findByMusanedNumber(trim($musanedNum));
+        } elseif ($contractNum) {
+            $contract = RecruitmentContract::where('contract_number', trim($contractNum))->first();
+        }
+
+        if ($contract) {
+            $historyMap = $contract->statusHistories->keyBy('status');
         }
 
         return view('public.contract-track', compact('contract', 'historyMap', 'statuses', 'musanedNum'));
