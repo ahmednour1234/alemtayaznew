@@ -220,7 +220,6 @@
                 <thead>
                     <tr>
                         <th style="width:36px;">#</th>
-                        <th>اسم العاملة</th>
                         <th>الجنسية</th>
                         <th>رقم الجواز</th>
                         <th>العميل</th>
@@ -236,12 +235,6 @@
                 @php $wContract = isset($contracts[$worker->pivot->contract_id]) ? $contracts[$worker->pivot->contract_id] : null; @endphp
                     <tr>
                         <td class="num-cell">{{ $i + 1 }}</td>
-                        <td>
-                            <div class="worker-name">{{ $worker->name }}</div>
-                            @if($worker->file_number)
-                            <div class="worker-file">{{ $worker->file_number }}</div>
-                            @endif
-                        </td>
                         <td>
                             @if($worker->nationality)
                             <span class="nat-badge">
@@ -262,7 +255,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="10" style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
+                        <td colspan="9" style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
                             لا توجد عاملات مضافة لهذه الرحلة
                         </td>
                     </tr>
