@@ -13,10 +13,24 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
-class RecruitmentStatementImport implements ToCollection, WithHeadingRow, WithCalculatedFormulas
+/**
+ * Reads the recruitment statement Excel by COLUMN INDEX (not name),
+ * because WithHeadingRow strips Arabic characters via Str::slug().
+ *
+ * Expected column order (row 1 = headers, row 2+ = data):
+ *   0: رقم العقد
+ *   1: هوية صاحب العمل
+ *   2: الجنسية
+ *   3: المهنة
+ *   4: الفرع
+ *   5: تاريخ بداية العقد
+ *   6: ايراد استقدام
+ *   7: تكاليف الاستقدام مصاريف
+ *   8: مباشرة للعقود الضريبية
+ */
+class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
 {
     public int $incomeCount  = 0;
     public int $expenseCount = 0;
@@ -25,10 +39,6 @@ class RecruitmentStatementImport implements ToCollection, WithHeadingRow, WithCa
     /** @var array<int, string> */
     public array $errors = [];
 
-    /** Branch name extracted from the title row (e.g. "شركة الامتياز للاستقدام") */
-    private ?string $titleBranch = null;
-
-    // Known brand aliases -> real branch name
     private const BRANCH_ALIASES = [
         'امتياز'   => 'الرياض',
         'الامتياز' => 'الرياض',
@@ -40,54 +50,59 @@ class RecruitmentStatementImport implements ToCollection, WithHeadingRow, WithCa
         'الإنجاز'  => 'حفر الباطن',
     ];
 
-    /**
-     * Row 1 is the heading row (standard template format).
-     */
-    public function headingRow(): int
-    {
-        return 1;
-    }
+    // Column indexes
+    private const COL_CONTRACT    = 0;
+    private const COL_EMPLOYER    = 1;
+    private const COL_NATIONALITY = 2;
+    private const COL_JOB         = 3;
+    private const COL_BRANCH      = 4;
+    private const COL_DATE        = 5;
+    private const COL_INCOME      = 6;
+    private const COL_EXPENSE     = 7;
+    private const COL_TAX         = 8;
 
     public function collection(Collection $rows): void
     {
         $adminId = Auth::guard('admin')->id() ?? Admin::query()->value('id');
 
         foreach ($rows as $index => $row) {
-            $rowNumber = $index + 2; // heading=row1, data starts row2
-            $data = $row->toArray();
+            // Skip row 1 (headers)
+            if ($index === 0) {
+                continue;
+            }
+
+            $rowNumber = $index + 1;
+            $data = $row->values()->toArray(); // indexed array
 
             if ($this->isEmptyRow($data)) {
                 continue;
             }
+            }
 
-            // --- Resolve branch (with title fallback) ---
-            $branch = $this->resolveBranch($data);
+            // --- Resolve branch (column 4) ---
+            $branch = $this->resolveBranch(trim((string) ($data[self::COL_BRANCH] ?? '')));
             if (! $branch) {
                 $this->skip($rowNumber, 'Branch was not found.');
                 continue;
             }
 
-            // --- Resolve date ---
-            $date = $this->resolveDate($data);
+            // --- Resolve date (column 5) ---
+            $date = $this->resolveDate($data[self::COL_DATE] ?? null);
             if (! $date) {
                 $this->skip($rowNumber, 'Date is invalid.');
                 continue;
             }
 
-            // --- Reference / description from contract number + employer ID ---
-            $contractNo  = $this->str($data['رقم_العقد']  ?? $data['رقم العقد']  ?? $data['contract_number'] ?? null);
-            $employerId  = $this->str($data['هوية_صاحب_العمل'] ?? $data['هوية صاحب العمل'] ?? $data['employer_id'] ?? null);
-            $nationality = $this->str($data['الجنسية'] ?? $data['جنسية'] ?? $data['nationality'] ?? null);
+            // --- Reference / description ---
+            $contractNo  = $this->str($data[self::COL_CONTRACT]    ?? null);
+            $employerId  = $this->str($data[self::COL_EMPLOYER]     ?? null);
+            $nationality = $this->str($data[self::COL_NATIONALITY]  ?? null);
 
             $baseRef  = $contractNo ?: ('ROW-' . $rowNumber);
             $baseDesc = trim(implode(' - ', array_filter([$contractNo, $employerId, $nationality])));
 
-            // === 1. Income: ايراد استقدام ===
-            $incomeAmount = $this->amount(
-                $data['ايراد_استقدام']   ?? $data['ايراد استقدام']   ??
-                $data['إيراد_استقدام']  ?? $data['إيراد استقدام']  ??
-                $data['income']          ?? $data['ايراد']           ?? null
-            );
+            // === 1. Income: ايراد استقدام (column 6) ===
+            $incomeAmount = $this->amount($data[self::COL_INCOME] ?? null);
 
             if ($incomeAmount !== null && $incomeAmount > 0) {
                 $incomeType = IncomeType::firstOrCreate(['name' => 'ايرادات الاستقدام'], ['active' => true]);
@@ -104,13 +119,8 @@ class RecruitmentStatementImport implements ToCollection, WithHeadingRow, WithCa
                 $this->incomeCount++;
             }
 
-            // === 2. Expense: تكاليف الاستقدام ===
-            $expAmount = $this->amount(
-                $data['تكاليف_الاستقدام_مصاريف'] ?? $data['تكاليف الاستقدام مصاريف'] ??
-                $data['تكاليف_الاستقدام']         ?? $data['تكاليف الاستقدام']         ??
-                $data['تكاليف']                   ?? $data['مصاريف']                   ??
-                $data['expense']                   ?? null
-            );
+            // === 2. Expense: تكاليف الاستقدام (column 7) ===
+            $expAmount = $this->amount($data[self::COL_EXPENSE] ?? null);
 
             if ($expAmount !== null && $expAmount > 0) {
                 $expType = ExpenseType::firstOrCreate(['name' => 'تكاليف الاستقدام'], ['active' => true]);
@@ -128,11 +138,8 @@ class RecruitmentStatementImport implements ToCollection, WithHeadingRow, WithCa
                 $this->expenseCount++;
             }
 
-            // === 3. Expense: مباشرة للعقود الضريبية ===
-            $taxAmount = $this->amount(
-                $data['مباشرة_للعقود_الضريبية'] ?? $data['مباشرة للعقود الضريبية'] ??
-                $data['ضريبة']                   ?? $data['tax']                     ?? null
-            );
+            // === 3. Expense: مباشرة للعقود الضريبية (column 8) ===
+            $taxAmount = $this->amount($data[self::COL_TAX] ?? null);
 
             if ($taxAmount !== null && $taxAmount > 0) {
                 $taxType = ExpenseType::firstOrCreate(['name' => 'ضريبة العقود'], ['active' => true]);
@@ -156,24 +163,17 @@ class RecruitmentStatementImport implements ToCollection, WithHeadingRow, WithCa
     // Helpers
     // -----------------------------------------------------------------------
 
-    private function resolveBranch(array $data): ?Branch
+    private function resolveBranch(string $raw): ?Branch
     {
-        $name = trim((string) (
-            $data['الفرع']       ?? $data['فرع']        ??
-            $data['المكتب']      ?? $data['مكتب']       ??
-            $data['branch_name'] ?? $data['branch']     ?? ''
-        ));
-        $code = trim((string) ($data['branch_code'] ?? $data['كود_الفرع'] ?? ''));
+        $name = $raw;
+        $code = '';
 
         // Apply alias mapping
         if (isset(self::BRANCH_ALIASES[$name])) {
             $name = self::BRANCH_ALIASES[$name];
         }
 
-        // If still empty, fall back to branch extracted from title row (row 1 company name)
-        if ($name === '' && $code === '' && $this->titleBranch !== null) {
-            $name = $this->titleBranch;
-        }
+        if ($name === '') return null;
 
         // 1. Exact code
         if ($code !== '') {
@@ -223,12 +223,8 @@ class RecruitmentStatementImport implements ToCollection, WithHeadingRow, WithCa
         return null;
     }
 
-    private function resolveDate(array $data): ?string
+    private function resolveDate(mixed $value): ?string
     {
-        $value = $data['تاريخ_بداية_العقد'] ?? $data['تاريخ بداية العقد'] ??
-                 $data['التاريخ']            ?? $data['تاريخ']             ??
-                 $data['date']               ?? null;
-
         if ($value === null || trim((string) $value) === '') {
             return null;
         }
