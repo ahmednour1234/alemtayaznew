@@ -26,8 +26,8 @@ class IncomeImport implements ToModel, WithHeadingRow, WithValidation
 
     public function model(array $row)
     {
-        $branchName = trim((string) ($row['branch_name'] ?? ''));
-        $branchCode = trim((string) ($row['branch_code'] ?? ''));
+        $branchName = trim((string) ($row['branch_name'] ?? $row['branch'] ?? $row['المكتب'] ?? $row['مكتب'] ?? $row['الفرع'] ?? $row['فرع'] ?? ''));
+        $branchCode = trim((string) ($row['branch_code'] ?? $row['كود_الفرع'] ?? ''));
         $typeName   = trim((string) ($row['type_name'] ?? $row['income_type_name'] ?? ''));
 
         // Apply branch alias mapping

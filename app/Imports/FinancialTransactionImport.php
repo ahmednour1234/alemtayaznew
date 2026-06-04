@@ -49,20 +49,20 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
                 continue;
             }
 
-            $amount = $this->amount($data['amount'] ?? null);
+            $amount = $this->amount($data['amount'] ?? $data['المبلغ'] ?? $data['مبلغ'] ?? null);
             if ($amount === null || $amount <= 0) {
                 $this->skip($rowNumber, 'Amount must be greater than zero.');
                 continue;
             }
 
-            $date = $this->date($data['date'] ?? null);
+            $date = $this->date($data['date'] ?? $data['التاريخ'] ?? $data['تاريخ'] ?? null);
             if (! $date) {
                 $this->skip($rowNumber, 'Date is invalid.');
                 continue;
             }
 
             if ($recordType === 'income') {
-                $typeName = trim((string) ($data['type_name'] ?? $data['income_type_name'] ?? ''));
+                $typeName = trim((string) ($data['type_name'] ?? $data['income_type_name'] ?? $data['النوع'] ?? $data['نوع'] ?? ''));
                 $type = $typeName !== '' ? IncomeType::firstOrCreate(['name' => $typeName], ['active' => true]) : null;
 
                 if (! $type) {
@@ -87,7 +87,7 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
                 continue;
             }
 
-            $typeName = trim((string) ($data['type_name'] ?? $data['expense_type_name'] ?? ''));
+            $typeName = trim((string) ($data['type_name'] ?? $data['expense_type_name'] ?? $data['النوع'] ?? $data['نوع'] ?? ''));
             $type = $typeName !== '' ? ExpenseType::firstOrCreate(['name' => $typeName], ['active' => true]) : null;
 
             if (! $type) {
@@ -166,7 +166,7 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
     private function branch(array $row): ?Branch
     {
         // Accept multiple possible column name variants
-        $branchName = trim((string) ($row['branch_name'] ?? $row['branch'] ?? $row['الفرع'] ?? $row['فرع'] ?? ''));
+        $branchName = trim((string) ($row['branch_name'] ?? $row['branch'] ?? $row['المكتب'] ?? $row['مكتب'] ?? $row['الفرع'] ?? $row['فرع'] ?? ''));
         $branchCode = trim((string) ($row['branch_code'] ?? $row['كود_الفرع'] ?? ''));
 
         // 0. Known brand aliases → resolve to real branch name
