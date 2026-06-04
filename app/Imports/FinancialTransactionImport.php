@@ -269,15 +269,20 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
 
     private function paymentMethod(mixed $value): string
     {
-        $value = mb_strtolower(trim((string) $value));
-
-        return match ($value) {
-            'bank_transfer', 'bank transfer', 'transfer', 'تحويل', 'تحويل بنكي' => 'bank_transfer',
-            'card', 'visa', 'بطاقة', 'كارت' => 'card',
-            'other', 'اخرى', 'أخرى' => 'other',
-            'cash', 'نقد', 'نقدي' => 'cash',
-            default => 'bank_transfer',
-        ];
+        $v = mb_strtolower(trim((string) $value));
+        if (in_array($v, ['bank_transfer', 'bank transfer', 'transfer', "\u062a\u062d\u0648\u064a\u0644", "\u062a\u062d\u0648\u064a\u0644 \u0628\u0646\u0643\u064a"])) {
+            return 'bank_transfer';
+        }
+        if (in_array($v, ['card', 'visa', "\u0628\u0637\u0627\u0642\u0629", "\u0643\u0627\u0631\u062a"])) {
+            return 'card';
+        }
+        if (in_array($v, ['other', "\u0627\u062e\u0631\u0649", "\u0623\u062e\u0631\u0649"])) {
+            return 'other';
+        }
+        if (in_array($v, ['cash', "\u0646\u0642\u062f", "\u0646\u0642\u062f\u064a"])) {
+            return 'cash';
+        }
+        return 'bank_transfer';
     }
 
     private function resolveReference(mixed $value, string $prefix = 'REF'): string
