@@ -71,8 +71,13 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
         $adminId = Auth::guard('admin')->id() ?? Admin::query()->value('id');
 
         foreach ($rows as $index => $row) {
-            // Skip row 1 (headers row)
+            // Row 0 = headers — capture and show them for debugging
             if ($index === 0) {
+                $headers = array_values($row->toArray());
+                foreach ($headers as $col => $name) {
+                    $this->errors[] = "Col {$col}: " . trim((string) $name);
+                }
+                $this->skippedCount++;
                 continue;
             }
 
