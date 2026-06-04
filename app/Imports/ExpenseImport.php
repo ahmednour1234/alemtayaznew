@@ -68,12 +68,21 @@ class ExpenseImport implements ToModel, WithHeadingRow, WithValidation
             if ($branch) return $branch;
         }
 
-        // 3. By normalized name (ignore ال prefix on each word)
+        // 3. Fuzzy match: normalized + sorted chars + 70% similarity
         if ($branchName !== '') {
-            $normalized = $this->normalizeBranchName($branchName);
-            $branch = Branch::all()->first(
-                fn($b) => $this->normalizeBranchName($b->name) === $normalized
-            );
+            $normInput   = $this->normalizeBranchName($branchName);
+            $sortedInput = $this->sortedChars($normInput);
+
+            $branch = Branch::all()->first(function ($b) use ($normInput, $sortedInput) {
+                $normDb   = $this->normalizeBranchName($b->name);
+                // a) normalized exact match (حفر باطن = حفر الباطن)
+                if ($normDb === $normInput) return true;
+                // b) same chars different order (ليان = لينا)
+                if ($this->sortedChars($normDb) === $sortedInput) return true;
+                // c) high similarity >= 70% for minor typos
+                similar_text($normInput, $normDb, $pct);
+                return $pct >= 70;
+            });
             if ($branch) return $branch;
         }
 
@@ -89,9 +98,17 @@ class ExpenseImport implements ToModel, WithHeadingRow, WithValidation
 
     private function normalizeBranchName(string $name): string
     {
-        $words = array_filter(preg_split('/\s+/', trim($name)));
-        $words = array_map(fn($w) => preg_replace('/^ال/', '', $w), $words);
+        $words = array_filter(preg_split('/\s+/u', trim($name)));
+        $words = array_map(fn($w) => preg_replace('/^ال/u', '', $w), $words);
         return implode(' ', $words);
+    }
+
+    private function sortedChars(string $str): string
+    {
+        $str   = str_replace(' ', '', $str);
+        $chars = preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
+        sort($chars);
+        return implode('', $chars);
     }
 
     private function generateBranchCode(): string
