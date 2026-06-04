@@ -1,14 +1,15 @@
-<?php
+﻿<?php
 
 namespace App\Imports;
 
-use App\Models\Agent;
-use App\Models\Admin;
-use App\Models\Branch;
-use App\Models\Client;
-use App\Models\Nationality;
-use App\Models\RecruitmentContract;
-use App\Models\Worker;
+use App Models Agent;
+use App Models Admin;
+use App Models Airport;
+use App Models Branch;
+use App Models Client;
+use App Models Nationality;
+use App Models RecruitmentContract;
+use App Models Worker;
 use Illuminate Support Collection;
 use Illuminate Support Facades Auth;
 use Maatwebsite Excel Concerns ToCollection;
@@ -38,27 +39,28 @@ class ContractImport implements ToCollection, WithStartRow, WithCalculatedFormul
             // E=4 musaned | F=5 request_date | G=6 worker | H=7 agent
             // I=8 payment_status | J=9 total_cost | K=10 notes
             // L=11 arrival_date | M=12 status | N=13 nationality
-            // O=14 trial_end | P=15 contract_end | Q=16 passport_number | R=17 client_national_id
+            // O=14 trial_end | P=15 contract_end | Q=16 passport_number | R=17 client_national_id | S=18 arrival_airport
             $v = array_values($row->toArray());
 
-            $clientName      = trim($v[0]  ?? '');
-            $branchCode      = trim($v[1]  ?? '');
-            $visaTypeRaw     = trim($v[2]  ?? '');
-            $visaNumber      = $v[3]  ?? null;
-            $musaned         = $v[4]  ?? null;
-            $reqDate         = $v[5]  ?? null;
-            $workerName      = trim($v[6]  ?? '');
-            $agentName       = trim($v[7]  ?? '');
-            $payRaw          = trim($v[8]  ?? '');
-            $totalCost       = $v[9]  ?? null;
-            $notes           = $v[10] ?? null;
-            $arrivalRaw      = $v[11] ?? null;
-            $statusRaw       = $v[12] ?? null;
-            $nationalityName = trim($v[13] ?? '');
-            $trialEndRaw     = $v[14] ?? null;
-            $contractEndRaw  = $v[15] ?? null;
-            $passportNumber  = trim($v[16] ?? '') ?: null;   // Q — رقم جواز العاملة (اختياري)
-            $clientNationalId = trim($v[17] ?? '') ?: null;  // R — رقم هوية العميل (اختياري)
+            $clientName       = trim($v[0]  ?? '');
+            $branchCode       = trim($v[1]  ?? '');
+            $visaTypeRaw      = trim($v[2]  ?? '');
+            $visaNumber       = $v[3]  ?? null;
+            $musaned          = $v[4]  ?? null;
+            $reqDate          = $v[5]  ?? null;
+            $workerName       = trim($v[6]  ?? '');
+            $agentName        = trim($v[7]  ?? '');
+            $payRaw           = trim($v[8]  ?? '');
+            $totalCost        = $v[9]  ?? null;
+            $notes            = $v[10] ?? null;
+            $arrivalRaw       = $v[11] ?? null;
+            $statusRaw        = $v[12] ?? null;
+            $nationalityName  = trim($v[13] ?? '');
+            $trialEndRaw      = $v[14] ?? null;
+            $contractEndRaw   = $v[15] ?? null;
+            $passportNumber   = trim($v[16] ?? '') ?: null;
+            $clientNationalId = trim($v[17] ?? '') ?: null;
+            $airportName      = trim($v[18] ?? '') ?: null;   // S — محطة الوصول
 
             // Skip completely empty rows
             if ($branchCode === '' && $clientName === '') continue;
@@ -70,10 +72,18 @@ class ContractImport implements ToCollection, WithStartRow, WithCalculatedFormul
                 continue;
             }
 
-            // Resolve nationality (optional)
-            $nationality = $nationalityName !== ''
-                ? Nationality::where('name', $nationalityName)->first()
-                : null;
+            // Resolve nationality with fuzzy match (normalise hamza variations)
+            $nationality = null;
+            if ($nationalityName !== '') {
+                $nationality = Nationality::where('name', $nationalityName)->first();
+                if (! $nationality) {
+                    // Normalise hamza: replace إأآٱ with ا for comparison
+                    $normalized = preg_replace('/[أإآٱ]/', 'ا', $nationalityName);
+                    $nationality = Nationality::get()->first(function ($n) use ($normalized) {
+                        return preg_replace('/[أإآٱ]/', 'ا', $n->name) === $normalized;
+                    });
+                }
+            }
 
             // Auto-create client if not found (classification = confirmed)
             $client = null;
@@ -135,7 +145,20 @@ class ContractImport implements ToCollection, WithStartRow, WithCalculatedFormul
                 }
             }
 
-            $visaType  = in_array($visaTypeRaw, ['domestic', 'rehabilitation']) ? $visaTypeRaw : 'domestic';
+            // Resolve arrival airport — use column S value, default to مطار الملك خالد الدولي
+            $arrivalAirport = null;
+            if ($airportName) {
+                $arrivalAirport = Airport::where('name', $airportName)
+                    ->orWhere('code', strtoupper($airportName))
+                    ->first();
+            }
+            if (! $arrivalAirport) {
+                $arrivalAirport = Airport::where('name', 'like', '%خالد%')
+                    ->orWhere('code', 'RUH')
+                    ->first();
+            }
+
+
 
             // Payment status — supports English and Arabic values
             $payStatus = match (true) {
@@ -208,26 +231,27 @@ class ContractImport implements ToCollection, WithStartRow, WithCalculatedFormul
             $requestDate ??= now()->format('Y-m-d');
 
             RecruitmentContract::create([
-                'contract_number'    => RecruitmentContract::generateNumber(),
-                'branch_id'          => $branch->id,
-                'admin_id'           => $adminId,
-                'client_id'          => $client?->id,
-                'worker_id'          => $worker?->id,
-                'agent_id'           => $agent?->id,
-                'visa_type'          => $visaType,
-                'visa_number'        => $visaNumber ?: null,
-                'musaned_number'     => $musaned    ?: null,
-                'request_date'       => $requestDate,
-                'payment_status'     => $payStatus,
-                'total_cost'         => is_numeric($totalCost) ? $totalCost : null,
-                'notes'              => $notes ?: null,
+                'contract_number'       => RecruitmentContract::generateNumber(),
+                'branch_id'             => $branch->id,
+                'admin_id'              => $adminId,
+                'client_id'             => $client?->id,
+                'worker_id'             => $worker?->id,
+                'agent_id'              => $agent?->id,
+                'visa_type'             => $visaType,
+                'visa_number'           => $visaNumber ?: null,
+                'musaned_number'        => $musaned    ?: null,
+                'request_date'          => $requestDate,
+                'payment_status'        => $payStatus,
+                'total_cost'            => is_numeric($totalCost) ? $totalCost : null,
+                'notes'                 => $notes ?: null,
                 'origin_nationality_id' => $nationality?->id,
-                'arrival_date'       => $arrivalDate,
-                'trial_end_date'     => $trialEndDate,
-                'contract_end_date'  => $contractEndDate,
-                'current_department' => $payStatus === 'full' ? 'coordination' : 'customer_service',
-                'current_status'     => $statusVal,
-                'active'             => true,
+                'arrival_airport_id'    => $arrivalAirport?->id,
+                'arrival_date'          => $arrivalDate,
+                'trial_end_date'        => $trialEndDate,
+                'contract_end_date'     => $contractEndDate,
+                'current_department'    => $payStatus === 'full' ? 'coordination' : 'customer_service',
+                'current_status'        => $statusVal,
+                'active'                => true,
             ]);
 
             $this->imported++;
