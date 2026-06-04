@@ -41,33 +41,19 @@ class RecruitmentStatementImport implements ToCollection, WithHeadingRow, WithCa
     ];
 
     /**
-     * Row 2 is the real heading (row 1 is the company title like "شركة الامتياز للاستقدام").
+     * Row 1 is the heading row (standard template format).
      */
     public function headingRow(): int
     {
-        return 2;
+        return 1;
     }
 
     public function collection(Collection $rows): void
     {
         $adminId = Auth::guard('admin')->id() ?? Admin::query()->value('id');
 
-        // Extract branch from title row (row 1) by scanning aliases in the first row's values
-        if ($this->titleBranch === null && $rows->isNotEmpty()) {
-            $firstRow = $rows->first();
-            foreach ($firstRow->toArray() as $cell) {
-                $cell = trim((string) $cell);
-                foreach (self::BRANCH_ALIASES as $alias => $real) {
-                    if (mb_strpos($cell, $alias) !== false) {
-                        $this->titleBranch = $real;
-                        break 2;
-                    }
-                }
-            }
-        }
-
         foreach ($rows as $index => $row) {
-            $rowNumber = $index + 3; // heading=row2, data starts row3
+            $rowNumber = $index + 2; // heading=row1, data starts row2
             $data = $row->toArray();
 
             if ($this->isEmptyRow($data)) {
