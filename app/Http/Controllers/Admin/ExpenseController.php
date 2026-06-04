@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ExpenseExport;
+use App\Exports\ExpenseTemplateExport;
 use App\Exports\FinancialTransactionTemplateExport;
 use App\Imports\FinancialTransactionImport;
 
@@ -184,7 +185,7 @@ class ExpenseController extends Controller
 
     public function importTemplate()
     {
-        return Excel::download(new FinancialTransactionTemplateExport(), 'financial_transactions_template.xlsx');
+        return Excel::download(new ExpenseTemplateExport(), 'المصروفات_template.xlsx');
     }
 
     public function import(Request $request)

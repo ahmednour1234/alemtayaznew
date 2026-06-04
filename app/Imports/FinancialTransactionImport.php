@@ -38,9 +38,9 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
             }
 
             $recordType = $this->recordType($data);
+            // If no record_type column → assume expense (expense-only template)
             if (! $recordType) {
-                $this->skip($rowNumber, 'record_type must be income/expense or ايراد/مصروف.');
-                continue;
+                $recordType = 'expense';
             }
 
             $branch = $this->branch($data);
