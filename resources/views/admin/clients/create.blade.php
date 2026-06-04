@@ -38,9 +38,8 @@
                     <label class="block text-sm font-medium text-slate-700 mb-1.5">الحالة الاجتماعية <span class="text-red-500">*</span></label>
                     <select name="marital_status" required
                             class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 @error('marital_status') border-red-400 @enderror">
-                        <option value="">اختر...</option>
                         <option value="single"   {{ old('marital_status') === 'single'   ? 'selected' : '' }}>أعزب</option>
-                        <option value="married"  {{ old('marital_status') === 'married'  ? 'selected' : '' }}>متزوج</option>
+                        <option value="married"  {{ old('marital_status', 'married') === 'married'  ? 'selected' : '' }}>متزوج</option>
                         <option value="divorced" {{ old('marital_status') === 'divorced' ? 'selected' : '' }}>مطلق</option>
                         <option value="widowed"  {{ old('marital_status') === 'widowed'  ? 'selected' : '' }}>أرمل</option>
                     </select>
