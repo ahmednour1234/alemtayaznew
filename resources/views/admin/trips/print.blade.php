@@ -219,15 +219,18 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width:48px;">#</th>
+                        <th style="width:40px;">#</th>
                         <th>اسم العاملة</th>
                         <th>الجنسية</th>
                         <th>رقم الجواز</th>
+                        <th>العميل</th>
+                        <th>رقم الهوية</th>
                         <th>ملاحظات</th>
                     </tr>
                 </thead>
                 <tbody>
                 @forelse($trip->workers as $i => $worker)
+                @php $wContract = isset($contracts[$worker->pivot->contract_id]) ? $contracts[$worker->pivot->contract_id] : null; @endphp
                     <tr>
                         <td class="num-cell">{{ $i + 1 }}</td>
                         <td>
@@ -247,11 +250,13 @@
                             @endif
                         </td>
                         <td class="passport-cell">{{ $worker->passport_number ?: '—' }}</td>
+                        <td style="font-size:13px;font-weight:700;color:#0f172a;">{{ $wContract?->client?->name ?? '—' }}</td>
+                        <td class="passport-cell">{{ $wContract?->client?->national_id ?? '—' }}</td>
                         <td class="notes-cell">{{ $worker->pivot->notes ?? '—' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
+                        <td colspan="7" style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
                             لا توجد عاملات مضافة لهذه الرحلة
                         </td>
                     </tr>
