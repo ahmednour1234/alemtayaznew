@@ -51,19 +51,20 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
     ];
 
     // Column indexes (0-based) — matches the actual uploaded file format:
-    // 0=رقم العقد, 1=رقم الصادر, 2=هوية صاحب العمل, 3=المهنة, 4=الجنسية,
+    // 0=رقم العقد, 1=رقم الصادر(تأشيرة), 2=هوية صاحب العمل, 3=المهنة, 4=الجنسية,
     // 5=الفرع, 6=تاريخ بداية العقد, 7=ايراد استقدام,
     // 8=تكاليف الاستقدام مصاريف, 9=مباشرة للعقود الضريبية
-    private const COL_CONTRACT    = 0;
-    private const COL_ISSUER      = 1;
-    private const COL_EMPLOYER    = 2;
-    private const COL_JOB         = 3;
-    private const COL_NATIONALITY = 4;
-    private const COL_BRANCH      = 5;
-    private const COL_DATE        = 6;
-    private const COL_INCOME      = 7;
-    private const COL_EXPENSE     = 8;
-    private const COL_TAX         = 9;
+    private const COL_CONTRACT    = 0;  // رقم العقد
+    private const COL_VISA        = 1;  // رقم التأشيرة (رقم الصادر)
+    private const COL_EMPLOYER    = 2;  // هوية صاحب العمل
+    private const COL_JOB         = 3;  // المهنة
+    private const COL_NATIONALITY = 4;  // الجنسية
+    private const COL_BRANCH      = 5;  // الفرع
+    private const COL_DATE        = 6;  // تاريخ بداية العقد
+    private const COL_INCOME      = 7;  // ايراد استقدام
+    private const COL_EXPENSE     = 8;  // تكاليف الاستقدام مصاريف
+    private const COL_TAX         = 9;  // مباشرة للعقود الضريبية
+    private const COL_PASSPORT    = 10; // رقم الجواز (لو موجود في عمود 10)
 
     public function collection(Collection $rows): void
     {
@@ -97,9 +98,13 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
             }
 
             // --- Reference / description ---
-            $contractNo = $this->str($data[self::COL_CONTRACT] ?? null);
-            $baseRef    = $contractNo ?: ('ROW-' . $rowNumber);
-            $baseDesc   = $contractNo; // البيان = رقم العقد فقط
+            $contractNo  = $this->str($data[self::COL_CONTRACT]    ?? null);
+            $visaNo      = $this->str($data[self::COL_VISA]         ?? null);
+            $passportNo  = $this->str($data[self::COL_PASSPORT]     ?? null);
+            $nationality = $this->str($data[self::COL_NATIONALITY]  ?? null);
+            $baseRef     = $contractNo ?: ('ROW-' . $rowNumber);
+            // البيان: رقم العقد - رقم الجواز - رقم التأشيرة - الجنسية
+            $baseDesc = trim(implode(' - ', array_filter([$contractNo, $passportNo, $visaNo, $nationality])));
 
             // === 1. Income: ايراد استقدام (column 6) ===
             $incomeAmount = $this->amount($data[self::COL_INCOME] ?? null);
