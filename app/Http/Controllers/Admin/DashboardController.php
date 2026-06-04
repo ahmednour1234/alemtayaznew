@@ -52,6 +52,34 @@ class DashboardController extends Controller
         ));
     }
 
+    public function approveAllPending()
+    {
+        $admin = Auth::guard('admin')->user();
+        if (! $admin->isSuperAdmin() && ! $admin->hasPermission('expenses.approve')) {
+            abort(403, 'ليس لديك صلاحية الموافقة على الطلبات.');
+        }
+
+        $branchId = $admin->isBranchAdmin() ? $admin->branch_id : null;
+
+        foreach ($this->expenseService->pending($branchId) as $expense) {
+            try {
+                $this->expenseService->approve($expense->id, $admin);
+            } catch (\RuntimeException) {
+                // already processed — skip
+            }
+        }
+
+        foreach ($this->transferService->pending($branchId) as $transfer) {
+            try {
+                $this->transferService->approve($transfer->id, $admin);
+            } catch (\RuntimeException) {
+                // already processed — skip
+            }
+        }
+
+        return back()->with('success', 'تم الموافقة على جميع الطلبات المعلقة.');
+    }
+
     public function rejectAllPending()
     {
         $admin = Auth::guard('admin')->user();

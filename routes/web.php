@@ -65,7 +65,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Dashboard
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        Route::post('dashboard/reject-all-pending', [DashboardController::class, 'rejectAllPending'])->name('dashboard.reject-all-pending');
+        Route::post('dashboard/reject-all-pending',  [DashboardController::class, 'rejectAllPending'])->name('dashboard.reject-all-pending');
+        Route::post('dashboard/approve-all-pending', [DashboardController::class, 'approveAllPending'])->name('dashboard.approve-all-pending');
         Route::get('dashboard/import-statement',          [DashboardController::class, 'importStatementPage'])->name('dashboard.import-statement');
         Route::get('dashboard/import-statement/template', [DashboardController::class, 'importStatementTemplate'])->name('dashboard.import-statement.template');
         Route::post('dashboard/import-statement',         [DashboardController::class, 'importStatement'])->name('dashboard.import-statement.store');
