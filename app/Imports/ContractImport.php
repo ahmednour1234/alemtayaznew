@@ -96,9 +96,14 @@ class ContractImport implements ToCollection, WithStartRow, WithCalculatedFormul
                         'active'         => true,
                     ]
                 );
-                // Update national_id if provided and missing on existing client
+                // Update national_id if provided, missing on this client, and not taken by another client
                 if ($clientNationalId && ! $client->national_id) {
-                    $client->update(['national_id' => $clientNationalId]);
+                    $takenByOther = Client::where('national_id', $clientNationalId)
+                        ->where('id', '!=', $client->id)
+                        ->exists();
+                    if (! $takenByOther) {
+                        $client->update(['national_id' => $clientNationalId]);
+                    }
                 }
             }
 
