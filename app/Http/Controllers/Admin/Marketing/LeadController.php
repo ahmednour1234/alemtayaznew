@@ -23,11 +23,12 @@ class LeadController extends Controller
         $query = Lead::with(['campaign', 'branch', 'nationality', 'assignedAdmin', 'latestCallLog'])
             ->latest();
 
+        if ($me->isBranchAdmin()) {
+            $query->where('branch_id', $me->branch_id);
+        }
 
         // Filter: assigned to current user only
-        if ($request->boolean('assigned_to_me')) {
             $query->where('assigned_admin_id', $me->id);
-        }
 
         foreach (['status', 'branch_id', 'nationality_id', 'campaign_id'] as $f) {
             if ($v = $request->input($f)) $query->where($f, $v);

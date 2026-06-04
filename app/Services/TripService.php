@@ -48,13 +48,14 @@ class TripService
         return $this->repo->delete($id);
     }
 
-    public function addWorker(Trip $trip, int $workerId, ?int $contractId = null, ?string $notes = null): void
+    public function addWorker(Trip $trip, int $workerId, ?int $contractId = null, ?string $notes = null, ?int $previousContractStatus = null): void
     {
         $trip->workers()->syncWithoutDetaching([
             $workerId => [
-                'contract_id' => $contractId,
-                'notes'       => $notes,
-                'status'      => 'scheduled',
+                'contract_id'              => $contractId,
+                'notes'                    => $notes,
+                'status'                   => 'scheduled',
+                'previous_contract_status' => $previousContractStatus,
             ],
         ]);
     }
