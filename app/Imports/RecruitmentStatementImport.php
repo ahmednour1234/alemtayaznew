@@ -50,7 +50,7 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
         'الإنجاز'  => 'حفر الباطن',
     ];
 
-    // Column indexes
+    // Column indexes (0-based)
     private const COL_CONTRACT    = 0;
     private const COL_EMPLOYER    = 1;
     private const COL_NATIONALITY = 2;
@@ -66,27 +66,26 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
         $adminId = Auth::guard('admin')->id() ?? Admin::query()->value('id');
 
         foreach ($rows as $index => $row) {
-            // Skip row 1 (headers)
+            // Skip row 1 (headers row)
             if ($index === 0) {
                 continue;
             }
 
             $rowNumber = $index + 1;
-            $data = $row->values()->toArray(); // indexed array
+            $data = array_values($row->toArray());
 
             if ($this->isEmptyRow($data)) {
                 continue;
             }
-            }
 
-            // --- Resolve branch (column 4) ---
+            // --- Branch (column 4) ---
             $branch = $this->resolveBranch(trim((string) ($data[self::COL_BRANCH] ?? '')));
             if (! $branch) {
                 $this->skip($rowNumber, 'Branch was not found.');
                 continue;
             }
 
-            // --- Resolve date (column 5) ---
+            // --- Date (column 5) ---
             $date = $this->resolveDate($data[self::COL_DATE] ?? null);
             if (! $date) {
                 $this->skip($rowNumber, 'Date is invalid.');
@@ -97,13 +96,11 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
             $contractNo  = $this->str($data[self::COL_CONTRACT]    ?? null);
             $employerId  = $this->str($data[self::COL_EMPLOYER]     ?? null);
             $nationality = $this->str($data[self::COL_NATIONALITY]  ?? null);
-
-            $baseRef  = $contractNo ?: ('ROW-' . $rowNumber);
-            $baseDesc = trim(implode(' - ', array_filter([$contractNo, $employerId, $nationality])));
+            $baseRef     = $contractNo ?: ('ROW-' . $rowNumber);
+            $baseDesc    = trim(implode(' - ', array_filter([$contractNo, $employerId, $nationality])));
 
             // === 1. Income: ايراد استقدام (column 6) ===
             $incomeAmount = $this->amount($data[self::COL_INCOME] ?? null);
-
             if ($incomeAmount !== null && $incomeAmount > 0) {
                 $incomeType = IncomeType::firstOrCreate(['name' => 'ايرادات الاستقدام'], ['active' => true]);
                 Income::create([
@@ -121,7 +118,6 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
 
             // === 2. Expense: تكاليف الاستقدام (column 7) ===
             $expAmount = $this->amount($data[self::COL_EXPENSE] ?? null);
-
             if ($expAmount !== null && $expAmount > 0) {
                 $expType = ExpenseType::firstOrCreate(['name' => 'تكاليف الاستقدام'], ['active' => true]);
                 Expense::create([
@@ -140,7 +136,6 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
 
             // === 3. Expense: مباشرة للعقود الضريبية (column 8) ===
             $taxAmount = $this->amount($data[self::COL_TAX] ?? null);
-
             if ($taxAmount !== null && $taxAmount > 0) {
                 $taxType = ExpenseType::firstOrCreate(['name' => 'ضريبة العقود'], ['active' => true]);
                 Expense::create([
@@ -159,68 +154,43 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     private function resolveBranch(string $raw): ?Branch
     {
         $name = $raw;
-        $code = '';
 
-        // Apply alias mapping
         if (isset(self::BRANCH_ALIASES[$name])) {
             $name = self::BRANCH_ALIASES[$name];
         }
 
-        if ($name === '') return null;
-
-        // 1. Exact code
-        if ($code !== '') {
-            $b = Branch::withTrashed()->where('code', $code)->first();
-            if ($b) { if ($b->trashed()) $b->restore(); return $b; }
+        if ($name === '') {
+            return null;
         }
 
-        // 2. name as code
-        if ($name !== '') {
-            $b = Branch::withTrashed()->where('code', $name)->first();
-            if ($b) { if ($b->trashed()) $b->restore(); return $b; }
-        }
+        // 1. Name as code
+        $b = Branch::withTrashed()->where('code', $name)->first();
+        if ($b) { if ($b->trashed()) $b->restore(); return $b; }
 
-        // 3. Exact name
-        if ($name !== '') {
-            $b = Branch::withTrashed()->where('name', $name)->first();
-            if ($b) { if ($b->trashed()) $b->restore(); return $b; }
-        }
+        // 2. Exact name
+        $b = Branch::withTrashed()->where('name', $name)->first();
+        if ($b) { if ($b->trashed()) $b->restore(); return $b; }
 
-        // 4. Fuzzy
-        if ($name !== '') {
-            $normIn  = $this->normalize($name);
-            $sortIn  = $this->sortedChars($normIn);
-            $b = Branch::withTrashed()->get()->first(function ($br) use ($normIn, $sortIn) {
-                similar_text($normIn, $br->code ?? '', $pc);
-                if ($pc >= 85) return true;
-                $normDb = $this->normalize($br->name);
-                if ($normDb === $normIn) return true;
-                if ($this->sortedChars($normDb) === $sortIn) return true;
-                similar_text($normIn, $normDb, $p);
-                return $p >= 70;
-            });
-            if ($b) { if ($b->trashed()) $b->restore(); return $b; }
-        }
+        // 3. Fuzzy
+        $normIn = $this->normalize($name);
+        $sortIn = $this->sortedChars($normIn);
+        $b = Branch::withTrashed()->get()->first(function ($br) use ($normIn, $sortIn) {
+            $normDb = $this->normalize($br->name);
+            if ($normDb === $normIn) return true;
+            if ($this->sortedChars($normDb) === $sortIn) return true;
+            similar_text($normIn, $normDb, $p);
+            return $p >= 70;
+        });
+        if ($b) { if ($b->trashed()) $b->restore(); return $b; }
 
-        // 5. Create
-        if ($name !== '' || $code !== '') {
-            $n = $name ?: $code;
-            $c = $code ?: ('BR-' . strtoupper(substr(md5($n), 0, 6)));
-            try {
-                return Branch::firstOrCreate(['code' => $c], ['name' => $n, 'active' => true]);
-            } catch (\Throwable) {
-                return Branch::firstOrCreate(['name' => $n], ['code' => 'BR-' . strtoupper(substr(md5($n . time()), 0, 6)), 'active' => true]);
-            }
-        }
-
-        return null;
+        // 4. Create new branch
+        $code = 'BR-' . strtoupper(substr(md5($name), 0, 6));
+        return Branch::firstOrCreate(['name' => $name], ['code' => $code, 'active' => true]);
     }
 
     private function resolveDate(mixed $value): ?string
@@ -228,7 +198,6 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
         if ($value === null || trim((string) $value) === '') {
             return null;
         }
-
         try {
             if ($value instanceof \DateTimeInterface) {
                 return Carbon::instance($value)->toDateString();
@@ -236,7 +205,6 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
             if (is_numeric($value)) {
                 return Carbon::instance(ExcelDate::excelToDateTimeObject((float) $value))->toDateString();
             }
-            // Strip time part if present (e.g. "2026-05-30 17:46:00")
             $str = trim((string) $value);
             if (preg_match('/(\d{4}-\d{2}-\d{2})/', $str, $m)) {
                 return $m[1];
