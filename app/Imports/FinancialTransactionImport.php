@@ -79,6 +79,8 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
                     'payment_method' => $this->paymentMethod($data['payment_method'] ?? null),
                     'reference_number' => $this->nullableString($data['reference_number'] ?? null),
                     'description' => $this->nullableString($data['description'] ?? null),
+                    'recipient' => $this->nullableString($data['recipient'] ?? null),
+                    'notes' => $this->nullableString($data['notes'] ?? null),
                 ]);
 
                 $this->incomeCount++;
@@ -103,6 +105,8 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
                 'status' => 'pending',
                 'reference_number' => $this->nullableString($data['reference_number'] ?? null),
                 'description' => $this->nullableString($data['description'] ?? null),
+                'recipient' => $this->nullableString($data['recipient'] ?? null),
+                'notes' => $this->nullableString($data['notes'] ?? null),
             ]);
 
             $this->expenseCount++;

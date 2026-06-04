@@ -17,15 +17,16 @@ use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
 /**
  * Flexible import that reads a single sheet with Arabic headers.
  * Columns (by index):
- *   0 = التاريخ      (date)
- *   1 = الفرع        (branch name)
- *   2 = النوع        (type name — contains keyword "إيراد" or "مصروف"/"مصاريف")
- *   3 = المبلغ       (amount)
- *   4 = العملة       (currency — ignored)
- *   5 = المرجع       (reference_number)
- *   6 = المستلم      (ignored)
- *   7 = طريقة الدفع  (payment_method — defaults to cash if empty)
- *   8 = الحالة       (ignored)
+ *   0 = التاريخ           (date)
+ *   1 = الفرع             (branch name)
+ *   2 = النوع             (type name — contains keyword "إيراد" or "مصروف"/"مصاريف")
+ *   3 = النوع (تجاهل)     (second type column — ignored)
+ *   4 = المبلغ            (amount)
+ *   5 = العملة (تجاهل)    (currency — ignored)
+ *   6 = المرجع            (description + reference_number)
+ *   7 = المستلم/ملاحظات  (recipient)
+ *   8 = طريقة الدفع       (payment_method — defaults to cash if empty)
+ *   9 = الحالة (تجاهل)   (status — ignored)
  */
 class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
 {
@@ -56,9 +57,10 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
             $rawDate          = $row[0] ?? null;
             $branchValue      = trim((string) ($row[1] ?? ''));
             $typeName         = trim((string) ($row[2] ?? ''));
-            $rawAmount        = $row[3] ?? null;
-            $reference        = trim((string) ($row[5] ?? ''));
-            $paymentMethodRaw = trim((string) ($row[7] ?? ''));
+            $rawAmount        = $row[4] ?? null;
+            $reference        = trim((string) ($row[6] ?? ''));
+            $recipient        = trim((string) ($row[7] ?? '')) ?: null;
+            $paymentMethodRaw = trim((string) ($row[8] ?? ''));
 
             // Skip completely empty rows
             if ($branchValue === '' && $typeName === '' && $rawAmount === null) {
@@ -158,7 +160,8 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
                     'date'             => $date,
                     'payment_method'   => $paymentMethod,
                     'reference_number' => $reference ?: null,
-                    'description'      => null,
+                    'description'      => $reference ?: null,
+                    'recipient'        => $recipient,
                 ]);
 
                 $this->incomeCount++;
@@ -186,7 +189,8 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
                     'payment_method'   => $paymentMethod,
                     'status'           => 'approved',
                     'reference_number' => $reference ?: null,
-                    'description'      => null,
+                    'description'      => $reference ?: null,
+                    'recipient'        => $recipient,
                 ]);
 
                 $this->expenseCount++;

@@ -12,7 +12,7 @@ class Income extends Model
     protected $fillable = [
         'branch_id', 'income_type_id', 'admin_id',
         'amount', 'date', 'payment_method',
-        'reference_number', 'description', 'attachment',
+        'reference_number', 'description', 'recipient', 'notes', 'attachment',
     ];
 
     use HasFactory, SoftDeletes;

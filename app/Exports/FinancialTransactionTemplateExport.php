@@ -21,14 +21,16 @@ class FinancialTransactionTemplateExport implements FromArray, WithColumnWidths,
             'payment_method',
             'reference_number',
             'description',
+            'recipient',
+            'notes',
         ];
     }
 
     public function array(): array
     {
         return [
-            ['income', 'الرياض', 'إيرادات الاستقدام', '3500.00', '2026-06-02', 'cash', 'REF-001', 'مثال إيراد'],
-            ['expense', 'الرياض', 'مصروف رواتب', '1200.00', '2026-06-02', 'bank_transfer', 'REF-002', 'مثال مصروف'],
+            ['income', 'الرياض', 'إيرادات الاستقدام', '3500.00', '2026-06-02', 'cash', 'REF-001', 'مثال إيراد', 'أحمد محمد', 'ملاحظة اختيارية'],
+            ['expense', 'الرياض', 'مصروف رواتب', '1200.00', '2026-06-02', 'bank_transfer', 'REF-002', 'مثال مصروف', 'علي حسن', 'ملاحظة اختيارية'],
         ];
     }
 
@@ -54,6 +56,8 @@ class FinancialTransactionTemplateExport implements FromArray, WithColumnWidths,
             'F' => 18,
             'G' => 20,
             'H' => 32,
+            'I' => 24,
+            'J' => 32,
         ];
     }
 }

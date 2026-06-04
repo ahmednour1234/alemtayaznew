@@ -12,7 +12,7 @@ class Expense extends Model
     protected $fillable = [
         'branch_id', 'expense_type_id', 'admin_id', 'approved_by',
         'amount', 'date', 'payment_method', 'status',
-        'reference_number', 'description', 'attachment',
+        'reference_number', 'description', 'recipient', 'notes', 'attachment',
         'rejection_reason', 'approved_at',
     ];
     use HasFactory, SoftDeletes;
