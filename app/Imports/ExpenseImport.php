@@ -13,11 +13,27 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 
 class ExpenseImport implements ToModel, WithHeadingRow, WithValidation
 {
+    private const BRANCH_ALIASES = [
+        'امتياز'   => 'الرياض',
+        'الامتياز' => 'الرياض',
+        'متميز'    => 'عرعر',
+        'المتميز'  => 'عرعر',
+        'انجاز'    => 'حفر الباطن',
+        'الانجاز'  => 'حفر الباطن',
+        'إنجاز'    => 'حفر الباطن',
+        'الإنجاز'  => 'حفر الباطن',
+    ];
+
     public function model(array $row)
     {
         $branchName = trim((string) ($row['branch_name'] ?? ''));
         $branchCode = trim((string) ($row['branch_code'] ?? ''));
         $typeName   = trim((string) ($row['type_name'] ?? $row['expense_type_name'] ?? ''));
+
+        // Apply branch alias mapping
+        if (isset(self::BRANCH_ALIASES[$branchName])) {
+            $branchName = self::BRANCH_ALIASES[$branchName];
+        }
 
         $branch = $this->resolveBranch($branchName, $branchCode);
 
@@ -27,17 +43,21 @@ class ExpenseImport implements ToModel, WithHeadingRow, WithValidation
             return null;
         }
 
+        $ref = trim((string) ($row['reference_number'] ?? ''));
+        if ($ref === '' || $ref === '0') {
+            $ref = 'EXP-' . strtoupper(substr(uniqid(), -8));
+        }
+
         return new Expense([
             'branch_id'        => $branch->id,
             'expense_type_id'  => $type->id,
             'admin_id'         => Auth::guard('admin')->id() ?? Admin::first()?->id,
             'amount'           => $row['amount'],
             'date'             => $row['date'],
-            'payment_method'   => in_array($row['payment_method'], ['cash', 'bank_transfer', 'card', 'other'])
-                                    ? $row['payment_method'] : 'cash',
+            'payment_method'   => 'bank_transfer',
             'status'           => 'pending',
-            'reference_number' => $row['reference_number'] ?? null,
-            'description'      => $row['description'] ?? null,
+            'reference_number' => $ref,
+            'description'      => $row['description'] ?? $row['البيان'] ?? $row['byan'] ?? null,
         ]);
     }
 
@@ -50,7 +70,7 @@ class ExpenseImport implements ToModel, WithHeadingRow, WithValidation
             'expense_type_name' => ['nullable'],
             'amount'            => ['required', 'numeric', 'min:0.01'],
             'date'              => ['required', 'date'],
-            'payment_method'    => ['required'],
+            'payment_method'    => ['nullable'],
         ];
     }
 

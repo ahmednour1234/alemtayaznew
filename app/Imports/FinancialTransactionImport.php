@@ -77,10 +77,10 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
                     'amount' => $amount,
                     'date' => $date,
                     'payment_method' => $this->paymentMethod($data['payment_method'] ?? null),
-                    'reference_number' => $this->nullableString($data['reference_number'] ?? null),
-                    'description' => $this->nullableString($data['description'] ?? null),
-                    'recipient' => $this->nullableString($data['recipient'] ?? null),
-                    'notes' => $this->nullableString($data['notes'] ?? null),
+                    'reference_number' => $this->resolveReference($data['reference_number'] ?? null, 'INC'),
+                    'description' => $this->nullableString($data['description'] ?? $data['البيان'] ?? $data['byan'] ?? null),
+                    'recipient' => $this->nullableString($data['recipient'] ?? $data['المستفيد'] ?? null),
+                    'notes' => $this->nullableString($data['notes'] ?? $data['ملاحظات'] ?? null),
                 ]);
 
                 $this->incomeCount++;
@@ -103,10 +103,10 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
                 'date' => $date,
                 'payment_method' => $this->paymentMethod($data['payment_method'] ?? null),
                 'status' => 'pending',
-                'reference_number' => $this->nullableString($data['reference_number'] ?? null),
-                'description' => $this->nullableString($data['description'] ?? null),
-                'recipient' => $this->nullableString($data['recipient'] ?? null),
-                'notes' => $this->nullableString($data['notes'] ?? null),
+                'reference_number' => $this->resolveReference($data['reference_number'] ?? null, 'EXP'),
+                'description' => $this->nullableString($data['description'] ?? $data['البيان'] ?? $data['byan'] ?? null),
+                'recipient' => $this->nullableString($data['recipient'] ?? $data['المستفيد'] ?? null),
+                'notes' => $this->nullableString($data['notes'] ?? $data['ملاحظات'] ?? null),
             ]);
 
             $this->expenseCount++;
@@ -152,10 +152,26 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
         };
     }
 
+    private static array $branchAliases = [
+        'امتياز'     => 'الرياض',
+        'الامتياز'   => 'الرياض',
+        'متميز'      => 'عرعر',
+        'المتميز'    => 'عرعر',
+        'انجاز'      => 'حفر الباطن',
+        'الانجاز'    => 'حفر الباطن',
+        'إنجاز'      => 'حفر الباطن',
+        'الإنجاز'    => 'حفر الباطن',
+    ];
+
     private function branch(array $row): ?Branch
     {
         $branchName = trim((string) ($row['branch_name'] ?? ''));
         $branchCode = trim((string) ($row['branch_code'] ?? ''));
+
+        // 0. Known brand aliases → resolve to real branch name
+        if (isset(self::$branchAliases[$branchName])) {
+            $branchName = self::$branchAliases[$branchName];
+        }
 
         // 1. Exact code from branch_code column
         if ($branchCode !== '') {
@@ -260,8 +276,17 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
             'card', 'visa', 'بطاقة', 'كارت' => 'card',
             'other', 'اخرى', 'أخرى' => 'other',
             'cash', 'نقد', 'نقدي' => 'cash',
-            default => 'cash',
-        };
+            default => 'bank_transfer',
+        ];
+    }
+
+    private function resolveReference(mixed $value, string $prefix = 'REF'): string
+    {
+        $str = trim((string) $value);
+        if ($str !== '' && $str !== '0') {
+            return $str;
+        }
+        return $prefix . '-' . strtoupper(substr(uniqid(), -8));
     }
 
     private function nullableString(mixed $value): ?string
