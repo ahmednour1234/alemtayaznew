@@ -321,7 +321,7 @@ class TripController extends Controller
         ]);
         // attach the contract that belongs to this trip to each worker pivot
         $contractIds = $trip->workers->pluck('pivot.contract_id')->filter()->unique()->toArray();
-        $contracts = \App\Models\RecruitmentContract::with('client', 'branch')
+        $contracts = \App\Models\RecruitmentContract::with('client', 'branch', 'deliveryCity')
             ->whereIn('id', $contractIds)->get()->keyBy('id');
         return view('admin.trips.print', compact('trip', 'contracts'));
     }

@@ -219,12 +219,15 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width:40px;">#</th>
+                        <th style="width:36px;">#</th>
                         <th>اسم العاملة</th>
                         <th>الجنسية</th>
                         <th>رقم الجواز</th>
                         <th>العميل</th>
                         <th>رقم الهوية</th>
+                        <th>الجوال</th>
+                        <th>الفرع</th>
+                        <th>محطة الاستلام</th>
                         <th>ملاحظات</th>
                     </tr>
                 </thead>
@@ -252,11 +255,14 @@
                         <td class="passport-cell">{{ $worker->passport_number ?: '—' }}</td>
                         <td style="font-size:13px;font-weight:700;color:#0f172a;">{{ $wContract?->client?->name ?? '—' }}</td>
                         <td class="passport-cell">{{ $wContract?->client?->national_id ?? '—' }}</td>
+                        <td class="passport-cell">{{ $wContract?->client?->phone ?? '—' }}</td>
+                        <td style="font-size:12px;color:#16a34a;font-weight:600;">{{ $wContract?->branch?->name ?? '—' }}</td>
+                        <td style="font-size:12px;color:#0369a1;font-weight:600;">{{ $wContract?->deliveryCity?->name ?? '—' }}</td>
                         <td class="notes-cell">{{ $worker->pivot->notes ?? '—' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
+                        <td colspan="10" style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">
                             لا توجد عاملات مضافة لهذه الرحلة
                         </td>
                     </tr>
