@@ -72,16 +72,46 @@ class ContractImport implements ToCollection, WithStartRow, WithCalculatedFormul
                 continue;
             }
 
-            // Resolve nationality with fuzzy match (normalise hamza variations)
+            // Resolve nationality with multi-level fuzzy matching
             $nationality = null;
             if ($nationalityName !== '') {
+                // 1) Exact match
                 $nationality = Nationality::where('name', $nationalityName)->first();
+
                 if (! $nationality) {
-                    // Normalise hamza: replace إأآٱ with ا for comparison
-                    $normalized = preg_replace('/[أإآٱ]/', 'ا', $nationalityName);
-                    $nationality = Nationality::get()->first(function ($n) use ($normalized) {
-                        return preg_replace('/[أإآٱ]/', 'ا', $n->name) === $normalized;
-                    });
+                    // Helper: normalise Arabic text for comparison
+                    // - unify hamza variants (أإآٱ → ا)
+                    // - strip common suffixes (ية / يا / ي / ة) to get root
+                    $normalise = function (string $s): string {
+                        $s = preg_replace('/[أإآٱ]/', 'ا', $s);
+                        $s = preg_replace('/(ية|يا|ي|ة)$/', '', $s);
+                        return trim($s);
+                    };
+
+                    $normInput = $normalise($nationalityName);
+
+                    // 2) Hamza + suffix-stripped exact match
+                    $allNats = Nationality::all();
+                    $nationality = $allNats->first(
+                        fn ($n) => $normalise($n->name) === $normInput
+                    );
+                }
+
+                if (! $nationality) {
+                    // 3) similar_text fuzzy match — pick the closest name above 70% similarity
+                    $allNats = $allNats ?? Nationality::all();
+                    $best = null;
+                    $bestScore = 0;
+                    foreach ($allNats as $n) {
+                        similar_text($nationalityName, $n->name, $pct);
+                        if ($pct > $bestScore) {
+                            $bestScore = $pct;
+                            $best = $n;
+                        }
+                    }
+                    if ($bestScore >= 60) {
+                        $nationality = $best;
+                    }
                 }
             }
 
