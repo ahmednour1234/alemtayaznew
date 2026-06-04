@@ -121,9 +121,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('incomes', IncomeController::class);
 
         // Expenses
-        Route::get('expenses/export',         [ExpenseController::class, 'export'])->name('expenses.export');
-        Route::get('expenses/template',       [ExpenseController::class, 'importTemplate'])->name('expenses.template');
-        Route::post('expenses/import',        [ExpenseController::class, 'import'])->name('expenses.import');
+        Route::get('expenses/export',                [ExpenseController::class, 'export'])->name('expenses.export');
+        Route::get('expenses/template',              [ExpenseController::class, 'importTemplate'])->name('expenses.template');
+        Route::post('expenses/import',               [ExpenseController::class, 'import'])->name('expenses.import');
+        Route::get('expenses/recruitment-template',  [ExpenseController::class, 'recruitmentTemplate'])->name('expenses.recruitment-template');
+        Route::post('expenses/recruitment-import',   [ExpenseController::class, 'recruitmentImport'])->name('expenses.recruitment-import');
         Route::post('expenses/{id}/approve',  [ExpenseController::class, 'approve'])->name('expenses.approve');
         Route::post('expenses/{id}/reject',   [ExpenseController::class, 'reject'])->name('expenses.reject');
         Route::post('expenses/{id}/restore',  [ExpenseController::class, 'restore'])->name('expenses.restore');

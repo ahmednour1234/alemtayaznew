@@ -15,7 +15,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ExpenseExport;
 use App\Exports\ExpenseTemplateExport;
 use App\Exports\FinancialTransactionTemplateExport;
+use App\Exports\RecruitmentStatementTemplateExport;
 use App\Imports\FinancialTransactionImport;
+use App\Imports\RecruitmentStatementImport;
 
 class ExpenseController extends Controller
 {
@@ -203,6 +205,29 @@ class ExpenseController extends Controller
 
         return $import->skippedCount > 0
             ? $response->withErrors(array_slice($import->errors, 0, 5))
+            : $response;
+    }
+
+    public function recruitmentTemplate()
+    {
+        return Excel::download(new RecruitmentStatementTemplateExport(), 'كشف_الاستقدام_template.xlsx');
+    }
+
+    public function recruitmentImport(Request $request)
+    {
+        $request->validate(['file' => ['required', 'file', 'mimes:xlsx,xls,csv']]);
+        $import = new RecruitmentStatementImport();
+        Excel::import($import, $request->file('file'));
+
+        $message = "تم استيراد {$import->incomeCount} إيراد و {$import->expenseCount} مصروف من كشف الاستقدام بنجاح.";
+        if ($import->skippedCount > 0) {
+            $message .= " تم تخطي {$import->skippedCount} صف.";
+        }
+
+        $response = back()->with('success', $message);
+
+        return $import->skippedCount > 0
+            ? $response->withErrors(array_slice($import->errors, 0, 10))
             : $response;
     }
 }

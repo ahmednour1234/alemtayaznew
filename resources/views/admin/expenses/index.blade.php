@@ -9,6 +9,8 @@
         <a href="{{ route('admin.expenses.template') }}" class="bg-slate-600 hover:bg-slate-700 text-white text-sm px-3 py-2 rounded-lg">قالب الاستيراد</a>
         <button onclick="document.getElementById('importModal').classList.remove('hidden')"
                 class="bg-purple-600 hover:bg-purple-700 text-white text-sm px-3 py-2 rounded-lg">استيراد</button>
+        <button onclick="document.getElementById('recruitmentModal').classList.remove('hidden')"
+                class="bg-teal-600 hover:bg-teal-700 text-white text-sm px-3 py-2 rounded-lg">استيراد كشف الاستقدام</button>
         <a href="{{ route('admin.expenses.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             إضافة
@@ -251,6 +253,31 @@
             <div class="flex gap-3">
                 <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white text-sm px-5 py-2 rounded-lg">استيراد</button>
                 <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')"
+                        class="bg-slate-200 text-slate-700 text-sm px-5 py-2 rounded-lg">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Recruitment Statement Import Modal --}}
+<div id="recruitmentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-semibold mb-1">استيراد كشف الاستقدام</h3>
+        <p class="text-xs text-slate-500 mb-4">كل صف سينشئ: إيراد استقدام + تكاليف استقدام + ضريبة العقود تلقائياً</p>
+        <form action="{{ route('admin.expenses.recruitment-import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">ملف Excel</label>
+                <input type="file" name="file" accept=".xlsx,.xls,.csv" required
+                       class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                <p class="text-xs text-slate-400 mt-1">
+                    الأعمدة المطلوبة: الفرع، تاريخ بداية العقد، ايراد استقدام، تكاليف الاستقدام مصاريف، مباشرة للعقود الضريبية.
+                    <a href="{{ route('admin.expenses.recruitment-template') }}" class="text-teal-600 hover:underline">تحميل القالب</a>
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white text-sm px-5 py-2 rounded-lg">استيراد</button>
+                <button type="button" onclick="document.getElementById('recruitmentModal').classList.add('hidden')"
                         class="bg-slate-200 text-slate-700 text-sm px-5 py-2 rounded-lg">إلغاء</button>
             </div>
         </form>
