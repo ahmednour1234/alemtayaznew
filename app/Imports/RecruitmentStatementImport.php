@@ -50,16 +50,20 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
         'الإنجاز'  => 'حفر الباطن',
     ];
 
-    // Column indexes (0-based)
+    // Column indexes (0-based) — matches the actual uploaded file format:
+    // 0=رقم العقد, 1=رقم الصادر, 2=هوية صاحب العمل, 3=المهنة, 4=الجنسية,
+    // 5=الفرع, 6=تاريخ بداية العقد, 7=ايراد استقدام,
+    // 8=تكاليف الاستقدام مصاريف, 9=مباشرة للعقود الضريبية
     private const COL_CONTRACT    = 0;
-    private const COL_EMPLOYER    = 1;
-    private const COL_NATIONALITY = 2;
+    private const COL_ISSUER      = 1;
+    private const COL_EMPLOYER    = 2;
     private const COL_JOB         = 3;
-    private const COL_BRANCH      = 4;
-    private const COL_DATE        = 5;
-    private const COL_INCOME      = 6;
-    private const COL_EXPENSE     = 7;
-    private const COL_TAX         = 8;
+    private const COL_NATIONALITY = 4;
+    private const COL_BRANCH      = 5;
+    private const COL_DATE        = 6;
+    private const COL_INCOME      = 7;
+    private const COL_EXPENSE     = 8;
+    private const COL_TAX         = 9;
 
     public function collection(Collection $rows): void
     {
@@ -93,11 +97,9 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
             }
 
             // --- Reference / description ---
-            $contractNo  = $this->str($data[self::COL_CONTRACT]    ?? null);
-            $employerId  = $this->str($data[self::COL_EMPLOYER]     ?? null);
-            $nationality = $this->str($data[self::COL_NATIONALITY]  ?? null);
-            $baseRef     = $contractNo ?: ('ROW-' . $rowNumber);
-            $baseDesc    = trim(implode(' - ', array_filter([$contractNo, $employerId, $nationality])));
+            $contractNo = $this->str($data[self::COL_CONTRACT] ?? null);
+            $baseRef    = $contractNo ?: ('ROW-' . $rowNumber);
+            $baseDesc   = $contractNo; // البيان = رقم العقد فقط
 
             // === 1. Income: ايراد استقدام (column 6) ===
             $incomeAmount = $this->amount($data[self::COL_INCOME] ?? null);
