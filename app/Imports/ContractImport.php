@@ -36,6 +36,7 @@ class ContractImport implements ToCollection, WithStartRow
             // E=4 musaned | F=5 request_date | G=6 worker | H=7 agent
             // I=8 payment_status | J=9 total_cost | K=10 notes
             // L=11 arrival_date | M=12 status | N=13 nationality
+            // O=14 trial_end | P=15 contract_end | Q=16 passport_number
             $v = array_values($row->toArray());
 
             $clientName      = trim($v[0]  ?? '');
@@ -52,8 +53,9 @@ class ContractImport implements ToCollection, WithStartRow
             $arrivalRaw      = $v[11] ?? null;
             $statusRaw       = $v[12] ?? null;
             $nationalityName = trim($v[13] ?? '');
-            $trialEndRaw     = $v[14] ?? null;   // O — اختياري
-            $contractEndRaw  = $v[15] ?? null;   // P — اختياري
+            $trialEndRaw     = $v[14] ?? null;
+            $contractEndRaw  = $v[15] ?? null;
+            $passportNumber  = trim($v[16] ?? '') ?: null;   // Q — رقم جواز العاملة (اختياري)
 
             // Skip completely empty rows
             if ($branchCode === '' && $clientName === '') continue;
@@ -94,19 +96,35 @@ class ContractImport implements ToCollection, WithStartRow
 
             // Auto-create worker if not found; update nationality if missing
             $worker = null;
-            if ($workerName !== '') {
-                $worker = Worker::firstOrCreate(
-                    ['name' => $workerName],
-                    [
-                        'nationality_id' => $nationality?->id,
-                        'branch_id'      => $branch->id,
-                        'admin_id'       => $adminId,
-                        'active'         => true,
-                    ]
-                );
-                // Update nationality if worker existed without one
-                if ($worker->wasRecentlyCreated === false && $nationality && ! $worker->nationality_id) {
-                    $worker->update(['nationality_id' => $nationality->id]);
+            if ($workerName !== '' || $passportNumber !== null) {
+                // Match by passport number first (most reliable), then by name
+                if ($passportNumber !== null) {
+                    $worker = Worker::where('passport_number', $passportNumber)->first();
+                }
+                if (! $worker && $workerName !== '') {
+                    $worker = Worker::where('name', $workerName)->first();
+                }
+                if (! $worker) {
+                    $worker = Worker::create([
+                        'name'            => $workerName ?: ('عاملة-' . ($passportNumber ?? uniqid())),
+                        'passport_number' => $passportNumber,
+                        'nationality_id'  => $nationality?->id,
+                        'branch_id'       => $branch->id,
+                        'admin_id'        => $adminId,
+                        'active'          => true,
+                    ]);
+                } else {
+                    // Update missing fields on existing worker
+                    $updates = [];
+                    if ($passportNumber && ! $worker->passport_number) {
+                        $updates['passport_number'] = $passportNumber;
+                    }
+                    if ($nationality && ! $worker->nationality_id) {
+                        $updates['nationality_id'] = $nationality->id;
+                    }
+                    if ($updates) {
+                        $worker->update($updates);
+                    }
                 }
             }
 
