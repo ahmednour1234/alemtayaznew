@@ -9,12 +9,14 @@ use App\Models\Client;
 use App\Models\Nationality;
 use App\Models\RecruitmentContract;
 use App\Models\Worker;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithStartRow;
+use Illuminate Support Collection;
+use Illuminate Support Facades Auth;
+use Maatwebsite Excel Concerns ToCollection;
+use Maatwebsite Excel Concerns WithCalculatedFormulas;
+use Maatwebsite Excel Concerns WithStartRow;
+use PhpOffice PhpSpreadsheet Shared Date as ExcelDate;
 
-class ContractImport implements ToCollection, WithStartRow
+class ContractImport implements ToCollection, WithStartRow, WithCalculatedFormulas
 {
     private int $imported = 0;
     private array $errors = [];
@@ -36,7 +38,7 @@ class ContractImport implements ToCollection, WithStartRow
             // E=4 musaned | F=5 request_date | G=6 worker | H=7 agent
             // I=8 payment_status | J=9 total_cost | K=10 notes
             // L=11 arrival_date | M=12 status | N=13 nationality
-            // O=14 trial_end | P=15 contract_end | Q=16 passport_number
+            // O=14 trial_end | P=15 contract_end | Q=16 passport_number | R=17 client_national_id
             $v = array_values($row->toArray());
 
             $clientName      = trim($v[0]  ?? '');
@@ -56,6 +58,7 @@ class ContractImport implements ToCollection, WithStartRow
             $trialEndRaw     = $v[14] ?? null;
             $contractEndRaw  = $v[15] ?? null;
             $passportNumber  = trim($v[16] ?? '') ?: null;   // Q — رقم جواز العاملة (اختياري)
+            $clientNationalId = trim($v[17] ?? '') ?: null;  // R — رقم هوية العميل (اختياري)
 
             // Skip completely empty rows
             if ($branchCode === '' && $clientName === '') continue;
@@ -83,6 +86,10 @@ class ContractImport implements ToCollection, WithStartRow
                         'active'         => true,
                     ]
                 );
+                // Update national_id if provided and missing on existing client
+                if ($clientNationalId && ! $client->national_id) {
+                    $client->update(['national_id' => $clientNationalId]);
+                }
             }
 
             // Auto-create agent if not found
@@ -129,27 +136,53 @@ class ContractImport implements ToCollection, WithStartRow
             }
 
             $visaType  = in_array($visaTypeRaw, ['domestic', 'rehabilitation']) ? $visaTypeRaw : 'domestic';
-            $payStatus = in_array($payRaw, ['pending', 'partial', 'full']) ? $payRaw : 'pending';
 
-            // Arrival date
+            // Payment status — supports English and Arabic values
+            $payStatus = match (true) {
+                in_array($payRaw, ['full', 'paid'])                                                     => 'full',
+                str_contains($payRaw, 'مدفوع') || str_contains($payRaw, 'مكتمل') || str_contains($payRaw, 'كامل') => 'full',
+                in_array($payRaw, ['partial'])                                                          => 'partial',
+                str_contains($payRaw, 'جزئي')                                                         => 'partial',
+                default                                                                                 => 'pending',
+            };
+
+            // Arrival date — handle Excel serial numbers
             $arrivalDate = null;
             if (! empty($arrivalRaw)) {
-                try { $arrivalDate = \Carbon\Carbon::parse($arrivalRaw)->format('Y-m-d'); } catch (\Throwable) {}
+                try {
+                    if (is_numeric($arrivalRaw)) {
+                        $arrivalDate = \Carbon\Carbon::instance(ExcelDate::excelToDateTimeObject((float) $arrivalRaw))->format('Y-m-d');
+                    } else {
+                        $arrivalDate = \Carbon\Carbon::parse($arrivalRaw)->format('Y-m-d');
+                    }
+                } catch (\Throwable) {}
             }
 
-            // Trial end date: from column O if provided, else arrival_date + 3 months
+            // Trial end date — handle Excel serial numbers
             $trialEndDate = null;
             if (! empty($trialEndRaw)) {
-                try { $trialEndDate = \Carbon\Carbon::parse($trialEndRaw)->format('Y-m-d'); } catch (\Throwable) {}
+                try {
+                    if (is_numeric($trialEndRaw)) {
+                        $trialEndDate = \Carbon\Carbon::instance(ExcelDate::excelToDateTimeObject((float) $trialEndRaw))->format('Y-m-d');
+                    } else {
+                        $trialEndDate = \Carbon\Carbon::parse($trialEndRaw)->format('Y-m-d');
+                    }
+                } catch (\Throwable) {}
             }
             if (! $trialEndDate && $arrivalDate) {
                 $trialEndDate = \Carbon\Carbon::parse($arrivalDate)->addMonths(3)->format('Y-m-d');
             }
 
-            // Contract end date: from column P if provided, else arrival_date + 2 years
+            // Contract end date — handle Excel serial numbers
             $contractEndDate = null;
             if (! empty($contractEndRaw)) {
-                try { $contractEndDate = \Carbon\Carbon::parse($contractEndRaw)->format('Y-m-d'); } catch (\Throwable) {}
+                try {
+                    if (is_numeric($contractEndRaw)) {
+                        $contractEndDate = \Carbon\Carbon::instance(ExcelDate::excelToDateTimeObject((float) $contractEndRaw))->format('Y-m-d');
+                    } else {
+                        $contractEndDate = \Carbon\Carbon::parse($contractEndRaw)->format('Y-m-d');
+                    }
+                } catch (\Throwable) {}
             }
             if (! $contractEndDate && $arrivalDate) {
                 $contractEndDate = \Carbon\Carbon::parse($arrivalDate)->addYears(2)->format('Y-m-d');
@@ -161,10 +194,16 @@ class ContractImport implements ToCollection, WithStartRow
                 $statusVal = 1;
             }
 
-            // Request date fallback
+            // Request date fallback — handle Excel serial numbers
             $requestDate = null;
             if (! empty($reqDate)) {
-                try { $requestDate = \Carbon\Carbon::parse($reqDate)->format('Y-m-d'); } catch (\Throwable) {}
+                try {
+                    if (is_numeric($reqDate)) {
+                        $requestDate = \Carbon\Carbon::instance(ExcelDate::excelToDateTimeObject((float) $reqDate))->format('Y-m-d');
+                    } else {
+                        $requestDate = \Carbon\Carbon::parse($reqDate)->format('Y-m-d');
+                    }
+                } catch (\Throwable) {}
             }
             $requestDate ??= now()->format('Y-m-d');
 

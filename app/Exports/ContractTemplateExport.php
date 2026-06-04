@@ -33,6 +33,7 @@ class ContractTemplateExport implements FromArray, WithHeadings, WithStyles, Wit
                 'محسوب تلقائياً: تاريخ الوصول + 3 أشهر (اختياري)',
                 'محسوب تلقائياً: تاريخ الوصول + سنتين (اختياري)',
                 'رقم جواز سفر العاملة (اختياري)',
+                'رقم هوية / إقامة العميل (اختياري)',
             ],
             // سطر المثال
             [
@@ -53,6 +54,7 @@ class ContractTemplateExport implements FromArray, WithHeadings, WithStyles, Wit
                 '2026-06-01',
                 '2028-03-01',
                 'A12345678',
+                '1098765432',
             ],
         ];
     }
@@ -77,6 +79,7 @@ class ContractTemplateExport implements FromArray, WithHeadings, WithStyles, Wit
             'انتهاء التدريب (YYYY-MM-DD)',
             'انتهاء الضمان (YYYY-MM-DD)',
             'رقم جواز العاملة (اختياري)',
+            'رقم هوية العميل (اختياري)',
         ];
     }
 
@@ -86,25 +89,25 @@ class ContractTemplateExport implements FromArray, WithHeadings, WithStyles, Wit
             'A' => 22, 'B' => 20, 'C' => 36, 'D' => 18,
             'E' => 22, 'F' => 26, 'G' => 20, 'H' => 20,
             'I' => 32, 'J' => 22, 'K' => 28, 'L' => 26, 'M' => 90, 'N' => 26,
-            'O' => 28, 'P' => 28, 'Q' => 24,
+            'O' => 28, 'P' => 28, 'Q' => 24, 'R' => 24,
         ];
     }
 
     public function styles(Worksheet $sheet): array
     {
-        $sheet->getStyle('A1:Q1')->applyFromArray([
+        $sheet->getStyle('A1:R1')->applyFromArray([
             'font'      => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
             'fill'      => ['fillType' => 'solid', 'startColor' => ['rgb' => '1D4ED8']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true],
         ]);
         // سطر الشرح — خلفية رمادية
-        $sheet->getStyle('A2:Q2')->applyFromArray([
+        $sheet->getStyle('A2:R2')->applyFromArray([
             'font'      => ['italic' => true, 'size' => 9, 'color' => ['rgb' => '475569']],
             'fill'      => ['fillType' => 'solid', 'startColor' => ['rgb' => 'F1F5F9']],
             'alignment' => ['wrapText' => true],
         ]);
         // سطر المثال — خلفية صفراء فاتحة
-        $sheet->getStyle('A3:Q3')->applyFromArray([
+        $sheet->getStyle('A3:R3')->applyFromArray([
             'font' => ['size' => 10, 'color' => ['rgb' => '1E3A5F']],
             'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'FEF9C3']],
         ]);
