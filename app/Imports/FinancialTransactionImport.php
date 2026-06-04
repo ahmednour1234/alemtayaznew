@@ -165,30 +165,40 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
 
     private function branch(array $row): ?Branch
     {
-        $branchName = trim((string) ($row['branch_name'] ?? ''));
-        $branchCode = trim((string) ($row['branch_code'] ?? ''));
+        // Accept multiple possible column name variants
+        $branchName = trim((string) ($row['branch_name'] ?? $row['branch'] ?? $row['الفرع'] ?? $row['فرع'] ?? ''));
+        $branchCode = trim((string) ($row['branch_code'] ?? $row['كود_الفرع'] ?? ''));
 
         // 0. Known brand aliases → resolve to real branch name
         if (isset(self::$branchAliases[$branchName])) {
             $branchName = self::$branchAliases[$branchName];
         }
 
-        // 1. Exact code from branch_code column
+        // 1. Exact code from branch_code column (include soft-deleted restore)
         if ($branchCode !== '') {
-            $branch = Branch::where('code', $branchCode)->first();
-            if ($branch) return $branch;
+            $branch = Branch::withTrashed()->where('code', $branchCode)->first();
+            if ($branch) {
+                if ($branch->trashed()) $branch->restore();
+                return $branch;
+            }
         }
 
         // 2. branch_name might actually be a code (e.g. HFR-001, RYD-001)
         if ($branchName !== '') {
-            $branch = Branch::where('code', $branchName)->first();
-            if ($branch) return $branch;
+            $branch = Branch::withTrashed()->where('code', $branchName)->first();
+            if ($branch) {
+                if ($branch->trashed()) $branch->restore();
+                return $branch;
+            }
         }
 
-        // 3. Exact name
+        // 3. Exact name (include soft-deleted)
         if ($branchName !== '') {
-            $branch = Branch::where('name', $branchName)->first();
-            if ($branch) return $branch;
+            $branch = Branch::withTrashed()->where('name', $branchName)->first();
+            if ($branch) {
+                if ($branch->trashed()) $branch->restore();
+                return $branch;
+            }
         }
 
         // 4. Fuzzy: normalize (strip ال) + sorted chars + 70% similarity + code fuzzy 85%
@@ -196,7 +206,7 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
             $normInput   = $this->normalizeBranchName($branchName);
             $sortedInput = $this->sortedChars($normInput);
 
-            $branch = Branch::all()->first(function ($b) use ($normInput, $sortedInput) {
+            $branch = Branch::withTrashed()->get()->first(function ($b) use ($normInput, $sortedInput) {
                 similar_text($normInput, $b->code ?? '', $pctCode);
                 if ($pctCode >= 85) return true;
                 $normDb = $this->normalizeBranchName($b->name);
@@ -205,14 +215,25 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
                 similar_text($normInput, $normDb, $pct);
                 return $pct >= 70;
             });
-            if ($branch) return $branch;
+            if ($branch) {
+                if ($branch->trashed()) $branch->restore();
+                return $branch;
+            }
         }
 
-        // 5. Not found — create new branch automatically
+        // 5. Not found — create new branch (use firstOrCreate to avoid unique conflicts)
         if ($branchName !== '' || $branchCode !== '') {
             $name = $branchName ?: $branchCode;
-            $code = $branchCode ?: $this->generateBranchCode();
-            return Branch::create(['name' => $name, 'code' => $code, 'active' => true]);
+            $code = $branchCode ?: $branchName;
+            try {
+                return Branch::firstOrCreate(['code' => $code], ['name' => $name, 'active' => true]);
+            } catch (\Throwable) {
+                try {
+                    return Branch::firstOrCreate(['name' => $name], ['code' => 'BR-' . strtoupper(substr(md5($name), 0, 6)), 'active' => true]);
+                } catch (\Throwable) {
+                    return null;
+                }
+            }
         }
 
         return null;
