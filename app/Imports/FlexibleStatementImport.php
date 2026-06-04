@@ -16,17 +16,19 @@ use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
 
 /**
  * Flexible import that reads a single sheet with Arabic headers.
- * Columns (by index):
- *   0 = التاريخ           (date)
- *   1 = الفرع             (branch name)
- *   2 = النوع             (type name — contains keyword "إيراد" or "مصروف"/"مصاريف")
- *   3 = النوع (تجاهل)     (second type column — ignored)
- *   4 = المبلغ            (amount)
- *   5 = العملة (تجاهل)    (currency — ignored)
- *   6 = المرجع            (description + reference_number)
- *   7 = المستلم/ملاحظات  (recipient)
- *   8 = طريقة الدفع       (payment_method — defaults to cash if empty)
- *   9 = الحالة (تجاهل)   (status — ignored)
+ * Detects column positions dynamically from the header row so the import
+ * works regardless of column order changes in the exported Excel file.
+ *
+ * Recognised header names:
+ *   التاريخ / تاريخ           → date
+ *   الفرع / فرع               → branch
+ *   النوع (first occurrence)   → type keyword (إيراد / مصروف)
+ *   المبلغ / النوع (numeric)   → amount  (auto-detected from content)
+ *   المرجع                     → description (long text) or reference_number (numeric)
+ *   العملة                     → reference_number (numeric, when المرجع has text)
+ *   المستلم / ملاحظات         → recipient
+ *   طريقة الدفع               → payment_method
+ *   الحالة                     → ignored
  */
 class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
 {
@@ -39,36 +41,118 @@ class FlexibleStatementImport implements ToCollection, WithCalculatedFormulas
 
     public function collection(Collection $rows): void
     {
+        if ($rows->isEmpty()) {
+            return;
+        }
+
         $adminId = Auth::guard('admin')->id() ?? Admin::first()?->id;
+
+        // ── 1. Build header → [indices] map from the first row ──────────────
+        $colMap = []; // normalised_header => [col_index, ...]
+        foreach ($rows->first()->toArray() as $idx => $cell) {
+            $h = trim((string) $cell);
+            if ($h !== '') {
+                $colMap[$h][] = $idx;
+            }
+        }
+
+        // Helper: return first non-empty value from row for any of the given headers
+        $get = function (array $data, array $headers) use ($colMap): mixed {
+            foreach ($headers as $h) {
+                foreach ($colMap[$h] ?? [] as $idx) {
+                    $v = $data[$idx] ?? null;
+                    if ($v !== null && trim((string) $v) !== '') {
+                        return $v;
+                    }
+                }
+            }
+            return null;
+        };
+
+        // ── 2. Auto-detect the actual amount column index ────────────────────
+        // The Excel export sometimes mislabels columns; المبلغ may contain "Sar"
+        // while a النوع duplicate column actually holds the numeric amount.
+        $amountColIdx = null;
+        foreach ($rows->skip(1)->take(10) as $sampleRow) {
+            $d = $sampleRow->toArray();
+            // Try every candidate header in priority order
+            foreach (['المبلغ', 'النوع', 'المبالغ'] as $candidate) {
+                foreach (array_reverse($colMap[$candidate] ?? []) as $idx) {
+                    $v = str_replace([',', ' ', "\xc2\xa0"], '', (string) ($d[$idx] ?? ''));
+                    if (is_numeric($v) && (float) $v > 0) {
+                        $amountColIdx = $idx;
+                        break 3;
+                    }
+                }
+            }
+        }
+
+        // ── 3. Determine reference vs description split ──────────────────────
+        // المرجع may hold a long text description while العملة holds the numeric ref,
+        // or vice-versa. Detect by scanning a sample row.
+        $referenceColIdx   = null;
+        $descriptionColIdx = null;
+        foreach ($rows->skip(1)->take(10) as $sampleRow) {
+            $d = $sampleRow->toArray();
+            foreach (['المرجع', 'العملة', 'البيان'] as $hdr) {
+                foreach ($colMap[$hdr] ?? [] as $idx) {
+                    $v = trim((string) ($d[$idx] ?? ''));
+                    if ($v === '') {
+                        continue;
+                    }
+                    $vClean = str_replace([',', ' '], '', $v);
+                    if (is_numeric($vClean)) {
+                        $referenceColIdx = $referenceColIdx ?? $idx;
+                    } else {
+                        $descriptionColIdx = $descriptionColIdx ?? $idx;
+                    }
+                }
+            }
+            if ($referenceColIdx !== null || $descriptionColIdx !== null) {
+                break;
+            }
+        }
 
         // Cache branch lookups to avoid N+1 queries
         $branchCache      = [];
         $incomeTypeCache  = [];
         $expenseTypeCache = [];
 
-        foreach ($rows as $index => $row) {
-            $rowNum = $index + 1;
+        // First النوع column index (type keyword: إيراد / مصروف)
+        $typeColIdx = ($colMap['النوع'] ?? [null])[0];
 
-            // Skip header row(s): first row, or any row where column 4 (amount) is non-numeric
-            if ($rowNum === 1) {
-                continue;
-            }
+        // Recipient column
+        $recipientHeaders    = ['المستلم / ملاحظات', 'المستلم', 'ملاحظات', 'المستلم/ملاحظات'];
+        $paymentMethodHeaders = ['طريقة الدفع', 'طريقة الدفع'];
+        $dateHeaders          = ['التاريخ', 'تاريخ', 'ت'];
+        $branchHeaders        = ['الفرع', 'فرع', 'اسم الفرع'];
 
-            $rawDate          = $row[0] ?? null;
-            $branchValue      = trim((string) ($row[1] ?? ''));
-            $typeName         = trim((string) ($row[2] ?? ''));
-            $rawAmount        = $row[3] ?? null;  // D = النوع الثاني = المبلغ الفعلي
-            $referenceNumber  = trim((string) ($row[5] ?? ''));  // F = رقم المرجع
-            $description      = trim((string) ($row[6] ?? ''));  // G = نص المرجع/الوصف
-            $recipient        = trim((string) ($row[7] ?? '')) ?: null;  // H = المستلم/ملاحظات
-            $paymentMethodRaw = trim((string) ($row[8] ?? ''));  // I = طريقة الدفع
+        foreach ($rows->skip(1) as $index => $row) {
+            $rowNum = $index + 2;
+            $data   = $row->toArray();
+
+            $rawDate     = $get($data, $dateHeaders);
+            $branchValue = trim((string) $get($data, $branchHeaders));
+            $typeName    = $typeColIdx !== null ? trim((string) ($data[$typeColIdx] ?? '')) : '';
+            $rawAmount   = $amountColIdx !== null ? ($data[$amountColIdx] ?? null) : null;
+
+            $referenceNumber = $referenceColIdx !== null
+                ? (trim((string) ($data[$referenceColIdx] ?? '')) ?: null)
+                : null;
+
+            $description = $descriptionColIdx !== null
+                ? (trim((string) ($data[$descriptionColIdx] ?? '')) ?: null)
+                : null;
+
+            $recipient        = trim((string) $get($data, $recipientHeaders)) ?: null;
+            $paymentMethodRaw = trim((string) $get($data, $paymentMethodHeaders)) ?: '';
 
             // Skip completely empty rows
             if ($branchValue === '' && $typeName === '' && $rawAmount === null) {
                 continue;
             }
 
-            // Normalise amount: strip thousands separators (comma) and any trailing currency text
+            // Normalise amount
             $amountStr = trim(str_replace([',', ' ', "\xc2\xa0"], '', (string) $rawAmount));
             $amount    = is_numeric($amountStr) ? (float) $amountStr : null;
 
