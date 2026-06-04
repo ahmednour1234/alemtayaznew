@@ -2,20 +2,20 @@
 
 namespace App\Imports;
 
-use App Models Agent;
-use App Models Admin;
-use App Models Airport;
-use App Models Branch;
-use App Models Client;
-use App Models Nationality;
-use App Models RecruitmentContract;
-use App Models Worker;
-use Illuminate Support Collection;
-use Illuminate Support Facades Auth;
-use Maatwebsite Excel Concerns ToCollection;
-use Maatwebsite Excel Concerns WithCalculatedFormulas;
-use Maatwebsite Excel Concerns WithStartRow;
-use PhpOffice PhpSpreadsheet Shared Date as ExcelDate;
+use App\Models\Agent;
+use App\Models\Admin;
+use App\Models\Airport;
+use App\Models\Branch;
+use App\Models\Client;
+use App\Models\Nationality;
+use App\Models\RecruitmentContract;
+use App\Models\Worker;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
+use Maatwebsite\Excel\Concerns\WithStartRow;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
 class ContractImport implements ToCollection, WithStartRow, WithCalculatedFormulas
 {
@@ -158,7 +158,7 @@ class ContractImport implements ToCollection, WithStartRow, WithCalculatedFormul
                     ->first();
             }
 
-
+            $visaType = in_array($visaTypeRaw, ['domestic', 'rehabilitation']) ? $visaTypeRaw : 'domestic';
 
             // Payment status — supports English and Arabic values
             $payStatus = match (true) {
