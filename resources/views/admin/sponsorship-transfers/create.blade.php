@@ -228,7 +228,8 @@
 @endpush
 
 @section('content')
-<form method="POST" action="{{ route('admin.sponsorship-transfers.store') }}" enctype="multipart/form-data" class="w-full">
+<form method="POST" action="{{ route('admin.sponsorship-transfers.store') }}" enctype="multipart/form-data" class="w-full"
+      data-initial-tab="{{ $errors->hasAny(['total_fees','service_fee','loss_amount','notes']) ? 'fees' : 'contract' }}">
     @csrf
     <input type="hidden" name="original_contract_id" id="original_contract_id" value="{{ old('original_contract_id') }}">
 
