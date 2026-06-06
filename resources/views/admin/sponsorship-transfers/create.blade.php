@@ -489,6 +489,49 @@
             </div>
         </div>
 
+        {{-- ═══ MODAL: إضافة كفيل جديد ══════════════════════════════════════════ --}}
+        <div x-show="clientModal.open" x-cloak
+             class="fixed inset-0 z-50 flex items-center justify-center"
+             style="background:rgba(0,0,0,.45)">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+                 @click.outside="clientModal.open=false">
+                <div class="bg-blue-600 px-6 py-4 flex items-center justify-between">
+                    <h3 class="text-white font-bold text-base">إضافة كفيل جديد</h3>
+                    <button type="button" @click="clientModal.open=false"
+                            class="text-blue-100 hover:text-white transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 mb-1.5">الاسم <span class="text-red-500">*</span></label>
+                        <input type="text" x-model="clientModal.name" placeholder="اسم الكفيل"
+                               class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 mb-1.5">رقم الجوال</label>
+                        <input type="text" x-model="clientModal.phone" placeholder="05xxxxxxxx"
+                               class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 mb-1.5">رقم الهوية</label>
+                        <input type="text" x-model="clientModal.national_id" placeholder="1xxxxxxxxx"
+                               class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                    </div>
+                    <div x-show="clientModal.error" class="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-2" x-text="clientModal.error"></div>
+                </div>
+                <div class="px-6 pb-5 flex gap-3 justify-end">
+                    <button type="button" @click="clientModal.open=false"
+                            class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">إلغاء</button>
+                    <button type="button" @click="submitClientST($data)" :disabled="clientModal.loading"
+                            class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2 rounded-xl shadow disabled:opacity-60">
+                        <span x-show="!clientModal.loading">حفظ الكفيل</span>
+                        <span x-show="clientModal.loading">جاري الحفظ...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div class="st-footer">
             <button type="submit" class="st-gold-btn" style="min-width:170px;">
                 <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
@@ -589,51 +632,4 @@ async function submitClientST(component) {
 }
 </script>
 @endpush
-
-{{-- ═══ MODAL: إضافة كفيل جديد ════════════════════════════════════════════ --}}
-<template x-teleport="body">
-<div x-show="clientModal.open" x-cloak
-     class="fixed inset-0 z-50 flex items-center justify-center"
-     style="background:rgba(0,0,0,.45)"
-     x-data>
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
-         @click.outside="clientModal.open=false">
-        <div class="bg-blue-600 px-6 py-4 flex items-center justify-between">
-            <h3 class="text-white font-bold text-base">إضافة كفيل جديد</h3>
-            <button type="button" @click="clientModal.open=false"
-                    class="text-blue-100 hover:text-white transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-        <div class="p-6 space-y-4">
-            <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-1.5">الاسم <span class="text-red-500">*</span></label>
-                <input type="text" x-model="clientModal.name" placeholder="اسم الكفيل"
-                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-1.5">رقم الجوال</label>
-                <input type="text" x-model="clientModal.phone" placeholder="05xxxxxxxx"
-                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-slate-600 mb-1.5">رقم الهوية</label>
-                <input type="text" x-model="clientModal.national_id" placeholder="1xxxxxxxxx"
-                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-            </div>
-            <div x-show="clientModal.error" class="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-2" x-text="clientModal.error"></div>
-        </div>
-        <div class="px-6 pb-5 flex gap-3 justify-end">
-            <button type="button" @click="clientModal.open=false"
-                    class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">إلغاء</button>
-            <button type="button" @click="submitClientST($data)" :disabled="clientModal.loading"
-                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2 rounded-xl shadow disabled:opacity-60">
-                <span x-show="!clientModal.loading">حفظ الكفيل</span>
-                <span x-show="clientModal.loading">جاري الحفظ...</span>
-            </button>
-        </div>
-    </div>
-</div>
-</template>
-
 @endsection
