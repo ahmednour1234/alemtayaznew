@@ -591,8 +591,9 @@ function calcNet() {
 })();
 
 function stForm() {
+    var initialTab = document.querySelector('[data-initial-tab]') ? document.querySelector('[data-initial-tab]').dataset.initialTab : 'contract';
     return {
-        tab: '{{ $errors->hasAny(["total_fees","service_fee","loss_amount","notes"]) ? "fees" : "contract" }}',
+        tab: initialTab,
         clientModal: { open: false, name: '', phone: '', national_id: '', loading: false, error: '' },
 
         async submitClientST() {
