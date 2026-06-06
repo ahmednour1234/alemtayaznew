@@ -664,9 +664,10 @@ async function saveNewClient() {
         var data = await res.json();
         if (data.id) {
             var select = document.getElementById('to_client_id');
-            if (select._tomSelect) {
-                select._tomSelect.addOption({ value: String(data.id), text: data.name });
-                select._tomSelect.setValue(String(data.id));
+            var ts = select && select.tomselect ? select.tomselect : (select && select._tomSelect ? select._tomSelect : null);
+            if (ts) {
+                ts.addOption({ value: String(data.id), text: data.name });
+                ts.addItem(String(data.id));
             } else {
                 select.appendChild(new Option(data.name, data.id, true, true));
                 select.value = data.id;
