@@ -284,7 +284,7 @@ document.addEventListener('alpine:init', function () {
     @csrf
     <input type="hidden" name="original_contract_id" id="original_contract_id" value="{{ old('original_contract_id') }}">
 
-    <div class="st-shell">
+    <div class="st-shell" x-data="stForm()">
         <div class="st-hero">
             <div class="st-title-wrap">
                 <div class="st-icon-box">
@@ -310,7 +310,7 @@ document.addEventListener('alpine:init', function () {
             </div>
         </div>
 
-        <div class="st-body" x-data="stForm()">
+        <div class="st-body">
             <div class="st-tabs">
                 <button type="button" class="st-tab" :class="{ 'active': tab === 'contract' }" @click="tab = 'contract'">
                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
@@ -432,7 +432,7 @@ document.addEventListener('alpine:init', function () {
                                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
                                 الكفيل المستلم (إلى)
                             </span>
-                            <button type="button" @click="clientModal.open=true"
+                            <button type="button" onclick="document.getElementById('addClientModal').style.display='flex'"
                                     style="font-size:11px;color:#2563eb;text-decoration:underline;background:none;border:none;cursor:pointer;padding:0;">+ إضافة كفيل جديد</button>
                         </label>
                         <select name="to_client_id" id="to_client_id" class="st-control">
@@ -541,45 +541,41 @@ document.addEventListener('alpine:init', function () {
             </div>
         </div>
 
-        {{-- ═══ MODAL: إضافة كفيل جديد ══════════════════════════════════════════ --}}
-        <div x-show="clientModal.open" x-cloak
-             class="fixed inset-0 z-50 flex items-center justify-center"
-             style="background:rgba(0,0,0,.45)">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
-                 @click.outside="clientModal.open=false">
-                <div class="bg-blue-600 px-6 py-4 flex items-center justify-between">
-                    <h3 class="text-white font-bold text-base">إضافة كفيل جديد</h3>
-                    <button type="button" @click="clientModal.open=false"
-                            class="text-blue-100 hover:text-white transition">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        {{-- ═══ MODAL: إضافة كفيل جديد (Vanilla JS) ══════════════════════════ --}}
+        <div id="addClientModal"
+             style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(0,0,0,.45);"
+             onclick="if(event.target===this)this.style.display='none'">
+            <div style="background:#fff;border-radius:16px;box-shadow:0 25px 50px rgba(0,0,0,.25);width:100%;max-width:420px;margin:0 16px;overflow:hidden;">
+                <div style="background:#2563eb;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
+                    <h3 style="color:#fff;font-weight:700;font-size:15px;font-family:Cairo,sans-serif;margin:0;">إضافة كفيل جديد</h3>
+                    <button type="button" onclick="document.getElementById('addClientModal').style.display='none'"
+                            style="color:#bfdbfe;background:none;border:none;cursor:pointer;line-height:1;">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </div>
-                <div class="p-6 space-y-4">
+                <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
                     <div>
-                        <label class="block text-sm font-semibold text-slate-600 mb-1.5">الاسم <span class="text-red-500">*</span></label>
-                        <input type="text" x-model="clientModal.name" placeholder="اسم الكفيل"
-                               class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                        <label style="display:block;font-size:13px;font-weight:600;color:#475569;margin-bottom:6px;font-family:Cairo,sans-serif;">الاسم <span style="color:#ef4444">*</span></label>
+                        <input id="newClientName" type="text" placeholder="اسم الكفيل"
+                               style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:9px 12px;font-size:13px;font-family:Cairo,sans-serif;outline:none;box-sizing:border-box;">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-slate-600 mb-1.5">رقم الجوال</label>
-                        <input type="text" x-model="clientModal.phone" placeholder="05xxxxxxxx"
-                               class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                        <label style="display:block;font-size:13px;font-weight:600;color:#475569;margin-bottom:6px;font-family:Cairo,sans-serif;">رقم الجوال</label>
+                        <input id="newClientPhone" type="text" placeholder="05xxxxxxxx"
+                               style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:9px 12px;font-size:13px;font-family:Cairo,sans-serif;outline:none;box-sizing:border-box;">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-slate-600 mb-1.5">رقم الهوية</label>
-                        <input type="text" x-model="clientModal.national_id" placeholder="1xxxxxxxxx"
-                               class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                        <label style="display:block;font-size:13px;font-weight:600;color:#475569;margin-bottom:6px;font-family:Cairo,sans-serif;">رقم الهوية</label>
+                        <input id="newClientNationalId" type="text" placeholder="1xxxxxxxxx"
+                               style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:9px 12px;font-size:13px;font-family:Cairo,sans-serif;outline:none;box-sizing:border-box;">
                     </div>
-                    <div x-show="clientModal.error" class="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-2" x-text="clientModal.error"></div>
+                    <div id="newClientError" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;font-size:13px;border-radius:8px;padding:8px 12px;font-family:Cairo,sans-serif;"></div>
                 </div>
-                <div class="px-6 pb-5 flex gap-3 justify-end">
-                    <button type="button" @click="clientModal.open=false"
-                            class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">إلغاء</button>
-                    <button type="button" @click="submitClientST()" :disabled="clientModal.loading"
-                            class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2 rounded-xl shadow disabled:opacity-60">
-                        <span x-show="!clientModal.loading">حفظ الكفيل</span>
-                        <span x-show="clientModal.loading">جاري الحفظ...</span>
-                    </button>
+                <div style="padding:0 24px 20px;display:flex;gap:10px;justify-content:flex-end;">
+                    <button type="button" onclick="document.getElementById('addClientModal').style.display='none'"
+                            style="padding:9px 20px;border-radius:10px;font-size:13px;font-weight:600;color:#64748b;border:1.5px solid #e2e8f0;background:#fff;cursor:pointer;font-family:Cairo,sans-serif;">إلغاء</button>
+                    <button type="button" id="saveClientBtn" onclick="saveNewClient()"
+                            style="padding:9px 24px;border-radius:10px;font-size:13px;font-weight:700;color:#fff;background:#2563eb;border:none;cursor:pointer;font-family:Cairo,sans-serif;">حفظ الكفيل</button>
                 </div>
             </div>
         </div>
@@ -641,6 +637,56 @@ function calcNet() {
     if (workerSelect && workerSelect.value) onWorkerChange(workerSelect.value);
     calcNet();
 })();
+
+async function saveNewClient() {
+    var name       = document.getElementById('newClientName').value.trim();
+    var phone      = document.getElementById('newClientPhone').value.trim();
+    var nationalId = document.getElementById('newClientNationalId').value.trim();
+    var errEl      = document.getElementById('newClientError');
+    var btn        = document.getElementById('saveClientBtn');
+
+    errEl.style.display = 'none';
+    if (!name) { errEl.textContent = 'الاسم مطلوب'; errEl.style.display = 'block'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'جاري الحفظ...';
+
+    try {
+        var res = await fetch('{{ route("admin.clients.quick-store") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ name: name, phone: phone || null, national_id: nationalId || null })
+        });
+        var data = await res.json();
+        if (data.id) {
+            var select = document.getElementById('to_client_id');
+            if (select._tomSelect) {
+                select._tomSelect.addOption({ value: String(data.id), text: data.name });
+                select._tomSelect.setValue(String(data.id));
+            } else {
+                select.appendChild(new Option(data.name, data.id, true, true));
+                select.value = data.id;
+            }
+            document.getElementById('addClientModal').style.display = 'none';
+            document.getElementById('newClientName').value = '';
+            document.getElementById('newClientPhone').value = '';
+            document.getElementById('newClientNationalId').value = '';
+        } else {
+            errEl.textContent = data.message || 'حدث خطأ';
+            errEl.style.display = 'block';
+        }
+    } catch(e) {
+        errEl.textContent = 'تعذّر الاتصال بالخادم';
+        errEl.style.display = 'block';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'حفظ الكفيل';
+}
 </script>
 @endpush
 @endsection
