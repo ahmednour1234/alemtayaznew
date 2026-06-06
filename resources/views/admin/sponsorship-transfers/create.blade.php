@@ -258,7 +258,7 @@
             </div>
         </div>
 
-        <div class="st-body" x-data="{ tab: '{{ $errors->hasAny(['total_fees','service_fee','loss_amount','notes']) ? 'fees' : 'contract' }}', clientModal: { open: false, name: '', phone: '', national_id: '', loading: false, error: '' } }">
+        <div class="st-body" x-data="stForm()">
             <div class="st-tabs">
                 <button type="button" class="st-tab" :class="{ 'active': tab === 'contract' }" @click="tab = 'contract'">
                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
@@ -523,7 +523,7 @@
                 <div class="px-6 pb-5 flex gap-3 justify-end">
                     <button type="button" @click="clientModal.open=false"
                             class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">إلغاء</button>
-                    <button type="button" @click="submitClientST($data)" :disabled="clientModal.loading"
+                    <button type="button" @click="submitClientST()" :disabled="clientModal.loading"
                             class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2 rounded-xl shadow disabled:opacity-60">
                         <span x-show="!clientModal.loading">حفظ الكفيل</span>
                         <span x-show="clientModal.loading">جاري الحفظ...</span>
@@ -590,45 +590,53 @@ function calcNet() {
     calcNet();
 })();
 
-async function submitClientST(component) {
-    if (!component.clientModal.name.trim()) {
-        component.clientModal.error = 'الاسم مطلوب';
-        return;
-    }
-    component.clientModal.loading = true;
-    component.clientModal.error   = '';
-    try {
-        const res = await fetch('{{ route("admin.clients.quick-store") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                name: component.clientModal.name,
-                phone: component.clientModal.phone,
-                national_id: component.clientModal.national_id || null
-            })
-        });
-        const data = await res.json();
-        if (data.id) {
-            const select = document.getElementById('to_client_id');
-            const opt = new Option(data.name, data.id, true, true);
-            select.appendChild(opt);
-            select.value = data.id;
-            if (select._tomSelect) {
-                select._tomSelect.addOption({ value: String(data.id), text: data.name });
-                select._tomSelect.setValue(String(data.id));
+function stForm() {
+    return {
+        tab: '{{ $errors->hasAny(["total_fees","service_fee","loss_amount","notes"]) ? "fees" : "contract" }}',
+        clientModal: { open: false, name: '', phone: '', national_id: '', loading: false, error: '' },
+
+        async submitClientST() {
+            if (!this.clientModal.name.trim()) {
+                this.clientModal.error = 'الاسم مطلوب';
+                return;
             }
-            component.clientModal = { open: false, name: '', phone: '', national_id: '', loading: false, error: '' };
-        } else {
-            component.clientModal.error = data.message || 'حدث خطأ';
-        }
-    } catch (e) {
-        component.clientModal.error = 'تعذّر الاتصال بالخادم';
-    }
-    component.clientModal.loading = false;
+            this.clientModal.loading = true;
+            this.clientModal.error   = '';
+            try {
+                const res = await fetch('{{ route("admin.clients.quick-store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: this.clientModal.name,
+                        phone: this.clientModal.phone,
+                        national_id: this.clientModal.national_id || null
+                    })
+                });
+                const data = await res.json();
+                if (data.id) {
+                    const select = document.getElementById('to_client_id');
+                    const opt = new Option(data.name, data.id, true, true);
+                    select.appendChild(opt);
+                    if (select._tomSelect) {
+                        select._tomSelect.addOption({ value: String(data.id), text: data.name });
+                        select._tomSelect.setValue(String(data.id));
+                    } else {
+                        select.value = data.id;
+                    }
+                    this.clientModal = { open: false, name: '', phone: '', national_id: '', loading: false, error: '' };
+                } else {
+                    this.clientModal.error = data.message || 'حدث خطأ';
+                }
+            } catch (e) {
+                this.clientModal.error = 'تعذّر الاتصال بالخادم';
+            }
+            this.clientModal.loading = false;
+        },
+    };
 }
 </script>
 @endpush
