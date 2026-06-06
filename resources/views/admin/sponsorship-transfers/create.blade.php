@@ -258,7 +258,7 @@
             </div>
         </div>
 
-        <div class="st-body" x-data="{ tab: '{{ $errors->hasAny(['total_fees','service_fee','loss_amount','notes']) ? 'fees' : 'contract' }}' }">
+        <div class="st-body" x-data="{ tab: '{{ $errors->hasAny(['total_fees','service_fee','loss_amount','notes']) ? 'fees' : 'contract' }}', clientModal: { open: false, name: '', phone: '', national_id: '', loading: false, error: '' } }">
             <div class="st-tabs">
                 <button type="button" class="st-tab" :class="{ 'active': tab === 'contract' }" @click="tab = 'contract'">
                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
@@ -375,11 +375,15 @@
                     </div>
 
                     <div class="st-field">
-                        <label class="st-label">
-                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-                            الكفيل المستلم (إلى)
+                        <label class="st-label" style="display:flex;justify-content:space-between;align-items:center;">
+                            <span style="display:flex;align-items:center;gap:6px;">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                                الكفيل المستلم (إلى)
+                            </span>
+                            <button type="button" @click="clientModal.open=true"
+                                    style="font-size:11px;color:#2563eb;text-decoration:underline;background:none;border:none;cursor:pointer;padding:0;">+ إضافة كفيل جديد</button>
                         </label>
-                        <select name="to_client_id" class="st-control">
+                        <select name="to_client_id" id="to_client_id" class="st-control">
                             <option value="">لم يحدد بعد</option>
                             @foreach($clients as $c)
                             <option value="{{ $c->id }}" @selected(old('to_client_id') == $c->id)>{{ $c->name }}</option>
@@ -542,6 +546,94 @@ function calcNet() {
     if (workerSelect && workerSelect.value) onWorkerChange(workerSelect.value);
     calcNet();
 })();
+
+async function submitClientST(component) {
+    if (!component.clientModal.name.trim()) {
+        component.clientModal.error = 'الاسم مطلوب';
+        return;
+    }
+    component.clientModal.loading = true;
+    component.clientModal.error   = '';
+    try {
+        const res = await fetch('{{ route("admin.clients.quick-store") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                name: component.clientModal.name,
+                phone: component.clientModal.phone,
+                national_id: component.clientModal.national_id || null
+            })
+        });
+        const data = await res.json();
+        if (data.id) {
+            const select = document.getElementById('to_client_id');
+            const opt = new Option(data.name, data.id, true, true);
+            select.appendChild(opt);
+            select.value = data.id;
+            if (select._tomSelect) {
+                select._tomSelect.addOption({ value: String(data.id), text: data.name });
+                select._tomSelect.setValue(String(data.id));
+            }
+            component.clientModal = { open: false, name: '', phone: '', national_id: '', loading: false, error: '' };
+        } else {
+            component.clientModal.error = data.message || 'حدث خطأ';
+        }
+    } catch (e) {
+        component.clientModal.error = 'تعذّر الاتصال بالخادم';
+    }
+    component.clientModal.loading = false;
+}
 </script>
 @endpush
+
+{{-- ═══ MODAL: إضافة كفيل جديد ════════════════════════════════════════════ --}}
+<template x-teleport="body">
+<div x-show="clientModal.open" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center"
+     style="background:rgba(0,0,0,.45)"
+     x-data>
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+         @click.outside="clientModal.open=false">
+        <div class="bg-blue-600 px-6 py-4 flex items-center justify-between">
+            <h3 class="text-white font-bold text-base">إضافة كفيل جديد</h3>
+            <button type="button" @click="clientModal.open=false"
+                    class="text-blue-100 hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="p-6 space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-1.5">الاسم <span class="text-red-500">*</span></label>
+                <input type="text" x-model="clientModal.name" placeholder="اسم الكفيل"
+                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-1.5">رقم الجوال</label>
+                <input type="text" x-model="clientModal.phone" placeholder="05xxxxxxxx"
+                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-600 mb-1.5">رقم الهوية</label>
+                <input type="text" x-model="clientModal.national_id" placeholder="1xxxxxxxxx"
+                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+            </div>
+            <div x-show="clientModal.error" class="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-2" x-text="clientModal.error"></div>
+        </div>
+        <div class="px-6 pb-5 flex gap-3 justify-end">
+            <button type="button" @click="clientModal.open=false"
+                    class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">إلغاء</button>
+            <button type="button" @click="submitClientST($data)" :disabled="clientModal.loading"
+                    class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2 rounded-xl shadow disabled:opacity-60">
+                <span x-show="!clientModal.loading">حفظ الكفيل</span>
+                <span x-show="clientModal.loading">جاري الحفظ...</span>
+            </button>
+        </div>
+    </div>
+</div>
+</template>
+
 @endsection

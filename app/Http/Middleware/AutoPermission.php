@@ -173,7 +173,7 @@ class AutoPermission
         'admin.workers.store'         => 'workers.create',
         'admin.workers.bulk'          => 'workers.create',
         'admin.workers.bulk-store'    => 'workers.create',
-        'admin.workers.quick-store'   => 'workers.create',
+        'admin.workers.quick-store'   => null,
         'admin.workers.edit'          => 'workers.edit',
         'admin.workers.update'        => 'workers.edit',
         'admin.workers.destroy'       => 'workers.delete',
