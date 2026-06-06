@@ -28,13 +28,13 @@ class LeadController extends Controller
 
 
         foreach (['status', 'branch_id', 'nationality_id', 'campaign_id', 'assigned_admin_id'] as $f) {
-            if ($v = $request->input($f)) $query->where($f, $v)->where('assigned_admin_id', $me->id);
+            if ($v = $request->input($f)) $query->where($f, $v);
         }
         if ($s = $request->input('search')) {
             $query->where(fn($q) => $q->where('name', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%"));
         }
 
-        $leads       = $query->paginate(30)->withQueryString();
+        $leads       = $query->where('assigned_admin_id', $me->id)->paginate(30)->withQueryString();
         $statuses    = Lead::statuses();
         $branches    = Branch::where('active', true)->get();
         $nationalities = Nationality::where('active', true)->orderBy('name')->get();
