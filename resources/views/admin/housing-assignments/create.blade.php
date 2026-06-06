@@ -70,6 +70,7 @@
     <h2 class="text-lg font-bold text-slate-800">تسكين عاملة جديدة</h2>
 </div>
 
+<div x-data="housingForm()">
 <form method="POST" action="{{ route('admin.housing-assignments.store') }}">
     @csrf
 
@@ -180,11 +181,15 @@
 
                     {{-- Worker --}}
                     <div class="field-card">
-                        <label class="form-label">
-                            <svg width="13" height="13" fill="none" stroke="#c9a84c" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            العاملة <span class="req">*</span>
+                        <label class="form-label" style="justify-content:space-between;">
+                            <span style="display:flex;align-items:center;gap:6px;">
+                                <svg width="13" height="13" fill="none" stroke="#c9a84c" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                العاملة <span class="req">*</span>
+                            </span>
+                            <button type="button" @click="workerModal.open=true"
+                                    class="text-indigo-500 hover:text-indigo-700 font-normal text-xs underline">+ إضافة عاملة جديدة</button>
                         </label>
-                        <select name="worker_id" required class="form-input" style="padding:4px 0">
+                        <select id="workerSelect" name="worker_id" required class="form-input" style="padding:4px 0">
                             <option value="">اختر عاملة</option>
                             @foreach($workers as $w)
                             <option value="{{ $w->id }}" {{ old('worker_id') == $w->id ? 'selected' : '' }}>
@@ -326,6 +331,56 @@
     </div>
 </form>
 
+    {{-- ═══ MODAL: إضافة عاملة ════════════════════════════════════════════════ --}}
+    <div x-show="workerModal.open" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center"
+         style="background:rgba(0,0,0,.45)">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+             @click.outside="workerModal.open=false">
+            <div class="bg-indigo-600 px-6 py-4 flex items-center justify-between">
+                <h3 class="text-white font-bold text-base">إضافة عاملة جديدة</h3>
+                <button type="button" @click="workerModal.open=false"
+                        class="text-indigo-100 hover:text-white transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-1.5">الاسم <span class="text-red-500">*</span></label>
+                    <input type="text" x-model="workerModal.name" placeholder="اسم العاملة"
+                           class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-1.5">الجنسية</label>
+                    <select x-model="workerModal.nationality_id"
+                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
+                        <option value="">— اختر —</option>
+                        @foreach(\App\Models\Nationality::where('active', true)->orderBy('name')->get() as $nat)
+                        <option value="{{ $nat->id }}">{{ $nat->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-1.5">رقم الجواز</label>
+                    <input type="text" x-model="workerModal.passport_number" placeholder="A1234567"
+                           class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
+                </div>
+                <div x-show="workerModal.error" class="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-2" x-text="workerModal.error"></div>
+            </div>
+            <div class="px-6 pb-5 flex gap-3 justify-end">
+                <button type="button" @click="workerModal.open=false"
+                        class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">إلغاء</button>
+                <button type="button" @click="submitWorker()" :disabled="workerModal.loading"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2 rounded-xl shadow disabled:opacity-60">
+                    <span x-show="!workerModal.loading">حفظ العاملة</span>
+                    <span x-show="workerModal.loading">جاري الحفظ...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>{{-- end x-data --}}
+
 @push('scripts')
 <script>
 const reasonColors = {
@@ -358,6 +413,51 @@ function selectWorkerStatus(val) {
         el.style.background   = active ? wsBg[s]     : '#fff';
         el.style.color        = active ? wsColors[s]  : '#64748b';
     });
+}
+</script>
+
+<script>
+function housingForm() {
+    return {
+        workerModal: { open: false, name: '', nationality_id: '', passport_number: '', loading: false, error: '' },
+
+        async submitWorker() {
+            if (!this.workerModal.name.trim()) {
+                this.workerModal.error = 'الاسم مطلوب';
+                return;
+            }
+            this.workerModal.loading = true;
+            this.workerModal.error   = '';
+            try {
+                const res = await fetch('{{ route("admin.workers.quick-store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: this.workerModal.name,
+                        nationality_id: this.workerModal.nationality_id || null,
+                        passport_number: this.workerModal.passport_number || null
+                    })
+                });
+                const data = await res.json();
+                if (data.id) {
+                    const select = document.getElementById('workerSelect');
+                    const opt = new Option(data.name + (data.nationality ? ' — ' + data.nationality : ''), data.id, true, true);
+                    select.appendChild(opt);
+                    select.value = data.id;
+                    this.workerModal = { open: false, name: '', nationality_id: '', passport_number: '', loading: false, error: '' };
+                } else {
+                    this.workerModal.error = data.message || 'حدث خطأ';
+                }
+            } catch (e) {
+                this.workerModal.error = 'تعذّر الاتصال بالخادم';
+            }
+            this.workerModal.loading = false;
+        },
+    };
 }
 </script>
 @endpush
