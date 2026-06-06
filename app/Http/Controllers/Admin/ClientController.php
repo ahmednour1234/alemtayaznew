@@ -81,7 +81,22 @@ class ClientController extends Controller
             'classification' => ['nullable', 'string', 'in:potential,confirmed,premium'],
         ]);
 
-        $me             = Auth::guard('admin')->user();
+        $me = Auth::guard('admin')->user();
+
+        // If national_id provided and already exists, return the existing client
+        if (filled($request->national_id)) {
+            $existing = \App\Models\Client::where('national_id', $request->national_id)->first();
+            if ($existing) {
+                return response()->json([
+                    'id'          => $existing->id,
+                    'name'        => $existing->name,
+                    'phone'       => $existing->phone,
+                    'national_id' => $existing->national_id,
+                    'existing'    => true,
+                ]);
+            }
+        }
+
         $classification = $request->classification
             ?? (filled($request->national_id) ? 'confirmed' : 'potential');
 
