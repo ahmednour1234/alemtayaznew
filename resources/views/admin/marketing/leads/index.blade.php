@@ -12,7 +12,7 @@
 
 <!-- Filters -->
 <div class="bg-white rounded-xl p-5 shadow-sm mb-4 border border-slate-100">
-    <form method="GET" class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <form method="GET" class="grid grid-cols-2 md:grid-cols-6 gap-3">
         <div>
             <label class="block text-xs font-medium text-slate-500 mb-1.5">بحث</label>
             <input type="text" name="search" value="{{ request('search') }}" placeholder="اسم أو جوال"
@@ -45,6 +45,15 @@
                 @endforeach
             </select>
         </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1.5">المسؤول</label>
+            <select name="assigned_admin_id" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                <option value="">الكل</option>
+                @foreach($admins as $admin)
+                    <option value="{{ $admin->id }}" {{ request('assigned_admin_id') == $admin->id ? 'selected' : '' }}>{{ $admin->name }}</option>
+                @endforeach
+            </select>
+        </div>
         <div class="flex items-end gap-2">
             <button class="bg-slate-800 hover:bg-slate-900 text-white text-sm px-5 py-2 rounded-lg flex-1">تصفية</button>
             <a href="{{ request()->fullUrlWithQuery(['assigned_to_me' => request('assigned_to_me') ? '' : '1']) }}"
@@ -63,6 +72,7 @@
                 <th class="px-4 py-3 font-medium">الجوال</th>
                 <th class="px-4 py-3 font-medium">المدينة</th>
                 <th class="px-4 py-3 font-medium">الجنسية</th>
+                <th class="px-4 py-3 font-medium">المسؤول</th>
                 <th class="px-4 py-3 font-medium">الحملة</th>
                 <th class="px-4 py-3 font-medium">الفرع</th>
                 <th class="px-4 py-3 font-medium">آخر مكالمة</th>
@@ -87,6 +97,7 @@
                 </td>
                 <td class="px-4 py-3 text-slate-600">{{ $lead->city ?? '—' }}</td>
                 <td class="px-4 py-3 text-slate-600">{{ $lead->nationality?->name ?? '—' }}</td>
+                <td class="px-4 py-3 text-slate-600 text-xs">{{ $lead->assignedAdmin?->name ?? '—' }}</td>
                 <td class="px-4 py-3 text-slate-600 text-xs">{{ $lead->campaign?->name ?? '—' }}</td>
                 <td class="px-4 py-3 text-slate-600 text-xs">{{ $lead->branch?->name ?? '—' }}</td>
                 <td class="px-4 py-3 text-xs text-slate-500">
@@ -102,7 +113,7 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="9" class="px-4 py-10 text-center text-slate-400 text-sm">لا يوجد عملاء محتملون</td></tr>
+            <tr><td colspan="10" class="px-4 py-10 text-center text-slate-400 text-sm">لا يوجد عملاء محتملون</td></tr>
             @endforelse
         </tbody>
     </table>

@@ -32,7 +32,7 @@ class LeadController extends Controller
             $query->where('assigned_admin_id', $me->id);
         }
 
-        foreach (['status', 'branch_id', 'nationality_id', 'campaign_id'] as $f) {
+        foreach (['status', 'branch_id', 'nationality_id', 'campaign_id', 'assigned_admin_id'] as $f) {
             if ($v = $request->input($f)) $query->where($f, $v);
         }
         if ($s = $request->input('search')) {
