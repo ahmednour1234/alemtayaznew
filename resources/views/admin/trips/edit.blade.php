@@ -182,19 +182,6 @@ select.form-input { padding-top: 9px; padding-bottom: 9px; }
                         </select>
                     </div>
 
-                    <div>
-                        <label class="form-label">
-                            <svg width="13" height="13" fill="none" stroke="#c9a84c" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                            الفرع <span class="req">*</span>
-                        </label>
-                        <select name="branch_id" required class="form-input">
-                            @foreach($branches as $b)
-                            <option value="{{ $b->id }}" {{ old('branch_id', $trip->branch_id) == $b->id ? 'selected' : '' }}>{{ $b->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('branch_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-                    </div>
-
                 </div>
             </div>
 

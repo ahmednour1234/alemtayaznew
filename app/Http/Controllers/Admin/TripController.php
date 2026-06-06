@@ -44,10 +44,8 @@ class TripController extends Controller
     public function create()
     {
         $airports      = Airport::orderBy('name')->get();
-        $branches      = Branch::where('active', true)->orderBy('name')->get();
         $nationalities = Nationality::where('active', true)->orderBy('name')->get();
-        $branchId      = $this->branchFilter();
-        return view('admin.trips.create', compact('airports', 'branches', 'nationalities', 'branchId'));
+        return view('admin.trips.create', compact('airports', 'nationalities'));
     }
 
     public function store(Request $request)
@@ -59,15 +57,12 @@ class TripController extends Controller
             'airport_id'             => 'nullable|exists:airports,id',
             'origin_nationality_id'  => 'nullable|exists:nationalities,id',
             'flight_number'          => 'nullable|string|max:50',
-            'branch_id'              => 'required|exists:branches,id',
             'notes'                  => 'nullable|string|max:1000',
         ]);
 
-        if ($bid = $this->branchFilter()) {
-            $data['branch_id'] = $bid;
-        }
-
-        $data['admin_id'] = Auth::guard('admin')->id();
+        $me = Auth::guard('admin')->user();
+        $data['branch_id'] = $me->branch_id;
+        $data['admin_id']  = $me->id;
         $data['status']   = 'scheduled';
 
         $trip = $this->service->create($data);
@@ -143,9 +138,8 @@ class TripController extends Controller
     {
         $trip          = $this->service->find($id);
         $airports      = Airport::orderBy('name')->get();
-        $branches      = Branch::where('active', true)->orderBy('name')->get();
         $nationalities = Nationality::where('active', true)->orderBy('name')->get();
-        return view('admin.trips.edit', compact('trip', 'airports', 'branches', 'nationalities'));
+        return view('admin.trips.edit', compact('trip', 'airports', 'nationalities'));
     }
 
     public function update(Request $request, int $id)
@@ -157,7 +151,6 @@ class TripController extends Controller
             'airport_id'             => 'nullable|exists:airports,id',
             'origin_nationality_id'  => 'nullable|exists:nationalities,id',
             'flight_number'          => 'nullable|string|max:50',
-            'branch_id'              => 'required|exists:branches,id',
             'notes'                  => 'nullable|string|max:1000',
         ]);
 
