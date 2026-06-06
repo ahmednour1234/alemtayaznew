@@ -445,9 +445,16 @@ function housingForm() {
                 const data = await res.json();
                 if (data.id) {
                     const select = document.getElementById('workerSelect');
-                    const opt = new Option(data.name + (data.nationality ? ' — ' + data.nationality : ''), data.id, true, true);
-                    select.appendChild(opt);
-                    select.value = data.id;
+                    const label = data.name + (data.nationality ? ' — ' + data.nationality : '');
+                    const ts = select && select.tomselect ? select.tomselect : (select && select._tomSelect ? select._tomSelect : null);
+                    if (ts) {
+                        ts.addOption({ value: String(data.id), text: label });
+                        ts.addItem(String(data.id));
+                    } else {
+                        const opt = new Option(label, data.id, true, true);
+                        select.appendChild(opt);
+                        select.value = data.id;
+                    }
                     this.workerModal = { open: false, name: '', nationality_id: '', passport_number: '', loading: false, error: '' };
                 } else {
                     this.workerModal.error = data.message || 'حدث خطأ';
