@@ -228,6 +228,61 @@
 @endpush
 
 @section('content')
+<script>
+function stForm() {
+    var form = document.currentScript ? document.currentScript.closest('form') : null;
+    var initialTab = 'contract';
+    @if($errors->hasAny(['total_fees','service_fee','loss_amount','notes']))
+    initialTab = 'fees';
+    @endif
+    return {
+        tab: initialTab,
+        clientModal: { open: false, name: '', phone: '', national_id: '', loading: false, error: '' },
+
+        async submitClientST() {
+            if (!this.clientModal.name.trim()) {
+                this.clientModal.error = 'الاسم مطلوب';
+                return;
+            }
+            this.clientModal.loading = true;
+            this.clientModal.error   = '';
+            try {
+                const res = await fetch('{{ route("admin.clients.quick-store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: this.clientModal.name,
+                        phone: this.clientModal.phone,
+                        national_id: this.clientModal.national_id || null
+                    })
+                });
+                const data = await res.json();
+                if (data.id) {
+                    const select = document.getElementById('to_client_id');
+                    if (select._tomSelect) {
+                        select._tomSelect.addOption({ value: String(data.id), text: data.name });
+                        select._tomSelect.setValue(String(data.id));
+                    } else {
+                        const opt = new Option(data.name, data.id, true, true);
+                        select.appendChild(opt);
+                        select.value = data.id;
+                    }
+                    this.clientModal = { open: false, name: '', phone: '', national_id: '', loading: false, error: '' };
+                } else {
+                    this.clientModal.error = data.message || 'حدث خطأ';
+                }
+            } catch (e) {
+                this.clientModal.error = 'تعذّر الاتصال بالخادم';
+            }
+            this.clientModal.loading = false;
+        },
+    };
+}
+</script>
 <form method="POST" action="{{ route('admin.sponsorship-transfers.store') }}" enctype="multipart/form-data" class="w-full"
       data-initial-tab="{{ $errors->hasAny(['total_fees','service_fee','loss_amount','notes']) ? 'fees' : 'contract' }}">
     @csrf
@@ -590,56 +645,6 @@ function calcNet() {
     if (workerSelect && workerSelect.value) onWorkerChange(workerSelect.value);
     calcNet();
 })();
-
-function stForm() {
-    var initialTab = document.querySelector('[data-initial-tab]') ? document.querySelector('[data-initial-tab]').dataset.initialTab : 'contract';
-    return {
-        tab: initialTab,
-        clientModal: { open: false, name: '', phone: '', national_id: '', loading: false, error: '' },
-
-        async submitClientST() {
-            if (!this.clientModal.name.trim()) {
-                this.clientModal.error = 'الاسم مطلوب';
-                return;
-            }
-            this.clientModal.loading = true;
-            this.clientModal.error   = '';
-            try {
-                const res = await fetch('{{ route("admin.clients.quick-store") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: this.clientModal.name,
-                        phone: this.clientModal.phone,
-                        national_id: this.clientModal.national_id || null
-                    })
-                });
-                const data = await res.json();
-                if (data.id) {
-                    const select = document.getElementById('to_client_id');
-                    const opt = new Option(data.name, data.id, true, true);
-                    select.appendChild(opt);
-                    if (select._tomSelect) {
-                        select._tomSelect.addOption({ value: String(data.id), text: data.name });
-                        select._tomSelect.setValue(String(data.id));
-                    } else {
-                        select.value = data.id;
-                    }
-                    this.clientModal = { open: false, name: '', phone: '', national_id: '', loading: false, error: '' };
-                } else {
-                    this.clientModal.error = data.message || 'حدث خطأ';
-                }
-            } catch (e) {
-                this.clientModal.error = 'تعذّر الاتصال بالخادم';
-            }
-            this.clientModal.loading = false;
-        },
-    };
-}
 </script>
 @endpush
 @endsection
