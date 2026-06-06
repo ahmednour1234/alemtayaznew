@@ -365,6 +365,18 @@
                     <input type="text" x-model="workerModal.passport_number" placeholder="A1234567"
                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
                 </div>
+                <hr class="border-slate-200">
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">بيانات الكفيل (اختياري)</p>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-1.5">اسم الكفيل</label>
+                    <input type="text" x-model="workerModal.sponsor_name" placeholder="اسم الكفيل"
+                           class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-1.5">رقم جوال الكفيل</label>
+                    <input type="text" x-model="workerModal.sponsor_phone" placeholder="05xxxxxxxx"
+                           class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
+                </div>
                 <div x-show="workerModal.error" class="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-2" x-text="workerModal.error"></div>
             </div>
             <div class="px-6 pb-5 flex gap-3 justify-end">
@@ -419,7 +431,7 @@ function selectWorkerStatus(val) {
 <script>
 function housingForm() {
     return {
-        workerModal: { open: false, name: '', nationality_id: '', passport_number: '', loading: false, error: '' },
+        workerModal: { open: false, name: '', nationality_id: '', passport_number: '', sponsor_name: '', sponsor_phone: '', loading: false, error: '' },
 
         async submitWorker() {
             if (!this.workerModal.name.trim()) {
@@ -439,7 +451,9 @@ function housingForm() {
                     body: JSON.stringify({
                         name: this.workerModal.name,
                         nationality_id: this.workerModal.nationality_id || null,
-                        passport_number: this.workerModal.passport_number || null
+                        passport_number: this.workerModal.passport_number || null,
+                        sponsor_name: this.workerModal.sponsor_name || null,
+                        sponsor_phone: this.workerModal.sponsor_phone || null
                     })
                 });
                 const data = await res.json();
@@ -455,7 +469,7 @@ function housingForm() {
                         select.appendChild(opt);
                         select.value = data.id;
                     }
-                    this.workerModal = { open: false, name: '', nationality_id: '', passport_number: '', loading: false, error: '' };
+                    this.workerModal = { open: false, name: '', nationality_id: '', passport_number: '', sponsor_name: '', sponsor_phone: '', loading: false, error: '' };
                 } else {
                     this.workerModal.error = data.message || 'حدث خطأ';
                 }

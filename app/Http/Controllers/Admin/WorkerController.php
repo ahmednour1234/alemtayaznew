@@ -85,9 +85,27 @@ class WorkerController extends Controller
             'name'            => ['required', 'string', 'max:255'],
             'nationality_id'  => ['nullable', 'integer', 'exists:nationalities,id'],
             'passport_number' => ['nullable', 'string', 'max:50'],
+            'sponsor_name'    => ['nullable', 'string', 'max:255'],
+            'sponsor_phone'   => ['nullable', 'string', 'max:20'],
         ]);
 
         $me = Auth::guard('admin')->user();
+
+        // Save sponsor as client if provided
+        $clientId = null;
+        if (filled($request->sponsor_name)) {
+            $sponsor = \App\Models\Client::create([
+                'name'           => $request->sponsor_name,
+                'phone'          => $request->sponsor_phone,
+                'marital_status' => 'single',
+                'classification' => 'potential',
+                'branch_id'      => $me->branch_id,
+                'admin_id'       => $me->id,
+                'active'         => true,
+            ]);
+            $clientId = $sponsor->id;
+        }
+
         $worker = Worker::create([
             'name'            => $request->name,
             'nationality_id'  => $request->nationality_id,
@@ -95,6 +113,7 @@ class WorkerController extends Controller
             'status'          => 'available',
             'branch_id'       => $me->branch_id,
             'admin_id'        => $me->id,
+            'client_id'       => $clientId,
             'active'          => true,
         ]);
 
