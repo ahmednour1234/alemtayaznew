@@ -85,6 +85,28 @@ class HousingAssignmentController extends Controller
             ->with('success', 'تم تسكين العاملة بنجاح.');
     }
 
+    public function update(int $id, Request $request)
+    {
+        $data = $request->validate([
+            'housing_id'              => 'required|exists:housings,id',
+            'branch_id'               => 'required|exists:branches,id',
+            'check_in_date'           => 'required|date',
+            'expected_check_out_date' => 'nullable|date|after_or_equal:check_in_date',
+            'reason'                  => 'nullable|in:sponsorship_transfer,deportation,handover,rental,settlement',
+            'worker_status'           => 'nullable|in:normal,escaped,sick',
+            'notes'                   => 'nullable|string|max:500',
+        ]);
+
+        if ($branchId = $this->branchFilter()) {
+            $data['branch_id'] = $branchId;
+        }
+
+        $assignment = \App\Models\HousingAssignment::findOrFail($id);
+        $assignment->update($data);
+
+        return back()->with('success', 'تم تعديل بيانات التسكين بنجاح.');
+    }
+
     public function checkout(int $id, Request $request)
     {
         $data = $request->validate([

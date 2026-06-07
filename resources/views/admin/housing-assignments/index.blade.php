@@ -248,6 +248,93 @@
                     <div class="flex gap-2 items-center">
                         <button @click="show = true"
                                 class="text-blue-600 hover:underline text-xs">عرض</button>
+                        @can('housing-assignments.edit')
+                        {{-- Edit modal --}}
+                        <div x-data="{ editOpen: false }">
+                            <button type="button" @click="editOpen = true"
+                                    class="text-indigo-600 hover:underline text-xs">تعديل</button>
+                            <div x-show="editOpen" x-cloak
+                                 class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 overflow-y-auto"
+                                 @click.self="editOpen = false" @keydown.escape.window="editOpen = false">
+                                <div class="bg-white rounded-2xl shadow-xl w-full max-w-md my-8">
+                                    <div class="px-6 pt-5 pb-3 border-b border-slate-100">
+                                        <h3 class="font-bold text-slate-800">تعديل التسكين — {{ $a->worker?->name }}</h3>
+                                    </div>
+                                    <form method="POST" action="{{ route('admin.housing-assignments.update', $a->id) }}">
+                                        @csrf @method('PATCH')
+                                        <div class="p-6 space-y-4">
+                                            <div>
+                                                <label class="block text-xs font-semibold text-slate-600 mb-1.5">السكن <span class="text-red-500">*</span></label>
+                                                <select name="housing_id" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                    @foreach($housings as $h)
+                                                    <option value="{{ $h->id }}" {{ $a->housing_id == $h->id ? 'selected' : '' }}>{{ $h->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            @if($branches)
+                                            <div>
+                                                <label class="block text-xs font-semibold text-slate-600 mb-1.5">الفرع <span class="text-red-500">*</span></label>
+                                                <select name="branch_id" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                    @foreach($branches as $br)
+                                                    <option value="{{ $br->id }}" {{ $a->branch_id == $br->id ? 'selected' : '' }}>{{ $br->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            @else
+                                            <input type="hidden" name="branch_id" value="{{ $a->branch_id }}">
+                                            @endif
+                                            <div class="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">تاريخ الدخول <span class="text-red-500">*</span></label>
+                                                    <input type="date" name="check_in_date" required
+                                                           value="{{ $a->check_in_date?->format('Y-m-d') }}"
+                                                           class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">تاريخ المغادرة المتوقع</label>
+                                                    <input type="date" name="expected_check_out_date"
+                                                           value="{{ $a->expected_check_out_date?->format('Y-m-d') }}"
+                                                           class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">سبب السكن</label>
+                                                    <select name="reason" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                        <option value="">—</option>
+                                                        <option value="sponsorship_transfer" {{ $a->reason === 'sponsorship_transfer' ? 'selected' : '' }}>نقل كفالة</option>
+                                                        <option value="deportation"          {{ $a->reason === 'deportation'          ? 'selected' : '' }}>تسفير</option>
+                                                        <option value="handover"             {{ $a->reason === 'handover'             ? 'selected' : '' }}>تسليم</option>
+                                                        <option value="rental"               {{ $a->reason === 'rental'               ? 'selected' : '' }}>تأجير</option>
+                                                        <option value="settlement"           {{ $a->reason === 'settlement'           ? 'selected' : '' }}>تسوية</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">حالة العمالة</label>
+                                                    <select name="worker_status" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                                                        <option value="normal"  {{ ($a->worker_status ?? 'normal') === 'normal'  ? 'selected' : '' }}>نظامية</option>
+                                                        <option value="escaped" {{ $a->worker_status === 'escaped' ? 'selected' : '' }}>هاربة</option>
+                                                        <option value="sick"    {{ $a->worker_status === 'sick'    ? 'selected' : '' }}>مريضة</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="block text-xs font-semibold text-slate-600 mb-1.5">ملاحظات</label>
+                                                <textarea name="notes" rows="2"
+                                                          class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">{{ $a->notes }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="px-6 py-4 border-t border-slate-100 flex gap-2 justify-end">
+                                            <button type="button" @click="editOpen = false"
+                                                    class="text-slate-500 text-sm px-4 py-2">إلغاء</button>
+                                            <button type="submit"
+                                                    class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-5 py-2 rounded-lg">حفظ التعديلات</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        @endcan
                         @if(! $a->check_out_date)
                         <form method="POST" action="{{ route('admin.housing-assignments.checkout', $a->id) }}"
                               enctype="multipart/form-data"

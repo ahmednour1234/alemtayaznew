@@ -51,20 +51,20 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
     ];
 
     // Column indexes (0-based) — matches the actual uploaded file format:
-    // 0=رقم العقد, 1=رقم الصادر(تأشيرة), 2=هوية صاحب العمل, 3=المهنة, 4=الجنسية,
-    // 5=الفرع, 6=تاريخ بداية العقد, 7=ايراد استقدام,
-    // 8=تكاليف الاستقدام مصاريف, 9=مباشرة للعقود الضريبية
+    // 0=رقم العقد, 1=هوية صاحب العمل, 2=رقم الصادر(تأشيرة), 3=المهنة, 4=الجنسية,
+    // 5=ايراد استقدام, 6=تكاليف الاستقدام, 7=مصاريف مباشرة للعقود,
+    // 8=الضريبي, 9=تاريخ بداية العقد, 10=الفرع (branch)
     private const COL_CONTRACT    = 0;  // رقم العقد
-    private const COL_VISA        = 1;  // رقم التأشيرة (رقم الصادر)
-    private const COL_EMPLOYER    = 2;  // هوية صاحب العمل
+    private const COL_EMPLOYER    = 1;  // هوية صاحب العمل
+    private const COL_VISA        = 2;  // رقم التأشيرة (رقم الصادر)
     private const COL_JOB         = 3;  // المهنة
     private const COL_NATIONALITY = 4;  // الجنسية
-    private const COL_BRANCH      = 5;  // الفرع
-    private const COL_DATE        = 6;  // تاريخ بداية العقد
-    private const COL_INCOME      = 7;  // ايراد استقدام
-    private const COL_EXPENSE     = 8;  // تكاليف الاستقدام مصاريف
-    private const COL_TAX         = 9;  // مباشرة للعقود الضريبية
-    private const COL_PASSPORT    = 10; // رقم الجواز (لو موجود في عمود 10)
+    private const COL_INCOME      = 5;  // ايراد استقدام
+    private const COL_EXPENSE     = 6;  // تكاليف الاستقدام
+    private const COL_EXPENSE2    = 7;  // مصاريف مباشرة للعقود
+    private const COL_TAX         = 8;  // الضريبي
+    private const COL_DATE        = 9;  // تاريخ بداية العقد
+    private const COL_BRANCH      = 10; // الفرع (branch) — اسم أو رقم كود الفرع
 
     public function collection(Collection $rows): void
     {
@@ -105,11 +105,10 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
             // --- Reference / description ---
             $contractNo  = $this->str($data[self::COL_CONTRACT]    ?? null);
             $visaNo      = $this->str($data[self::COL_VISA]         ?? null);
-            $passportNo  = $this->str($data[self::COL_PASSPORT]     ?? null);
             $nationality = $this->str($data[self::COL_NATIONALITY]  ?? null);
             $baseRef     = $contractNo ?: ('ROW-' . $rowNumber);
-            // البيان: رقم العقد - رقم الجواز - رقم التأشيرة - الجنسية
-            $baseDesc = trim(implode(' - ', array_filter([$contractNo, $passportNo, $visaNo, $nationality])));
+            // البيان: رقم العقد - رقم التأشيرة - الجنسية
+            $baseDesc = trim(implode(' - ', array_filter([$contractNo, $visaNo, $nationality])));
 
             // === 1. Income: ايراد استقدام (column 6) ===
             $incomeAmount = $this->amount($data[self::COL_INCOME] ?? null);
@@ -146,7 +145,25 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
                 $this->expenseCount++;
             }
 
-            // === 3. Expense: مباشرة للعقود الضريبية (column 8) ===
+            // === 3. Expense: مصاريف مباشرة للعقود (column 7) ===
+            $exp2Amount = $this->amount($data[self::COL_EXPENSE2] ?? null);
+            if ($exp2Amount !== null && $exp2Amount > 0) {
+                $exp2Type = ExpenseType::firstOrCreate(['name' => 'مصاريف مباشرة للعقود'], ['active' => true]);
+                Expense::create([
+                    'branch_id'        => $branch->id,
+                    'expense_type_id'  => $exp2Type->id,
+                    'admin_id'         => $adminId,
+                    'amount'           => $exp2Amount,
+                    'date'             => $date,
+                    'payment_method'   => 'bank_transfer',
+                    'status'           => 'pending',
+                    'reference_number' => 'EXP2-' . $baseRef,
+                    'description'      => $baseDesc ?: 'مصاريف مباشرة للعقود',
+                ]);
+                $this->expenseCount++;
+            }
+
+            // === 4. Expense: الضريبي (column 8) ===
             $taxAmount = $this->amount($data[self::COL_TAX] ?? null);
             if ($taxAmount !== null && $taxAmount > 0) {
                 $taxType = ExpenseType::firstOrCreate(['name' => 'ضريبة العقود'], ['active' => true]);

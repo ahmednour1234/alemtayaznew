@@ -231,6 +231,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('housing-assignments/create',              [HousingAssignmentController::class, 'create'])->name('housing-assignments.create');
         Route::post('housing-assignments',                    [HousingAssignmentController::class, 'store'])->name('housing-assignments.store');
         Route::patch('housing-assignments/{id}/checkout',     [HousingAssignmentController::class, 'checkout'])->name('housing-assignments.checkout');
+        Route::patch('housing-assignments/{id}',              [HousingAssignmentController::class, 'update'])->name('housing-assignments.update');
         Route::delete('housing-assignments/{id}',             [HousingAssignmentController::class, 'destroy'])->name('housing-assignments.destroy');
         Route::get('housing-visits/reports',                  [HousingVisitController::class, 'reports'])->name('housing-visits.reports');
         Route::resource('housing-visits', HousingVisitController::class);
