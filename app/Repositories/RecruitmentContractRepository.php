@@ -35,7 +35,10 @@ class RecruitmentContractRepository implements RecruitmentContractRepositoryInte
             $q->where(function ($qr) use ($s) {
                 $qr->where('contract_number', 'like', "%{$s}%")
                    ->orWhere('musaned_number', 'like', "%{$s}%")
-                   ->orWhereHas('client', fn($c) => $c->where('name', 'like', "%{$s}%"));
+                   ->orWhere('visa_number', 'like', "%{$s}%")
+                   ->orWhereHas('client', fn($c) => $c->where('name', 'like', "%{$s}%"))
+                   ->orWhereHas('worker', fn($w) => $w->where('name', 'like', "%{$s}%")
+                                                       ->orWhere('passport_number', 'like', "%{$s}%"));
             });
         }
 
