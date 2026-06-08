@@ -31,7 +31,7 @@ class ExpenseController extends Controller
     public function index(Request $request)
     {
         $me       = Auth::guard('admin')->user();
-        $filters  = $request->only('branch_id', 'expense_type_id', 'status', 'payment_method', 'date_from', 'date_to');
+        $filters  = $request->only('branch_id', 'expense_type_id', 'status', 'payment_method', 'date_from', 'date_to', 'description');
         if ($me->isBranchAdmin()) {
             $filters['branch_id'] = $me->branch_id;
         }

@@ -71,6 +71,38 @@
                 </div>
             </div>
 
+            {{-- Type --}}
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-medium text-slate-500 mb-1.5">النوع</label>
+                <div style="position:relative;">
+                    <svg style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#94a3b8;"
+                         width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path d="M7 7h.01M7 3h5a2 2 0 011.41.59l7 7a2 2 0 010 2.82l-7 7a2 2 0 01-2.82 0l-7-7A2 2 0 014 9V4a1 1 0 011-1z"/>
+                    </svg>
+                    <select name="expense_type_id"
+                            style="width:100%;padding:8px 34px 8px 32px;border:1.5px solid #e2e8f0;border-radius:8px;
+                                   font-size:13px;color:#0f172a;background:#fff;outline:none;
+                                   font-family:Cairo,sans-serif;appearance:none;-webkit-appearance:none;cursor:pointer;">
+                        <option value="">الكل</option>
+                        @foreach($types as $type)
+                        <option value="{{ $type->id }}" {{ request('expense_type_id') == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
+                        @endforeach
+                    </select>
+                    <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#94a3b8;"
+                         width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </div>
+            </div>
+
+            {{-- Description --}}
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-medium text-slate-500 mb-1.5">البيان</label>
+                <input type="text" name="description" value="{{ request('description') }}" placeholder="بحث في البيان..."
+                       style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;
+                              font-size:13px;color:#0f172a;outline:none;font-family:Cairo,sans-serif;">
+            </div>
+
             {{-- Date From --}}
             <div class="flex-1 min-w-[150px]">
                 <label class="block text-xs font-medium text-slate-500 mb-1.5">من تاريخ</label>

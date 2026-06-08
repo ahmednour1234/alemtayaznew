@@ -13,6 +13,7 @@ class ExpenseRepository implements ExpenseRepositoryInterface
             ->with(['branch', 'expenseType', 'admin', 'approver'])
             ->when(!empty($filters['branch_id']), fn($q) => $q->where('branch_id', $filters['branch_id']))
             ->when(!empty($filters['expense_type_id']), fn($q) => $q->where('expense_type_id', $filters['expense_type_id']))
+            ->when(!empty($filters['description']), fn($q) => $q->where('description', 'like', '%' . $filters['description'] . '%'))
             ->when(!empty($filters['status']), fn($q) => $q->where('status', $filters['status']))
             ->when(!empty($filters['payment_method']), fn($q) => $q->where('payment_method', $filters['payment_method']))
             ->when(!empty($filters['date_from']), fn($q) => $q->whereDate('date', '>=', $filters['date_from']))
