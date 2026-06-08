@@ -1,7 +1,7 @@
 @php
     $admin = auth('admin')->user();
     $openSettings   = request()->routeIs(['admin.branches.*', 'admin.cities.*', 'admin.settings.*', 'admin.nationalities.*', 'admin.airports.*']);
-    $openFinance    = request()->routeIs(['admin.income-types.*','admin.expense-types.*','admin.incomes.*','admin.expenses.*','admin.transfers.*','admin.reports.branch-statement','admin.reports.branch-statement.export','admin.reports.income-statement','admin.reports.income-statement.export']);
+    $openFinance    = request()->routeIs(['admin.income-types.*','admin.expense-types.*','admin.incomes.*','admin.expenses.*','admin.transfers.*','admin.reports.branch-statement','admin.reports.branch-statement.export','admin.reports.income-statement','admin.reports.income-statement.export','admin.reports.type-breakdown','admin.reports.type-breakdown.excel','admin.reports.type-breakdown.pdf']);
     $openAccounting = request()->routeIs(['admin.income-types.*', 'admin.expense-types.*']);
     $openMoney      = request()->routeIs(['admin.incomes.*', 'admin.expenses.*', 'admin.transfers.*']);
     $openReports    = request()->routeIs(['admin.reports.*']);
@@ -481,6 +481,7 @@
                             @php $repItems = [
                                 ['r'=>'admin.reports.branch-statement',   'p'=>'admin.reports.branch-statement',   'l'=>'كشف حساب الفرع',       'd'=>'M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v14a2 2 0 002 2z', 'perm'=>'reports.branch-statement'],
                                 ['r'=>'admin.reports.income-statement',   'p'=>'admin.reports.income-statement',   'l'=>'قائمة دخل كل الفروع', 'd'=>'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z',                                      'perm'=>'reports.income-statement'],
+                                ['r'=>'admin.reports.type-breakdown',     'p'=>'admin.reports.type-breakdown',     'l'=>'تقرير البنود المالية', 'd'=>'M9 17V7m4 10V11m4 6V9M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z',   'perm'=>'reports.income-statement'],
                             ] @endphp
                             @foreach($repItems as $it)
                                 @if($can($it['perm']))

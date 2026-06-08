@@ -122,6 +122,59 @@ class ReportService
         ];
     }
 
+    // ── تقرير الإيرادات والمصروفات حسب نوع البند ─────────────────────────────
+    public function getTypeBreakdown(array $branchIds, ?string $dateFrom, ?string $dateTo): array
+    {
+        $applyFilters = function ($q) use ($branchIds, $dateFrom, $dateTo) {
+            if (!empty($branchIds)) {
+                $q->whereIn('branch_id', $branchIds);
+            }
+            $q->when($dateFrom, fn($q) => $q->whereDate('date', '>=', $dateFrom))
+              ->when($dateTo,   fn($q) => $q->whereDate('date', '<=', $dateTo));
+            return $q;
+        };
+
+        // الإيرادات حسب النوع
+        $incomeRows = Income::query()
+            ->selectRaw('income_type_id, COUNT(*) as cnt, SUM(amount) as total')
+            ->tap($applyFilters)
+            ->groupBy('income_type_id')
+            ->with('incomeType')
+            ->get()
+            ->map(fn($r) => [
+                'name'  => optional($r->incomeType)->name ?? 'غير محدد',
+                'count' => (int) $r->cnt,
+                'total' => (float) $r->total,
+            ]);
+
+        // المصروفات المعتمدة حسب النوع
+        $expenseRows = Expense::query()
+            ->selectRaw('expense_type_id, COUNT(*) as cnt, SUM(amount) as total')
+            ->where('status', 'approved')
+            ->tap($applyFilters)
+            ->groupBy('expense_type_id')
+            ->with('expenseType')
+            ->get()
+            ->map(fn($r) => [
+                'name'  => optional($r->expenseType)->name ?? 'غير محدد',
+                'count' => (int) $r->cnt,
+                'total' => (float) $r->total,
+            ]);
+
+        $incomeTotal  = $incomeRows->sum('total');
+        $expenseTotal = $expenseRows->sum('total');
+
+        return [
+            'income_rows'   => $incomeRows->sortByDesc('total')->values(),
+            'expense_rows'  => $expenseRows->sortByDesc('total')->values(),
+            'income_total'  => $incomeTotal,
+            'expense_total' => $expenseTotal,
+            'net'           => $incomeTotal - $expenseTotal,
+            'date_from'     => $dateFrom,
+            'date_to'       => $dateTo,
+        ];
+    }
+
     // ── إحصائيات العقود الشاملة ──────────────────────────────────────────────
     public function getContractStats(?int $branchId): array
     {

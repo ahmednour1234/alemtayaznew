@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\Reports\BranchStatementController;
 use App\Http\Controllers\Admin\Reports\ContractReportsController;
 use App\Http\Controllers\Admin\Reports\HousingReportsController;
 use App\Http\Controllers\Admin\Reports\IncomeStatementController;
+use App\Http\Controllers\Admin\Reports\TypeBreakdownController;
 use App\Http\Controllers\Admin\Settings\AdminController as SettingsAdminController;
 use App\Http\Controllers\Admin\Settings\PermissionController;
 use App\Http\Controllers\Admin\Settings\RoleController;
@@ -143,6 +144,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('branch-statement/export', [BranchStatementController::class, 'export'])->name('branch-statement.export');
             Route::get('income-statement',        [IncomeStatementController::class, 'index'])->name('income-statement');
             Route::get('income-statement/export', [IncomeStatementController::class, 'export'])->name('income-statement.export');
+            Route::get('type-breakdown',          [TypeBreakdownController::class, 'index'])->name('type-breakdown');
+            Route::get('type-breakdown/excel',    [TypeBreakdownController::class, 'exportExcel'])->name('type-breakdown.excel');
+            Route::get('type-breakdown/pdf',      [TypeBreakdownController::class, 'exportPdf'])->name('type-breakdown.pdf');
             Route::get('contracts-received',      [ContractReportsController::class, 'received'])->name('contracts-received');
             Route::get('contracts-delayed',       [ContractReportsController::class, 'delayed'])->name('contracts-delayed');
             Route::get('contracts-stats',         [ContractReportsController::class, 'stats'])->name('contracts-stats');
