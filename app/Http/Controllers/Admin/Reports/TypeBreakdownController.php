@@ -69,6 +69,8 @@ class TypeBreakdownController extends Controller
             $request->date_to,
         );
 
+        // خط Amiri مثبّت مسبقاً في مجلد storage/fonts لدعم تشكيل الحروف العربية،
+        // ويُستدعى عبر CSS (font-family: 'Amiri') في قالب الـ PDF.
         $pdf = Pdf::loadView('admin.reports.type-breakdown-pdf', ['report' => $report])
             ->setPaper('a4', 'portrait');
 
