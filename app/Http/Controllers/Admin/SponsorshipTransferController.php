@@ -51,9 +51,7 @@ class SponsorshipTransferController extends Controller
             ->orderBy('name');
 
         $workers = (clone $baseQuery)
-            ->whereNull('client_id')
-            ->whereNull('assigned_at')
-            ->whereNull('assigned_by_admin_id')
+
             ->get();
 
         // Map worker data for JS auto-fill
