@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Models\Branch;
 use App\Models\Expense;
+use App\Models\ExpenseType;
 use App\Models\FinancialTransfer;
 use App\Models\Income;
+use App\Models\IncomeType;
 use App\Models\RecruitmentContract;
 use Carbon\Carbon;
 
@@ -142,6 +144,7 @@ class ReportService
             ->with('incomeType')
             ->get()
             ->map(fn($r) => [
+                'id'    => $r->income_type_id,
                 'name'  => optional($r->incomeType)->name ?? 'غير محدد',
                 'count' => (int) $r->cnt,
                 'total' => (float) $r->total,
@@ -156,6 +159,7 @@ class ReportService
             ->with('expenseType')
             ->get()
             ->map(fn($r) => [
+                'id'    => $r->expense_type_id,
                 'name'  => optional($r->expenseType)->name ?? 'غير محدد',
                 'count' => (int) $r->cnt,
                 'total' => (float) $r->total,
@@ -172,6 +176,57 @@ class ReportService
             'net'           => $incomeTotal - $expenseTotal,
             'date_from'     => $dateFrom,
             'date_to'       => $dateTo,
+        ];
+    }
+
+    // ── تفاصيل عمليات بند معيّن (للـ popup) ──────────────────────────────────
+    public function getTypeDetails(string $kind, int $typeId, array $branchIds, ?string $dateFrom, ?string $dateTo): array
+    {
+        $applyFilters = function ($q) use ($branchIds, $dateFrom, $dateTo) {
+            if (!empty($branchIds)) {
+                $q->whereIn('branch_id', $branchIds);
+            }
+            return $q->when($dateFrom, fn($q) => $q->whereDate('date', '>=', $dateFrom))
+                     ->when($dateTo,   fn($q) => $q->whereDate('date', '<=', $dateTo));
+        };
+
+        if ($kind === 'expense') {
+            $type  = ExpenseType::find($typeId);
+            $items = Expense::with('branch')
+                ->where('expense_type_id', $typeId)
+                ->where('status', 'approved')
+                ->tap($applyFilters)
+                ->orderByDesc('date')
+                ->get()
+                ->map(fn($e) => [
+                    'date'        => optional($e->date)->format('Y-m-d'),
+                    'description' => $e->description,
+                    'recipient'   => $e->recipient,
+                    'amount'      => (float) $e->amount,
+                    'branch'      => optional($e->branch)->name,
+                ]);
+        } else {
+            $type  = IncomeType::find($typeId);
+            $items = Income::with('branch')
+                ->where('income_type_id', $typeId)
+                ->tap($applyFilters)
+                ->orderByDesc('date')
+                ->get()
+                ->map(fn($i) => [
+                    'date'        => optional($i->date)->format('Y-m-d'),
+                    'description' => $i->description,
+                    'recipient'   => $i->recipient,
+                    'amount'      => (float) $i->amount,
+                    'branch'      => optional($i->branch)->name,
+                ]);
+        }
+
+        return [
+            'kind'      => $kind === 'expense' ? 'مصروف' : 'إيراد',
+            'type_name' => optional($type)->name ?? 'غير محدد',
+            'items'     => $items,
+            'total'     => $items->sum('amount'),
+            'count'     => $items->count(),
         ];
     }
 

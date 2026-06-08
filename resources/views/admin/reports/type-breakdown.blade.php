@@ -47,6 +47,8 @@
 
 @if(isset($report))
 
+<div x-data="typeBreakdownDetails()">
+
 {{-- بطاقات ملخص --}}
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <div class="bg-white rounded-xl shadow-sm p-5 border-r-4 border-green-500">
@@ -77,8 +79,9 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse($report['income_rows'] as $row)
-                <tr class="hover:bg-slate-50">
-                    <td class="px-4 py-3 font-medium">{{ $row['name'] }}</td>
+                <tr class="hover:bg-green-50 cursor-pointer transition"
+                    @click="open('income', {{ $row['id'] ?? 'null' }})">
+                    <td class="px-4 py-3 font-medium text-blue-700 underline-offset-2 hover:underline">{{ $row['name'] }}</td>
                     <td class="px-4 py-3">{{ number_format($row['count']) }}</td>
                     <td class="px-4 py-3 font-semibold text-green-600">{{ number_format($row['total'], 2) }}</td>
                 </tr>
@@ -111,8 +114,9 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse($report['expense_rows'] as $row)
-                <tr class="hover:bg-slate-50">
-                    <td class="px-4 py-3 font-medium">{{ $row['name'] }}</td>
+                <tr class="hover:bg-red-50 cursor-pointer transition"
+                    @click="open('expense', {{ $row['id'] ?? 'null' }})">
+                    <td class="px-4 py-3 font-medium text-blue-700 underline-offset-2 hover:underline">{{ $row['name'] }}</td>
                     <td class="px-4 py-3">{{ number_format($row['count']) }}</td>
                     <td class="px-4 py-3 font-semibold text-red-600">{{ number_format($row['total'], 2) }}</td>
                 </tr>
@@ -130,6 +134,112 @@
         </table>
     </div>
 </div>
+
+{{-- نافذة منبثقة: كشف تفصيلي للبند --}}
+<div x-show="show" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background: rgba(15,23,42,.5);"
+     @keydown.escape.window="close()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col"
+         @click.outside="close()" x-transition>
+        {{-- رأس النافذة --}}
+        <div class="flex items-center justify-between px-5 py-4 border-b">
+            <div>
+                <h3 class="text-lg font-bold text-slate-800">
+                    كشف البند: <span x-text="data.type_name"></span>
+                    <span class="text-xs px-2 py-0.5 rounded-full align-middle"
+                          :class="data.kind === 'مصروف' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'"
+                          x-text="data.kind"></span>
+                </h3>
+                <p class="text-sm text-slate-500 mt-0.5">
+                    عدد العمليات: <span x-text="data.count"></span> —
+                    الإجمالي: <span class="font-semibold" x-text="fmt(data.total)"></span>
+                </p>
+            </div>
+            <button @click="close()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
+        </div>
+
+        {{-- محتوى النافذة --}}
+        <div class="overflow-y-auto p-5">
+            <template x-if="loading">
+                <div class="py-10 text-center text-slate-400">جاري التحميل...</div>
+            </template>
+
+            <template x-if="!loading">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-50 text-slate-500 text-xs border-b">
+                        <tr>
+                            <th class="px-3 py-2 text-right">التاريخ</th>
+                            <th class="px-3 py-2 text-right">الوصف</th>
+                            <th class="px-3 py-2 text-right">الجهة / المستلم</th>
+                            <th class="px-3 py-2 text-right">الفرع</th>
+                            <th class="px-3 py-2 text-right">النوع</th>
+                            <th class="px-3 py-2 text-right">المبلغ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <template x-for="(item, i) in data.items" :key="i">
+                            <tr class="hover:bg-slate-50">
+                                <td class="px-3 py-2 whitespace-nowrap" x-text="item.date || '—'"></td>
+                                <td class="px-3 py-2" x-text="item.description || '—'"></td>
+                                <td class="px-3 py-2" x-text="item.recipient || '—'"></td>
+                                <td class="px-3 py-2" x-text="item.branch || '—'"></td>
+                                <td class="px-3 py-2" x-text="data.kind"></td>
+                                <td class="px-3 py-2 font-semibold"
+                                    :class="data.kind === 'مصروف' ? 'text-red-600' : 'text-green-600'"
+                                    x-text="fmt(item.amount)"></td>
+                            </tr>
+                        </template>
+                        <template x-if="!data.items || data.items.length === 0">
+                            <tr><td colspan="6" class="px-3 py-6 text-center text-slate-400">لا توجد عمليات</td></tr>
+                        </template>
+                    </tbody>
+                    <tfoot class="bg-slate-100 text-xs font-bold border-t">
+                        <tr>
+                            <td class="px-3 py-2" colspan="5">الإجمالي</td>
+                            <td class="px-3 py-2" x-text="fmt(data.total)"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </template>
+        </div>
+    </div>
+</div>
+
+</div>{{-- نهاية x-data --}}
+
+@push('scripts')
+<script>
+function typeBreakdownDetails() {
+    return {
+        show: false,
+        loading: false,
+        data: { type_name: '', kind: '', items: [], total: 0, count: 0 },
+        fmt(n) {
+            return Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        },
+        open(kind, typeId) {
+            if (!typeId) return;
+            this.show = true;
+            this.loading = true;
+            this.data = { type_name: '', kind: '', items: [], total: 0, count: 0 };
+
+            const params = new URLSearchParams(window.location.search);
+            params.set('kind', kind);
+            params.set('type_id', typeId);
+
+            fetch('{{ route('admin.reports.type-breakdown.details') }}?' + params.toString(), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(json => { this.data = json; this.loading = false; })
+                .catch(() => { this.loading = false; });
+        },
+        close() { this.show = false; }
+    };
+}
+</script>
+@endpush
 
 @endif
 

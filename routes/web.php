@@ -145,6 +145,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('income-statement',        [IncomeStatementController::class, 'index'])->name('income-statement');
             Route::get('income-statement/export', [IncomeStatementController::class, 'export'])->name('income-statement.export');
             Route::get('type-breakdown',          [TypeBreakdownController::class, 'index'])->name('type-breakdown');
+            Route::get('type-breakdown/details',  [TypeBreakdownController::class, 'details'])->name('type-breakdown.details');
             Route::get('type-breakdown/excel',    [TypeBreakdownController::class, 'exportExcel'])->name('type-breakdown.excel');
             Route::get('type-breakdown/pdf',      [TypeBreakdownController::class, 'exportPdf'])->name('type-breakdown.pdf');
             Route::get('contracts-received',      [ContractReportsController::class, 'received'])->name('contracts-received');

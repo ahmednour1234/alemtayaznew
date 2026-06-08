@@ -47,6 +47,23 @@ class TypeBreakdownController extends Controller
         return view('admin.reports.type-breakdown', ['branches' => $branches, 'report' => $report]);
     }
 
+    /** تفاصيل عمليات بند معيّن — تُعاد كـ JSON للـ popup */
+    public function details(Request $request)
+    {
+        $kind   = $request->input('kind') === 'expense' ? 'expense' : 'income';
+        $typeId = (int) $request->input('type_id');
+
+        $data = $this->reportService->getTypeDetails(
+            $kind,
+            $typeId,
+            $this->branchIds($request),
+            $request->date_from,
+            $request->date_to,
+        );
+
+        return response()->json($data);
+    }
+
     public function exportExcel(Request $request)
     {
         $report = $this->reportService->getTypeBreakdown(
