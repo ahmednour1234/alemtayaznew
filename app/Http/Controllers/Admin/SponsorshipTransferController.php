@@ -51,18 +51,11 @@ class SponsorshipTransferController extends Controller
             ->with(['nationality', 'client', 'latestContract.client', 'activeHousingAssignment'])
             ->orderBy('name');
 
-        // Group 1: في السكن بسبب نقل كفالة (reason = sponsorship_transfer)
-        $housingWorkers = (clone $baseQuery)
-            ->whereIn('status', ['in_housing', 'sponsorship_transfer'])
-            ->whereHas('activeHousingAssignment', fn($q) => $q->where('reason', 'sponsorship_transfer'))
+        $workers = (clone $baseQuery)
+            ->whereNull('client_id')
+            ->whereNull('assigned_at')
+            ->whereNull('assigned_by_admin_id')
             ->get();
-
-        // Group 2: وصلت من عقود الاستقدام (assigned — مع أو بدون عقد)
-        $contractWorkers = (clone $baseQuery)
-            ->where('status', 'assigned')
-            ->get();
-
-        $workers = $housingWorkers->merge($contractWorkers);
 
         // Map worker data for JS auto-fill
         $workersJson = $workers->map(function ($w) {
@@ -82,8 +75,7 @@ class SponsorshipTransferController extends Controller
         $branches = $branchId ? null : Branch::where('active', true)->orderBy('name')->get();
 
         return view('admin.sponsorship-transfers.create', compact(
-            'workers', 'workersJson', 'clients', 'branches', 'branchId',
-            'housingWorkers', 'contractWorkers'
+            'workers', 'workersJson', 'clients', 'branches', 'branchId'
         ));
     }
 

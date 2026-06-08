@@ -336,24 +336,11 @@ document.addEventListener('alpine:init', function () {
                         </label>
                         <select name="worker_id" id="worker_select" required class="st-control" onchange="onWorkerChange(this.value)">
                             <option value="">اختر عاملة...</option>
-                            @if($housingWorkers->isNotEmpty())
-                            <optgroup label="عاملات في السكن">
-                                @foreach($housingWorkers as $w)
-                                <option value="{{ $w->id }}" @selected(old('worker_id') == $w->id)>
-                                    {{ $w->name }}{{ $w->nationality ? ' - '.$w->nationality->name : '' }}
-                                </option>
-                                @endforeach
-                            </optgroup>
-                            @endif
-                            @if($contractWorkers->isNotEmpty())
-                            <optgroup label="وصلت من عقود الاستقدام">
-                                @foreach($contractWorkers as $w)
-                                <option value="{{ $w->id }}" @selected(old('worker_id') == $w->id)>
-                                    {{ $w->name }}{{ $w->nationality ? ' - '.$w->nationality->name : '' }}
-                                </option>
-                                @endforeach
-                            </optgroup>
-                            @endif
+                            @foreach($workers as $w)
+                            <option value="{{ $w->id }}" @selected(old('worker_id') == $w->id)>
+                                {{ $w->name }}{{ $w->nationality ? ' - '.$w->nationality->name : '' }}
+                            </option>
+                            @endforeach
                         </select>
                         @error('worker_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
@@ -603,6 +590,15 @@ function onWorkerChange(workerId) {
     if (!info) {
         box.classList.remove('visible');
         document.getElementById('current_sponsor_name').textContent = '—';
+        if (fromSel) {
+            fromSel.value = '';
+            if (fromSel._tomSelect) {
+                fromSel._tomSelect.clear();
+            }
+        }
+        if (contractInput) {
+            contractInput.value = '';
+        }
         return;
     }
 
@@ -613,6 +609,11 @@ function onWorkerChange(workerId) {
         fromSel.value = info.client_id;
         if (fromSel._tomSelect) {
             fromSel._tomSelect.setValue(String(info.client_id));
+        }
+    } else if (fromSel) {
+        fromSel.value = '';
+        if (fromSel._tomSelect) {
+            fromSel._tomSelect.clear();
         }
     }
 
