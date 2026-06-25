@@ -34,3 +34,6 @@ Schedule::command('housing:check-rental-expiry')->dailyAt('08:45');
 
 // Remind assigners of workers with no contract; auto-cancel after 4 days
 Schedule::command('workers:notify-uncontracted')->dailyAt('09:00');
+
+// HR: notify before iqama renewal, probation end, insurance & document expiry (within 30 days)
+Schedule::command('hr:check-expiries')->dailyAt('07:30');

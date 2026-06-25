@@ -45,6 +45,17 @@ class NotificationService
         'worker_no_contract'         => 'workers.view',
         'worker_no_contract_warning' => 'workers.view',
         'worker_assignment_cancelled'=> 'workers.view',
+        // ── HR ─────────────────────────────────────────────
+        'employee_created'            => 'employees.view',
+        'employee_deleted'            => 'employees.view',
+        'employee_iqama_expiry'       => 'employees.view',
+        'employee_probation_ending'   => 'employees.view',
+        'employee_document_uploaded'  => 'employee-documents.view',
+        'employee_document_expiry'    => 'employee-documents.view',
+        'employee_leave_created'      => 'employee-leaves.view',
+        'employee_leave_decided'      => 'employee-leaves.view',
+        'employee_insurance_created'  => 'employee-insurances.view',
+        'employee_insurance_expiry'   => 'employee-insurances.view',
     ];
 
     /**

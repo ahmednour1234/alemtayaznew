@@ -26,6 +26,8 @@
     $showSTGroup         = $can('sponsorship-transfers.view');
     $showWorkersGroup    = $can('workers.view')||$can('workers.create');
     $showContractsGroup  = $can('contracts.view');
+    $openHR              = request()->routeIs('admin.hr.*');
+    $showHRGroup         = $can('employees.view')||$can('employee-documents.view')||$can('employee-leaves.view')||$can('employee-insurances.view');
 @endphp
 
 <div x-data="{
@@ -42,7 +44,8 @@
         cp: {{ $openComplaints ? 'true' : 'false' }},
         op: {{ $openOperations ? 'true' : 'false' }},
         opr: {{ $openOpsReports ? 'true' : 'false' }},
-        st: {{ $openST ? 'true' : 'false' }}
+        st: {{ $openST ? 'true' : 'false' }},
+        hr: {{ $openHR ? 'true' : 'false' }}
      }"
      style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
 
@@ -665,6 +668,64 @@
                      'd'=>'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12'],
                 ] @endphp
                 @foreach($workerItems as $it)
+                    @if($can($it['perm']))
+                    @php $on = request()->routeIs($it['p']); @endphp
+                    <a href="{{ route($it['r']) }}"
+                       style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
+                              border-radius:7px;text-decoration:none;font-size:12.5px;
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                       onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
+                       onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
+                       {{ $on ? 'data-on=1' : '' }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                            <path d="{{ $it['d'] }}"/>
+                        </svg>
+                        {{ $it['l'] }}
+                    </a>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        @if($showHRGroup)
+        {{-- Section label: الموارد البشرية --}}
+        <div style="padding:10px 10px 4px;margin-top:4px;">
+            <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">الموارد البشرية</p>
+        </div>
+
+        {{-- -- GROUP: الموارد البشرية -- --}}
+        <div style="margin-bottom:1px;">
+            <button @click="hr=!hr"
+                    style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
+                           border-radius:8px;border:none;cursor:pointer;text-align:right;
+                           font-family:Cairo,sans-serif;font-size:13px;font-weight:600;
+                           transition:background .15s,color .15s;"
+                    :style="{ color: hr ? '#e2e8f0' : '#c8d4e3', background: hr ? 'rgba(255,255,255,.05)' : 'transparent' }"
+                    @mouseenter="$el.style.background='rgba(255,255,255,.06)';$el.style.color='#e2e8f0';"
+                    @mouseleave="$el.style.background=hr?'rgba(255,255,255,.05)':'transparent';$el.style.color=hr?'#e2e8f0':'#c8d4e3';">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75"/>
+                </svg>
+                <span style="flex:1;">الموارد البشرية</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                     style="flex-shrink:0;transition:transform .25s;" :style="{ transform: hr ? 'rotate(180deg)' : 'none' }">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div x-show="hr" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
+                @php $hrItems = [
+                    ['r'=>'admin.hr.employees.index',  'p'=>'admin.hr.employees.*',  'l'=>'الموظفين',       'perm'=>'employees.view',
+                     'd'=>'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z'],
+                    ['r'=>'admin.hr.documents.index',  'p'=>'admin.hr.documents.*',  'l'=>'وثائق الشركة',   'perm'=>'employee-documents.view',
+                     'd'=>'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6'],
+                    ['r'=>'admin.hr.leaves.index',     'p'=>'admin.hr.leaves.*',     'l'=>'الإجازات',       'perm'=>'employee-leaves.view',
+                     'd'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                    ['r'=>'admin.hr.insurances.index', 'p'=>'admin.hr.insurances.*', 'l'=>'التأمين الطبي', 'perm'=>'employee-insurances.view',
+                     'd'=>'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4'],
+                ] @endphp
+                @foreach($hrItems as $it)
                     @if($can($it['perm']))
                     @php $on = request()->routeIs($it['p']); @endphp
                     <a href="{{ route($it['r']) }}"

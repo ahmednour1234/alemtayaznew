@@ -261,5 +261,33 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('calendar',        [CalendarController::class, 'index'])->name('calendar.index');
         Route::get('calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
 
+        // ── الموارد البشرية (HR) ──────────────────────────────────────────────
+        Route::prefix('hr')->name('hr.')->group(function () {
+            // الموظفين
+            Route::resource('employees', \App\Http\Controllers\Admin\HR\EmployeeController::class)
+                ->except('show');
+            Route::get('employees/{employee}', [\App\Http\Controllers\Admin\HR\EmployeeController::class, 'show'])
+                ->name('employees.show');
+
+            // وثائق الشركة/الموظفين (خاصة)
+            Route::get('documents/{document}/download', [\App\Http\Controllers\Admin\HR\EmployeeDocumentController::class, 'download'])
+                ->name('documents.download');
+            Route::resource('documents', \App\Http\Controllers\Admin\HR\EmployeeDocumentController::class)
+                ->parameters(['documents' => 'document'])
+                ->except('show');
+
+            // الإجازات
+            Route::post('leaves/{leave}/decide', [\App\Http\Controllers\Admin\HR\EmployeeLeaveController::class, 'decide'])
+                ->name('leaves.decide');
+            Route::resource('leaves', \App\Http\Controllers\Admin\HR\EmployeeLeaveController::class)
+                ->parameters(['leaves' => 'leave'])
+                ->except('show');
+
+            // التأمين الطبي
+            Route::resource('insurances', \App\Http\Controllers\Admin\HR\EmployeeMedicalInsuranceController::class)
+                ->parameters(['insurances' => 'insurance'])
+                ->except('show');
+        });
+
     });
 });

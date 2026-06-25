@@ -290,6 +290,41 @@ class AutoPermission
         // ── Calendar (التقويم) ────────────────────────────────
         'admin.calendar.index'  => 'calendar.view',
         'admin.calendar.events' => 'calendar.view',
+
+        // ── HR: Employees (الموظفين) ─────────────────────────
+        'admin.hr.employees.index'   => 'employees.view',
+        'admin.hr.employees.show'    => 'employees.view',
+        'admin.hr.employees.create'  => 'employees.create',
+        'admin.hr.employees.store'   => 'employees.create',
+        'admin.hr.employees.edit'    => 'employees.edit',
+        'admin.hr.employees.update'  => 'employees.edit',
+        'admin.hr.employees.destroy' => 'employees.delete',
+
+        // ── HR: Documents (وثائق الشركة) ─────────────────────
+        'admin.hr.documents.index'    => 'employee-documents.view',
+        'admin.hr.documents.create'   => 'employee-documents.create',
+        'admin.hr.documents.store'    => 'employee-documents.create',
+        'admin.hr.documents.edit'     => 'employee-documents.edit',
+        'admin.hr.documents.update'   => 'employee-documents.edit',
+        'admin.hr.documents.destroy'  => 'employee-documents.delete',
+        'admin.hr.documents.download' => 'employee-documents.download',
+
+        // ── HR: Leaves (الإجازات) ────────────────────────────
+        'admin.hr.leaves.index'   => 'employee-leaves.view',
+        'admin.hr.leaves.create'  => 'employee-leaves.create',
+        'admin.hr.leaves.store'   => 'employee-leaves.create',
+        'admin.hr.leaves.edit'    => 'employee-leaves.edit',
+        'admin.hr.leaves.update'  => 'employee-leaves.edit',
+        'admin.hr.leaves.destroy' => 'employee-leaves.delete',
+        'admin.hr.leaves.decide'  => 'employee-leaves.approve',
+
+        // ── HR: Medical Insurance (التأمين الطبي) ────────────
+        'admin.hr.insurances.index'   => 'employee-insurances.view',
+        'admin.hr.insurances.create'  => 'employee-insurances.create',
+        'admin.hr.insurances.store'   => 'employee-insurances.create',
+        'admin.hr.insurances.edit'    => 'employee-insurances.edit',
+        'admin.hr.insurances.update'  => 'employee-insurances.edit',
+        'admin.hr.insurances.destroy' => 'employee-insurances.delete',
     ];
 
     public function handle(Request $request, Closure $next): Response
