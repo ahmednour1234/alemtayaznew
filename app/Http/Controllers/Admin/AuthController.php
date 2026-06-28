@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\Security\SecurityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    public function __construct(private readonly SecurityLogger $security) {}
+
     public function showLogin()
     {
         if (Auth::guard('admin')->check()) {
@@ -28,6 +31,9 @@ class AuthController extends Controller
 
             if (! $admin->active) {
                 Auth::guard('admin')->logout();
+                // Bad-credentials failures are captured by the Failed event listener;
+                // an inactive-account rejection is logged explicitly here.
+                $this->security->logFailedLogin($credentials['email'], 'admin', $request, 'inactive');
                 return back()->withErrors(['email' => 'حسابك غير مفعّل. يرجى التواصل مع المدير.']);
             }
 

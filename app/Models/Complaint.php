@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Complaint extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, \App\Models\Concerns\HasEncryptedPii;
 
     protected $fillable = [
         'complaint_number', 'public_token', 'contract_id', 'contract_type',
@@ -29,7 +29,14 @@ class Complaint extends Model
             'processed_at'           => 'datetime',
             'resolved_at'            => 'datetime',
             'last_stale_notified_at' => 'datetime',
+            'phone'                  => 'encrypted',
         ];
+    }
+
+    /** Encrypted-at-rest PII fields and their searchable hash columns. */
+    public function piiHashMap(): array
+    {
+        return ['phone' => 'phone_hash'];
     }
 
     // ── Relations ────────────────────────────────────────────────────────────

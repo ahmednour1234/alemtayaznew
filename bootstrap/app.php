@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.admin'      => \App\Http\Middleware\AdminAuthenticate::class,
             'permission'      => \App\Http\Middleware\CheckPermission::class,
             'auto.permission' => \App\Http\Middleware\AutoPermission::class,
+            'log.access'      => \App\Http\Middleware\LogAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

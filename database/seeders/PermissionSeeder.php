@@ -742,6 +742,9 @@ class PermissionSeeder extends Seeder
             ['name' => 'تقرير التسويات',            'slug' => 'housing-settlements.reports',   'description' => null],
             // ── لوحة الفروع ───────────────────────────
             ['name' => 'عرض لوحة الفروع',           'slug' => 'leads-board.view',              'description' => null],
+            // ── الأمن والتدقيق ─────────────────────────
+            ['name' => 'عرض سجلات الأمن والتدقيق',  'slug' => 'security-logs.view',            'description' => null],
+            ['name' => 'إدارة الحوادث الأمنية',     'slug' => 'security-logs.manage',          'description' => null],
         ]);
 
         foreach ($permissions as $permission) {

@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Listeners\LogFailedLogin;
 use App\Models\Admin;
+use Illuminate\Auth\Events\Failed;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -34,6 +37,9 @@ class AppServiceProvider extends ServiceProvider
             }
             return $admin->hasPermission($ability) ? true : null;
         });
+
+        // Log every failed authentication attempt to the security audit trail.
+        Event::listen(Failed::class, LogFailedLogin::class);
     }
 }
 

@@ -22,10 +22,11 @@ class GlobalSearchController extends Controller
         $results = [];
 
         // ── Workers ──────────────────────────────────────────────────────────
+        // passport_number & phone are encrypted at rest → exact-match via hash columns.
         Worker::where(function ($query) use ($q) {
             $query->where('name', 'like', "%{$q}%")
-                  ->orWhere('passport_number', 'like', "%{$q}%")
-                  ->orWhere('phone', 'like', "%{$q}%");
+                  ->orWhere('passport_number_hash', Worker::hashPii($q))
+                  ->orWhere('phone_hash', Worker::hashPii($q));
         })->limit(5)->get()
           ->each(function ($w) use (&$results) {
               $results[] = [
@@ -39,10 +40,11 @@ class GlobalSearchController extends Controller
           });
 
         // ── Clients ───────────────────────────────────────────────────────────
+        // national_id & phone are encrypted at rest → exact-match via hash columns.
         Client::where(function ($query) use ($q) {
             $query->where('name', 'like', "%{$q}%")
-                  ->orWhere('national_id', 'like', "%{$q}%")
-                  ->orWhere('phone', 'like', "%{$q}%");
+                  ->orWhere('national_id_hash', Client::hashPii($q))
+                  ->orWhere('phone_hash', Client::hashPii($q));
         })->limit(5)->get()
           ->each(function ($c) use (&$results) {
               $results[] = [
@@ -76,7 +78,7 @@ class GlobalSearchController extends Controller
         // ── Agents ────────────────────────────────────────────────────────────
         Agent::where(function ($query) use ($q) {
             $query->where('name', 'like', "%{$q}%")
-                  ->orWhere('phone', 'like', "%{$q}%");
+                  ->orWhere('phone_hash', Agent::hashPii($q));
         })->limit(3)->get()
           ->each(function ($a) use (&$results) {
               $results[] = [

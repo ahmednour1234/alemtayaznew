@@ -31,7 +31,7 @@ class LeadController extends Controller
             if ($v = $request->input($f)) $query->where($f, $v);
         }
         if ($s = $request->input('search')) {
-            $query->where(fn($q) => $q->where('name', 'like', "%{$s}%")->orWhere('phone', 'like', "%{$s}%"));
+            $query->where(fn($q) => $q->where('name', 'like', "%{$s}%")->orWhere('phone_hash', \App\Models\Lead::hashPii($s)));
         }
 
         $leads       = $query->where('assigned_admin_id', $me->id)->paginate(30)->withQueryString();

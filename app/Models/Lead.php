@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Lead extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, \App\Models\Concerns\HasEncryptedPii;
 
     protected $fillable = [
         'campaign_id', 'name', 'phone', 'city', 'nationality_id',
@@ -22,7 +22,14 @@ class Lead extends Model
     {
         return [
             'last_contacted_at' => 'datetime',
+            'phone'             => 'encrypted',
         ];
+    }
+
+    /** Encrypted-at-rest PII fields and their searchable hash columns. */
+    public function piiHashMap(): array
+    {
+        return ['phone' => 'phone_hash'];
     }
 
     public static function statuses(): array

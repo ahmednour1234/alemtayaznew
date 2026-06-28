@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Agent extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, \App\Models\Concerns\HasEncryptedPii;
 
     protected $fillable = [
         'name', 'phone', 'email', 'nationality_id', 'document', 'notes', 'active',
@@ -17,7 +17,16 @@ class Agent extends Model
 
     protected function casts(): array
     {
-        return ['active' => 'boolean'];
+        return [
+            'active' => 'boolean',
+            'phone'  => 'encrypted',
+        ];
+    }
+
+    /** Encrypted-at-rest PII fields and their searchable hash columns. */
+    public function piiHashMap(): array
+    {
+        return ['phone' => 'phone_hash'];
     }
 
     public function nationality(): BelongsTo

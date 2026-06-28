@@ -85,7 +85,7 @@ class ClientController extends Controller
 
         // If national_id provided and already exists, return the existing client
         if (filled($request->national_id)) {
-            $existing = \App\Models\Client::where('national_id', $request->national_id)->first();
+            $existing = \App\Models\Client::wherePii('national_id', $request->national_id)->first();
             if ($existing) {
                 return response()->json([
                     'id'          => $existing->id,

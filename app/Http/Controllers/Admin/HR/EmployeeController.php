@@ -37,9 +37,10 @@ class EmployeeController extends Controller
         }
         if ($s = $request->input('search')) {
             $query->where(function ($q) use ($s) {
+                // iqama_number is encrypted → exact-match via hash column.
                 $q->where('name', 'like', "%{$s}%")
                   ->orWhere('employee_no', 'like', "%{$s}%")
-                  ->orWhere('iqama_number', 'like', "%{$s}%");
+                  ->orWhere('iqama_hash', \App\Models\Employee::hashPii($s));
             });
         }
 

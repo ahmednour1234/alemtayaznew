@@ -24,7 +24,7 @@ class TripRepository implements TripRepositoryInterface
             ->when(!empty($filters['worker_search']), fn($q) =>
                 $q->whereHas('workers', fn($wq) =>
                     $wq->where('name', 'like', '%' . $filters['worker_search'] . '%')
-                       ->orWhere('passport_number', 'like', '%' . $filters['worker_search'] . '%')
+                       ->orWhere('passport_number_hash', \App\Models\Worker::hashPii($filters['worker_search']))
                        ->orWhere('file_number', 'like', '%' . $filters['worker_search'] . '%')
                 )
             )

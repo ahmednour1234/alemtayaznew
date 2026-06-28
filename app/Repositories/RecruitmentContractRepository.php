@@ -38,7 +38,7 @@ class RecruitmentContractRepository implements RecruitmentContractRepositoryInte
                    ->orWhere('visa_number', 'like', "%{$s}%")
                    ->orWhereHas('client', fn($c) => $c->where('name', 'like', "%{$s}%"))
                    ->orWhereHas('worker', fn($w) => $w->where('name', 'like', "%{$s}%")
-                                                       ->orWhere('passport_number', 'like', "%{$s}%"));
+                                                       ->orWhere('passport_number_hash', \App\Models\Worker::hashPii($s)));
             });
         }
 

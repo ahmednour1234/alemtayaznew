@@ -20,9 +20,10 @@ class ComplaintRepository implements ComplaintRepositoryInterface
         if (!empty($filters['search'])) {
             $s = $filters['search'];
             $q->where(function ($w) use ($s) {
+                // phone is encrypted at rest → exact-match via hash column.
                 $w->where('complaint_number', 'like', "%$s%")
                   ->orWhere('description', 'like', "%$s%")
-                  ->orWhere('phone', 'like', "%$s%")
+                  ->orWhere('phone_hash', Complaint::hashPii($s))
                   ->orWhere('musaned_number', 'like', "%$s%");
             });
         }

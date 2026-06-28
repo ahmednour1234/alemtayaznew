@@ -125,6 +125,14 @@ class AutoPermission
         'admin.reports.contracts-received'       => 'reports.contracts-received',
         'admin.reports.contracts-delayed'        => 'reports.contracts-delayed',        'admin.reports.housing-rentals'          => 'housing-rentals.reports',
         'admin.reports.housing-settlements'      => 'housing-settlements.reports',
+        // ── Security & Compliance logs ────────────────
+        'admin.security.incidents'          => 'security-logs.view',
+        'admin.security.incidents.status'   => 'security-logs.manage',
+        'admin.security.access-logs'        => 'security-logs.view',
+        'admin.security.failed-logins'      => 'security-logs.view',
+        'admin.security.export-logs'        => 'security-logs.view',
+        'admin.security.permission-changes' => 'security-logs.view',
+
         // ── Settings: Admins ──────────────────────────
         'admin.settings.admins.index'   => 'admins.manage',
         'admin.settings.admins.create'  => 'admins.manage',

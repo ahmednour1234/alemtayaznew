@@ -106,12 +106,13 @@ class TripController extends Controller
             if (! empty($terms)) {
                 $contractsQuery->where(function ($q) use ($terms) {
                     foreach ($terms as $term) {
+                        // national_id & passport_number are encrypted → exact-match via hash columns.
                         $q->orWhere('contract_number', 'like', "%{$term}%")
                           ->orWhere('visa_number', 'like', "%{$term}%")
                           ->orWhereHas('client', fn($q2) => $q2->where('name', 'like', "%{$term}%")
-                              ->orWhere('national_id', 'like', "%{$term}%"))
+                              ->orWhere('national_id_hash', \App\Models\Client::hashPii($term)))
                           ->orWhereHas('worker', fn($q2) => $q2->where('name', 'like', "%{$term}%")
-                              ->orWhere('passport_number', 'like', "%{$term}%"));
+                              ->orWhere('passport_number_hash', \App\Models\Worker::hashPii($term)));
                     }
                 });
             }

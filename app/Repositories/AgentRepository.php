@@ -12,8 +12,9 @@ class AgentRepository implements AgentRepositoryInterface
         return Agent::with('nationality')
             ->when(!empty($filters['nationality_id']), fn($q) => $q->where('nationality_id', $filters['nationality_id']))
             ->when(!empty($filters['search']),         fn($q) => $q->where(function ($q2) use ($filters) {
+                // phone is encrypted at rest → exact-match via hash column.
                 $q2->where('name', 'like', '%' . $filters['search'] . '%')
-                   ->orWhere('phone', 'like', '%' . $filters['search'] . '%')
+                   ->orWhere('phone_hash', Agent::hashPii($filters['search']))
                    ->orWhere('email', 'like', '%' . $filters['search'] . '%');
             }))
             ->latest()

@@ -22,11 +22,12 @@ class WorkerRepository implements WorkerRepositoryInterface
             $q->where('profession', $filters['profession']);
         }
         if (!empty($filters['search'])) {
-            $s = '%' . $filters['search'] . '%';
-            $q->where(function ($q2) use ($s) {
-                $q2->where('name', 'like', $s)
-                   ->orWhere('passport_number', 'like', $s)
-                   ->orWhere('phone', 'like', $s);
+            $term = $filters['search'];
+            // passport_number & phone are encrypted at rest → exact-match via hash columns.
+            $q->where(function ($q2) use ($term) {
+                $q2->where('name', 'like', '%' . $term . '%')
+                   ->orWhere('passport_number_hash', Worker::hashPii($term))
+                   ->orWhere('phone_hash', Worker::hashPii($term));
             });
         }
 
@@ -90,7 +91,7 @@ class WorkerRepository implements WorkerRepositoryInterface
         $q = Worker::where('active', true);
         $q->where(function ($sub) use ($passportNumber, $originalCvName) {
             if ($passportNumber) {
-                $sub->orWhere('passport_number', $passportNumber);
+                $sub->orWhere('passport_number_hash', Worker::hashPii($passportNumber));
             }
             if ($originalCvName) {
                 $sub->orWhere('original_cv_name', $originalCvName);

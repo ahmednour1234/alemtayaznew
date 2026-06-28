@@ -128,7 +128,7 @@ class ContractImport implements ToCollection, WithStartRow, WithCalculatedFormul
                 );
                 // Update national_id if provided, missing on this client, and not taken by another client
                 if ($clientNationalId && ! $client->national_id) {
-                    $takenByOther = Client::where('national_id', $clientNationalId)
+                    $takenByOther = Client::wherePii('national_id', $clientNationalId)
                         ->where('id', '!=', $client->id)
                         ->exists();
                     if (! $takenByOther) {
@@ -151,7 +151,7 @@ class ContractImport implements ToCollection, WithStartRow, WithCalculatedFormul
             if ($workerName !== '' || $passportNumber !== null) {
                 // Match by passport number first (most reliable), then by name
                 if ($passportNumber !== null) {
-                    $worker = Worker::where('passport_number', $passportNumber)->first();
+                    $worker = Worker::wherePii('passport_number', $passportNumber)->first();
                 }
                 if (! $worker && $workerName !== '') {
                     $worker = Worker::where('name', $workerName)->first();

@@ -518,14 +518,24 @@ class RoleSeeder extends Seeder
             'housing-visits.reports',
         ];
 
+        // Security & compliance logs are super-admin only by default.
+        $securityPermissions = [
+            'security-logs.view',
+            'security-logs.manage',
+        ];
+
         foreach ($roles as &$roleData) {
             $permissions = $roleData['permissions'];
             $isSuperAdmin = $roleData['slug'] === 'super-admin';
             $isHousingRole = in_array('housing-assignments.view', $permissions, true);
 
             if ($isSuperAdmin || $isHousingRole) {
-                $roleData['permissions'] = array_values(array_unique(array_merge($permissions, $housingVisitPermissions)));
+                $permissions = array_merge($permissions, $housingVisitPermissions);
             }
+            if ($isSuperAdmin) {
+                $permissions = array_merge($permissions, $securityPermissions);
+            }
+            $roleData['permissions'] = array_values(array_unique($permissions));
         }
         unset($roleData);
 

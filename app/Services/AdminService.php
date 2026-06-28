@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\Admin;
 use App\Repositories\Contracts\AdminRepositoryInterface;
 use App\Repositories\Contracts\RoleRepositoryInterface;
+use App\Services\Security\SecurityLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -12,6 +14,7 @@ class AdminService
     public function __construct(
         private readonly AdminRepositoryInterface $repo,
         private readonly RoleRepositoryInterface $roleRepo,
+        private readonly SecurityLogger $security,
     ) {}
 
     public function list(array $filters = [])
@@ -33,6 +36,12 @@ class AdminService
             $data['password'] = Hash::make($data['password']);
             $admin = $this->repo->create($data);
             $admin->roles()->sync($roles);
+
+            $this->security->logPermissionChange('assigned', [
+                'target_user_id' => $admin->id,
+                'after'          => ['roles' => array_values($roles)],
+            ]);
+
             return $admin;
         });
     }
@@ -49,10 +58,20 @@ class AdminService
                 unset($data['password']);
             }
 
+            $beforeRoles = $roles !== null
+                ? (Admin::with('roles:id')->find($id)?->roles->pluck('id')->all() ?? [])
+                : null;
+
             $admin = $this->repo->update($id, $data);
 
             if ($roles !== null) {
                 $admin->roles()->sync($roles);
+
+                $this->security->logPermissionChange('updated', [
+                    'target_user_id' => $id,
+                    'before'         => ['roles' => $beforeRoles],
+                    'after'          => ['roles' => array_values($roles)],
+                ]);
             }
 
             return $admin;

@@ -57,7 +57,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('login', [AuthController::class, 'login'])->name('login.post');
 
     // ── Protected ─────────────────────────────────────────────────────────────
-    Route::middleware(['auth.admin', 'auto.permission'])->group(function () {
+    Route::middleware(['auth.admin', 'auto.permission', 'log.access'])->group(function () {
 
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -153,6 +153,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('contracts-stats',         [ContractReportsController::class, 'stats'])->name('contracts-stats');
             Route::get('housing-rentals',         [HousingReportsController::class, 'rentals'])->name('housing-rentals');
             Route::get('housing-settlements',     [HousingReportsController::class, 'settlements'])->name('housing-settlements');
+        });
+
+        // Security & Compliance logs (الأمن والتدقيق)
+        Route::prefix('security')->name('security.')->group(function () {
+            $sc = \App\Http\Controllers\Admin\Security\SecurityLogController::class;
+            Route::get('incidents',              [$sc, 'incidents'])->name('incidents');
+            Route::post('incidents/{id}/status', [$sc, 'updateIncidentStatus'])->name('incidents.status');
+            Route::get('access-logs',            [$sc, 'accessLogs'])->name('access-logs');
+            Route::get('failed-logins',          [$sc, 'failedLogins'])->name('failed-logins');
+            Route::get('export-logs',            [$sc, 'exportLogs'])->name('export-logs');
+            Route::get('permission-changes',     [$sc, 'permissionChanges'])->name('permission-changes');
         });
 
         // Settings

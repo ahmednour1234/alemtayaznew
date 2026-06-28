@@ -14,9 +14,10 @@ class ClientRepository implements ClientRepositoryInterface
             ->when(!empty($filters['classification']), fn($q) => $q->where('classification', $filters['classification']))
             ->when(!empty($filters['marital_status']), fn($q) => $q->where('marital_status', $filters['marital_status']))
             ->when(!empty($filters['search']),         fn($q) => $q->where(function ($q2) use ($filters) {
+                // national_id & phone are encrypted at rest → exact-match via hash columns.
                 $q2->where('name', 'like', '%' . $filters['search'] . '%')
-                   ->orWhere('national_id', 'like', '%' . $filters['search'] . '%')
-                   ->orWhere('phone', 'like', '%' . $filters['search'] . '%');
+                   ->orWhere('national_id_hash', Client::hashPii($filters['search']))
+                   ->orWhere('phone_hash', Client::hashPii($filters['search']));
             }))
             ->latest()
             ->paginate(20);

@@ -2,17 +2,28 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Client;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreClientRequest extends FormRequest
 {
     public function authorize(): bool { return true; }
 
+    /** national_id is encrypted → uniqueness is enforced against its hash column. */
+    protected function prepareForValidation(): void
+    {
+        if (filled($this->national_id)) {
+            $this->merge(['national_id_hash' => Client::hashPii($this->national_id)]);
+        }
+    }
+
     public function rules(): array
     {
         return [
             'name'                    => ['required', 'string', 'max:255'],
-            'national_id'             => ['nullable', 'string', 'max:20', 'unique:clients,national_id'],
+            'national_id'             => ['nullable', 'string', 'max:20'],
+            'national_id_hash'        => ['nullable', Rule::unique('clients', 'national_id_hash')],
             'phone'                   => ['required', 'string', 'max:20'],
             'marital_status'          => ['required', 'in:single,married,divorced,widowed'],
             'classification'          => ['nullable', 'in:potential,confirmed,premium,blocked'],

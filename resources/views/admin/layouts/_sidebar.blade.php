@@ -77,6 +77,51 @@
             لوحة التحكم
         </a>
 
+        @if($can('security-logs.view'))
+        {{-- Section label: الأمن والتدقيق --}}
+        <div style="padding:10px 10px 4px;margin-top:4px;">
+            <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">الأمن والتدقيق</p>
+        </div>
+        <div x-data="{ sec: {{ request()->routeIs('admin.security.*') ? 'true' : 'false' }} }" style="margin-bottom:1px;">
+            <button @click="sec=!sec"
+                    style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
+                           border-radius:8px;border:none;cursor:pointer;text-align:right;
+                           font-family:Cairo,sans-serif;font-size:13px;font-weight:600;background:transparent;"
+                    :style="{ color: sec ? '#e2e8f0' : '#c8d4e3', background: sec ? 'rgba(255,255,255,.05)' : 'transparent' }">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span style="flex:1;">الأمن والتدقيق</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                     style="flex-shrink:0;transition:transform .25s;" :style="{ transform: sec ? 'rotate(180deg)' : 'none' }">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+            <div x-show="sec" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
+                @php $secItems = [
+                    ['r'=>'admin.security.incidents',          'l'=>'الحوادث الأمنية'],
+                    ['r'=>'admin.security.access-logs',        'l'=>'سجلات الوصول'],
+                    ['r'=>'admin.security.failed-logins',      'l'=>'محاولات الدخول الفاشلة'],
+                    ['r'=>'admin.security.export-logs',        'l'=>'سجلات التصدير'],
+                    ['r'=>'admin.security.permission-changes', 'l'=>'تغييرات الصلاحيات'],
+                ] @endphp
+                @foreach($secItems as $it)
+                    @php $on = request()->routeIs($it['r']); @endphp
+                    <a href="{{ route($it['r']) }}"
+                       style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
+                              border-radius:7px;text-decoration:none;font-size:12.5px;
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
+                            <circle cx="12" cy="12" r="3"/><path d="M3 12h3m12 0h3M12 3v3m0 12v3"/>
+                        </svg>
+                        {{ $it['l'] }}
+                    </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         @if($showContractsGroup)
         {{-- Section label: عقود الاستقدام --}}
         <div style="padding:10px 10px 4px;margin-top:4px;">

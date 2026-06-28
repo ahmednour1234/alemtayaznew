@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Worker extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, \App\Models\Concerns\HasEncryptedPii;
 
     protected $fillable = [
         'name', 'passport_number', 'nationality_id', 'profession',
@@ -25,8 +25,19 @@ class Worker extends Model
     protected function casts(): array
     {
         return [
-            'active'      => 'boolean',
-            'assigned_at' => 'datetime',
+            'active'          => 'boolean',
+            'assigned_at'     => 'datetime',
+            'passport_number' => 'encrypted',
+            'phone'           => 'encrypted',
+        ];
+    }
+
+    /** Encrypted-at-rest PII fields and their searchable hash columns. */
+    public function piiHashMap(): array
+    {
+        return [
+            'passport_number' => 'passport_number_hash',
+            'phone'           => 'phone_hash',
         ];
     }
 
