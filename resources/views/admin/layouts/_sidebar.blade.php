@@ -77,7 +77,8 @@
             لوحة التحكم
         </a>
 
-        @if($can('security-logs.view'))
+        {{-- الأمن والتدقيق: مخفي من القائمة الجانبية (لا يزال يعمل عبر الروابط المباشرة) --}}
+        @if(false && $can('security-logs.view'))
         {{-- Section label: الأمن والتدقيق --}}
         <div style="padding:10px 10px 4px;margin-top:4px;">
             <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
