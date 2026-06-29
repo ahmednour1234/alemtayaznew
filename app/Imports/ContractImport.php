@@ -164,13 +164,25 @@ class ContractImport implements ToCollection, WithCalculatedFormulas
                         'active'         => true,
                     ]
                 );
-                // Update national_id if provided, missing on this client, and not taken by another client
-                if ($clientNationalId && ! $client->national_id) {
-                    $takenByOther = Client::wherePii('national_id', $clientNationalId)
-                        ->where('id', '!=', $client->id)
-                        ->exists();
-                    if (! $takenByOther) {
-                        $client->update(['national_id' => $clientNationalId]);
+                // Update national_id if provided, missing on this client, and not taken by another client.
+                // Reading the encrypted national_id can throw DecryptException if the stored value
+                // was encrypted with a different APP_KEY or is corrupted — treat that as "missing".
+                $existingNationalId = null;
+                try {
+                    $existingNationalId = $client->national_id;
+                } catch (\Throwable) {
+                    $existingNationalId = null;
+                }
+                if ($clientNationalId && ! $existingNationalId) {
+                    try {
+                        $takenByOther = Client::wherePii('national_id', $clientNationalId)
+                            ->where('id', '!=', $client->id)
+                            ->exists();
+                        if (! $takenByOther) {
+                            $client->update(['national_id' => $clientNationalId]);
+                        }
+                    } catch (\Throwable $e) {
+                        $this->errors[] = "الصف {$rowNum}: تعذّر تحديث رقم هوية العميل";
                     }
                 }
             }
