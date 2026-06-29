@@ -14,53 +14,79 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
-use Maatwebsite\Excel\Concerns\WithStartRow;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
-class ContractImport implements ToCollection, WithStartRow, WithCalculatedFormulas
+class ContractImport implements ToCollection, WithCalculatedFormulas
 {
     private int $imported = 0;
     private array $errors = [];
 
     /**
-     * Skip row 1 (headings) and row 2 (description) — data starts at row 3.
+     * Logical field => list of keywords to look for in the header cell.
+     * The first column whose header contains any of these keywords wins.
+     * Order of columns in the sheet does NOT matter — only the header text.
      */
-    public function startRow(): int { return 3; }
+    private const FIELD_KEYWORDS = [
+        'client'             => ['اسم العميل', 'العميل', 'client'],
+        'branch_code'        => ['كود الفرع', 'رمز الفرع', 'الفرع', 'branch'],
+        'visa_type'          => ['نوع التأشيرة', 'نوع التاشيرة', 'visa_type', 'visa type'],
+        'visa_number'        => ['رقم التأشيرة', 'رقم التاشيرة', 'visa_number', 'visa number'],
+        'musaned'            => ['مساند', 'musaned'],
+        'request_date'       => ['تاريخ الطلب', 'request'],
+        'worker'             => ['اسم العاملة', 'العاملة', 'worker'],
+        'agent'              => ['اسم الوكيل', 'الوكيل', 'agent'],
+        'payment_status'     => ['حالة الدفع', 'الدفع', 'payment'],
+        'total_cost'         => ['اجمالي التكلفة', 'إجمالي التكلفة', 'التكلفة', 'cost'],
+        'notes'              => ['ملاحظات', 'notes'],
+        'arrival_date'       => ['تاريخ الوصول', 'arrival_date', 'arrival date'],
+        'status'             => ['الحالة', 'status'],
+        'nationality'        => ['الجنسية', 'جنسية', 'nationality'],
+        'trial_end'          => ['انتهاء التدريب', 'التدريب', 'trial'],
+        'contract_end'       => ['انتهاء الضمان', 'الضمان', 'contract_end', 'contract end'],
+        'passport_number'    => ['جواز', 'passport'],
+        'client_national_id' => ['هوية العميل', 'هوية', 'اقامة', 'إقامة', 'national_id', 'national id'],
+        'arrival_airport'    => ['محطة الوصول', 'المطار', 'مطار', 'airport'],
+    ];
+
+    /** @var array<string,int> resolved logical field => column index */
+    private array $map = [];
 
     public function collection(Collection $rows)
     {
         $adminId = Auth::guard('admin')->id() ?? Admin::first()?->id;
 
+        // Row 1 (index 0) is the header row, row 2 (index 1) is the description.
+        // Build the field => column-index map from the header row, then read data from row 3.
+        $headerRow = $rows->first();
+        if ($headerRow === null) return;
+        $this->buildMap(array_values($headerRow->toArray()));
+
         foreach ($rows as $i => $row) {
-            $rowNum = $i + 3; // row 3 is the first data row
+            if ($i < 2) continue;       // skip header (0) and description (1) rows
+            $rowNum = $i + 1;            // 1-based Excel row number for error messages
 
-            // All columns read by numeric index — avoids Arabic slug issues
-            // A=0 client | B=1 branch_code | C=2 visa_type | D=3 visa_number
-            // E=4 musaned | F=5 request_date | G=6 worker | H=7 agent
-            // I=8 payment_status | J=9 total_cost | K=10 notes
-            // L=11 arrival_date | M=12 status | N=13 nationality
-            // O=14 trial_end | P=15 contract_end | Q=16 passport_number | R=17 client_national_id | S=18 arrival_airport
             $v = array_values($row->toArray());
+            $get = fn (string $field) => isset($this->map[$field]) ? ($v[$this->map[$field]] ?? null) : null;
 
-            $clientName       = trim($v[0]  ?? '');
-            $branchCode       = trim($v[1]  ?? '');
-            $visaTypeRaw      = trim($v[2]  ?? '');
-            $visaNumber       = $v[3]  ?? null;
-            $musaned          = $v[4]  ?? null;
-            $reqDate          = $v[5]  ?? null;
-            $workerName       = trim($v[6]  ?? '');
-            $agentName        = trim($v[7]  ?? '');
-            $payRaw           = trim($v[8]  ?? '');
-            $totalCost        = $v[9]  ?? null;
-            $notes            = $v[10] ?? null;
-            $arrivalRaw       = $v[11] ?? null;
-            $statusRaw        = $v[12] ?? null;
-            $nationalityName  = trim($v[13] ?? '');
-            $trialEndRaw      = $v[14] ?? null;
-            $contractEndRaw   = $v[15] ?? null;
-            $passportNumber   = trim($v[16] ?? '') ?: null;
-            $clientNationalId = trim($v[17] ?? '') ?: null;
-            $airportName      = trim($v[18] ?? '') ?: null;   // S — محطة الوصول
+            $clientName       = trim((string) $get('client'));
+            $branchCode       = trim((string) $get('branch_code'));
+            $visaTypeRaw      = trim((string) $get('visa_type'));
+            $visaNumber       = $get('visa_number');
+            $musaned          = $get('musaned');
+            $reqDate          = $get('request_date');
+            $workerName       = trim((string) $get('worker'));
+            $agentName        = trim((string) $get('agent'));
+            $payRaw           = trim((string) $get('payment_status'));
+            $totalCost        = $get('total_cost');
+            $notes            = $get('notes');
+            $arrivalRaw       = $get('arrival_date');
+            $statusRaw        = $get('status');
+            $nationalityName  = trim((string) $get('nationality'));
+            $trialEndRaw      = $get('trial_end');
+            $contractEndRaw   = $get('contract_end');
+            $passportNumber   = trim((string) $get('passport_number')) ?: null;
+            $clientNationalId = trim((string) $get('client_national_id')) ?: null;
+            $airportName      = trim((string) $get('arrival_airport')) ?: null;
 
             // Skip completely empty rows
             if ($branchCode === '' && $clientName === '') continue;
@@ -298,6 +324,42 @@ class ContractImport implements ToCollection, WithStartRow, WithCalculatedFormul
                     'client_id' => $client?->id,
                 ]);
             }
+        }
+    }
+
+    /**
+     * Resolve each logical field to a column index by matching the header text
+     * against FIELD_KEYWORDS. Column order is irrelevant — only the header name matters.
+     */
+    private function buildMap(array $headers): void
+    {
+        // Normalise each header cell once (lowercase + unify hamza/teh-marbuta + trim)
+        $norm = function (string $s): string {
+            $s = trim(mb_strtolower($s));
+            $s = preg_replace('/[أإآٱ]/u', 'ا', $s);
+            $s = str_replace(['ة', 'ـ', '*'], ['ه', '', ''], $s);
+            return trim(preg_replace('/\s+/u', ' ', $s));
+        };
+
+        $normHeaders = [];
+        foreach ($headers as $idx => $h) {
+            $normHeaders[$idx] = $norm((string) $h);
+        }
+
+        foreach (self::FIELD_KEYWORDS as $field => $keywords) {
+            foreach ($keywords as $kw) {
+                $nkw = $norm($kw);
+                foreach ($normHeaders as $idx => $nh) {
+                    if ($nh !== '' && str_contains($nh, $nkw)) {
+                        $this->map[$field] = $idx;
+                        continue 3; // field resolved — move to next field
+                    }
+                }
+            }
+        }
+
+        if (! isset($this->map['branch_code'])) {
+            $this->errors[] = "تعذّر العثور على عمود 'كود الفرع' في الملف — تأكد من أسماء الأعمدة";
         }
     }
 
