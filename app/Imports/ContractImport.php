@@ -106,21 +106,33 @@ class ContractImport implements ToCollection, WithCalculatedFormulas
 
                 if (! $nationality) {
                     // Helper: normalise Arabic text for comparison
-                    // - unify hamza variants (أإآٱ → ا)
-                    // - strip common suffixes (ية / يا / ي / ة) to get root
+                    // - unify hamza variants (أإآٱ → ا) and alef-maqsura (ى → ي)
+                    // - unify teh-marbuta (ة → ه)
+                    // - strip tatweel, diacritics, and all spaces
+                    // - strip common suffixes (ية / يا / ي / ه) to get the root
                     $normalise = function (string $s): string {
-                        $s = preg_replace('/[أإآٱ]/', 'ا', $s);
-                        $s = preg_replace('/(ية|يا|ي|ة)$/', '', $s);
-                        return trim($s);
+                        $s = trim($s);
+                        $s = preg_replace('/[أإآٱ]/u', 'ا', $s);
+                        $s = str_replace(['ى', 'ة', 'ـ'], ['ي', 'ه', ''], $s);
+                        $s = preg_replace('/[\x{064B}-\x{065F}\x{0670}]/u', '', $s); // tashkeel
+                        $s = preg_replace('/\s+/u', '', $s);                          // drop spaces
+                        $s = preg_replace('/(يه|يا|ي|ه)$/u', '', $s);                 // strip suffixes
+                        return $s;
                     };
 
                     $normInput = $normalise($nationalityName);
 
-                    // 2) Hamza + suffix-stripped exact match
+                    // 2) Hamza + suffix-stripped match (exact, then containment both ways)
                     $allNats = Nationality::all();
                     $nationality = $allNats->first(
                         fn ($n) => $normalise($n->name) === $normInput
                     );
+                    if (! $nationality && $normInput !== '') {
+                        $nationality = $allNats->first(function ($n) use ($normalise, $normInput) {
+                            $nn = $normalise($n->name);
+                            return $nn !== '' && (str_contains($nn, $normInput) || str_contains($normInput, $nn));
+                        });
+                    }
                 }
 
                 if (! $nationality) {
