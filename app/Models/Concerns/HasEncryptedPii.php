@@ -2,6 +2,7 @@
 
 namespace App\Models\Concerns;
 
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -40,6 +41,25 @@ trait HasEncryptedPii
 
     /** @return array<string,string> source PII field => hash column */
     abstract public function piiHashMap(): array;
+
+    /**
+     * Tolerant read for encrypted PII columns: if a value cannot be decrypted
+     * (e.g. a legacy row stored as plaintext before encryption was introduced),
+     * fall back to the raw stored value instead of throwing a DecryptException
+     * that would otherwise break the whole page.
+     */
+    public function getAttributeValue($key)
+    {
+        if (array_key_exists($key, $this->piiHashMap())) {
+            try {
+                return parent::getAttributeValue($key);
+            } catch (DecryptException $e) {
+                return $this->getAttributeFromArray($key);
+            }
+        }
+
+        return parent::getAttributeValue($key);
+    }
 
     /**
      * Deterministic keyed hash used for exact-match lookups on encrypted columns.
