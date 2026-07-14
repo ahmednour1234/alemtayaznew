@@ -79,7 +79,7 @@ class CampaignController extends Controller
             'archived'    => $campaign->leads()->where('status', 'archived')->count(),
         ];
 
-        $admins      = Admin::where('active', true)->orderBy('name')->get();
+        $admins      = Admin::with('branch')->where('active', true)->orderBy('name')->get();
         $nationalities = Nationality::where('active', true)->orderBy('name')->get();
 
         return view('admin.marketing.campaigns.show', compact('campaign', 'stats', 'admins', 'nationalities'));
@@ -274,11 +274,19 @@ class CampaignController extends Controller
     }
 
     /**
-     * Re-assign all unassigned leads in this campaign to CS staff.
+     * Re-assign active leads in this campaign to the selected staff.
      * POST campaigns/{campaign}/reassign-unassigned
      */
-    public function reassignUnassigned(Campaign $campaign)
+    public function reassignUnassigned(Request $request, Campaign $campaign)
     {
+        $data = $request->validate([
+            'assignee_ids'   => ['required', 'array', 'min:1'],
+            'assignee_ids.*' => ['integer', 'exists:admins,id'],
+        ], [
+            'assignee_ids.required' => 'اختر موظفاً واحداً على الأقل لإعادة التوزيع',
+            'assignee_ids.min'      => 'اختر موظفاً واحداً على الأقل لإعادة التوزيع',
+        ]);
+
         $leads = Lead::where('campaign_id', $campaign->id)
             ->whereIn('status', ['new', 'in_progress'])
             ->get();
@@ -287,21 +295,24 @@ class CampaignController extends Controller
             return back()->with('success', 'لا يوجد عملاء نشطون لإعادة التوزيع');
         }
 
-        // All active CS staff across all branches — distribute without city/branch filtering
-        $allCsStaff = Admin::where('department', 'customer_service')
+        $requestedAssigneeIds = collect($data['assignee_ids'])->unique()->values();
+
+        $selectedStaff = Admin::whereIn('id', $requestedAssigneeIds)
             ->where('active', true)
             ->get();
 
-        if ($allCsStaff->isEmpty()) {
-            return back()->with('error', 'لا يوجد موظفو خدمة عملاء نشطون');
+        if ($selectedStaff->count() !== $requestedAssigneeIds->count()) {
+            return back()
+                ->withErrors(['assignee_ids' => 'كل الموظفين المختارين يجب أن يكونوا نشطين'])
+                ->withInput();
         }
 
         $loadCache = [];   // admin_id → active lead count
         $count = 0;
 
         foreach ($leads as $lead) {
-            // Assign to least-busy CS staff across all branches
-            $assignee = $allCsStaff->sortBy(function ($admin) use (&$loadCache) {
+            // Assign to the least-busy selected staff member.
+            $assignee = $selectedStaff->sortBy(function ($admin) use (&$loadCache) {
                 if (! isset($loadCache[$admin->id])) {
                     $loadCache[$admin->id] = Lead::where('assigned_admin_id', $admin->id)
                         ->whereIn('status', ['new', 'in_progress'])
@@ -324,6 +335,6 @@ class CampaignController extends Controller
             $count++;
         }
 
-        return back()->with('success', "تم توزيع {$count} عميل محتمل على موظفي خدمة العملاء");
+        return back()->with('success', "تم توزيع {$count} عميل محتمل على الموظفين المختارين");
     }
 }

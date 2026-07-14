@@ -74,21 +74,35 @@
             @endif
         </h3>
         <div class="flex items-center gap-3">
-            <form method="POST" action="{{ route('admin.marketing.campaigns.reassign-unassigned', $campaign) }}">
-                @csrf
-                <button type="submit"
-                        onclick="return confirm('إعادة توزيع جميع العملاء المحتملين على موظفي خدمة العملاء؟')"
-                        class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-sm transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 3M21 7.5H7.5" />
-                    </svg>
-                    إعادة توزيع
-                </button>
-            </form>
             <a href="{{ route('admin.marketing.leads.index', ['campaign_id' => $campaign->id]) }}"
                class="text-xs text-blue-600 hover:underline">عرض الكل</a>
         </div>
     </div>
+    <form method="POST"
+          action="{{ route('admin.marketing.campaigns.reassign-unassigned', $campaign) }}"
+          class="px-5 py-4 border-b border-slate-100 bg-slate-50/60 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-3 items-end">
+        @csrf
+        <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">إعادة التوزيع على</label>
+            <select name="assignee_ids[]" multiple required
+                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white min-h-[44px]">
+                @foreach($admins as $admin)
+                    <option value="{{ $admin->id }}" @selected(in_array($admin->id, old('assignee_ids', [])))>
+                        {{ $admin->name }}{{ $admin->branch ? ' - '.$admin->branch->name : '' }}{{ $admin->department ? ' - '.$admin->department_label : '' }}
+                    </option>
+                @endforeach
+            </select>
+            <p class="text-xs text-slate-400 mt-1">اختر موظفاً أو أكثر ليتم توزيع العملاء النشطين عليهم فقط.</p>
+        </div>
+        <button type="submit"
+                onclick="return confirm('إعادة توزيع جميع العملاء النشطين على الموظفين المختارين؟')"
+                class="inline-flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-sm transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 3M21 7.5H7.5" />
+            </svg>
+            إعادة توزيع
+        </button>
+    </form>
     @php $statuses = \App\Models\Lead::statuses(); @endphp
     <table class="w-full text-sm text-right">
         <thead class="bg-slate-50 text-xs text-slate-500">
