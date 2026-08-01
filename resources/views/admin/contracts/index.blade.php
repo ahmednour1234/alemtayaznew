@@ -13,6 +13,7 @@
 @section('content')
 <div class="w-full space-y-5" x-data="{
     importModal: false,
+    statusModal: false,
     selected: [],
     get hasSelection() { return this.selected.length > 0; },
     toggleAll(ids) {
@@ -101,6 +102,77 @@
     </div>
     {{-- ===== End Import Modal ===== --}}
 
+    {{-- ===== Bulk Status Update Modal ===== --}}
+    <div x-show="statusModal" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         @keydown.escape.window="statusModal = false">
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="statusModal = false"></div>
+        {{-- Dialog --}}
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10">
+            {{-- Header --}}
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-800">تحديث حالات العقود من Excel</h3>
+                </div>
+                <button @click="statusModal = false" class="text-slate-400 hover:text-slate-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            {{-- Body --}}
+            <form action="{{ route('admin.contracts.status-import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="px-6 py-5 space-y-4">
+                    {{-- Instructions --}}
+                    <div class="bg-amber-50 border border-amber-100 rounded-xl p-3 text-xs text-amber-800 space-y-1 leading-relaxed">
+                        <p class="font-semibold text-amber-900">تعليمات التحديث:</p>
+                        <ul class="list-disc list-inside space-y-0.5">
+                            <li>يتم البحث عن العقد بواسطة <strong>رقم التأشيرة</strong></li>
+                            <li><strong>رقم الحالة</strong> من 1 إلى 15 (موضحة في النموذج)</li>
+                            <li><strong>تاريخ الحالة</strong> بصيغة YYYY-MM-DD — إن تُرك فارغاً يُستخدم تاريخ اليوم</li>
+                            <li>الصف الأول عناوين، الصف الثاني شرح — تبدأ البيانات من الصف الثالث</li>
+                            <li>يتم تسجيل التحديث في سجل الحالات وإشعار القسم المختص</li>
+                        </ul>
+                    </div>
+                    {{-- Template download --}}
+                    <a href="{{ route('admin.contracts.status-template') }}"
+                       class="flex items-center gap-2 w-full justify-center border border-dashed border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700 text-sm font-medium py-2.5 rounded-xl transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                        تحميل نموذج تحديث الحالات
+                    </a>
+                    {{-- File drop zone --}}
+                    <div x-data="{ fileName: '' }">
+                        <label for="status-file-modal"
+                               class="flex flex-col items-center justify-center gap-2 w-full border-2 border-dashed border-slate-200 hover:border-amber-400 bg-slate-50 hover:bg-amber-50 rounded-xl py-8 cursor-pointer transition">
+                            <svg class="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 4v-6M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+                            <span class="text-sm text-slate-500" x-text="fileName || 'انقر لاختيار الملف أو اسحب وأفلت'"></span>
+                            <span class="text-xs text-slate-400">.xlsx / .xls / .csv</span>
+                        </label>
+                        <input type="file" name="file" id="status-file-modal" accept=".xlsx,.xls,.csv"
+                               class="hidden"
+                               @change="fileName = $event.target.files[0]?.name ?? ''">
+                    </div>
+                </div>
+                {{-- Footer --}}
+                <div class="flex gap-3 px-6 pb-5">
+                    <button type="submit"
+                            class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium py-2.5 rounded-xl shadow transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        رفع وتحديث الحالات
+                    </button>
+                    <button type="button" @click="statusModal = false"
+                            class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-2.5 rounded-xl transition">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {{-- ===== End Bulk Status Update Modal ===== --}}
+
     {{-- Header --}}
     <div class="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -118,6 +190,11 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
                 نموذج
             </a>
+            <button @click="statusModal = true"
+                    class="flex items-center gap-1.5 text-sm bg-white border border-slate-200 text-slate-600 hover:text-amber-700 hover:border-amber-300 px-4 py-2 rounded-xl shadow-sm transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                تحديث الحالات
+            </button>
             <a href="{{ route('admin.contracts.export', request()->query()) }}"
                class="flex items-center gap-1.5 text-sm bg-white border border-slate-200 text-slate-600 hover:text-emerald-700 hover:border-emerald-300 px-4 py-2 rounded-xl shadow-sm transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>

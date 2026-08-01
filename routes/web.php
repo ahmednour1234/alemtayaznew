@@ -211,6 +211,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('contracts/export',               [RecruitmentContractController::class, 'export'])->name('contracts.export');
         Route::get('contracts/template',             [RecruitmentContractController::class, 'template'])->name('contracts.template');
         Route::post('contracts/import',              [RecruitmentContractController::class, 'import'])->name('contracts.import');
+        Route::get('contracts/status-template',      [RecruitmentContractController::class, 'statusTemplate'])->name('contracts.status-template');
+        Route::post('contracts/status-import',       [RecruitmentContractController::class, 'statusImport'])->name('contracts.status-import');
         Route::post('contracts/bulk-delete',         [RecruitmentContractController::class, 'bulkDelete'])->name('contracts.bulk-delete');
         Route::get('contracts/{id}/print',           [RecruitmentContractController::class, 'printView'])->name('contracts.print');
         Route::resource('contracts', RecruitmentContractController::class);

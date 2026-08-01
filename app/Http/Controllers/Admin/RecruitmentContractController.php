@@ -7,7 +7,9 @@ use App\Http\Requests\Admin\StoreRecruitmentContractRequest;
 use App\Http\Requests\Admin\UpdateRecruitmentContractRequest;
 use App\Exports\ContractExport;
 use App\Exports\ContractTemplateExport;
+use App\Exports\ContractStatusTemplateExport;
 use App\Imports\ContractImport;
+use App\Imports\ContractStatusImport;
 use App\Models\Agent;
 use App\Models\Airport;
 use App\Models\City;
@@ -407,6 +409,41 @@ class RecruitmentContractController extends Controller
         $msg = "تم استيراد {$importer->importedCount()} عقد بنجاح";
         if ($errs = $importer->importErrors()) {
             $msg .= '. تحذيرات: ' . implode(' | ', array_slice($errs, 0, 5));
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    // ── Bulk status update (رفع اكسل لتحديث الحالات) ────────────────────────────
+
+    public function statusTemplate()
+    {
+        return Excel::download(new ContractStatusTemplateExport(), 'نموذج-تحديث-حالات-العقود.xlsx');
+    }
+
+    public function statusImport(Request $request): RedirectResponse
+    {
+        $request->validate(['file' => ['required', 'file', 'mimes:xlsx,xls,csv']]);
+
+        $importer = new ContractStatusImport($this->service);
+        Excel::import($importer, $request->file('file'));
+
+        $updated = $importer->updatedCount();
+        $skipped = $importer->skippedCount();
+        $errs    = $importer->importErrors();
+
+        $msg = "تم تحديث حالة {$updated} عقد";
+        if ($skipped > 0) {
+            $msg .= " — وتم تخطي {$skipped} عقد (الحالة نفسها بالفعل)";
+        }
+
+        // لا شيء نجح وكل الصفوف بها أخطاء → اعرضها كرسالة خطأ
+        if ($updated === 0 && $errs) {
+            return back()->with('error', 'لم يتم تحديث أي عقد. ' . implode(' | ', array_slice($errs, 0, 5)));
+        }
+
+        if ($errs) {
+            $msg .= '. تحذيرات (' . count($errs) . '): ' . implode(' | ', array_slice($errs, 0, 5));
         }
 
         return back()->with('success', $msg);
