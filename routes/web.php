@@ -308,24 +308,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
 |--------------------------------------------------------------------------
 | Uploaded file delivery
 |--------------------------------------------------------------------------
-| Serves files from the 'public' disk through PHP instead of relying on the
-| public/storage symlink, which many shared hosts do not allow (the missing
-| link is what returned 403). Works regardless of how the app is mounted.
+| Serves files from storage/app/public through PHP, the same way the worker
+| CV/passport routes above already do in production.
+|
+| Deliberately NOT mounted at /storage: that path collides with the public/
+| storage symlink, and when the link is missing or stale Apache answers 403
+| before PHP ever runs. /file/... has no such collision.
 */
-Route::get('storage/{path}', function (string $path) {
-    // Block traversal outside the public disk.
+Route::get('file/{path}', function (string $path) {
+    // Block traversal outside storage/app/public.
     if (str_contains($path, '..')) {
         abort(404);
     }
 
-    $disk = Illuminate\Support\Facades\Storage::disk('public');
+    $full = storage_path('app/public/'.$path);
+    abort_if(! is_file($full), 404);
 
-    if (! $disk->exists($path)) {
-        abort(404);
-    }
-
-    // Display PDFs/images in the browser rather than forcing a download.
-    return response()->file($disk->path($path), [
+    return response()->file($full, [
+        'Content-Type'        => mime_content_type($full) ?: 'application/octet-stream',
         'Content-Disposition' => 'inline; filename="'.basename($path).'"',
     ]);
-})->where('path', '.*')->name('storage.show');
+})->where('path', '.*')->name('file.show');

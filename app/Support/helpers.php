@@ -21,8 +21,10 @@ if (! function_exists('file_url')) {
             return $path;
         }
 
+        // Routed through PHP via /file/... rather than /storage/..., which
+        // Apache 403s when the public/storage symlink is missing or stale.
         $base = rtrim(Request::getSchemeAndHttpHost().Request::getBaseUrl(), '/');
 
-        return $base.'/storage/'.ltrim($path, '/');
+        return $base.'/file/'.ltrim($path, '/');
     }
 }
