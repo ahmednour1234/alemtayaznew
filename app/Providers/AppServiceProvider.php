@@ -17,7 +17,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Loaded here as well as via composer's autoload "files" so the helpers
+        // are available even when the server's autoloader has not been rebuilt.
+        require_once app_path('Support/helpers.php');
     }
 
     /**
