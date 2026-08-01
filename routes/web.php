@@ -324,5 +324,8 @@ Route::get('storage/{path}', function (string $path) {
         abort(404);
     }
 
-    return response()->file($disk->path($path));
+    // Display PDFs/images in the browser rather than forcing a download.
+    return response()->file($disk->path($path), [
+        'Content-Disposition' => 'inline; filename="'.basename($path).'"',
+    ]);
 })->where('path', '.*')->name('storage.show');
