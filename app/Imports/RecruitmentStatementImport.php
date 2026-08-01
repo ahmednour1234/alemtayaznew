@@ -39,6 +39,9 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
     /** @var array<int, string> */
     public array $errors = [];
 
+    /** Branch list cached for the whole import — reloading it per row caused 504 timeouts. */
+    private ?\Illuminate\Support\Collection $allBranches = null;
+
     private const BRANCH_ALIASES = [
         'امتياز'   => 'الرياض',
         'الامتياز' => 'الرياض',
@@ -208,7 +211,8 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
         // 3. Fuzzy
         $normIn = $this->normalize($name);
         $sortIn = $this->sortedChars($normIn);
-        $b = Branch::withTrashed()->get()->first(function ($br) use ($normIn, $sortIn) {
+        $this->allBranches ??= Branch::withTrashed()->get();
+        $b = $this->allBranches->first(function ($br) use ($normIn, $sortIn) {
             $normDb = $this->normalize($br->name);
             if ($normDb === $normIn) return true;
             if ($this->sortedChars($normDb) === $sortIn) return true;

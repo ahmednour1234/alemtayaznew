@@ -25,9 +25,42 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
     /** @var array<int, string> */
     public array $errors = [];
 
+    /**
+     * In-memory caches. Without these every row re-queried the database —
+     * the branch fuzzy match alone loaded the whole branches table per row,
+     * which is what pushed large files past the nginx timeout (504).
+     *
+     * @var array<string, Branch|null>
+     */
+    private array $branchCache = [];
+
+    /** @var array<string, int> */
+    private array $incomeTypeCache = [];
+
+    /** @var array<string, int> */
+    private array $expenseTypeCache = [];
+
+    /** @var Collection<int, Branch>|null */
+    private ?Collection $allBranches = null;
+
+    /** Rows buffered for bulk insert. */
+    private const BATCH_SIZE = 500;
+
+    /** @var array<int, array<string, mixed>> */
+    private array $incomeBuffer = [];
+
+    /** @var array<int, array<string, mixed>> */
+    private array $expenseBuffer = [];
+
     public function collection(Collection $rows): void
     {
+        // Large sheets legitimately take a while; don't let PHP kill the run
+        // half-way and leave the import partially applied.
+        @set_time_limit(0);
+
         $adminId = Auth::guard('admin')->id() ?? Admin::query()->value('id');
+        // insert() bypasses Eloquent, so timestamps must be set explicitly.
+        $now = now();
 
         foreach ($rows as $index => $row) {
             $rowNumber = $index + 2;
@@ -63,16 +96,16 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
 
             if ($recordType === 'income') {
                 $typeName = trim((string) ($data['type_name'] ?? $data['income_type_name'] ?? $data['النوع'] ?? $data['نوع'] ?? ''));
-                $type = $typeName !== '' ? IncomeType::firstOrCreate(['name' => $typeName], ['active' => true]) : null;
+                $typeId   = $typeName !== '' ? $this->incomeTypeId($typeName) : null;
 
-                if (! $type) {
+                if (! $typeId) {
                     $this->skip($rowNumber, 'Income type is required.');
                     continue;
                 }
 
-                Income::create([
+                $this->incomeBuffer[] = [
                     'branch_id' => $branch->id,
-                    'income_type_id' => $type->id,
+                    'income_type_id' => $typeId,
                     'admin_id' => $adminId,
                     'amount' => $amount,
                     'date' => $date,
@@ -81,23 +114,26 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
                     'description' => $this->nullableString($data['description'] ?? $data['البيان'] ?? $data['byan'] ?? null),
                     'recipient' => $this->nullableString($data['recipient'] ?? $data['المستفيد'] ?? null),
                     'notes' => $this->nullableString($data['notes'] ?? $data['ملاحظات'] ?? null),
-                ]);
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
 
                 $this->incomeCount++;
+                $this->flushIfFull();
                 continue;
             }
 
             $typeName = trim((string) ($data['type_name'] ?? $data['expense_type_name'] ?? $data['النوع'] ?? $data['نوع'] ?? ''));
-            $type = $typeName !== '' ? ExpenseType::firstOrCreate(['name' => $typeName], ['active' => true]) : null;
+            $typeId   = $typeName !== '' ? $this->expenseTypeId($typeName) : null;
 
-            if (! $type) {
+            if (! $typeId) {
                 $this->skip($rowNumber, 'Expense type is required.');
                 continue;
             }
 
-            Expense::create([
+            $this->expenseBuffer[] = [
                 'branch_id' => $branch->id,
-                'expense_type_id' => $type->id,
+                'expense_type_id' => $typeId,
                 'admin_id' => $adminId,
                 'amount' => $amount,
                 'date' => $date,
@@ -107,9 +143,68 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
                 'description' => $this->nullableString($data['description'] ?? $data['البيان'] ?? $data['byan'] ?? null),
                 'recipient' => $this->nullableString($data['recipient'] ?? $data['المستفيد'] ?? null),
                 'notes' => $this->nullableString($data['notes'] ?? $data['ملاحظات'] ?? null),
-            ]);
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
 
             $this->expenseCount++;
+            $this->flushIfFull();
+        }
+
+        // Write whatever is left in the buffers.
+        $this->flush();
+    }
+
+    /** Write buffered rows once they reach the batch size. */
+    private function flushIfFull(): void
+    {
+        if (count($this->incomeBuffer) >= self::BATCH_SIZE || count($this->expenseBuffer) >= self::BATCH_SIZE) {
+            $this->flush();
+        }
+    }
+
+    /** Bulk-insert buffered rows — one query per batch instead of one per row. */
+    private function flush(): void
+    {
+        if ($this->incomeBuffer) {
+            $rows = $this->incomeBuffer;
+            $this->incomeBuffer = [];
+            $this->insertBatch(Income::class, $rows, $this->incomeCount);
+        }
+
+        if ($this->expenseBuffer) {
+            $rows = $this->expenseBuffer;
+            $this->expenseBuffer = [];
+            $this->insertBatch(Expense::class, $rows, $this->expenseCount);
+        }
+    }
+
+    /**
+     * Insert a batch in one query. If the batch fails (one bad row would
+     * otherwise discard all of them) retry row by row so the good rows still
+     * land and only the genuinely broken ones are reported as skipped.
+     *
+     * @param  class-string  $model
+     * @param  array<int, array<string, mixed>>  $rows
+     */
+    private function insertBatch(string $model, array $rows, int &$counter): void
+    {
+        try {
+            $model::insert($rows);
+            return;
+        } catch (\Throwable) {
+            // fall through to per-row retry
+        }
+
+        foreach ($rows as $row) {
+            try {
+                $model::insert([$row]);
+            } catch (\Throwable $e) {
+                $counter--;
+                $this->skippedCount++;
+                $ref = $row['reference_number'] ?? '—';
+                $this->errors[] = "Reference {$ref}: could not be saved ({$e->getMessage()})";
+            }
         }
     }
 
@@ -163,7 +258,57 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
         'الإنجاز'    => 'حفر الباطن',
     ];
 
+    /** Resolve an income type id, creating it once and caching by name. */
+    private function incomeTypeId(string $name): ?int
+    {
+        if (! isset($this->incomeTypeCache[$name])) {
+            $this->incomeTypeCache[$name] = IncomeType::firstOrCreate(
+                ['name' => $name],
+                ['active' => true]
+            )->id;
+        }
+
+        return $this->incomeTypeCache[$name];
+    }
+
+    /** Resolve an expense type id, creating it once and caching by name. */
+    private function expenseTypeId(string $name): ?int
+    {
+        if (! isset($this->expenseTypeCache[$name])) {
+            $this->expenseTypeCache[$name] = ExpenseType::firstOrCreate(
+                ['name' => $name],
+                ['active' => true]
+            )->id;
+        }
+
+        return $this->expenseTypeCache[$name];
+    }
+
+    /**
+     * Cached wrapper around resolveBranch(). Sheets repeat the same handful of
+     * branch names across thousands of rows, so each distinct value is resolved
+     * once instead of re-running the fuzzy scan per row.
+     */
     private function branch(array $row): ?Branch
+    {
+        $nameRaw = trim((string) ($row['branch_name'] ?? $row['branch'] ?? $row['المكتب'] ?? $row['مكتب'] ?? $row['الفرع'] ?? $row['فرع'] ?? ''));
+        $codeRaw = trim((string) ($row['branch_code'] ?? $row['كود_الفرع'] ?? ''));
+
+        $key = $nameRaw . '|' . $codeRaw;
+
+        if (! array_key_exists($key, $this->branchCache)) {
+            $branch = $this->resolveBranch($row);
+            // A newly created branch must be visible to the fuzzy scan of later rows.
+            if ($branch && $this->allBranches !== null && ! $this->allBranches->contains('id', $branch->id)) {
+                $this->allBranches->push($branch);
+            }
+            $this->branchCache[$key] = $branch;
+        }
+
+        return $this->branchCache[$key];
+    }
+
+    private function resolveBranch(array $row): ?Branch
     {
         // Accept multiple possible column name variants
         $branchName = trim((string) ($row['branch_name'] ?? $row['branch'] ?? $row['المكتب'] ?? $row['مكتب'] ?? $row['الفرع'] ?? $row['فرع'] ?? ''));
@@ -206,7 +351,10 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
             $normInput   = $this->normalizeBranchName($branchName);
             $sortedInput = $this->sortedChars($normInput);
 
-            $branch = Branch::withTrashed()->get()->first(function ($b) use ($normInput, $sortedInput) {
+            // Loaded once per import, not once per row.
+            $this->allBranches ??= Branch::withTrashed()->get();
+
+            $branch = $this->allBranches->first(function ($b) use ($normInput, $sortedInput) {
                 similar_text($normInput, $b->code ?? '', $pctCode);
                 if ($pctCode >= 85) return true;
                 $normDb = $this->normalizeBranchName($b->name);

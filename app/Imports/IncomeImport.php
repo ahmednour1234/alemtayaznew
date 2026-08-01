@@ -13,6 +13,9 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 
 class IncomeImport implements ToModel, WithHeadingRow, WithValidation
 {
+    /** Branch list cached for the whole import — reloading it per row caused 504 timeouts. */
+    private ?\Illuminate\Support\Collection $allBranches = null;
+
     private const BRANCH_ALIASES = [
         'امتياز'   => 'الرياض',
         'الامتياز' => 'الرياض',
@@ -98,7 +101,8 @@ class IncomeImport implements ToModel, WithHeadingRow, WithValidation
             $normInput   = $this->normalizeBranchName($branchName);
             $sortedInput = $this->sortedChars($normInput);
 
-            $branch = Branch::all()->first(function ($b) use ($normInput, $sortedInput) {
+            $this->allBranches ??= Branch::all();
+            $branch = $this->allBranches->first(function ($b) use ($normInput, $sortedInput) {
                 // also try code fuzzy match
                 similar_text($normInput, $b->code ?? '', $pctCode);
                 if ($pctCode >= 85) return true;
