@@ -70,7 +70,7 @@
         <div>
             <label class="block text-sm font-semibold text-slate-700 mb-1.5">ملف التوثيق</label>
             @if($visit->documentation_file)
-            <a href="{{ Storage::url($visit->documentation_file) }}" target="_blank" class="block text-xs text-blue-600 hover:underline mb-2">عرض الملف الحالي</a>
+            <a href="{{ file_url($visit->documentation_file) }}" target="_blank" class="block text-xs text-blue-600 hover:underline mb-2">عرض الملف الحالي</a>
             @endif
             <input type="file" name="documentation_file" accept=".jpg,.jpeg,.png,.webp,.pdf"
                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">

@@ -97,7 +97,7 @@
                 <td class="px-4 py-3 text-slate-500">{{ $r->rent_end_date?->format('Y-m-d') ?? '—' }}</td>
                 <td class="px-4 py-3">
                     @if($r->contract_image)
-                    <a href="{{ asset('storage/'.$r->contract_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض</a>
+                    <a href="{{ file_url($r->contract_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض</a>
                     @else
                     <span class="text-slate-300 text-xs">—</span>
                     @endif

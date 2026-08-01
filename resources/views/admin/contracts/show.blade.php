@@ -113,7 +113,7 @@
                     <div><dt class="text-slate-400 text-xs mb-0.5">محطة الاستلام</dt><dd>{{ $contract->deliveryCity->name ?? '—' }}</dd></div>
                     @if($contract->visa_image)
                     <div><dt class="text-slate-400 text-xs mb-0.5">صورة التأشيرة</dt>
-                        <dd><a href="{{ Storage::url($contract->visa_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض الملف</a></dd>
+                        <dd><a href="{{ file_url($contract->visa_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض الملف</a></dd>
                     </div>
                     @endif
                 </dl>
@@ -127,7 +127,7 @@
                     <div><dt class="text-slate-400 text-xs mb-0.5">تاريخ العقد</dt><dd>{{ $contract->musaned_date?->format('Y/m/d') ?? '—' }}</dd></div>
                     @if($contract->musaned_file)
                     <div><dt class="text-slate-400 text-xs mb-0.5">ملف العقد</dt>
-                        <dd><a href="{{ Storage::url($contract->musaned_file) }}" target="_blank" class="text-blue-600 hover:underline text-xs">تحميل الملف</a></dd>
+                        <dd><a href="{{ file_url($contract->musaned_file) }}" target="_blank" class="text-blue-600 hover:underline text-xs">تحميل الملف</a></dd>
                     </div>
                     @endif
                     @php

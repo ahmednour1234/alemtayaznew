@@ -102,7 +102,7 @@
                 <td class="px-4 py-3 text-slate-500">{{ $s->settlement_date?->format('Y-m-d') ?? '—' }}</td>
                 <td class="px-4 py-3">
                     @if($s->document_image)
-                    <a href="{{ asset('storage/'.$s->document_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض</a>
+                    <a href="{{ file_url($s->document_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض</a>
                     @else
                     <span class="text-slate-300 text-xs">—</span>
                     @endif

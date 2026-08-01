@@ -204,7 +204,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">صورة التأشيرة</label>
                     @if($contract->visa_image)
-                    <div class="mb-2"><a href="{{ Storage::url($contract->visa_image) }}" target="_blank" class="text-blue-600 text-xs hover:underline">الملف الحالي</a></div>
+                    <div class="mb-2"><a href="{{ file_url($contract->visa_image) }}" target="_blank" class="text-blue-600 text-xs hover:underline">الملف الحالي</a></div>
                     @endif
                     <input type="file" name="visa_image" accept=".jpg,.jpeg,.png,.pdf"
                            class="w-full border border-slate-200 rounded-xl px-4 py-2 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
@@ -266,7 +266,7 @@
                 <div class="md:col-span-2">
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">ملف عقد مساند</label>
                     @if($contract->musaned_file)
-                    <div class="mb-2"><a href="{{ Storage::url($contract->musaned_file) }}" target="_blank" class="text-blue-600 text-xs hover:underline">الملف الحالي</a></div>
+                    <div class="mb-2"><a href="{{ file_url($contract->musaned_file) }}" target="_blank" class="text-blue-600 text-xs hover:underline">الملف الحالي</a></div>
                     @endif
                     <input type="file" name="musaned_file" accept=".jpg,.jpeg,.png,.pdf"
                            class="w-full border border-slate-200 rounded-xl px-4 py-2 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
@@ -293,10 +293,10 @@
                 <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">رقم مساند:</span><span class="font-medium text-slate-800">{{ $contract->musaned_number ?? '—' }}</span></div>
                 <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">تاريخ مساند:</span><span class="font-medium text-slate-800">{{ $contract->musaned_date?->format('Y-m-d') ?? '—' }}</span></div>
                 @if($contract->visa_image)
-                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">التأشيرة:</span><a href="{{ Storage::url($contract->visa_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض الملف</a></div>
+                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">التأشيرة:</span><a href="{{ file_url($contract->visa_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض الملف</a></div>
                 @endif
                 @if($contract->musaned_file)
-                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">عقد مساند:</span><a href="{{ Storage::url($contract->musaned_file) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض الملف</a></div>
+                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">عقد مساند:</span><a href="{{ file_url($contract->musaned_file) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض الملف</a></div>
                 @endif
             </div>
         </div>
@@ -491,7 +491,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">صورة إثبات التقييم</label>
                     @if($contract->rating_image)
-                    <div class="mb-2"><a href="{{ Storage::url($contract->rating_image) }}" target="_blank" class="text-blue-600 text-xs hover:underline">الصورة الحالية</a></div>
+                    <div class="mb-2"><a href="{{ file_url($contract->rating_image) }}" target="_blank" class="text-blue-600 text-xs hover:underline">الصورة الحالية</a></div>
                     @endif
                     <input type="file" name="rating_image" accept=".jpg,.jpeg,.png"
                            class="w-full border border-slate-200 rounded-xl px-4 py-2 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">

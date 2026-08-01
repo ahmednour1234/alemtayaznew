@@ -62,7 +62,7 @@
         <h3 class="font-semibold text-slate-800 mb-3">توثيق الزيارة</h3>
         <p class="text-sm text-slate-600 whitespace-pre-line">{{ $visit->documentation ?: 'لا يوجد توثيق نصي.' }}</p>
         @if($visit->documentation_file)
-        <a href="{{ Storage::url($visit->documentation_file) }}" target="_blank" class="inline-block mt-4 text-sm text-blue-600 hover:underline">عرض ملف التوثيق</a>
+        <a href="{{ file_url($visit->documentation_file) }}" target="_blank" class="inline-block mt-4 text-sm text-blue-600 hover:underline">عرض ملف التوثيق</a>
         @endif
     </div>
 

@@ -43,7 +43,7 @@
                 <label class="block text-sm font-medium text-slate-700 mb-1.5">صورة العقد (مساند)</label>
                 @if($transfer->musaned_contract_image)
                 <div class="mb-2 flex items-center gap-3">
-                    <a href="{{ Storage::url($transfer->musaned_contract_image) }}" target="_blank"
+                    <a href="{{ file_url($transfer->musaned_contract_image) }}" target="_blank"
                        class="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:underline">
                         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                         عرض الصورة الحالية

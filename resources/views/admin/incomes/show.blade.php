@@ -29,7 +29,7 @@
         @if($income->attachment)
         <div>
             <p class="text-xs text-slate-400">المرفق</p>
-            <a href="{{ Storage::url($income->attachment) }}" target="_blank" class="text-blue-600 text-sm hover:underline mt-0.5 block">عرض المرفق</a>
+            <a href="{{ file_url($income->attachment) }}" target="_blank" class="text-blue-600 text-sm hover:underline mt-0.5 block">عرض المرفق</a>
         </div>
         @endif
         <div class="flex gap-3 pt-4 border-t">

@@ -127,6 +127,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('expenses/import',               [ExpenseController::class, 'import'])->name('expenses.import');
         Route::get('expenses/recruitment-template',  [ExpenseController::class, 'recruitmentTemplate'])->name('expenses.recruitment-template');
         Route::post('expenses/recruitment-import',   [ExpenseController::class, 'recruitmentImport'])->name('expenses.recruitment-import');
+        Route::get('expenses/{id}/print',     [ExpenseController::class, 'print'])->name('expenses.print');
         Route::post('expenses/{id}/approve',  [ExpenseController::class, 'approve'])->name('expenses.approve');
         Route::post('expenses/{id}/reject',   [ExpenseController::class, 'reject'])->name('expenses.reject');
         Route::post('expenses/{id}/restore',  [ExpenseController::class, 'restore'])->name('expenses.restore');
@@ -302,3 +303,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Uploaded file delivery
+|--------------------------------------------------------------------------
+| Serves files from the 'public' disk through PHP instead of relying on the
+| public/storage symlink, which many shared hosts do not allow (the missing
+| link is what returned 403). Works regardless of how the app is mounted.
+*/
+Route::get('storage/{path}', function (string $path) {
+    // Block traversal outside the public disk.
+    if (str_contains($path, '..')) {
+        abort(404);
+    }
+
+    $disk = Illuminate\Support\Facades\Storage::disk('public');
+
+    if (! $disk->exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($disk->path($path));
+})->where('path', '.*')->name('storage.show');

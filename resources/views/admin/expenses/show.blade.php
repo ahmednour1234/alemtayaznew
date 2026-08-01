@@ -37,7 +37,7 @@
         <div><p class="text-xs text-slate-400">الوصف</p><p class="mt-0.5">{{ $expense->description }}</p></div>
         @endif
         @if($expense->attachment)
-        <div><p class="text-xs text-slate-400">المرفق</p><a href="{{ Storage::url($expense->attachment) }}" target="_blank" class="text-blue-600 text-sm hover:underline mt-0.5 block">عرض المرفق</a></div>
+        <div><p class="text-xs text-slate-400">المرفق</p><a href="{{ file_url($expense->attachment) }}" target="_blank" class="text-blue-600 text-sm hover:underline mt-0.5 block">عرض المرفق</a></div>
         @endif
 
         <!-- Actions -->
@@ -50,6 +50,10 @@
             <button @click="rejectModal = true" class="bg-red-600 hover:bg-red-700 text-white text-sm px-5 py-2 rounded-lg">رفض</button>
             <a href="{{ route('admin.expenses.edit', $expense->id) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm px-5 py-2 rounded-lg">تعديل</a>
             @endif
+            <a href="{{ route('admin.expenses.print', $expense->id) }}" target="_blank" class="bg-slate-700 hover:bg-slate-800 text-white text-sm px-5 py-2 rounded-lg inline-flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                طباعة
+            </a>
             <a href="{{ route('admin.expenses.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-5 py-2 rounded-lg">رجوع</a>
 
             <!-- Reject Modal -->

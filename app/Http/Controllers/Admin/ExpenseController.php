@@ -84,6 +84,16 @@ class ExpenseController extends Controller
         return view('admin.expenses.show', compact('expense'));
     }
 
+    public function print(int $id)
+    {
+        $me      = Auth::guard('admin')->user();
+        $expense = $this->service->find($id);
+        if ($me->isBranchAdmin() && $expense->branch_id !== $me->branch_id) {
+            abort(403, 'ليس لديك صلاحية عرض هذا السجل.');
+        }
+        return view('admin.expenses.print', compact('expense'));
+    }
+
     public function edit(int $id)
     {
         $me       = Auth::guard('admin')->user();

@@ -60,7 +60,7 @@
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1.5">المرفق</label>
                 @if($income->attachment)
-                    <a href="{{ Storage::url($income->attachment) }}" target="_blank" class="text-blue-600 text-xs hover:underline block mb-2">عرض المرفق الحالي</a>
+                    <a href="{{ file_url($income->attachment) }}" target="_blank" class="text-blue-600 text-xs hover:underline block mb-2">عرض المرفق الحالي</a>
                 @endif
                 <input type="file" name="attachment" accept="image/*,.pdf"
                        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
