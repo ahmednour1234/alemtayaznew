@@ -3,7 +3,9 @@
 <head>
     <meta charset="utf-8">
     <style>
-        * { font-family: 'amiri', sans-serif; }
+        /* dejavusans مرفق مع mPDF ويدعم العربية. لا تستخدم Amiri هنا:
+           جدول GSUB الخاص به يحوي صيغة (Type 5, Format 3) لا تدعمها mPDF. */
+        * { font-family: 'dejavusans', sans-serif; }
         body { direction: rtl; font-size: 12px; color: #1e293b; }
         h1 { font-size: 18px; text-align: center; margin-bottom: 4px; }
         .meta { text-align: center; color: #64748b; font-size: 11px; margin-bottom: 16px; }

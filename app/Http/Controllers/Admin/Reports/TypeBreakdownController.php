@@ -95,40 +95,29 @@ class TypeBreakdownController extends Controller
             @mkdir($tempDir, 0775, true);
         }
 
-        // mPDF يفشل في تحليل جدول GPOS الخاص بخط Amiri ويرمي:
-        //   "GPOS Lookup Type 5, Format 3 not supported"
-        // ويحدث ذلك عند تحميل الخط قبل قراءة useOTL، فلا تنفع أي قيمة له.
-        // لذلك نولّد نسخة من الخط بلا GPOS ونستخدمها. التوليد يتم هنا في الكود
-        // (لا كملف مرفوع) حتى لا يعتمد الحل على رفع ملفات ثنائية أو مسح الكاش
-        // يدوياً. GSUB يبقى وهو المسؤول عن وصل الحروف العربية وتشكيلها.
-        $fontDir = $this->prepareFonts($tempDir);
-
+        // لماذا لا نستخدم خط Amiri هنا:
+        // جدول GSUB في Amiri يحتوي على 60 بحثاً من نوع (Type 5, Format 3)
+        // لا يدعمها mPDF، فيرمي FontException. ورسالة الخطأ تقول "GPOS"
+        // لكن المصدر الحقيقي هو GSUB — وGSUB هو المسؤول عن وصل الحروف
+        // العربية فلا يمكن حذفه. لذلك نستخدم خطاً خالياً من هذه الصيغة.
+        //
+        // DejaVuSans مرفق مع mPDF نفسها (لا يحتاج رفع ملفات) ويدعم العربية،
+        // وتشكيل الحروف يتولاه mPDF داخلياً عبر Indic/Arabic shaper.
         $config = [
             'mode'             => 'utf-8',
             'format'           => 'A4',
             'directionality'   => 'rtl',
-            'default_font'     => 'amiri',
-            // معطّلان عمداً: تفعيلهما قد يستبدل amiri بخط افتراضي لا يدعم العربية.
-            'autoScriptToLang' => false,
-            'autoLangToFont'   => false,
+            'default_font'     => 'dejavusans',
+            'autoScriptToLang' => true,
+            'autoLangToFont'   => true,
             'tempDir'          => $tempDir,
-            'fontDir'          => [$fontDir],
-            'fontdata'         => [
-                'amiri' => [
-                    'R'      => 'amiri_r_nogpos.ttf',
-                    'B'      => 'amiri_b_nogpos.ttf',
-                    'useOTL' => 0xFF,
-                ],
-            ],
         ];
 
         try {
             $pdf = $this->renderPdf($config, $html);
         } catch (\Mpdf\Exception\FontException $e) {
-            // بيانات خط مخزّنة من محاولة سابقة قد تكون تالفة — نظّف، أعد بناء
-            // الخطوط من الأصل، ثم أعد المحاولة مرة واحدة.
+            // بيانات خط مخزّنة من محاولة سابقة قد تكون تالفة — نظّف وأعد مرة واحدة.
             $this->clearFontCache($tempDir);
-            $this->prepareFonts($tempDir);
             $pdf = $this->renderPdf($config, $html);
         }
 
@@ -140,95 +129,6 @@ class TypeBreakdownController extends Controller
         ]);
     }
 
-    /**
-     * يبني (مرة واحدة) نسخة من خط Amiri بلا جدول GPOS داخل مجلد العمل،
-     * ويُعيد مسار المجلد الذي يحوي الخطوط الجاهزة لـ mPDF.
-     */
-    private function prepareFonts(string $tempDir): string
-    {
-        $outDir = $tempDir . '/fonts';
-        if (! is_dir($outDir)) {
-            @mkdir($outDir, 0775, true);
-        }
-
-        $map = [
-            'amiri_normal.ttf' => 'amiri_r_nogpos.ttf',
-            'amiri_bold.ttf'   => 'amiri_b_nogpos.ttf',
-        ];
-
-        foreach ($map as $source => $target) {
-            $src = storage_path('fonts/' . $source);
-            $dst = $outDir . '/' . $target;
-
-            if (! is_file($src)) {
-                continue;
-            }
-
-            // أعد البناء فقط إذا كان الأصل أحدث من الناتج.
-            if (is_file($dst) && filemtime($dst) >= filemtime($src)) {
-                continue;
-            }
-
-            $this->stripFontTables($src, $dst, ['GPOS']);
-        }
-
-        return $outDir;
-    }
-
-    /** يعيد كتابة ملف TTF بعد حذف الجداول المطلوبة منه. */
-    private function stripFontTables(string $src, string $dst, array $drop): void
-    {
-        $data = file_get_contents($src);
-        if ($data === false || strlen($data) < 12) {
-            return;
-        }
-
-        $numTables = unpack('n', substr($data, 4, 2))[1];
-        $tables    = [];
-
-        for ($i = 0; $i < $numTables; $i++) {
-            $rec = 12 + $i * 16;
-            $tag = substr($data, $rec, 4);
-            if (in_array($tag, $drop, true)) {
-                continue;
-            }
-            $offset = unpack('N', substr($data, $rec + 8, 4))[1];
-            $length = unpack('N', substr($data, $rec + 12, 4))[1];
-            $tables[$tag] = [
-                'checksum' => substr($data, $rec + 4, 4),
-                'data'     => substr($data, $offset, $length),
-            ];
-        }
-
-        ksort($tables);
-        $count = count($tables);
-
-        // searchRange / entrySelector / rangeShift حسب مواصفة TTF
-        $searchRange = 1;
-        $entrySelector = 0;
-        while ($searchRange * 2 <= $count) {
-            $searchRange *= 2;
-            $entrySelector++;
-        }
-        $searchRange *= 16;
-
-        $header = pack('N', 0x00010000)
-            . pack('nnnn', $count, $searchRange, $entrySelector, $count * 16 - $searchRange);
-
-        $offset    = 12 + $count * 16;
-        $directory = '';
-        $body      = '';
-
-        foreach ($tables as $tag => $table) {
-            $length     = strlen($table['data']);
-            $directory .= $tag . $table['checksum'] . pack('N', $offset) . pack('N', $length);
-            $padding    = (4 - ($length % 4)) % 4;
-            $body      .= $table['data'] . str_repeat("\0", $padding);
-            $offset    += $length + $padding;
-        }
-
-        file_put_contents($dst, $header . $directory . $body);
-    }
 
     /** يولّد الـ PDF ويُعيده كنص ثنائي. */
     private function renderPdf(array $config, string $html): string
@@ -247,8 +147,6 @@ class TypeBreakdownController extends Controller
             $tempDir . '/ttfontdata/*',
             $tempDir . '/*.mtx.php',
             $tempDir . '/*.cw.dat',
-            // والخطوط المولّدة نفسها، حتى يُعاد بناؤها من الأصل.
-            $tempDir . '/fonts/*',
         ];
 
         foreach ($patterns as $pattern) {
