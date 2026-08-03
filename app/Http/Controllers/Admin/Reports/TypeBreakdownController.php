@@ -6,7 +6,6 @@ use App\Exports\TypeBreakdownExport;
 use App\Http\Controllers\Controller;
 use App\Services\BranchService;
 use App\Services\ReportService;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -86,11 +85,44 @@ class TypeBreakdownController extends Controller
             $request->date_to,
         );
 
-        // خط Amiri مثبّت مسبقاً في مجلد storage/fonts لدعم تشكيل الحروف العربية،
-        // ويُستدعى عبر CSS (font-family: 'Amiri') في قالب الـ PDF.
-        $pdf = Pdf::loadView('admin.reports.type-breakdown-pdf', ['report' => $report])
-            ->setPaper('a4', 'portrait');
+        // يُستخدم mPDF لا dompdf: الأخير لا يطبّق تشكيل الحروف العربية
+        // (Arabic shaping) فتظهر الكلمات مقطّعة ومعكوسة الترتيب.
+        $html = view('admin.reports.type-breakdown-pdf', ['report' => $report])->render();
 
-        return $pdf->download('type_breakdown_' . now()->format('Y-m-d') . '.pdf');
+        // mPDF يفشل إن لم يجد مجلد الملفات المؤقتة.
+        $tempDir = storage_path('app/mpdf');
+        if (! is_dir($tempDir)) {
+            @mkdir($tempDir, 0775, true);
+        }
+
+        $mpdf = new \Mpdf\Mpdf([
+            'mode'             => 'utf-8',
+            'format'           => 'A4',
+            'directionality'   => 'rtl',
+            'default_font'     => 'amiri',
+            // معطّلان عمداً: تفعيلهما قد يستبدل amiri بخط افتراضي لا يدعم العربية.
+            'autoScriptToLang' => false,
+            'autoLangToFont'   => false,
+            'tempDir'          => storage_path('app/mpdf'),
+            'fontDir'          => [storage_path('fonts')],
+            'fontdata'         => [
+                'amiri' => [
+                    'R' => 'amiri_normal.ttf',
+                    'B' => 'amiri_bold.ttf',
+                    'useOTL'    => 0xFF,  // يفعّل تشكيل الحروف العربية
+                    'useKashida' => 75,
+                ],
+            ],
+        ]);
+
+        $mpdf->SetDirectionality('rtl');
+        $mpdf->WriteHTML($html);
+
+        $filename = 'type_breakdown_' . now()->format('Y-m-d') . '.pdf';
+
+        return response($mpdf->Output($filename, \Mpdf\Output\Destination::STRING_RETURN), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 }
