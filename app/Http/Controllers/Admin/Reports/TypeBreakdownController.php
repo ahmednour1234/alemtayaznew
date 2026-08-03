@@ -95,7 +95,7 @@ class TypeBreakdownController extends Controller
             @mkdir($tempDir, 0775, true);
         }
 
-        $mpdf = new \Mpdf\Mpdf([
+        $config = [
             'mode'             => 'utf-8',
             'format'           => 'A4',
             'directionality'   => 'rtl',
@@ -103,26 +103,55 @@ class TypeBreakdownController extends Controller
             // معطّلان عمداً: تفعيلهما قد يستبدل amiri بخط افتراضي لا يدعم العربية.
             'autoScriptToLang' => false,
             'autoLangToFont'   => false,
-            'tempDir'          => storage_path('app/mpdf'),
+            'tempDir'          => $tempDir,
             'fontDir'          => [storage_path('fonts')],
             'fontdata'         => [
                 'amiri' => [
                     'R' => 'amiri_normal.ttf',
                     'B' => 'amiri_bold.ttf',
-                    'useOTL'    => 0xFF,  // يفعّل تشكيل الحروف العربية
-                    'useKashida' => 75,
+                    // 0x04 = GSUB فقط، وهو ما يلزم لتشكيل الحروف العربية ووصلها.
+                    // القيمة 0xFF تطلب أيضاً جداول GPOS المتقدمة، وخط Amiri
+                    // يستخدم منها صيغة (Lookup Type 5, Format 3) لا يدعمها mPDF
+                    // فيرمي FontException. التشكيل لا يحتاج GPOS.
+                    'useOTL' => 0x04,
                 ],
             ],
-        ]);
+        ];
 
-        $mpdf->SetDirectionality('rtl');
-        $mpdf->WriteHTML($html);
+        try {
+            $pdf = $this->renderPdf($config, $html);
+        } catch (\Mpdf\Exception\FontException $e) {
+            // قد تكون بيانات الخط المخزّنة مؤقتاً تالفة من محاولة سابقة —
+            // نظّف الكاش وأعد المحاولة مرة واحدة.
+            $this->clearFontCache($tempDir);
+            $pdf = $this->renderPdf($config, $html);
+        }
 
         $filename = 'type_breakdown_' . now()->format('Y-m-d') . '.pdf';
 
-        return response($mpdf->Output($filename, \Mpdf\Output\Destination::STRING_RETURN), 200, [
+        return response($pdf, 200, [
             'Content-Type'        => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
+    }
+
+    /** يولّد الـ PDF ويُعيده كنص ثنائي. */
+    private function renderPdf(array $config, string $html): string
+    {
+        $mpdf = new \Mpdf\Mpdf($config);
+        $mpdf->SetDirectionality('rtl');
+        $mpdf->WriteHTML($html);
+
+        return $mpdf->Output('', \Mpdf\Output\Destination::STRING_RETURN);
+    }
+
+    /** يحذف ملفات بيانات الخطوط المؤقتة التي يبنيها mPDF. */
+    private function clearFontCache(string $tempDir): void
+    {
+        foreach (glob($tempDir . '/ttfontdata/*') ?: [] as $file) {
+            if (is_file($file)) {
+                @unlink($file);
+            }
+        }
     }
 }
