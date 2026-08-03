@@ -404,8 +404,8 @@
                                                 </div>
                                             </div>
                                             <div>
-                                                <label class="block text-xs text-slate-500 mb-1">صورة العقد</label>
-                                                <input type="file" name="rental_contract_image" accept="image/*" class="w-full text-xs">
+                                                <label class="block text-xs text-slate-500 mb-1">صورة العقد <span class="text-slate-400">(صورة أو PDF)</span></label>
+                                                <input type="file" name="rental_contract_image" accept="image/*,application/pdf,.pdf" class="w-full text-xs">
                                             </div>
                                             <textarea name="rental_notes" rows="2" placeholder="ملاحظات التأجير" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"></textarea>
                                         </div>
@@ -446,8 +446,8 @@
                                                 </div>
                                             </div>
                                             <div>
-                                                <label class="block text-xs text-slate-500 mb-1">صورة المستند</label>
-                                                <input type="file" name="settlement_document_image" accept="image/*" class="w-full text-xs">
+                                                <label class="block text-xs text-slate-500 mb-1">صورة المستند <span class="text-slate-400">(صورة أو PDF)</span></label>
+                                                <input type="file" name="settlement_document_image" accept="image/*,application/pdf,.pdf" class="w-full text-xs">
                                             </div>
                                             <textarea name="settlement_notes" rows="2" placeholder="ملاحظات التسوية" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"></textarea>
                                         </div>

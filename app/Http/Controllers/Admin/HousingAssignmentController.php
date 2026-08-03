@@ -120,7 +120,8 @@ class HousingAssignmentController extends Controller
             'rent_value'               => 'nullable|numeric|min:0',
             'rent_start_date'          => 'nullable|date',
             'rent_end_date'            => 'nullable|date|after_or_equal:rent_start_date',
-            'rental_contract_image'    => 'nullable|image|max:5120',
+            // صورة أو ملف PDF
+            'rental_contract_image'    => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
             'rental_notes'             => 'nullable|string|max:1000',
 
             // بيانات التسوية
@@ -129,7 +130,8 @@ class HousingAssignmentController extends Controller
             'settlement_amount'        => 'nullable|numeric|min:0',
             'settlement_type'          => 'nullable|string|max:50',
             'settlement_date'          => 'nullable|date',
-            'settlement_document_image'=> 'nullable|image|max:5120',
+            // صورة أو ملف PDF
+            'settlement_document_image'=> 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
             'settlement_notes'         => 'nullable|string|max:1000',
         ]);
 
