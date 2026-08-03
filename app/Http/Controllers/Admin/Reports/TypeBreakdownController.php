@@ -106,14 +106,20 @@ class TypeBreakdownController extends Controller
             'tempDir'          => $tempDir,
             'fontDir'          => [storage_path('fonts')],
             'fontdata'         => [
+                // نسخة من خط Amiri أُزيل منها جدول GPOS فقط، مع الإبقاء على
+                // GSUB وهو المسؤول عن تشكيل الحروف العربية ووصلها.
+                //
+                // السبب: mPDF يفشل في تحليل GPOS الخاص بـ Amiri
+                // (Chaining Contextual Positioning) ويرمي:
+                //   "GPOS Lookup Type 5, Format 3 not supported"
+                // وهذا التحليل يحدث عند تحميل الخط قبل قراءة useOTL،
+                // فلا تنفع أي قيمة له — الحل إزالة الجدول من الخط نفسه.
+                // GPOS مسؤول عن التموضع الدقيق للتشكيل فقط، وغيابه لا يؤثر
+                // على اتصال الحروف.
                 'amiri' => [
-                    'R' => 'amiri_normal.ttf',
-                    'B' => 'amiri_bold.ttf',
-                    // 0x04 = GSUB فقط، وهو ما يلزم لتشكيل الحروف العربية ووصلها.
-                    // القيمة 0xFF تطلب أيضاً جداول GPOS المتقدمة، وخط Amiri
-                    // يستخدم منها صيغة (Lookup Type 5, Format 3) لا يدعمها mPDF
-                    // فيرمي FontException. التشكيل لا يحتاج GPOS.
-                    'useOTL' => 0x04,
+                    'R' => 'amiri_normal_nogpos.ttf',
+                    'B' => 'amiri_bold_nogpos.ttf',
+                    'useOTL' => 0xFF,
                 ],
             ],
         ];
@@ -148,9 +154,11 @@ class TypeBreakdownController extends Controller
     /** يحذف ملفات بيانات الخطوط المؤقتة التي يبنيها mPDF. */
     private function clearFontCache(string $tempDir): void
     {
-        foreach (glob($tempDir . '/ttfontdata/*') ?: [] as $file) {
-            if (is_file($file)) {
-                @unlink($file);
+        foreach ([$tempDir . '/ttfontdata/*', $tempDir . '/*.mtx.php', $tempDir . '/*.cw.dat'] as $pattern) {
+            foreach (glob($pattern) ?: [] as $file) {
+                if (is_file($file)) {
+                    @unlink($file);
+                }
             }
         }
     }
