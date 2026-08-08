@@ -29,10 +29,9 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
      * In-memory caches. Without these every row re-queried the database —
      * the branch fuzzy match alone loaded the whole branches table per row,
      * which is what pushed large files past the nginx timeout (504).
-     *
-     * @var array<string, Branch|null>
+     * مطابقة الفروع صارت داخل BranchResolver وهو يحتفظ بذاكرته الخاصة.
      */
-    private array $branchCache = [];
+    private readonly \App\Services\BranchResolver $branchResolver;
 
     /** @var array<string, int> */
     private array $incomeTypeCache = [];
@@ -40,8 +39,10 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
     /** @var array<string, int> */
     private array $expenseTypeCache = [];
 
-    /** @var Collection<int, Branch>|null */
-    private ?Collection $allBranches = null;
+    public function __construct()
+    {
+        $this->branchResolver = new \App\Services\BranchResolver();
+    }
 
     /** Rows buffered for bulk insert. */
     private const BATCH_SIZE = 500;
@@ -247,17 +248,6 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
         };
     }
 
-    private static array $branchAliases = [
-        'امتياز'     => 'الرياض',
-        'الامتياز'   => 'الرياض',
-        'متميز'      => 'عرعر',
-        'المتميز'    => 'عرعر',
-        'انجاز'      => 'حفر الباطن',
-        'الانجاز'    => 'حفر الباطن',
-        'إنجاز'      => 'حفر الباطن',
-        'الإنجاز'    => 'حفر الباطن',
-    ];
-
     /** Resolve an income type id, creating it once and caching by name. */
     private function incomeTypeId(string $name): ?int
     {
@@ -285,127 +275,15 @@ class FinancialTransactionImport implements ToCollection, WithHeadingRow, WithCa
     }
 
     /**
-     * Cached wrapper around resolveBranch(). Sheets repeat the same handful of
-     * branch names across thousands of rows, so each distinct value is resolved
-     * once instead of re-running the fuzzy scan per row.
+     * يستخدم BranchResolver المشترك: أي اختصار في اسم الفرع («الحفر») يُطابق
+     * الفرع الصحيح («حفر الباطن») بدل إنشاء فرع مكرّر.
      */
     private function branch(array $row): ?Branch
     {
-        $nameRaw = trim((string) ($row['branch_name'] ?? $row['branch'] ?? $row['المكتب'] ?? $row['مكتب'] ?? $row['الفرع'] ?? $row['فرع'] ?? ''));
-        $codeRaw = trim((string) ($row['branch_code'] ?? $row['كود_الفرع'] ?? ''));
+        $name = trim((string) ($row['branch_name'] ?? $row['branch'] ?? $row['المكتب'] ?? $row['مكتب'] ?? $row['الفرع'] ?? $row['فرع'] ?? ''));
+        $code = trim((string) ($row['branch_code'] ?? $row['كود_الفرع'] ?? ''));
 
-        $key = $nameRaw . '|' . $codeRaw;
-
-        if (! array_key_exists($key, $this->branchCache)) {
-            $branch = $this->resolveBranch($row);
-            // A newly created branch must be visible to the fuzzy scan of later rows.
-            if ($branch && $this->allBranches !== null && ! $this->allBranches->contains('id', $branch->id)) {
-                $this->allBranches->push($branch);
-            }
-            $this->branchCache[$key] = $branch;
-        }
-
-        return $this->branchCache[$key];
-    }
-
-    private function resolveBranch(array $row): ?Branch
-    {
-        // Accept multiple possible column name variants
-        $branchName = trim((string) ($row['branch_name'] ?? $row['branch'] ?? $row['المكتب'] ?? $row['مكتب'] ?? $row['الفرع'] ?? $row['فرع'] ?? ''));
-        $branchCode = trim((string) ($row['branch_code'] ?? $row['كود_الفرع'] ?? ''));
-
-        // 0. Known brand aliases → resolve to real branch name
-        if (isset(self::$branchAliases[$branchName])) {
-            $branchName = self::$branchAliases[$branchName];
-        }
-
-        // 1. Exact code from branch_code column (include soft-deleted restore)
-        if ($branchCode !== '') {
-            $branch = Branch::withTrashed()->where('code', $branchCode)->first();
-            if ($branch) {
-                if ($branch->trashed()) $branch->restore();
-                return $branch;
-            }
-        }
-
-        // 2. branch_name might actually be a code (e.g. HFR-001, RYD-001)
-        if ($branchName !== '') {
-            $branch = Branch::withTrashed()->where('code', $branchName)->first();
-            if ($branch) {
-                if ($branch->trashed()) $branch->restore();
-                return $branch;
-            }
-        }
-
-        // 3. Exact name (include soft-deleted)
-        if ($branchName !== '') {
-            $branch = Branch::withTrashed()->where('name', $branchName)->first();
-            if ($branch) {
-                if ($branch->trashed()) $branch->restore();
-                return $branch;
-            }
-        }
-
-        // 4. Fuzzy: normalize (strip ال) + sorted chars + 70% similarity + code fuzzy 85%
-        if ($branchName !== '') {
-            $normInput   = $this->normalizeBranchName($branchName);
-            $sortedInput = $this->sortedChars($normInput);
-
-            // Loaded once per import, not once per row.
-            $this->allBranches ??= Branch::withTrashed()->get();
-
-            $branch = $this->allBranches->first(function ($b) use ($normInput, $sortedInput) {
-                similar_text($normInput, $b->code ?? '', $pctCode);
-                if ($pctCode >= 85) return true;
-                $normDb = $this->normalizeBranchName($b->name);
-                if ($normDb === $normInput) return true;
-                if ($this->sortedChars($normDb) === $sortedInput) return true;
-                similar_text($normInput, $normDb, $pct);
-                return $pct >= 70;
-            });
-            if ($branch) {
-                if ($branch->trashed()) $branch->restore();
-                return $branch;
-            }
-        }
-
-        // 5. Not found — create new branch (use firstOrCreate to avoid unique conflicts)
-        if ($branchName !== '' || $branchCode !== '') {
-            $name = $branchName ?: $branchCode;
-            $code = $branchCode ?: $branchName;
-            try {
-                return Branch::firstOrCreate(['code' => $code], ['name' => $name, 'active' => true]);
-            } catch (\Throwable) {
-                try {
-                    return Branch::firstOrCreate(['name' => $name], ['code' => 'BR-' . strtoupper(substr(md5($name), 0, 6)), 'active' => true]);
-                } catch (\Throwable) {
-                    return null;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private function normalizeBranchName(string $name): string
-    {
-        $words = array_filter(preg_split('/\s+/u', trim($name)));
-        $words = array_map(fn($w) => preg_replace('/^ال/u', '', $w), $words);
-        return implode(' ', $words);
-    }
-
-    private function sortedChars(string $str): string
-    {
-        $str   = str_replace(' ', '', $str);
-        $chars = preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
-        sort($chars);
-        return implode('', $chars);
-    }
-
-    private function generateBranchCode(): string
-    {
-        $max = Branch::withTrashed()->max('id') ?? 0;
-        return 'BR' . str_pad($max + 1, 4, '0', STR_PAD_LEFT);
+        return $this->branchResolver->resolve($name, $code);
     }
 
     private function amount(mixed $value): ?float

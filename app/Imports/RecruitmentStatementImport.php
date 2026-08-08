@@ -39,19 +39,13 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
     /** @var array<int, string> */
     public array $errors = [];
 
-    /** Branch list cached for the whole import — reloading it per row caused 504 timeouts. */
-    private ?\Illuminate\Support\Collection $allBranches = null;
+    /** مطابقة أسماء الفروع (الاختصارات والأسماء التجارية) في مكان واحد. */
+    private readonly \App\Services\BranchResolver $branchResolver;
 
-    private const BRANCH_ALIASES = [
-        'امتياز'   => 'الرياض',
-        'الامتياز' => 'الرياض',
-        'متميز'    => 'عرعر',
-        'المتميز'  => 'عرعر',
-        'انجاز'    => 'حفر الباطن',
-        'الانجاز'  => 'حفر الباطن',
-        'إنجاز'    => 'حفر الباطن',
-        'الإنجاز'  => 'حفر الباطن',
-    ];
+    public function __construct()
+    {
+        $this->branchResolver = new \App\Services\BranchResolver();
+    }
 
     // Column indexes (0-based) — matches the actual uploaded file format:
     // 0=رقم العقد, 1=هوية صاحب العمل, 2=رقم الصادر(تأشيرة), 3=المهنة, 4=الجنسية,
@@ -188,42 +182,13 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
 
     // -------------------------------------------------------------------------
 
+    /**
+     * يستخدم BranchResolver المشترك: أي اختصار في اسم الفرع («الحفر») يُطابق
+     * الفرع الصحيح («حفر الباطن») بدل إنشاء فرع مكرّر.
+     */
     private function resolveBranch(string $raw): ?Branch
     {
-        $name = $raw;
-
-        if (isset(self::BRANCH_ALIASES[$name])) {
-            $name = self::BRANCH_ALIASES[$name];
-        }
-
-        if ($name === '') {
-            return null;
-        }
-
-        // 1. Name as code
-        $b = Branch::withTrashed()->where('code', $name)->first();
-        if ($b) { if ($b->trashed()) $b->restore(); return $b; }
-
-        // 2. Exact name
-        $b = Branch::withTrashed()->where('name', $name)->first();
-        if ($b) { if ($b->trashed()) $b->restore(); return $b; }
-
-        // 3. Fuzzy
-        $normIn = $this->normalize($name);
-        $sortIn = $this->sortedChars($normIn);
-        $this->allBranches ??= Branch::withTrashed()->get();
-        $b = $this->allBranches->first(function ($br) use ($normIn, $sortIn) {
-            $normDb = $this->normalize($br->name);
-            if ($normDb === $normIn) return true;
-            if ($this->sortedChars($normDb) === $sortIn) return true;
-            similar_text($normIn, $normDb, $p);
-            return $p >= 70;
-        });
-        if ($b) { if ($b->trashed()) $b->restore(); return $b; }
-
-        // 4. Create new branch
-        $code = 'BR-' . strtoupper(substr(md5($name), 0, 6));
-        return Branch::firstOrCreate(['name' => $name], ['code' => $code, 'active' => true]);
+        return $this->branchResolver->resolve($raw);
     }
 
     private function resolveDate(mixed $value): ?string
@@ -258,21 +223,6 @@ class RecruitmentStatementImport implements ToCollection, WithCalculatedFormulas
     private function str(mixed $value): string
     {
         return trim((string) ($value ?? ''));
-    }
-
-    private function normalize(string $name): string
-    {
-        $words = array_filter(preg_split('/\s+/u', trim($name)));
-        $words = array_map(fn($w) => preg_replace('/^ال/u', '', $w), $words);
-        return implode(' ', $words);
-    }
-
-    private function sortedChars(string $str): string
-    {
-        $str   = str_replace(' ', '', $str);
-        $chars = preg_split('//u', $str, -1, PREG_SPLIT_NO_EMPTY);
-        sort($chars);
-        return implode('', $chars);
     }
 
     private function isEmptyRow(array $row): bool
