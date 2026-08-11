@@ -107,7 +107,7 @@ class RecruitmentContractController extends Controller
         return view('admin.contracts.index', compact('contracts', 'statuses', 'departments', 'filters', 'nationalities', 'branches'));
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         $me = $this->me();
         // Department guard (middleware also enforces this, belt-and-suspenders)
@@ -116,6 +116,30 @@ class RecruitmentContractController extends Controller
         }
         $data = $this->formData();
         $data['defaultBranch'] = $me->branch_id;
+
+        // قادم من شاشة حجز العاملة (?worker_id=&client_id=) — املأ النموذج مسبقاً
+        $data['prefill'] = [
+            'worker_id' => $request->integer('worker_id') ?: null,
+            'client_id' => $request->integer('client_id') ?: null,
+        ];
+
+        if ($data['prefill']['worker_id']) {
+            $worker = Worker::find($data['prefill']['worker_id']);
+
+            // قائمة العاملات تعرض المتاحات فقط، والعاملة المحجوزة حالتها
+            // «reserved» — نضيفها يدوياً وإلا اختفت من القائمة.
+            if ($worker) {
+                $data['workers'] = $data['workers']
+                    ->merge(collect([$worker]))
+                    ->unique('id')
+                    ->sortBy('name')
+                    ->values();
+            }
+
+            // رقم الجواز يُعرض للتأكيد لأنه إلزامي لإتمام العقد
+            $data['prefillWorker'] = $worker;
+        }
+
         return view('admin.contracts.create', $data);
     }
 
@@ -136,16 +160,37 @@ class RecruitmentContractController extends Controller
         }
 
         // ── CV → Client lock ──────────────────────────────────────────────────
+        $contractWorker = null;
         if (! empty($data['worker_id'])) {
-            $worker = Worker::find($data['worker_id']);
-            if ($worker && $worker->client_id && (int)$worker->client_id !== (int)($data['client_id'] ?? 0)) {
+            $contractWorker = Worker::find($data['worker_id']);
+            if ($contractWorker && $contractWorker->client_id && (int)$contractWorker->client_id !== (int)($data['client_id'] ?? 0)) {
                 return back()
                     ->withInput()
                     ->withErrors(['worker_id' => 'هذه العاملة مُعيَّنة لعميل آخر. يجب أن يكون العقد للعميل نفسه المُعيَّنة له العاملة.']);
             }
         }
 
+        // رقم الجواز يُحفظ في ملف العاملة لا في العقد
+        $passportNumber = $data['worker_passport_number'] ?? null;
+        unset($data['worker_passport_number']);
+
         $contract = $this->service->store($data);
+
+        // ── تثبيت الحجز ───────────────────────────────────────────────────────
+        // العاملة كانت «محجوزة» بمهلة 24 ساعة؛ بإنشاء العقد تصبح «مُعيَّنة»
+        // فلا يفكّها أمر workers:notify-uncontracted بعد انتهاء المهلة.
+        if ($contractWorker) {
+            $update = ['status' => 'assigned'];
+
+            if ($passportNumber) {
+                $update['passport_number'] = $passportNumber;
+            }
+            if (! empty($data['client_id'])) {
+                $update['client_id'] = $data['client_id'];
+            }
+
+            $contractWorker->update($update);
+        }
 
         $this->notifications->notify(
             'contract_created',

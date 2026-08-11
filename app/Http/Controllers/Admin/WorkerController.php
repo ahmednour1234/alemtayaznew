@@ -303,8 +303,18 @@ class WorkerController extends Controller
 
     public function doAssign(Request $request, int $id)
     {
+        $worker = $this->service->find($id);
+
         $request->validate([
             'assignee' => ['required', 'string'],
+            // رقم الجواز إلزامي لإتمام الحجز — يُقبل من النموذج أو يكون مسجّلاً مسبقاً
+            'passport_number' => [
+                $worker->passport_number ? 'nullable' : 'required',
+                'string',
+                'max:50',
+            ],
+        ], [], [
+            'passport_number' => 'رقم جواز العاملة',
         ]);
 
         // Resolve client_id — either a direct client or a lead to convert
@@ -357,8 +367,16 @@ class WorkerController extends Controller
             return back()->withErrors(['assignee' => $e->getMessage()]);
         }
 
+        // زر «حجز وإنشاء عقد» → ينتقل مباشرة لشاشة عقد الاستقدام بالبيانات جاهزة
+        if ($request->boolean('create_contract')) {
+            return redirect()->route('admin.contracts.create', [
+                'worker_id' => $id,
+                'client_id' => $clientId,
+            ])->with('success', 'تم حجز العاملة لمدة 24 ساعة — أكمل بيانات العقد الآن.');
+        }
+
         return redirect()->route('admin.workers.index')
-            ->with('success', 'تم تعيين العاملة للعميل بنجاح.');
+            ->with('success', 'تم حجز العاملة للعميل لمدة 24 ساعة. أنشئ عقد الاستقدام قبل انتهاء المهلة وإلا يُفكّ الحجز تلقائياً.');
     }
 
     // ── Unassign ──────────────────────────────────────────────────────────────

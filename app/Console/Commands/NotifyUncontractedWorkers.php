@@ -8,22 +8,27 @@ use App\Models\Worker;
 use Illuminate\Console\Command;
 
 /**
- * Runs daily. For every worker that is "assigned" to a client
- * but has no recruitment contract yet:
+ * يعمل كل ساعة. حجز العاملة صالح لمدة 24 ساعة فقط:
  *
- *  • Day 1–3 → daily reminder to the admin who assigned the worker.
- *  • Day 4+  → warning to the branch manager + auto-cancel the assignment.
+ *  • قبل مرور 24 ساعة  → تذكير للموظّف الذي حجزها (مرة واحدة عند اقتراب المهلة).
+ *  • بعد مرور 24 ساعة  → فكّ الحجز تلقائياً وإشعار الموظّف ومدير الفرع.
  */
 class NotifyUncontractedWorkers extends Command
 {
+    /** مهلة الحجز بالساعات — بعدها يُفكّ الحجز تلقائياً. */
+    private const RESERVATION_HOURS = 24;
+
+    /** يُرسل تذكير عند تبقّي هذا العدد من الساعات أو أقل. */
+    private const REMINDER_BEFORE_HOURS = 6;
+
     protected $signature   = 'workers:notify-uncontracted';
-    protected $description = 'Remind assigners about workers with no contract; auto-cancel after 4 days';
+    protected $description = 'فكّ حجز العاملات بلا عقد بعد 24 ساعة مع إشعار المسؤولين';
 
     public function handle(): void
     {
-        // Workers assigned to a client but with no recruitment contract
+        // العاملات المحجوزة/المعيَّنة لعميل بلا عقد استقدام
         $workers = Worker::where('active', true)
-            ->where('status', 'assigned')
+            ->whereIn('status', ['assigned', 'reserved'])
             ->whereNotNull('client_id')
             ->whereNotNull('assigned_at')
             ->doesntHave('latestContract')
@@ -31,102 +36,98 @@ class NotifyUncontractedWorkers extends Command
             ->get();
 
         if ($workers->isEmpty()) {
-            $this->info('No uncontracted assigned workers found.');
+            $this->info('لا توجد عاملات محجوزة بلا عقد.');
             return;
         }
 
-        $cancelled = 0;
-        $reminded  = 0;
+        $released = 0;
+        $reminded = 0;
 
         foreach ($workers as $worker) {
             /** @var \Carbon\Carbon $assignedAt */
-            $assignedAt = $worker->assigned_at;
-            $daysElapsed = (int) $assignedAt->diffInDays(now());
+            $assignedAt   = $worker->assigned_at;
+            $hoursElapsed = $assignedAt->diffInHours(now());
 
-            $workerName  = $worker->name      ?? '—';
-            $clientName  = $worker->client?->name  ?? '—';
-            $branchName  = $worker->branch?->name  ?? '—';
-            $url         = route('admin.workers.show', $worker->id);
+            $workerName = $worker->name           ?? '—';
+            $clientName = $worker->client?->name   ?? '—';
+            $branchName = $worker->branch?->name   ?? '—';
+            $url        = route('admin.workers.show', $worker->id);
 
-            if ($daysElapsed >= 4) {
-                // ── Auto-cancel + warn branch manager ────────────────────────
+            if ($hoursElapsed >= self::RESERVATION_HOURS) {
+                // ── انتهت المهلة: فكّ الحجز تلقائياً ─────────────────────────
                 $worker->update([
-                    'client_id'             => null,
-                    'status'                => 'available',
-                    'assigned_by_admin_id'  => null,
-                    'assigned_at'           => null,
+                    'client_id'            => null,
+                    'status'               => 'available',
+                    'assigned_by_admin_id' => null,
+                    'assigned_at'          => null,
                 ]);
 
-                $title = 'إلغاء تلقائي لتعيين عاملة';
-                $body  = "تم إلغاء تعيين العاملة «{$workerName}» للعميل «{$clientName}» (فرع {$branchName}) تلقائياً لمرور 4 أيام دون إنشاء عقد.";
+                $title = 'انتهاء حجز عاملة تلقائياً';
+                $body  = "انتهت مهلة حجز العاملة «{$workerName}» للعميل «{$clientName}» (فرع {$branchName}) "
+                       . "بعد " . self::RESERVATION_HOURS . " ساعة دون إنشاء عقد، وأصبحت متاحة مرة أخرى.";
 
-                // Notify branch manager(s) of that branch
-                $managers = Admin::where('active', true)
-                    ->where(function ($q) use ($worker) {
-                        $q->where('branch_id', $worker->branch_id)
-                          ->where('department', 'branch_manager');
-                    })
-                    ->orWhere(function ($q) {
-                        $q->whereNull('branch_id'); // super-admin
-                    })
-                    ->get();
-
-                foreach ($managers as $manager) {
+                // إشعار الموظّف الذي حجزها
+                if ($worker->assigned_by_admin_id) {
                     $this->upsertNotification(
-                        $manager->id,
-                        'worker_assignment_cancelled',
+                        $worker->assigned_by_admin_id,
+                        'worker_reservation_expired',
                         $title,
                         $body,
                         $url
                     );
                 }
 
-                $cancelled++;
-            } else {
-                // ── Daily reminder to the assigning admin ────────────────────
-                if (! $worker->assigned_by_admin_id) {
-                    continue;
+                // إشعار مديري الفرع والمديرين العامين
+                $managers = Admin::where('active', true)
+                    ->where(function ($q) use ($worker) {
+                        $q->where(function ($inner) use ($worker) {
+                            $inner->where('branch_id', $worker->branch_id)
+                                  ->where('department', 'branch_manager');
+                        })->orWhereNull('branch_id'); // مدير عام
+                    })
+                    ->get();
+
+                foreach ($managers as $manager) {
+                    $this->upsertNotification(
+                        $manager->id,
+                        'worker_reservation_expired',
+                        $title,
+                        $body,
+                        $url
+                    );
                 }
 
-                $title = 'تذكير: عاملة معيَّنة بلا عقد';
-                $body  = "العاملة «{$workerName}» معيَّنة للعميل «{$clientName}» منذ {$daysElapsed} " .
-                         ($daysElapsed === 1 ? 'يوم' : 'أيام') .
-                         " ولم يُنشأ لها عقد بعد.";
-
-                $this->upsertNotification(
-                    $worker->assigned_by_admin_id,
-                    'worker_no_contract',
-                    $title,
-                    $body,
-                    $url
-                );
-
-                // Day 3 → also warn the branch manager
-                if ($daysElapsed === 3) {
-                    $warnTitle = 'تحذير: عاملة معيَّنة منذ 3 أيام بلا عقد';
-                    $warnBody  = "تحذير: مرّت 3 أيام على تعيين العاملة «{$workerName}» للعميل «{$clientName}» (فرع {$branchName}) دون إنشاء عقد. ستُلغى التعيين تلقائياً غداً.";
-
-                    $managers = Admin::where('active', true)
-                        ->where('branch_id', $worker->branch_id)
-                        ->where('department', 'branch_manager')
-                        ->get();
-
-                    foreach ($managers as $manager) {
-                        $this->upsertNotification(
-                            $manager->id,
-                            'worker_no_contract_warning',
-                            $warnTitle,
-                            $warnBody,
-                            $url
-                        );
-                    }
-                }
-
-                $reminded++;
+                $released++;
+                continue;
             }
+
+            // ── تذكير قبل انتهاء المهلة ──────────────────────────────────────
+            if (! $worker->assigned_by_admin_id) {
+                continue;
+            }
+
+            $hoursLeft = self::RESERVATION_HOURS - (int) $hoursElapsed;
+
+            if ($hoursLeft > self::REMINDER_BEFORE_HOURS) {
+                continue; // ما زال أمامه وقت — لا تُزعج الموظّف
+            }
+
+            $title = 'تنبيه: حجز عاملة على وشك الانتهاء';
+            $body  = "يتبقّى {$hoursLeft} ساعة على انتهاء حجز العاملة «{$workerName}» للعميل «{$clientName}». "
+                   . "أنشئ عقد الاستقدام قبل انتهاء المهلة وإلا سيُفكّ الحجز تلقائياً.";
+
+            $this->upsertNotification(
+                $worker->assigned_by_admin_id,
+                'worker_reservation_expiring',
+                $title,
+                $body,
+                $url
+            );
+
+            $reminded++;
         }
 
-        $this->info("Reminded: {$reminded} worker(s). Auto-cancelled: {$cancelled} assignment(s).");
+        $this->info("تذكيرات: {$reminded} — حجوزات مفكوكة: {$released}");
     }
 
     private function upsertNotification(
@@ -136,10 +137,12 @@ class NotifyUncontractedWorkers extends Command
         string $body,
         string $url
     ): void {
+        // منع التكرار: إشعار واحد لكل (موظّف + نوع + عاملة) خلال نافذة الحجز.
+        // لا نستخدم "اليوم" هنا لأن الأمر يعمل كل ساعة والحجز 24 ساعة فقط.
         $exists = AdminNotification::where('admin_id', $adminId)
             ->where('type', $type)
             ->where('url', $url)
-            ->whereDate('created_at', today())
+            ->where('created_at', '>=', now()->subHours(self::RESERVATION_HOURS))
             ->exists();
 
         if (! $exists) {

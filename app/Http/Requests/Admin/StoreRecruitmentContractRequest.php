@@ -30,6 +30,8 @@ class StoreRecruitmentContractRequest extends FormRequest
 
             // Coordination
             'worker_id'            => ['nullable', 'exists:workers,id'],
+            // رقم جواز العاملة — إلزامي عند اختيار عاملة، ويُحفظ في ملفها
+            'worker_passport_number' => ['nullable', 'required_with:worker_id', 'string', 'max:50'],
             'e_doc_number'         => ['nullable', 'string', 'max:100'],
             'agent_id'             => ['nullable', 'exists:agents,id'],
             'current_department'   => ['nullable', 'in:customer_service,accounts,coordination'],
@@ -48,6 +50,13 @@ class StoreRecruitmentContractRequest extends FormRequest
             'client_sms'           => ['nullable', 'boolean'],
             'client_rating'        => ['nullable', 'boolean'],
             'rating_image'         => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'worker_passport_number' => 'رقم جواز العاملة',
         ];
     }
 }

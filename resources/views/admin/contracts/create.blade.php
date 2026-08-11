@@ -126,7 +126,7 @@
                     <select id="clientSelect" name="client_id" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition @error('client_id') border-red-400 @enderror">
                         <option value="">— اختر العميل —</option>
                         @foreach($clients as $cl)
-                        <option value="{{ $cl->id }}" {{ old('client_id') == $cl->id ? 'selected' : '' }}>{{ $cl->name }}</option>
+                        <option value="{{ $cl->id }}" {{ old('client_id', $prefill['client_id'] ?? null) == $cl->id ? 'selected' : '' }}>{{ $cl->name }}</option>
                         @endforeach
                     </select>
                     @error('client_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
@@ -462,9 +462,20 @@
                     <select id="workerSelect" name="worker_id" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
                         <option value="">— اختر عاملة —</option>
                         @foreach($workers as $w)
-                        <option value="{{ $w->id }}" {{ old('worker_id') == $w->id ? 'selected' : '' }}>{{ $w->name }}</option>
+                        <option value="{{ $w->id }}" {{ old('worker_id', $prefill['worker_id'] ?? null) == $w->id ? 'selected' : '' }}>{{ $w->name }}</option>
                         @endforeach
                     </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-1.5">
+                        رقم جواز العاملة <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="worker_passport_number"
+                           value="{{ old('worker_passport_number', $prefillWorker->passport_number ?? '') }}"
+                           placeholder="A1234567"
+                           class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition @error('worker_passport_number') border-red-400 @enderror">
+                    <p class="text-xs text-slate-400 mt-1">يُحفظ في ملف العاملة تلقائياً.</p>
+                    @error('worker_passport_number')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">رقم التوثيق الالكتروني بمساند</label>

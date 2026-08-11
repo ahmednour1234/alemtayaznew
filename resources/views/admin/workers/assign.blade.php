@@ -133,9 +133,13 @@
                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">رقم الجواز</label>
-                            <input type="text" name="passport_number" value="{{ old('passport_number', $worker->passport_number) }}"
-                                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">
+                                رقم الجواز <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="passport_number" required
+                                   value="{{ old('passport_number', $worker->passport_number) }}"
+                                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 @error('passport_number') border-red-400 @enderror">
+                            @error('passport_number')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">الهاتف</label>
@@ -155,10 +159,29 @@
                     </div>
                 </div>
 
-                <div class="flex gap-3">
+                {{-- تنبيه مهلة الحجز --}}
+                <div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 flex items-start gap-2">
+                    <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-xs text-amber-800 leading-relaxed">
+                        الحجز صالح لمدة <strong>24 ساعة</strong> فقط. إذا لم يُنشأ عقد استقدام خلالها
+                        يُفكّ الحجز تلقائياً وتعود العاملة متاحة، مع إرسال إشعار لك ولمدير الفرع.
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                    <button type="submit" name="create_contract" value="1"
+                            @if($clients->isEmpty() && $leads->isEmpty()) disabled @endif
+                            class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm px-6 py-2.5 rounded-lg font-medium inline-flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6m5 7H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        حجز وإنشاء عقد استقدام
+                    </button>
                     <button type="submit" @if($clients->isEmpty() && $leads->isEmpty()) disabled @endif
                             class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm px-6 py-2.5 rounded-lg font-medium">
-                        تعيين العاملة للعميل
+                        حجز فقط
                     </button>
                     <a href="{{ route('admin.workers.index') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm px-6 py-2.5 rounded-lg font-medium">إلغاء</a>
                 </div>
