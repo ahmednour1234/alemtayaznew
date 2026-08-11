@@ -107,6 +107,7 @@
                     <th>الخبرة</th>
                     <th>الحالة</th>
                     <th>العميل</th>
+                    <th>حجزها</th>
                     <th>CV</th>
                     <th>الإجراءات</th>
                 </tr>
@@ -143,6 +144,16 @@
                 </td>
                 <td class="text-sm text-slate-600">
                     {{ $w->client?->name ?? '—' }}
+                </td>
+                <td class="text-sm text-slate-600">
+                    @if($w->assignedBy)
+                        <span class="block">{{ $w->assignedBy->name }}</span>
+                        @if($w->assigned_at)
+                        <span class="text-xs text-slate-400">{{ $w->assigned_at->format('Y-m-d H:i') }}</span>
+                        @endif
+                    @else
+                        —
+                    @endif
                 </td>
                 <td>
                     @if($w->cv_path)

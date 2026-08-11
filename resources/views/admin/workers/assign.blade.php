@@ -142,6 +142,14 @@
                             @error('passport_number')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
                         <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">
+                                رقم التأشيرة <span class="text-slate-400 font-normal">(اختياري)</span>
+                            </label>
+                            <input type="text" name="visa_number" value="{{ old('visa_number', $worker->visa_number) }}"
+                                   class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 @error('visa_number') border-red-400 @enderror">
+                            @error('visa_number')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">الهاتف</label>
                             <input type="text" name="phone" value="{{ old('phone', $worker->phone) }}"
                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">

@@ -313,8 +313,11 @@ class WorkerController extends Controller
                 'string',
                 'max:50',
             ],
+            // رقم التأشيرة اختياري
+            'visa_number' => ['nullable', 'string', 'max:50'],
         ], [], [
             'passport_number' => 'رقم جواز العاملة',
+            'visa_number'     => 'رقم التأشيرة',
         ]);
 
         // Resolve client_id — either a direct client or a lead to convert
@@ -351,7 +354,7 @@ class WorkerController extends Controller
 
         // Update worker details if provided
         $data = array_filter($request->only(
-            'name', 'passport_number', 'nationality_id', 'profession',
+            'name', 'passport_number', 'visa_number', 'nationality_id', 'profession',
             'gender', 'experience', 'religion', 'age', 'phone', 'notes'
         ), fn($v) => $v !== null && $v !== '');
 

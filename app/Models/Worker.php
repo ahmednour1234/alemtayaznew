@@ -14,7 +14,7 @@ class Worker extends Model
     use HasFactory, SoftDeletes, \App\Models\Concerns\HasEncryptedPii;
 
     protected $fillable = [
-        'name', 'passport_number', 'nationality_id', 'profession',
+        'name', 'passport_number', 'visa_number', 'nationality_id', 'profession',
         'gender', 'experience', 'religion', 'age', 'phone',
         'cv_path', 'original_cv_name', 'passport_image',
         'status', 'client_id', 'branch_id', 'admin_id',

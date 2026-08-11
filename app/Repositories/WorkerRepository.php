@@ -9,7 +9,7 @@ class WorkerRepository implements WorkerRepositoryInterface
 {
     public function getAll(array $filters = []): mixed
     {
-        $q = Worker::with(['nationality', 'client', 'branch'])
+        $q = Worker::with(['nationality', 'client', 'branch', 'assignedBy'])
                    ->where('active', true);
 
         if (!empty($filters['nationality_id'])) {
@@ -73,7 +73,19 @@ class WorkerRepository implements WorkerRepositoryInterface
      */
     public function assignToClient(int $id, int $clientId, int $assignedByAdminId): void
     {
-        Worker::findOrFail($id)->update([
+        $worker = Worker::findOrFail($id);
+
+        // منع حجز نفس العاملة لنفس العميل مرتين طالما الحجز/التعيين ما زال قائماً
+        if ($worker->client_id === $clientId && in_array($worker->status, ['reserved', 'assigned'], true)) {
+            throw new \RuntimeException('هذه العاملة محجوزة بالفعل لنفس العميل. لا يمكن حجزها مرتين.');
+        }
+
+        // العاملة محجوزة لعميل آخر — لا تُسحب منه ضمنياً
+        if ($worker->client_id && $worker->client_id !== $clientId && in_array($worker->status, ['reserved', 'assigned'], true)) {
+            throw new \RuntimeException('هذه العاملة محجوزة لعميل آخر. ألغِ الحجز الحالي أولاً.');
+        }
+
+        $worker->update([
             'client_id'             => $clientId,
             'status'                => 'reserved',
             'assigned_by_admin_id'  => $assignedByAdminId,
