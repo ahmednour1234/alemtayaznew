@@ -32,13 +32,28 @@ class RecruitmentContractRepository implements RecruitmentContractRepositoryInte
 
         if (! empty($filters['search'])) {
             $s = $filters['search'];
-            $q->where(function ($qr) use ($s) {
+            // البيانات الحساسة (الجواز/الهوية/الجوال) مشفّرة، فالبحث فيها بالمطابقة التامة عبر أعمدة الهاش
+            $workerHash = \App\Models\Worker::hashPii($s);
+            $clientHash = \App\Models\Client::hashPii($s);
+
+            $q->where(function ($qr) use ($s, $workerHash, $clientHash) {
                 $qr->where('contract_number', 'like', "%{$s}%")
                    ->orWhere('musaned_number', 'like', "%{$s}%")
                    ->orWhere('visa_number', 'like', "%{$s}%")
-                   ->orWhereHas('client', fn($c) => $c->where('name', 'like', "%{$s}%"))
-                   ->orWhereHas('worker', fn($w) => $w->where('name', 'like', "%{$s}%")
-                                                       ->orWhere('passport_number_hash', \App\Models\Worker::hashPii($s)));
+                   ->orWhereHas('client', function ($c) use ($s, $clientHash) {
+                       $c->where('name', 'like', "%{$s}%");
+                       if ($clientHash) {
+                           $c->orWhere('national_id_hash', $clientHash)
+                             ->orWhere('phone_hash', $clientHash);
+                       }
+                   })
+                   ->orWhereHas('worker', function ($w) use ($s, $workerHash) {
+                       $w->where('name', 'like', "%{$s}%");
+                       if ($workerHash) {
+                           $w->orWhere('passport_number_hash', $workerHash)
+                             ->orWhere('phone_hash', $workerHash);
+                       }
+                   });
             });
         }
 

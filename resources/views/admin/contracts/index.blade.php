@@ -253,7 +253,8 @@
     {{-- Filters --}}
     <form method="GET" class="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="بحث برقم العقد / مساند / التأشيرة / الجواز / العميل / اسم العاملة..."
+            <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="بحث برقم الجواز / الهوية / الجوال / اسم العاملة / اسم العميل / رقم التأشيرة / رقم عقد مساند..."
+                   title="أرقام الجواز والهوية والجوال يجب إدخالها كاملة (مطابقة تامة)"
                    class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
             <select name="status" class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                 <option value="">— كل الحالات —</option>
