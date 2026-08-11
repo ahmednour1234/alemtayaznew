@@ -177,7 +177,7 @@ class RecruitmentContractController extends Controller
         $contract = $this->service->store($data);
 
         // ── تثبيت الحجز ───────────────────────────────────────────────────────
-        // العاملة كانت «محجوزة» بمهلة 24 ساعة؛ بإنشاء العقد تصبح «مُعيَّنة»
+        // العاملة كانت «محجوزة» بمهلة 72 ساعة؛ بإنشاء العقد تصبح «مُعيَّنة»
         // فلا يفكّها أمر workers:notify-uncontracted بعد انتهاء المهلة.
         if ($contractWorker) {
             $update = ['status' => 'assigned'];

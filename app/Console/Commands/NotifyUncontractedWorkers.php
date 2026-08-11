@@ -8,21 +8,21 @@ use App\Models\Worker;
 use Illuminate\Console\Command;
 
 /**
- * يعمل كل ساعة. حجز العاملة صالح لمدة 24 ساعة فقط:
+ * يعمل كل ساعة. حجز العاملة صالح لمدة 72 ساعة فقط:
  *
- *  • قبل مرور 24 ساعة  → تذكير للموظّف الذي حجزها (مرة واحدة عند اقتراب المهلة).
- *  • بعد مرور 24 ساعة  → فكّ الحجز تلقائياً وإشعار الموظّف ومدير الفرع.
+ *  • قبل مرور 72 ساعة  → تذكير للموظّف الذي حجزها (مرة واحدة عند اقتراب المهلة).
+ *  • بعد مرور 72 ساعة  → فكّ الحجز تلقائياً وإشعار الموظّف ومدير الفرع.
  */
 class NotifyUncontractedWorkers extends Command
 {
-    /** مهلة الحجز بالساعات — بعدها يُفكّ الحجز تلقائياً. */
-    private const RESERVATION_HOURS = 24;
+    /** مهلة الحجز بالساعات — بعدها يُفكّ الحجز تلقائياً. المصدر الوحيد لهذه القيمة. */
+    public const RESERVATION_HOURS = 72;
 
     /** يُرسل تذكير عند تبقّي هذا العدد من الساعات أو أقل. */
     private const REMINDER_BEFORE_HOURS = 6;
 
     protected $signature   = 'workers:notify-uncontracted';
-    protected $description = 'فكّ حجز العاملات بلا عقد بعد 24 ساعة مع إشعار المسؤولين';
+    protected $description = 'فكّ حجز العاملات بلا عقد بعد ' . self::RESERVATION_HOURS . ' ساعة مع إشعار المسؤولين';
 
     public function handle(): void
     {
@@ -138,7 +138,7 @@ class NotifyUncontractedWorkers extends Command
         string $url
     ): void {
         // منع التكرار: إشعار واحد لكل (موظّف + نوع + عاملة) خلال نافذة الحجز.
-        // لا نستخدم "اليوم" هنا لأن الأمر يعمل كل ساعة والحجز 24 ساعة فقط.
+        // لا نستخدم "اليوم" هنا لأن الأمر يعمل كل ساعة ونافذة منع التكرار تساوي مهلة الحجز.
         $exists = AdminNotification::where('admin_id', $adminId)
             ->where('type', $type)
             ->where('url', $url)

@@ -68,7 +68,7 @@ class WorkerRepository implements WorkerRepositoryInterface
 
     /**
      * حجز العاملة لعميل. الحالة «محجوزة» لا «تم التعيين» لأن الحجز مؤقت
-     * (24 ساعة) ويُفكّ تلقائياً إن لم يُنشأ عقد — راجع workers:notify-uncontracted.
+     * (72 ساعة) ويُفكّ تلقائياً إن لم يُنشأ عقد — راجع workers:notify-uncontracted.
      * تتحول إلى «تم التعيين» عند إنشاء عقد الاستقدام.
      */
     public function assignToClient(int $id, int $clientId, int $assignedByAdminId): void

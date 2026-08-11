@@ -32,8 +32,8 @@ Schedule::command('housing:check-guarantee')->weeklyOn(0, '09:00');
 // Notify about rental expiry (7 days before and already expired) – runs daily
 Schedule::command('housing:check-rental-expiry')->dailyAt('08:45');
 
-// Remind assigners of workers with no contract; auto-cancel after 4 days
-// حجز العاملة صالح 24 ساعة — يعمل كل ساعة ليفكّ الحجز فور انتهاء المهلة
+// Remind assigners of workers with no contract; auto-release after 72 hours
+// حجز العاملة صالح 72 ساعة — يعمل كل ساعة ليفكّ الحجز فور انتهاء المهلة
 Schedule::command('workers:notify-uncontracted')->hourly();
 
 // HR: notify before iqama renewal, probation end, insurance & document expiry (within 30 days)
