@@ -9,6 +9,7 @@ use App\Exports\CombinedStatementTemplateExport;
 use App\Services\DashboardService;
 use App\Services\ExpenseService;
 use App\Services\IncomeService;
+use App\Services\ScheduledTasksRunner;
 use App\Services\TransferService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,10 +22,14 @@ class DashboardController extends Controller
         private readonly IncomeService $incomeService,
         private readonly ExpenseService $expenseService,
         private readonly TransferService $transferService,
+        private readonly ScheduledTasksRunner $scheduledTasks,
     ) {}
 
     public function index()
     {
+        // بديل cron: تشغيل المهام المجدولة عند دخول لوحة التحكم (محكوم بمهلة لكل أمر)
+        $this->scheduledTasks->runDue();
+
         $me       = \Illuminate\Support\Facades\Auth::guard('admin')->user();
         $branchId = $me->isBranchAdmin() ? $me->branch_id : null;
 
