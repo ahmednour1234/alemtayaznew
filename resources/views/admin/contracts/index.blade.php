@@ -64,6 +64,7 @@
                             <li>{{ __('contracts.import.use_template') }}</li>
                             <li>{{ __('contracts.import.branch_code') }}</li>
                             <li>{{ __('contracts.import.rows_hint') }}</li>
+                            <li class="font-semibold">{{ __('contracts.import.upsert_hint') }}</li>
                         </ul>
                     </div>
                     {{-- Template download --}}
