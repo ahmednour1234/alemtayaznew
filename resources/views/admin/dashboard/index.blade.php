@@ -906,35 +906,6 @@
                 </span>
                 طلبات الموافقة المعلقة
             </h3>
-            @php
-                $pendingTotal = $pendingExpenses->sum('amount') + $pendingTransfers->sum('amount');
-                $pendingCount = $pendingExpenses->count() + $pendingTransfers->count();
-            @endphp
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                <span class="badge orange">{{ $pendingCount }} طلب</span>
-                <span style="background:#fef9c3;color:#92400e;border:1px solid #fde68a;border-radius:999px;padding:5px 13px;font-size:12px;font-weight:900;">
-                    الإجمالي: {{ number_format($pendingTotal, 0) }} ريال
-                </span>
-                <a href="{{ route('admin.expenses.index') }}" class="table-link" style="--link-color:#d97706;--link-bg:#fffbeb;--link-border:#fde68a;">عرض الكل</a>
-                @if($pendingCount > 0)
-                <form action="{{ route('admin.dashboard.approve-all-pending') }}" method="POST" style="display:inline;"
-                      onsubmit="return confirm('هل أنت متأكد من الموافقة على جميع الطلبات المعلقة ({{ $pendingCount }} طلب)؟')">
-                    @csrf
-                    <button type="submit" class="btn-approve" style="background:linear-gradient(135deg,#16a34a,#15803d);">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-left:4px;"><polyline points="20 6 9 17 4 12"/></svg>
-                        موافقة الكل
-                    </button>
-                </form>
-                <form action="{{ route('admin.dashboard.reject-all-pending') }}" method="POST" style="display:inline;"
-                      onsubmit="return confirm('هل أنت متأكد من رفض جميع الطلبات المعلقة ({{ $pendingCount }} طلب)؟')">
-                    @csrf
-                    <button type="submit" class="btn-approve" style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-left:4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        رفض الكل
-                    </button>
-                </form>
-                @endif
-            </div>
         </div>
         <div class="dash-table-wrap">
             <table class="dash-table">
