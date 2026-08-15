@@ -310,8 +310,8 @@
                 <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
             </button>
             @else
-            <a href="{{ route('admin.contracts.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-6 py-2.5 rounded-xl">إلغاء</a>
-            <button type="submit" name="action" value="save" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">إضافة</button>
+            <a href="{{ route('admin.contracts.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-6 py-2.5 rounded-xl">{{ __('common.actions.cancel') }}</a>
+            <button type="submit" name="action" value="save" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">{{ __('contracts.form.add') }}</button>
             <button type="submit" name="action" value="save_more" class="bg-green-600 hover:bg-green-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">{{ __('contracts.form.add_more') }}</button>
             @endif
         </div>
@@ -376,8 +376,8 @@
                     <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
                 </button>
                 @else
-                <a href="{{ route('admin.contracts.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-6 py-2.5 rounded-xl">إلغاء</a>
-                <button type="submit" name="action" value="save" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">إضافة</button>
+                <a href="{{ route('admin.contracts.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-6 py-2.5 rounded-xl">{{ __('common.actions.cancel') }}</a>
+                <button type="submit" name="action" value="save" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">{{ __('contracts.form.add') }}</button>
                 <button type="submit" name="action" value="save_more" class="bg-green-600 hover:bg-green-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">{{ __('contracts.form.add_more') }}</button>
                 @endif
             </div>
@@ -438,15 +438,15 @@
                     <div>
                         <label class="block text-sm font-semibold text-slate-600 mb-2">{{ __('contracts.form.client_sms') }}</label>
                         <div class="flex gap-4">
-                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_sms" value="1" {{ old('client_sms') == '1' ? 'checked' : '' }} class="accent-blue-600"> نعم</label>
-                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_sms" value="0" {{ old('client_sms', '0') == '0' ? 'checked' : '' }} class="accent-blue-600"> لا</label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_sms" value="1" {{ old('client_sms') == '1' ? 'checked' : '' }} class="accent-blue-600"> {{ __('common.yes') }}</label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_sms" value="0" {{ old('client_sms', '0') == '0' ? 'checked' : '' }} class="accent-blue-600"> {{ __('common.no') }}</label>
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-slate-600 mb-2">{{ __('contracts.form.client_rating') }}</label>
                         <div class="flex gap-4">
-                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_rating" value="1" {{ old('client_rating') == '1' ? 'checked' : '' }} class="accent-blue-600"> نعم</label>
-                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_rating" value="0" {{ old('client_rating', '0') == '0' ? 'checked' : '' }} class="accent-blue-600"> لا</label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_rating" value="1" {{ old('client_rating') == '1' ? 'checked' : '' }} class="accent-blue-600"> {{ __('common.yes') }}</label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_rating" value="0" {{ old('client_rating', '0') == '0' ? 'checked' : '' }} class="accent-blue-600"> {{ __('common.no') }}</label>
                         </div>
                     </div>
                 </div>
@@ -553,8 +553,8 @@
                 @endif
             </div>
             <div class="flex gap-3">
-                <a href="{{ route('admin.contracts.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-6 py-2.5 rounded-xl">إلغاء</a>
-                <button type="submit" name="action" value="save" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">إضافة</button>
+                <a href="{{ route('admin.contracts.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-6 py-2.5 rounded-xl">{{ __('common.actions.cancel') }}</a>
+                <button type="submit" name="action" value="save" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">{{ __('contracts.form.add') }}</button>
                 <button type="submit" name="action" value="save_more" class="bg-green-600 hover:bg-green-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">{{ __('contracts.form.add_more') }}</button>
             </div>
         </div>
@@ -595,7 +595,7 @@
             </div>
             <div class="px-6 pb-5 flex gap-3 justify-end">
                 <button type="button" @click="clientModal.open=false"
-                        class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">إلغاء</button>
+                        class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">{{ __('common.actions.cancel') }}</button>
                 <button type="button" @click="submitClient()" :disabled="clientModal.loading"
                         class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2 rounded-xl shadow disabled:opacity-60">
                     <span x-show="!clientModal.loading">{{ __('contracts.form.save_client') }}</span>
@@ -643,7 +643,7 @@
             </div>
             <div class="px-6 pb-5 flex gap-3 justify-end">
                 <button type="button" @click="workerModal.open=false"
-                        class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">إلغاء</button>
+                        class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">{{ __('common.actions.cancel') }}</button>
                 <button type="button" @click="submitWorker()" :disabled="workerModal.loading"
                         class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2 rounded-xl shadow disabled:opacity-60">
                     <span x-show="!workerModal.loading">{{ __('contracts.form.save_worker') }}</span>

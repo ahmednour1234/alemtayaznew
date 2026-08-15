@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'تعديل عقد ' . $contract->contract_number)
+@section('title', __('contracts.edit') . ' ' . $contract->contract_number)
 @section('content')
 @php
     $me       = Auth::guard('admin')->user();
@@ -42,10 +42,10 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
             </a>
             <div>
-                <h2 class="text-xl font-bold text-slate-800">تعديل: <span class="font-mono">{{ $contract->contract_number }}</span></h2>
+                <h2 class="text-xl font-bold text-slate-800">{{ __('common.actions.edit') }}: <span class="font-mono">{{ $contract->contract_number }}</span></h2>
             </div>
         </div>
-        <a href="{{ route('admin.contracts.show', $contract->id) }}" class="text-sm text-slate-500 hover:text-slate-700 bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-sm transition">إلغاء</a>
+        <a href="{{ route('admin.contracts.show', $contract->id) }}" class="text-sm text-slate-500 hover:text-slate-700 bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-sm transition">{{ __('common.actions.cancel') }}</a>
     </div>
 
     @if($errors->any())
@@ -293,10 +293,10 @@
                 <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">{{ __('common.fields.musaned_number') }}:</span><span class="font-medium text-slate-800">{{ $contract->musaned_number ?? '—' }}</span></div>
                 <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">{{ __('contracts.fields.musaned_date') }}:</span><span class="font-medium text-slate-800">{{ $contract->musaned_date?->format('Y-m-d') ?? '—' }}</span></div>
                 @if($contract->visa_image)
-                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">التأشيرة:</span><a href="{{ file_url($contract->visa_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">{{ __('contracts.show.view_file') }}</a></div>
+                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">{{ __('common.fields.visa_number') }}:</span><a href="{{ file_url($contract->visa_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">{{ __('contracts.show.view_file') }}</a></div>
                 @endif
                 @if($contract->musaned_file)
-                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">عقد مساند:</span><a href="{{ file_url($contract->musaned_file) }}" target="_blank" class="text-blue-600 hover:underline text-xs">{{ __('contracts.show.view_file') }}</a></div>
+                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">{{ __('common.fields.musaned_number') }}:</span><a href="{{ file_url($contract->musaned_file) }}" target="_blank" class="text-blue-600 hover:underline text-xs">{{ __('contracts.show.view_file') }}</a></div>
                 @endif
             </div>
         </div>
@@ -311,12 +311,12 @@
                 <button type="button" @click="tab='acc'"
                         class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2.5 rounded-xl flex items-center gap-2">
                     <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-                    عرض تبويب ال{{ __('contracts.form.acc_short') }}
+                    {{ __('contracts.edit_extra.show_tab') }} {{ __('contracts.form.acc_short') }}
                 </button>
                 @endif
             </div>
             <div class="flex gap-3">
-                <a href="{{ route('admin.contracts.show', $contract->id) }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-5 py-2.5 rounded-xl">إلغاء</a>
+                <a href="{{ route('admin.contracts.show', $contract->id) }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-5 py-2.5 rounded-xl">{{ __('common.actions.cancel') }}</a>
                 @if($editT1)
                     @if($canForwardToAccs)
                     {{-- CS dept: two options --}}
@@ -326,13 +326,13 @@
                     </button>
                     <button type="submit" onclick="document.getElementById('__advance_to').value='accounts'"
                             class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2.5 rounded-xl shadow flex items-center gap-2">
-                        حفظ وإرسال لل{{ __('contracts.form.acc_short') }}
+                        {{ __('contracts.edit_extra.save_send') }} — {{ __('contracts.form.acc_short') }}
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </button>
                     @else
                     {{-- Boss or other: generic save --}}
                     <button type="submit" onclick="document.getElementById('__advance_to').value=''"
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">تحديث العقد</button>
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">{{ __('common.actions.update') }}</button>
                     @endif
                 @endif
             </div>
@@ -403,22 +403,22 @@
                 <button type="button" @click="tab='coord'"
                         class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2.5 rounded-xl flex items-center gap-2">
                     <svg class="w-4 h-4 rotate-180" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-                    عرض تبويب ال{{ __('contracts.form.coord_short') }}
+                    {{ __('contracts.edit_extra.show_tab') }} {{ __('contracts.form.coord_short') }}
                 </button>
                 @endif
-                <a href="{{ route('admin.contracts.show', $contract->id) }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-5 py-2.5 rounded-xl">إلغاء</a>
+                <a href="{{ route('admin.contracts.show', $contract->id) }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-5 py-2.5 rounded-xl">{{ __('common.actions.cancel') }}</a>
                 @if($editT2)
                     @if($canForwardToCoord)
                     {{-- Accounts dept: save always advances to coordination --}}
                     <button type="submit" onclick="document.getElementById('__advance_to').value='coordination'"
                             class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-6 py-2.5 rounded-xl shadow flex items-center gap-2">
-                        حفظ وإرسال لل{{ __('contracts.form.coord_short') }}
+                        {{ __('contracts.edit_extra.save_send') }} — {{ __('contracts.form.coord_short') }}
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </button>
                     @else
                     {{-- Boss or other: generic save --}}
                     <button type="submit" onclick="document.getElementById('__advance_to').value=''"
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">تحديث العقد</button>
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">{{ __('common.actions.update') }}</button>
                     @endif
                 @endif
             </div>
@@ -476,15 +476,15 @@
                     <div>
                         <label class="block text-sm font-semibold text-slate-600 mb-2">{{ __('contracts.form.client_sms') }}</label>
                         <div class="flex gap-4">
-                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_sms" value="1" {{ old('client_sms', $contract->client_sms) ? 'checked' : '' }} class="accent-blue-600"> نعم</label>
-                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_sms" value="0" {{ !old('client_sms', $contract->client_sms) ? 'checked' : '' }} class="accent-blue-600"> لا</label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_sms" value="1" {{ old('client_sms', $contract->client_sms) ? 'checked' : '' }} class="accent-blue-600"> {{ __('common.yes') }}</label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_sms" value="0" {{ !old('client_sms', $contract->client_sms) ? 'checked' : '' }} class="accent-blue-600"> {{ __('common.no') }}</label>
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-slate-600 mb-2">{{ __('contracts.form.client_rating') }}</label>
                         <div class="flex gap-4">
-                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_rating" value="1" {{ old('client_rating', $contract->client_rating) ? 'checked' : '' }} class="accent-blue-600"> نعم</label>
-                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_rating" value="0" {{ !old('client_rating', $contract->client_rating) ? 'checked' : '' }} class="accent-blue-600"> لا</label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_rating" value="1" {{ old('client_rating', $contract->client_rating) ? 'checked' : '' }} class="accent-blue-600"> {{ __('common.yes') }}</label>
+                            <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="client_rating" value="0" {{ !old('client_rating', $contract->client_rating) ? 'checked' : '' }} class="accent-blue-600"> {{ __('common.no') }}</label>
                         </div>
                     </div>
                 </div>
@@ -540,7 +540,7 @@
             {{-- Status tracker --}}
             <div class="flex items-center justify-between mb-3">
                 <h4 class="text-sm font-semibold text-slate-600">{{ __('contracts.form.stages') }} ({{ count($statuses) }} {{ __('contracts.form.stage_unit') }}) — {{ __('contracts.edit_extra.current_stage') }}: <span class="text-blue-600">{{ $statuses[$contract->current_status]['label'] ?? $contract->current_status }}</span></h4>
-                <span class="text-xs text-slate-400 bg-slate-100 rounded-lg px-3 py-1">✦ حدد التاريخ وفعّل {{ __('contracts.edit_extra.current_stage') }} بالضغط على الدائرة</span>
+                <span class="text-xs text-slate-400 bg-slate-100 rounded-lg px-3 py-1">✦ {{ __('contracts.edit_extra.stage_hint') }}</span>
             </div>
             <div class="border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-100">
                 @foreach($statuses as $num => $st)
@@ -575,7 +575,7 @@
             </div>
 
             <div class="mt-4">
-                <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('contracts.edit_extra.wa_on_save') }} (اختياري)</label>
+                <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('contracts.edit_extra.wa_on_save') }} ({{ __('common.fields.optional') }})</label>
                 <input type="text" name="whatsapp_message" placeholder="{{ __('contracts.edit_extra.wa_hint') }}..."
                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
             </div>
@@ -593,8 +593,8 @@
                 @endif
             </div>
             <div class="flex gap-3">
-                <a href="{{ route('admin.contracts.show', $contract->id) }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-6 py-2.5 rounded-xl">إلغاء</a>
-                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">تحديث العقد</button>
+                <a href="{{ route('admin.contracts.show', $contract->id) }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm px-6 py-2.5 rounded-xl">{{ __('common.actions.cancel') }}</a>
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2.5 rounded-xl shadow">{{ __('common.actions.update') }}</button>
             </div>
         </div>
         </div>{{-- /tab coord --}}
@@ -633,7 +633,7 @@
                 <div x-show="clientModal.error" class="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-2" x-text="clientModal.error"></div>
             </div>
             <div class="px-6 pb-5 flex gap-3 justify-end">
-                <button type="button" @click="clientModal.open=false" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">إلغاء</button>
+                <button type="button" @click="clientModal.open=false" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">{{ __('common.actions.cancel') }}</button>
                 <button type="button" @click="submitClient()" :disabled="clientModal.loading"
                         class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2 rounded-xl shadow disabled:opacity-60">
                     <span x-show="!clientModal.loading">{{ __('contracts.form.save_client') }}</span>
@@ -679,7 +679,7 @@
                 <div x-show="workerModal.error" class="bg-red-50 text-red-600 text-sm rounded-xl px-4 py-2" x-text="workerModal.error"></div>
             </div>
             <div class="px-6 pb-5 flex gap-3 justify-end">
-                <button type="button" @click="workerModal.open=false" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">إلغاء</button>
+                <button type="button" @click="workerModal.open=false" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm px-5 py-2 rounded-xl">{{ __('common.actions.cancel') }}</button>
                 <button type="button" @click="submitWorker()" :disabled="workerModal.loading"
                         class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-6 py-2 rounded-xl shadow disabled:opacity-60">
                     <span x-show="!workerModal.loading">{{ __('contracts.form.save_worker') }}</span>
