@@ -23,38 +23,41 @@
         clearAllMatching() { this.selectAllMatching = false; },
         selectNone() { this.selected = []; this.selectAllMatching = false; },
 
-        // الإرسال: في وضع «كل النتائج» نجلب المعرّفات من السيرفر أولاً
+        // الإرسال — يفتح واتساب مباشرة بلا تحميل أي صفحة
         async sendSelected() {
-            if (!this.waPhone) return;
+            if (!this.waPhone || this.sending) return;
 
-            let ids = this.selectedWithCv;
+            const MAX = {{ \App\Services\WorkerService::WHATSAPP_MAX_PER_MESSAGE }};
 
-            if (this.selectAllMatching) {
-                this.sending = true;
-                try {
-                    const params = new URLSearchParams(window.location.search);
-                    params.set('has_cv', '1');
-                    const res  = await fetch('{{ route('admin.workers.matching-ids') }}?' + params.toString(),
-                                             { headers: { 'Accept': 'application/json' } });
-                    if (!res.ok) throw new Error('fetch failed');
-                    ids = (await res.json()).ids;
-                } catch (e) {
-                    alert('تعذّر جلب قائمة العاملات. حاول مرة أخرى.');
-                    return;
-                } finally {
-                    this.sending = false;
-                }
-            }
-
-            if (!ids.length) { alert('لا توجد عاملات لديها CV ضمن التحديد.'); return; }
-
-            // معرّفات من صفحات أخرى غير متاحة في workerCvData → نبني الرسالة على السيرفر
-            if (this.selectAllMatching) {
-                postWhatsapp(ids, this.waPhone);
+            // الحالة العادية: البيانات موجودة في الصفحة → إرسال فوري
+            if (!this.selectAllMatching) {
+                const ids = this.selectedWithCv;
+                if (!ids.length) { alert('لا توجد عاملات لديها CV ضمن التحديد.'); return; }
+                if (ids.length > MAX && !confirm('سيتم إرسال أول ' + MAX + ' عاملة فقط من أصل ' + ids.length + ' لأن رسالة واتساب لا تتسع لأكثر من ذلك. متابعة؟')) return;
+                sendWhatsapp(ids.slice(0, MAX), this.waPhone);
                 return;
             }
 
-            sendWhatsapp(ids, this.waPhone);
+            // وضع «كل النتائج»: نجلب بيانات أول MAX عاملة فقط
+            this.sending = true;
+            try {
+                const params = new URLSearchParams(window.location.search);
+                params.set('has_cv', '1');
+                params.set('with_cv_data', '1');
+                const res = await fetch('{{ route('admin.workers.matching-ids') }}?' + params.toString(),
+                                        { headers: { 'Accept': 'application/json' } });
+                if (!res.ok) throw new Error('fetch failed');
+                const data = await res.json();
+
+                if (!data.workers.length) { alert('لا توجد عاملات لديها CV ضمن النتائج.'); return; }
+                if (data.count > data.limit && !confirm('سيتم إرسال أول ' + data.limit + ' عاملة فقط من أصل ' + data.count + ' لأن رسالة واتساب لا تتسع لأكثر من ذلك. متابعة؟')) return;
+
+                openWhatsapp(data.workers, this.waPhone);
+            } catch (e) {
+                alert('تعذّر جلب قائمة العاملات. حاول مرة أخرى.');
+            } finally {
+                this.sending = false;
+            }
         }
      }">
 
@@ -367,14 +370,9 @@ $workerCvMap = $workers->map(fn($w) => [
 <script>
 const workerCvData = @json($workerCvMap);
 
-function sendWhatsapp(selected, waPhone) {
-    if (!selected.length || !waPhone) return;
-
-    const workers = workerCvData.filter(w => selected.includes(w.id) && w.cv_url);
-    if (!workers.length) {
-        alert('العاملات المحددة لا تحتوي على CV');
-        return;
-    }
+/** يبني رسالة الواتساب ويفتحها فوراً — بلا تحميل أي صفحة. */
+function openWhatsapp(workers, waPhone) {
+    if (!workers.length || !waPhone) return;
 
     const lines = ['السلام عليكم، مرفق مجموعة CV عاملات للمراجعة:\n'];
     workers.forEach((w, i) => {
@@ -385,35 +383,20 @@ function sendWhatsapp(selected, waPhone) {
 
     const message = lines.join('\n\n');
     const clean   = waPhone.replace(/[^0-9]/g, '');
-    const url     = 'https://wa.me/' + clean + '?text=' + encodeURIComponent(message);
-    window.open(url, '_blank');
+    window.open('https://wa.me/' + clean + '?text=' + encodeURIComponent(message), '_blank');
 }
 
-/**
- * إرسال عبر السيرفر — يُستخدم مع «تحديد كل النتائج» لأن بيانات الصفحات
- * الأخرى غير موجودة في المتصفح، فيبني السيرفر رسالة الواتساب ثم يحوّل إليها.
- */
-function postWhatsapp(ids, waPhone) {
-    const form  = document.createElement('form');
-    form.method = 'POST';
-    form.action = '{{ route('admin.workers.send-whatsapp') }}';
-    form.target = '_blank';
+/** إرسال عاملات من الصفحة الحالية (بياناتها موجودة أصلاً في المتصفح). */
+function sendWhatsapp(selected, waPhone) {
+    if (!selected.length || !waPhone) return;
 
-    const add = (name, value) => {
-        const input = document.createElement('input');
-        input.type  = 'hidden';
-        input.name  = name;
-        input.value = value;
-        form.appendChild(input);
-    };
+    const workers = workerCvData.filter(w => selected.includes(w.id) && w.cv_url);
+    if (!workers.length) {
+        alert('العاملات المحددة لا تحتوي على CV');
+        return;
+    }
 
-    add('_token', '{{ csrf_token() }}');
-    add('phone', waPhone);
-    ids.forEach(id => add('worker_ids[]', id));
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
+    openWhatsapp(workers, waPhone);
 }
 </script>
 @endpush

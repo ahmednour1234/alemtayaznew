@@ -326,10 +326,47 @@ class WorkerService
 
     // ── WhatsApp ──────────────────────────────────────────────────────────────
 
+    /**
+     * الحد الأقصى للعاملات في رسالة واتساب واحدة.
+     * روابط wa.me تُمرَّر عبر عنوان URL، والنص العربي يتضخّم عند الترميز
+     * (كل حرف ≈ 9 بايت)، فتجاوز هذا العدد يجعل الرابط أطول مما تقبله المتصفحات.
+     */
+    public const WHATSAPP_MAX_PER_MESSAGE = 30;
+
+    /**
+     * بيانات العاملات اللازمة لبناء رسالة واتساب في المتصفح.
+     * محدودة بـ WHATSAPP_MAX_PER_MESSAGE حتى يبقى الرابط ضمن حدود المتصفح.
+     *
+     * @param  int[] $workerIds
+     * @return array<int, array{id:int, name:?string, nationality:?string, cv_url:string}>
+     */
+    public function whatsappPayload(array $workerIds): array
+    {
+        if (! $workerIds) {
+            return [];
+        }
+
+        return Worker::with('nationality')
+            ->whereIn('id', $workerIds)
+            ->whereNotNull('cv_path')
+            ->limit(self::WHATSAPP_MAX_PER_MESSAGE)
+            ->get()
+            ->map(fn(Worker $w) => [
+                'id'          => $w->id,
+                'name'        => $w->name,
+                'nationality' => $w->nationality?->name,
+                'cv_url'      => route('admin.workers.cv', $w->id),
+            ])
+            ->all();
+    }
+
     public function buildWhatsappUrl(string $phone, array $workerIds): string
     {
-        $workers = Worker::whereIn('id', $workerIds)
-                    ->whereNotNull('cv_path')->get();
+        $workers = Worker::with('nationality')
+                    ->whereIn('id', $workerIds)
+                    ->whereNotNull('cv_path')
+                    ->limit(self::WHATSAPP_MAX_PER_MESSAGE)
+                    ->get();
 
         $lines = ["السلام عليكم، مرفق مجموعة CV عاملات للمراجعة:\n"];
         foreach ($workers as $i => $w) {
