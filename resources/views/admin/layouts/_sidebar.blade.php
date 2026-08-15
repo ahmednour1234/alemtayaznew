@@ -112,7 +112,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}">
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                             <circle cx="12" cy="12" r="3"/><path d="M3 12h3m12 0h3M12 3v3m0 12v3"/>
                         </svg>
@@ -165,7 +165,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -210,7 +210,7 @@
                             <a href="{{ route($it['r']) }}"
                                style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
                                       border-radius:6px;text-decoration:none;font-size:12px;
-                                      {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                                      {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                                onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                                onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                                {{ $on ? 'data-on=1' : '' }}>
@@ -264,7 +264,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -320,7 +320,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -370,7 +370,7 @@
                             <a href="{{ route($it['r']) }}"
                                style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
                                       border-radius:6px;text-decoration:none;font-size:12px;
-                                      {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                                      {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                                onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                                onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                                {{ $on ? 'data-on=1' : '' }}>
@@ -414,7 +414,7 @@
             </button>
 
             <div x-show="f" x-collapse style="overflow:hidden;">
-                <div style="padding:4px 0 4px 10px;border-right:2px solid rgba(255,255,255,.06);margin-right:12px;">
+                <div style="padding-block:4px; padding-inline-end:10px;border-inline-end:2px solid rgba(255,255,255,.06);margin-inline-start:12px;">
 
                     @if($can('income-types.view') || $can('expense-types.view'))
                     {{-- SUB 1: {{ __('nav.finance.accounting') }} --}}
@@ -447,7 +447,7 @@
                                 <a href="{{ route($it['r']) }}"
                                    style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
                                           border-radius:6px;text-decoration:none;font-size:12px;
-                                          {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                                          {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                                    onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                                    onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                                    {{ $on ? 'data-on=1' : '' }}>
@@ -492,7 +492,7 @@
                                 <a href="{{ route($it['r']) }}"
                                    style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
                                           border-radius:6px;text-decoration:none;font-size:12px;
-                                          {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                                          {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                                    onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                                    onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                                    {{ $on ? 'data-on=1' : '' }}>
@@ -538,7 +538,7 @@
                                 <a href="{{ route($it['r']) }}"
                                    style="display:flex;align-items:center;gap:8px;padding:6px 10px;margin:1px 0;
                                           border-radius:6px;text-decoration:none;font-size:12px;
-                                          {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                                          {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                                    onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                                    onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                                    {{ $on ? 'data-on=1' : '' }}>
@@ -607,7 +607,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -663,7 +663,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -719,7 +719,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -777,7 +777,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -832,7 +832,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                        {{ $on ? 'data-on=1' : '' }}>
@@ -889,7 +889,7 @@
                     <a href="{{ route($it['r']) }}"
                        style="display:flex;align-items:center;gap:9px;padding:7px 10px;margin:1px 0;
                               border-radius:7px;text-decoration:none;font-size:12.5px;
-                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-right:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-right:2px solid transparent;' }}"
+                              {{ $on ? 'color:#c9a84c;background:rgba(201,168,76,.12);border-inline-end:2px solid #c9a84c;' : 'color:#c8d4e3;background:transparent;border-inline-end:2px solid transparent;' }}"
                        onmouseover="if(!this.dataset.on){this.style.background='rgba(255,255,255,.05)';this.style.color='#cbd5e1';}"
                        onmouseout="if(!this.dataset.on){this.style.background='transparent';this.style.color='#c8d4e3';}"
                        {{ $on ? 'data-on=1' : '' }}>

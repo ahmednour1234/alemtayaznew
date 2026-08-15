@@ -1,8 +1,24 @@
 ﻿@php
-    $locales    = config('locales.supported');
+    // احتياطي كامل: لو لم يُحمَّل config/locales.php بعد (كاش قديم) نعود للعربية
+    // بدل أن ينقلب اتجاه الواجهة كلها إلى LTR.
+    $fallbackConf = [
+        'native'      => 'العربية',
+        'flag'        => '🇸🇦',
+        'dir'         => 'rtl',
+        'font_stack'  => ['Cairo', 'sans-serif'],
+        'google_font' => 'Cairo:wght@300;400;500;600;700;800',
+    ];
+
+    $locales    = config('locales.supported') ?: ['ar' => $fallbackConf];
     $currentLoc = app()->getLocale();
-    $locConf    = $locales[$currentLoc] ?? $locales[config('locales.default')];
-    $dir        = $locConf['dir'];
+
+    // اللغة الحالية غير مدعومة (مثلاً APP_LOCALE=en الافتراضي في Laravel)
+    if (! isset($locales[$currentLoc])) {
+        $currentLoc = config('locales.default', 'ar');
+    }
+
+    $locConf = $locales[$currentLoc] ?? $fallbackConf;
+    $dir     = $locConf['dir'] ?? 'rtl';
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $currentLoc }}" dir="{{ $dir }}">

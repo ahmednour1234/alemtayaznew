@@ -139,13 +139,13 @@
             </svg>
         </button>
 
-        <div style="min-width:0;padding-right:10px;border-right:3px solid #c9a84c;">
+        <div style="min-width:0;padding-inline-start:10px;border-inline-start:3px solid #c9a84c;">
             <p style="font-size:15px;font-weight:800;color:#0f172a;margin:0;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                 @yield('title', __('nav.dashboard'))
             </p>
             <div class="tb-breadcrumb">
                 <a href="{{ route('admin.dashboard') }}">
-                    <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-left:2px;">
+                    <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-inline-end:2px;">
                         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                         <polyline points="9 22 9 12 15 12 15 22"/>
                     </svg>{{ __('common.home') }}
