@@ -826,7 +826,6 @@
                             <th>المبلغ</th>
                             <th>المصدر</th>
                             <th>التاريخ</th>
-                            <th>الحالة</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -835,10 +834,9 @@
                                 <td><span class="amount-green">{{ number_format($income->amount, 0) }}</span> ريال</td>
                                 <td>{{ $income->incomeType?->name ?? $income->source ?? 'دفعة من العميل' }}</td>
                                 <td>{{ $income->date?->format('d/m/Y') }}</td>
-                                <td><span class="badge green">تم التحصيل</span></td>
                             </tr>
                         @empty
-                            <tr><td colspan="4" class="empty-state">لا توجد إيرادات حالياً</td></tr>
+                            <tr><td colspan="3" class="empty-state">لا توجد إيرادات حالياً</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -866,7 +864,6 @@
                             <th>المبلغ</th>
                             <th>النوع</th>
                             <th>التاريخ</th>
-                            <th>الحالة</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -875,16 +872,9 @@
                                 <td><span class="amount-red">{{ number_format($expense->amount, 0) }}</span> ريال</td>
                                 <td>{{ $expense->expenseType?->name ?? 'مصروفات إدارية' }}</td>
                                 <td>{{ $expense->date?->format('d/m/Y') }}</td>
-                                <td>
-                                    @if(($expense->status ?? null) == 'paid' || ($expense->approved_at ?? false))
-                                        <span class="badge green">مدفوعة</span>
-                                    @else
-                                        <span class="badge orange">معلقة</span>
-                                    @endif
-                                </td>
                             </tr>
                         @empty
-                            <tr><td colspan="4" class="empty-state">لا توجد مصروفات حالياً</td></tr>
+                            <tr><td colspan="3" class="empty-state">لا توجد مصروفات حالياً</td></tr>
                         @endforelse
                     </tbody>
                 </table>
