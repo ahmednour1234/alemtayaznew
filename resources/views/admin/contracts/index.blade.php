@@ -218,9 +218,9 @@
                       && ! in_array($_dept, ['accounts', 'accountant', 'coordination']);
     // Quick-forward: only dept users (not bosses) who are at a forwardable stage
     $fwdNextMap = [
-        'customer_service' => ['stage' => 'customer_service', 'next' => 'accounts',     'label' => '{{ __('contracts.list.to_accounts') }}'],
-        'accounts'         => ['stage' => 'accounts',         'next' => 'coordination', 'label' => '{{ __('contracts.list.to_coord') }}'],
-        'accountant'       => ['stage' => 'accounts',         'next' => 'coordination', 'label' => '{{ __('contracts.list.to_coord') }}'],
+        'customer_service' => ['stage' => 'customer_service', 'next' => 'accounts',     'label' => __('contracts.list.to_accounts')],
+        'accounts'         => ['stage' => 'accounts',         'next' => 'coordination', 'label' => __('contracts.list.to_coord')],
+        'accountant'       => ['stage' => 'accounts',         'next' => 'coordination', 'label' => __('contracts.list.to_coord')],
     ];
     $myForward = (!$_u->isSuperAdmin() && !in_array($_dept, ['branch_manager', 'chairman', 'coordination']))
                  ? ($fwdNextMap[$_dept] ?? null)

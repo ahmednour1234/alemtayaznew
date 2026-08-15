@@ -142,6 +142,27 @@ return [
         'col_payment'  => 'Payment',
     ],
 
+    // ── Printable document ───────────────────────────────────────────────────
+    'print' => [
+        'doc_title'    => 'Recruitment contract',
+        'paid_full'    => 'Paid in full',
+        'paid_partial' => 'Partially paid',
+        'paid_pending' => 'Awaiting payment',
+        'client_data'  => 'Client details',
+        'worker_data'  => 'Worker details',
+        'no_worker'    => 'No worker assigned yet',
+        'details'      => 'Contract details',
+        'e_doc'        => 'E-documentation',
+        'airports'     => 'Airports',
+        'follow'       => 'Contract stage tracking',
+        'office'       => 'Recruitment office',
+        'witness'      => 'Witness',
+        'signature'    => 'Signature and date',
+        'printed_at'   => 'Printed on:',
+        'back'         => 'Back',
+        'print'        => 'Print',
+    ],
+
     // ── Edit screen only ─────────────────────────────────────────────────────
     'edit_extra' => [
         'current_file'  => 'Current file',

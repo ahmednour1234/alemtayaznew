@@ -142,6 +142,27 @@ return [
         'col_payment'  => 'Bayad',
     ],
 
+    // ── Dokumentong papi-print ───────────────────────────────────────────────
+    'print' => [
+        'doc_title'    => 'Kontrata sa recruitment',
+        'paid_full'    => 'Bayad na buo',
+        'paid_partial' => 'Bahagyang bayad',
+        'paid_pending' => 'Naghihintay ng bayad',
+        'client_data'  => 'Detalye ng kliyente',
+        'worker_data'  => 'Detalye ng manggagawa',
+        'no_worker'    => 'Wala pang naitalagang manggagawa',
+        'details'      => 'Detalye ng kontrata',
+        'e_doc'        => 'E-dokumentasyon',
+        'airports'     => 'Mga paliparan',
+        'follow'       => 'Pagsubaybay sa yugto ng kontrata',
+        'office'       => 'Opisina ng recruitment',
+        'witness'      => 'Saksi',
+        'signature'    => 'Lagda at petsa',
+        'printed_at'   => 'Ni-print noong:',
+        'back'         => 'Bumalik',
+        'print'        => 'I-print',
+    ],
+
     // ── Para sa edit screen lamang ───────────────────────────────────────────
     'edit_extra' => [
         'current_file'  => 'Kasalukuyang file',
