@@ -185,6 +185,10 @@ class WorkerService
      */
     public function bulkDestroy(array $ids): array
     {
+        if (! $ids) {
+            return ['deleted' => 0, 'skipped' => []];
+        }
+
         $workers = Worker::whereIn('id', $ids)
             ->withCount('recruitmentContracts')
             ->get();
@@ -207,6 +211,16 @@ class WorkerService
         }
 
         return ['deleted' => $deleted, 'skipped' => $skipped];
+    }
+
+    /**
+     * كل معرّفات العاملات المطابقة للفلاتر الحالية (متجاوزاً الـ pagination).
+     *
+     * @return int[]
+     */
+    public function idsMatchingFilters(array $filters): array
+    {
+        return $this->repo->filteredQuery($filters)->pluck('id')->all();
     }
 
     public function restore(int $id): void

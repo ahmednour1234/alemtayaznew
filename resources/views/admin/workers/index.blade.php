@@ -9,9 +9,53 @@
         selected: [],
         waPhone: '',
         showWa: false,
+        sending: false,
+        selectAllMatching: false,   // true = كل نتائج الفلتر عبر كل الصفحات
+        totalMatching: {{ $workers->total() }},
+        pageIds: {{ $workers->pluck('id')->toJson() }},
         cvIds: {{ $cvIds->toJson() }},
         get selectedWithCv() { return this.selected.filter(id => this.cvIds.includes(id)); },
-        get selectedNoCv()   { return this.selected.filter(id => !this.cvIds.includes(id)); }
+        get selectedNoCv()   { return this.selected.filter(id => !this.cvIds.includes(id)); },
+        // العدد المعروض في الأزرار: كل النتائج أو المحدد يدوياً
+        get actionCount()    { return this.selectAllMatching ? this.totalMatching : this.selected.length; },
+        get hasSelection()   { return this.selectAllMatching || this.selected.length > 0; },
+        // إلغاء وضع «كل النتائج» فور تعديل التحديد يدوياً
+        clearAllMatching() { this.selectAllMatching = false; },
+        selectNone() { this.selected = []; this.selectAllMatching = false; },
+
+        // الإرسال: في وضع «كل النتائج» نجلب المعرّفات من السيرفر أولاً
+        async sendSelected() {
+            if (!this.waPhone) return;
+
+            let ids = this.selectedWithCv;
+
+            if (this.selectAllMatching) {
+                this.sending = true;
+                try {
+                    const params = new URLSearchParams(window.location.search);
+                    params.set('has_cv', '1');
+                    const res  = await fetch('{{ route('admin.workers.matching-ids') }}?' + params.toString(),
+                                             { headers: { 'Accept': 'application/json' } });
+                    if (!res.ok) throw new Error('fetch failed');
+                    ids = (await res.json()).ids;
+                } catch (e) {
+                    alert('تعذّر جلب قائمة العاملات. حاول مرة أخرى.');
+                    return;
+                } finally {
+                    this.sending = false;
+                }
+            }
+
+            if (!ids.length) { alert('لا توجد عاملات لديها CV ضمن التحديد.'); return; }
+
+            // معرّفات من صفحات أخرى غير متاحة في workerCvData → نبني الرسالة على السيرفر
+            if (this.selectAllMatching) {
+                postWhatsapp(ids, this.waPhone);
+                return;
+            }
+
+            sendWhatsapp(ids, this.waPhone);
+        }
      }">
 
     {{-- Header --}}
@@ -78,7 +122,7 @@
     </form>
 
     {{-- WhatsApp panel (shows when items selected) --}}
-    <div x-show="selected.length > 0" x-cloak
+    <div x-show="hasSelection" x-cloak
          class="bg-green-50 border border-green-200 rounded-xl p-4 mb-5">
         <div class="flex flex-wrap items-center gap-3">
             <div class="flex items-center gap-2">
@@ -87,36 +131,80 @@
                 </svg>
                 <span class="text-sm font-semibold text-green-700">إرسال عبر واتساب</span>
                 <span class="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full"
-                      x-text="selectedWithCv.length + ' CV جاهز للإرسال'"></span>
+                      x-text="selectAllMatching ? ('كل النتائج (' + totalMatching + ')') : (selectedWithCv.length + ' CV جاهز للإرسال')"></span>
             </div>
-            <form @submit.prevent="sendWhatsapp(selectedWithCv, waPhone)" class="flex gap-2 flex-1 min-w-0">
+            <form @submit.prevent="sendSelected()" class="flex gap-2 flex-1 min-w-0">
                 <input type="tel" x-model="waPhone" placeholder="رقم الواتساب (مثال: 966501234567)"
                        class="flex-1 border border-green-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 min-w-0" required>
-                <button type="submit" :disabled="selectedWithCv.length === 0"
+                <button type="submit" :disabled="sending || (!selectAllMatching && selectedWithCv.length === 0)"
                         class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg font-medium whitespace-nowrap disabled:bg-slate-300 disabled:cursor-not-allowed">
-                    إرسال
+                    <span x-text="sending ? 'جارٍ التحضير...' : 'إرسال'"></span>
                 </button>
             </form>
 
             {{-- حذف جماعي --}}
             <form method="POST" action="{{ route('admin.workers.bulk-destroy') }}" class="inline"
-                  @submit="return confirm('حذف ' + selected.length + ' عاملة؟ العاملات المرتبطة بعقود استقدام لن تُحذف.')">
+                  @submit="return confirm('حذف ' + actionCount + ' عاملة؟ العاملات المرتبطة بعقود استقدام لن تُحذف.')">
                 @csrf @method('DELETE')
-                <template x-for="id in selected" :key="id">
-                    <input type="hidden" name="worker_ids[]" :value="id">
+                {{-- في وضع «كل النتائج» نرسل الفلاتر بدل آلاف المعرّفات --}}
+                <template x-if="selectAllMatching">
+                    <div>
+                        <input type="hidden" name="select_all" value="1">
+                        <input type="hidden" name="nationality_id" value="{{ $filters['nationality_id'] ?? '' }}">
+                        <input type="hidden" name="status"         value="{{ $filters['status'] ?? '' }}">
+                        <input type="hidden" name="profession"     value="{{ $filters['profession'] ?? '' }}">
+                        <input type="hidden" name="search"         value="{{ $filters['search'] ?? '' }}">
+                    </div>
+                </template>
+                <template x-if="!selectAllMatching">
+                    <div>
+                        <template x-for="id in selected" :key="id">
+                            <input type="hidden" name="worker_ids[]" :value="id">
+                        </template>
+                    </div>
                 </template>
                 <button type="submit"
                         class="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-lg font-medium whitespace-nowrap">
-                    حذف المحدد (<span x-text="selected.length"></span>)
+                    حذف المحدد (<span x-text="actionCount"></span>)
                 </button>
             </form>
 
-            <button @click="selected=[]" class="text-sm text-slate-500 hover:text-slate-700">إلغاء التحديد</button>
+            <button @click="selectNone()" class="text-sm text-slate-500 hover:text-slate-700">إلغاء التحديد</button>
+        </div>
+
+        {{-- تحديد كل النتائج عبر كل الصفحات --}}
+        <div x-show="selected.length === pageIds.length && totalMatching > pageIds.length" x-cloak
+             class="mt-3 pt-3 border-t border-green-200 text-sm">
+            <template x-if="!selectAllMatching">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-slate-600">
+                        تم تحديد <strong x-text="pageIds.length"></strong> في هذه الصفحة فقط.
+                    </span>
+                    <button type="button" @click="selectAllMatching = true"
+                            class="text-blue-600 hover:text-blue-800 font-semibold underline">
+                        تحديد كل النتائج المطابقة (<span x-text="totalMatching"></span>)
+                    </button>
+                </div>
+            </template>
+            <template x-if="selectAllMatching">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-green-800 font-semibold">
+                        محدَّد الآن كل النتائج المطابقة للفلتر (<span x-text="totalMatching"></span>) عبر كل الصفحات.
+                    </span>
+                    <button type="button" @click="selectAllMatching = false"
+                            class="text-slate-500 hover:text-slate-700 underline">
+                        الاكتفاء بهذه الصفحة
+                    </button>
+                </div>
+            </template>
         </div>
 
         {{-- تنبيه عند تحديد عاملات بلا CV --}}
-        <p x-show="selectedNoCv.length > 0" x-cloak class="text-xs text-amber-700 mt-2">
+        <p x-show="!selectAllMatching && selectedNoCv.length > 0" x-cloak class="text-xs text-amber-700 mt-2">
             <span x-text="selectedNoCv.length"></span> من المحددات بلا CV — ستُستبعد من الإرسال عبر واتساب، لكنها ستُحذف لو ضغطت «حذف المحدد».
+        </p>
+        <p x-show="selectAllMatching" x-cloak class="text-xs text-amber-700 mt-2">
+            عند الإرسال عبر واتساب ستُرسل فقط العاملات التي لديها CV من ضمن النتائج المطابقة.
         </p>
     </div>
 
@@ -128,9 +216,9 @@
                 <tr>
                     <th class="w-8">
                         <input type="checkbox" class="rounded"
-                               @change="selected = $event.target.checked
-                                ? {{ $workers->pluck('id') }}
-                                : []">
+                               :checked="selected.length === pageIds.length && pageIds.length > 0"
+                               @change="selectAllMatching = false;
+                                        selected = $event.target.checked ? [...pageIds] : []">
                     </th>
                     <th>العاملة</th>
                     <th>الجنسية</th>
@@ -148,7 +236,7 @@
             <tr>
                 <td>
                     <input type="checkbox" class="rounded" :value="{{ $w->id }}"
-                           x-model.number="selected">
+                           x-model.number="selected" @change="clearAllMatching()">
                 </td>
                 <td>
                     <div class="font-medium text-slate-800 text-sm">{{ $w->name ?: '—' }}</div>
@@ -299,6 +387,33 @@ function sendWhatsapp(selected, waPhone) {
     const clean   = waPhone.replace(/[^0-9]/g, '');
     const url     = 'https://wa.me/' + clean + '?text=' + encodeURIComponent(message);
     window.open(url, '_blank');
+}
+
+/**
+ * إرسال عبر السيرفر — يُستخدم مع «تحديد كل النتائج» لأن بيانات الصفحات
+ * الأخرى غير موجودة في المتصفح، فيبني السيرفر رسالة الواتساب ثم يحوّل إليها.
+ */
+function postWhatsapp(ids, waPhone) {
+    const form  = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route('admin.workers.send-whatsapp') }}';
+    form.target = '_blank';
+
+    const add = (name, value) => {
+        const input = document.createElement('input');
+        input.type  = 'hidden';
+        input.name  = name;
+        input.value = value;
+        form.appendChild(input);
+    };
+
+    add('_token', '{{ csrf_token() }}');
+    add('phone', waPhone);
+    ids.forEach(id => add('worker_ids[]', id));
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
 }
 </script>
 @endpush

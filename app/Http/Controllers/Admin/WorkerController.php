@@ -251,11 +251,25 @@ class WorkerController extends Controller
     public function bulkDestroy(Request $request)
     {
         $request->validate([
-            'worker_ids'   => ['required', 'array', 'min:1'],
+            'select_all'   => ['nullable', 'boolean'],
+            'worker_ids'   => ['required_without:select_all', 'array'],
             'worker_ids.*' => ['integer', 'exists:workers,id'],
         ], [], ['worker_ids' => 'العاملات']);
 
-        $result = $this->service->bulkDestroy($request->input('worker_ids'));
+        // «تحديد كل النتائج» → نعيد بناء القائمة من الفلاتر لا من المتصفح
+        if ($request->boolean('select_all')) {
+            $ids = $this->service->idsMatchingFilters(
+                $request->only(['nationality_id', 'status', 'profession', 'search'])
+            );
+        } else {
+            $ids = $request->input('worker_ids', []);
+        }
+
+        if (! $ids) {
+            return back()->withErrors(['delete' => 'لم يتم تحديد أي عاملة.']);
+        }
+
+        $result = $this->service->bulkDestroy($ids);
 
         if ($result['deleted'] === 0 && $result['skipped']) {
             return back()->withErrors([
@@ -426,6 +440,23 @@ class WorkerController extends Controller
         }
 
         return back()->with('success', 'تم إلغاء تعيين العاملة وأصبحت متاحة.');
+    }
+
+    /**
+     * معرّفات كل العاملات المطابقة للفلاتر الحالية (لتحديد الكل عبر الصفحات).
+     * has_cv=1 يقصر النتيجة على من لديها CV — للإرسال عبر واتساب.
+     */
+    public function matchingIds(Request $request)
+    {
+        $filters = $request->only(['nationality_id', 'status', 'profession', 'search']);
+
+        if ($request->boolean('has_cv')) {
+            $filters['has_cv'] = true;
+        }
+
+        $ids = $this->service->idsMatchingFilters($filters);
+
+        return response()->json(['ids' => $ids, 'count' => count($ids)]);
     }
 
     // ── WhatsApp ──────────────────────────────────────────────────────────────

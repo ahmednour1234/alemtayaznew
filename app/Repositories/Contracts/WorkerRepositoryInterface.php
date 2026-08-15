@@ -5,6 +5,7 @@ namespace App\Repositories\Contracts;
 interface WorkerRepositoryInterface
 {
     public function getAll(array $filters = []): mixed;
+    public function filteredQuery(array $filters = []): \Illuminate\Database\Eloquent\Builder;
     public function findById(int $id): mixed;
     public function create(array $data): mixed;
     public function update(int $id, array $data): mixed;

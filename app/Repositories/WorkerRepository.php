@@ -9,8 +9,20 @@ class WorkerRepository implements WorkerRepositoryInterface
 {
     public function getAll(array $filters = []): mixed
     {
-        $q = Worker::with(['nationality', 'client', 'branch', 'assignedBy'])
-                   ->where('active', true);
+        return $this->filteredQuery($filters)
+                    ->with(['nationality', 'client', 'branch', 'assignedBy'])
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(20)
+                    ->withQueryString();
+    }
+
+    /**
+     * الاستعلام الأساسي بعد تطبيق الفلاتر — يُستخدم للعرض وللعمليات الجماعية
+     * («تحديد كل النتائج») حتى يبقى نطاق الفلترة واحداً في الحالتين.
+     */
+    public function filteredQuery(array $filters = []): \Illuminate\Database\Eloquent\Builder
+    {
+        $q = Worker::query()->where('active', true);
 
         if (!empty($filters['nationality_id'])) {
             $q->where('nationality_id', $filters['nationality_id']);
@@ -31,7 +43,12 @@ class WorkerRepository implements WorkerRepositoryInterface
             });
         }
 
-        return $q->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+        // فقط من لديها CV — يُستخدم عند الإرسال عبر واتساب
+        if (!empty($filters['has_cv'])) {
+            $q->whereNotNull('cv_path');
+        }
+
+        return $q;
     }
 
     public function findById(int $id): mixed
