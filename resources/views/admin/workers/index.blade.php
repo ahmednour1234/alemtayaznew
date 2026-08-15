@@ -27,18 +27,32 @@
         async sendSelected() {
             if (!this.waPhone || this.sending) return;
 
-            const MAX = {{ \App\Services\WorkerService::WHATSAPP_MAX_PER_MESSAGE }};
+            const PER   = {{ \App\Services\WorkerService::WHATSAPP_MAX_PER_MESSAGE }};
+            const TOTAL = {{ \App\Services\WorkerService::WHATSAPP_MAX_TOTAL }};
+
+            // تأكيد عدد الرسائل التي ستُفتح
+            const confirmBatches = (n, available) => {
+                if (available > n) {
+                    if (!confirm('سيتم إرسال أول ' + n + ' عاملة من أصل ' + available + ' (الحد الأقصى للعملية الواحدة).')) return false;
+                }
+                const batches = Math.ceil(n / PER);
+                if (batches > 1) {
+                    return confirm(n + ' عاملة لا تتسع في رسالة واحدة، فستُقسَّم على ' + batches + ' رسائل متتابعة. متابعة؟');
+                }
+                return true;
+            };
 
             // الحالة العادية: البيانات موجودة في الصفحة → إرسال فوري
             if (!this.selectAllMatching) {
                 const ids = this.selectedWithCv;
                 if (!ids.length) { alert('لا توجد عاملات لديها CV ضمن التحديد.'); return; }
-                if (ids.length > MAX && !confirm('سيتم إرسال أول ' + MAX + ' عاملة فقط من أصل ' + ids.length + ' لأن رسالة واتساب لا تتسع لأكثر من ذلك. متابعة؟')) return;
-                sendWhatsapp(ids.slice(0, MAX), this.waPhone);
+                const take = Math.min(ids.length, TOTAL);
+                if (!confirmBatches(take, ids.length)) return;
+                sendWhatsapp(ids.slice(0, take), this.waPhone);
                 return;
             }
 
-            // وضع «كل النتائج»: نجلب بيانات أول MAX عاملة فقط
+            // وضع «كل النتائج»: نجلب البيانات من السيرفر
             this.sending = true;
             try {
                 const params = new URLSearchParams(window.location.search);
@@ -50,7 +64,7 @@
                 const data = await res.json();
 
                 if (!data.workers.length) { alert('لا توجد عاملات لديها CV ضمن النتائج.'); return; }
-                if (data.count > data.limit && !confirm('سيتم إرسال أول ' + data.limit + ' عاملة فقط من أصل ' + data.count + ' لأن رسالة واتساب لا تتسع لأكثر من ذلك. متابعة؟')) return;
+                if (!confirmBatches(data.workers.length, data.count)) return;
 
                 openWhatsapp(data.workers, this.waPhone);
             } catch (e) {
@@ -380,23 +394,50 @@ const workerCvData = @json($workerCvMap);
 function openWhatsapp(workers, waPhone) {
     if (!workers.length || !waPhone) return;
 
+    const PER   = {{ \App\Services\WorkerService::WHATSAPP_MAX_PER_MESSAGE }};
+    const clean = waPhone.replace(/[^0-9]/g, '');
     const LRI = '⁦', PDI = '⁩';   // عزل اتجاه النص اللاتيني
     const ltr = (s) => LRI + s + PDI;
 
-    const lines = ['*مجموعة CV عاملات للمراجعة*', ''];
+    // تقسيم إلى دفعات — رابط wa.me لا يتسع لأكثر من PER عاملة
+    const batches = [];
+    for (let i = 0; i < workers.length; i += PER) {
+        batches.push(workers.slice(i, i + PER));
+    }
 
-    workers.forEach((w, i) => {
-        const name = (w.name || ('عاملة ' + (i + 1))).trim();
+    const buildMessage = (batch, batchIndex) => {
+        const header = batches.length > 1
+            ? `*مجموعة CV عاملات للمراجعة (${batchIndex + 1}/${batches.length})*`
+            : '*مجموعة CV عاملات للمراجعة*';
 
-        lines.push(`*${i + 1}.* ${ltr(name)}`);
-        if (w.nationality) lines.push(`الجنسية: ${w.nationality}`);
-        lines.push(ltr(w.cv_url));
-        lines.push('');                      // سطر فارغ يفصل كل عاملة
-    });
+        const lines  = [header, ''];
+        const offset = batchIndex * PER;
 
-    const message = lines.join('\n').trimEnd();
-    const clean   = waPhone.replace(/[^0-9]/g, '');
-    window.open('https://wa.me/' + clean + '?text=' + encodeURIComponent(message), '_blank');
+        batch.forEach((w, i) => {
+            const num  = offset + i + 1;
+            const name = (w.name || ('عاملة ' + num)).trim();
+
+            lines.push(`*${num}.* ${ltr(name)}`);
+            if (w.nationality) lines.push(`الجنسية: ${w.nationality}`);
+            lines.push(ltr(w.cv_url));
+            lines.push('');                  // سطر فارغ يفصل كل عاملة
+        });
+
+        return lines.join('\n').trimEnd();
+    };
+
+    // الرسالة الأولى فوراً (ضمن حدث الضغط حتى لا يحجبها المتصفح)
+    window.open('https://wa.me/' + clean + '?text=' + encodeURIComponent(buildMessage(batches[0], 0)), '_blank');
+
+    // الباقي بتأكيد يدوي — الفتح التلقائي لعدة نوافذ يحجبه المتصفح
+    if (batches.length > 1) {
+        setTimeout(() => {
+            for (let b = 1; b < batches.length; b++) {
+                if (!confirm(`تم فتح الرسالة ${b} من ${batches.length}. أرسلها ثم اضغط «موافق» لفتح الرسالة ${b + 1}.`)) return;
+                window.open('https://wa.me/' + clean + '?text=' + encodeURIComponent(buildMessage(batches[b], b)), '_blank');
+            }
+        }, 600);
+    }
 }
 
 /** إرسال عاملات من الصفحة الحالية (بياناتها موجودة أصلاً في المتصفح). */

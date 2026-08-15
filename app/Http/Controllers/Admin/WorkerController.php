@@ -459,8 +459,9 @@ class WorkerController extends Controller
         // بيانات جاهزة لبناء رسالة الواتساب في المتصفح مباشرة (بلا تحميل صفحة)
         if ($request->boolean('with_cv_data')) {
             return response()->json([
-                'count'   => count($ids),
-                'limit'   => \App\Services\WorkerService::WHATSAPP_MAX_PER_MESSAGE,
+                'count'     => count($ids),
+                'limit'     => \App\Services\WorkerService::WHATSAPP_MAX_TOTAL,
+                'per_batch' => \App\Services\WorkerService::WHATSAPP_MAX_PER_MESSAGE,
                 'workers' => $this->service->whatsappPayload($ids),
             ]);
         }

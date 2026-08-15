@@ -328,10 +328,16 @@ class WorkerService
 
     /**
      * الحد الأقصى للعاملات في رسالة واتساب واحدة.
+     *
      * روابط wa.me تُمرَّر عبر عنوان URL، والنص العربي يتضخّم عند الترميز
-     * (كل حرف ≈ 9 بايت)، فتجاوز هذا العدد يجعل الرابط أطول مما تقبله المتصفحات.
+     * (كل حرف ≈ 9 بايت). قياس فعلي بأسماء طويلة: 75 عاملة ≈ 29,000 حرف،
+     * و80 عاملة تتجاوز حد Chrome (~32,000) فتفشل. اخترنا 60 لهامش أمان،
+     * وما زاد عنه يُقسَّم تلقائياً على رسائل متتابعة.
      */
-    public const WHATSAPP_MAX_PER_MESSAGE = 30;
+    public const WHATSAPP_MAX_PER_MESSAGE = 60;
+
+    /** الحد الأقصى لإجمالي العاملات عبر كل الرسائل في عملية إرسال واحدة. */
+    public const WHATSAPP_MAX_TOTAL = 300;
 
     /**
      * بيانات العاملات اللازمة لبناء رسالة واتساب في المتصفح.
@@ -349,7 +355,7 @@ class WorkerService
         return Worker::with('nationality')
             ->whereIn('id', $workerIds)
             ->whereNotNull('cv_path')
-            ->limit(self::WHATSAPP_MAX_PER_MESSAGE)
+            ->limit(self::WHATSAPP_MAX_TOTAL)
             ->get()
             ->map(fn(Worker $w) => [
                 'id'          => $w->id,
