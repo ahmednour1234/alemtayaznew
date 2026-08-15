@@ -168,7 +168,45 @@ class WorkerService
 
     public function destroy(int $id): void
     {
+        $worker = $this->repo->findById($id);
+
+        if ($worker->recruitmentContracts()->exists()) {
+            throw new \RuntimeException('لا يمكن حذف عاملة مرتبطة بعقد استقدام.');
+        }
+
         $this->repo->delete($id);
+    }
+
+    /**
+     * حذف جماعي للعاملات. العاملات المرتبطة بعقد استقدام تُستثنى ولا تُحذف.
+     *
+     * @param  int[] $ids
+     * @return array{deleted:int, skipped:array<int,string>}
+     */
+    public function bulkDestroy(array $ids): array
+    {
+        $workers = Worker::whereIn('id', $ids)
+            ->withCount('recruitmentContracts')
+            ->get();
+
+        $deletable = [];
+        $skipped   = [];
+
+        foreach ($workers as $worker) {
+            if ($worker->recruitment_contracts_count > 0) {
+                $skipped[] = $worker->name ?: ('عاملة #' . $worker->id);
+                continue;
+            }
+
+            $deletable[] = $worker->id;
+        }
+
+        $deleted = 0;
+        if ($deletable) {
+            $deleted = Worker::whereIn('id', $deletable)->delete();
+        }
+
+        return ['deleted' => $deleted, 'skipped' => $skipped];
     }
 
     public function restore(int $id): void

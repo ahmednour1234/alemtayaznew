@@ -238,8 +238,40 @@ class WorkerController extends Controller
     // ── Destroy / Restore ─────────────────────────────────────────────────────
     public function destroy(int $id)
     {
-        $this->service->destroy($id);
+        try {
+            $this->service->destroy($id);
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['delete' => $e->getMessage()]);
+        }
+
         return back()->with('success', 'تم حذف العاملة.');
+    }
+
+    /** حذف جماعي — يتخطّى العاملات المرتبطة بعقود استقدام. */
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'worker_ids'   => ['required', 'array', 'min:1'],
+            'worker_ids.*' => ['integer', 'exists:workers,id'],
+        ], [], ['worker_ids' => 'العاملات']);
+
+        $result = $this->service->bulkDestroy($request->input('worker_ids'));
+
+        if ($result['deleted'] === 0 && $result['skipped']) {
+            return back()->withErrors([
+                'delete' => 'لم يتم حذف أي عاملة — جميع المحددات مرتبطة بعقود استقدام: '
+                            . implode('، ', $result['skipped']),
+            ]);
+        }
+
+        $message = "تم حذف {$result['deleted']} عاملة.";
+
+        if ($result['skipped']) {
+            $count    = count($result['skipped']);
+            $message .= " وتم تخطّي {$count} لارتباطها بعقود استقدام: " . implode('، ', $result['skipped']);
+        }
+
+        return back()->with('success', $message);
     }
 
     public function restore(int $id)

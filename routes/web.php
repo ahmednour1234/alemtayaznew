@@ -195,6 +195,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('workers/bulk-store',       [WorkerController::class, 'bulkStore'])->name('workers.bulk-store');
         Route::post('workers/quick-store',      [WorkerController::class, 'quickStore'])->name('workers.quick-store');
         Route::post('workers/send-whatsapp',    [WorkerController::class, 'sendWhatsapp'])->name('workers.send-whatsapp');
+        Route::delete('workers/bulk-destroy',   [WorkerController::class, 'bulkDestroy'])->name('workers.bulk-destroy');
         Route::post('workers/{id}/restore',     [WorkerController::class, 'restore'])->name('workers.restore');
         Route::get('workers/{id}/assign',       [WorkerController::class, 'assign'])->name('workers.assign');
         Route::post('workers/{id}/assign',      [WorkerController::class, 'doAssign'])->name('workers.do-assign');
