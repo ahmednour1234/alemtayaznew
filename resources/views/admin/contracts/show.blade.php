@@ -293,14 +293,14 @@
                 default          => ['icon_bg' => 'bg-slate-100', 'icon_c' => 'text-slate-500', 'dot' => 'bg-slate-300'],
             };
             $sectionLabels = [
-                'customer_service' => ['label' => '{{ __('contracts.departments.customer_service') }}', 'bg' => 'bg-blue-50 text-blue-600'],
-                'accounts'         => ['label' => '{{ __('contracts.departments.accounts') }}',     'bg' => 'bg-emerald-50 text-emerald-600'],
-                'accountant'       => ['label' => '{{ __('contracts.departments.accounts') }}',     'bg' => 'bg-emerald-50 text-emerald-600'],
-                'coordination'     => ['label' => '{{ __('contracts.departments.coordination') }}',      'bg' => 'bg-indigo-50 text-indigo-600'],
-                'branch_manager'   => ['label' => '{{ __('contracts.show.branch_manager') }}',   'bg' => 'bg-purple-50 text-purple-600'],
-                'chairman'         => ['label' => '{{ __('contracts.show.dept_head') }}', 'bg' => 'bg-rose-50 text-rose-600'],
+                'customer_service' => ['label' => __('contracts.departments.customer_service'), 'bg' => 'bg-blue-50 text-blue-600'],
+                'accounts'         => ['label' => __('contracts.departments.accounts'),        'bg' => 'bg-emerald-50 text-emerald-600'],
+                'accountant'       => ['label' => __('contracts.departments.accounts'),        'bg' => 'bg-emerald-50 text-emerald-600'],
+                'coordination'     => ['label' => __('contracts.departments.coordination'),    'bg' => 'bg-indigo-50 text-indigo-600'],
+                'branch_manager'   => ['label' => __('contracts.show.branch_manager'),         'bg' => 'bg-purple-50 text-purple-600'],
+                'chairman'         => ['label' => __('contracts.show.dept_head'),              'bg' => 'bg-rose-50 text-rose-600'],
             ];
-            $secInfo = $sectionLabels[$log->section] ?? ['label' => '{{ __('contracts.show.management') }}', 'bg' => 'bg-slate-100 text-slate-500'];
+            $secInfo = $sectionLabels[$log->section] ?? ['label' => __('contracts.show.management'), 'bg' => 'bg-slate-100 text-slate-500'];
         @endphp
         <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
             {{-- Icon --}}

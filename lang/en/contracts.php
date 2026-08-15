@@ -282,6 +282,7 @@ return [
         'use_template'  => 'Use the official template to ensure the data is accepted',
         'branch_code'   => 'The branch code must already exist in the system',
         'rows_hint'     => 'Row 1 is headers, row 2 is explanations — data starts at row 3',
+        'upsert_hint'   => 'If the visa number, Musaned number or worker passport already exists, the existing contract is updated instead of creating a duplicate',
         'download_tpl'  => 'Download the official template',
         'pick_file'     => 'Click to choose a file or drag and drop',
         'submit'        => 'Upload and import',

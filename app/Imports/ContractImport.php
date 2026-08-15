@@ -19,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 class ContractImport implements ToCollection, WithCalculatedFormulas
 {
     private int $imported = 0;
+    private int $updated  = 0;
     private array $errors = [];
 
     /**
@@ -315,10 +316,13 @@ class ContractImport implements ToCollection, WithCalculatedFormulas
             }
             $requestDate ??= now()->format('Y-m-d');
 
-            RecruitmentContract::create([
-                'contract_number'       => RecruitmentContract::generateNumber(),
+            // ── هل العقد موجود مسبقاً؟ ───────────────────────────────────────
+            // نبحث بالتأشيرة ثم مساند ثم جواز العاملة. لو وُجد نُحدّثه بدل
+            // إنشاء نسخة مكررة، فالاستيراد المتكرر لا ينتج عقوداً مضاعفة.
+            $existing = $this->findExisting($visaNumber ?: null, $musaned ?: null, $worker?->id);
+
+            $payload = [
                 'branch_id'             => $branch->id,
-                'admin_id'              => $adminId,
                 'client_id'             => $client?->id,
                 'worker_id'             => $worker?->id,
                 'agent_id'              => $agent?->id,
@@ -334,12 +338,33 @@ class ContractImport implements ToCollection, WithCalculatedFormulas
                 'arrival_date'          => $arrivalDate,
                 'trial_end_date'        => $trialEndDate,
                 'contract_end_date'     => $contractEndDate,
-                'current_department'    => $payStatus === 'full' ? 'coordination' : 'customer_service',
                 'current_status'        => $statusVal,
                 'active'                => true,
-            ]);
+            ];
 
-            $this->imported++;
+            if ($existing) {
+                // تحديث: لا نكتب فوق قيمة موجودة بقيمة فارغة من الملف،
+                // ولا نُرجع العقد لقسم سابق — القسم يتقدّم فقط.
+                $update = array_filter(
+                    $payload,
+                    fn ($val) => $val !== null && $val !== ''
+                );
+
+                // الحالة تتقدّم فقط — لا تتراجع لمرحلة أقدم
+                if ($statusVal < $existing->current_status) {
+                    unset($update['current_status']);
+                }
+
+                $existing->update($update);
+                $this->updated++;
+            } else {
+                RecruitmentContract::create($payload + [
+                    'contract_number'    => RecruitmentContract::generateNumber(),
+                    'admin_id'           => $adminId,
+                    'current_department' => $payStatus === 'full' ? 'coordination' : 'customer_service',
+                ]);
+                $this->imported++;
+            }
 
             // Mark worker as assigned and link to client
             if ($worker) {
@@ -387,6 +412,33 @@ class ContractImport implements ToCollection, WithCalculatedFormulas
         }
     }
 
+    /**
+     * يبحث عن عقد قائم لتحديثه بدل إنشاء نسخة مكررة.
+     *
+     * الأولوية: رقم التأشيرة ← رقم مساند ← عقد العاملة النشط.
+     * الأولان معرّفان فريدان للعقد، والثالث احتياطي حين يخلو الملف منهما.
+     */
+    private function findExisting(?string $visaNumber, ?string $musaned, ?int $workerId): ?RecruitmentContract
+    {
+        if ($visaNumber) {
+            $found = RecruitmentContract::where('visa_number', $visaNumber)->first();
+            if ($found) return $found;
+        }
+
+        if ($musaned) {
+            $found = RecruitmentContract::where('musaned_number', $musaned)->first();
+            if ($found) return $found;
+        }
+
+        // احتياطي: أحدث عقد لنفس العاملة (العاملة تُطابَق بالجواز أعلاه)
+        if ($workerId) {
+            return RecruitmentContract::where('worker_id', $workerId)->latest('id')->first();
+        }
+
+        return null;
+    }
+
     public function importedCount(): int { return $this->imported; }
+    public function updatedCount(): int  { return $this->updated; }
     public function importErrors(): array { return $this->errors; }
 }

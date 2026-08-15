@@ -282,6 +282,7 @@ return [
         'use_template'  => 'Gamitin ang opisyal na template para matanggap ang datos',
         'branch_code'   => 'Ang code ng sangay ay dapat umiiral na sa sistema',
         'rows_hint'     => 'Row 1 ay mga heading, row 2 ay paliwanag — nagsisimula ang datos sa row 3',
+        'upsert_hint'   => 'Kung umiiral na ang numero ng visa, Musaned o pasaporte ng manggagawa, ia-update ang kasalukuyang kontrata sa halip na gumawa ng duplicate',
         'download_tpl'  => 'I-download ang opisyal na template',
         'pick_file'     => 'I-click para pumili ng file o i-drag and drop',
         'submit'        => 'I-upload at i-import',

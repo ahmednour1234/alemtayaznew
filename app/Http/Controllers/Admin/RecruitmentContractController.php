@@ -459,7 +459,15 @@ class RecruitmentContractController extends Controller
         $importer = new ContractImport();
         Excel::import($importer, $request->file('file'));
 
-        $msg = "تم استيراد {$importer->importedCount()} عقد بنجاح";
+        $created = $importer->importedCount();
+        $updated = $importer->updatedCount();
+
+        $parts = [];
+        if ($created) { $parts[] = "إضافة {$created} عقد جديد"; }
+        if ($updated) { $parts[] = "تحديث {$updated} عقد موجود"; }
+
+        $msg = $parts ? 'تم ' . implode(' و', $parts) : 'لم يتم استيراد أي صف';
+
         if ($errs = $importer->importErrors()) {
             $msg .= '. تحذيرات: ' . implode(' | ', array_slice($errs, 0, 5));
         }
