@@ -1,0 +1,133 @@
+<?php
+
+return [
+
+    'title'        => 'Mga kontrata sa recruitment',
+    'add'          => 'Magdagdag ng bagong kontrata',
+    'edit'         => 'I-edit ang kontrata',
+    'contract'     => 'Kontrata',
+    'trashed'      => 'Mga naburang kontrata',
+    'search_ph'    => 'Maghanap sa pasaporte / national ID / mobile / pangalan ng manggagawa / pangalan ng kliyente / visa / Musaned...',
+    'search_hint'  => 'Ang numero ng pasaporte, national ID at mobile ay dapat buo (eksaktong tugma)',
+    'all_statuses' => '— Lahat ng katayuan —',
+    'all_depts'    => '— Lahat ng departamento —',
+    'no_contracts' => 'Walang nahanap na kontrata',
+
+    // ── Mga yugto ng kontrata (15) ───────────────────────────────────────────
+    'statuses' => [
+        1  => 'Bago',
+        2  => 'Pag-apruba ng dayuhang embahada',
+        3  => 'Naghihintay ng pag-apruba ng dayuhang opisina',
+        4  => 'Tinanggap ng dayuhang labour office',
+        5  => 'Naghihintay ng approval (Musaned)',
+        6  => 'Tinanggap ang kontrata ng dayuhang labour office',
+        7  => 'Ipinadala ang visa sa embahada ng Saudi',
+        8  => 'Na-stamp ang visa',
+        9  => 'Kinansela ang visa',
+        10 => 'Travel permit pagkatapos ng stamping',
+        11 => 'Naghihintay ng booking ng flight',
+        12 => 'Nakatakdang pagdating',
+        13 => 'Natanggap',
+        14 => 'Ibinalik sa loob ng panahon ng warranty',
+        15 => 'Tumakas',
+    ],
+
+    // ── Paglalarawan ng bawat yugto ──────────────────────────────────────────
+    'status_desc' => [
+        1  => 'Natanggap ang kahilingan ng kliyente at binuksan ang file ng kontrata',
+        2  => 'Ipinadala ang file ng manggagawa sa dayuhang embahada, naghihintay ng pag-apruba',
+        3  => 'Ipinadala ang kontrata sa dayuhang opisina sa bansa ng manggagawa, naghihintay ng sagot',
+        4  => 'Natanggap ang opisyal na pagtanggap mula sa dayuhang opisina',
+        5  => 'Naghihintay ng elektronikong pag-apruba mula sa Musaned platform',
+        6  => 'Nilagdaan at kinumpirma ang panghuling kontrata ng dayuhang partido',
+        7  => 'Inihatid ang pasaporte at file ng manggagawa sa embahada ng Saudi para sa stamping',
+        8  => 'Natanggap ang na-stamp na pasaporte mula sa embahada ng Saudi',
+        9  => 'Tinanggihan o kinansela ang visa ng embahada sa anumang dahilan',
+        10 => 'Nailabas ang opisyal na travel permit para sa manggagawa',
+        11 => 'Nakikipag-ugnayan sa travel agency at nagbu-book ng flight',
+        12 => 'Nakumpirma ang flight at oras ng pagdating ng manggagawa',
+        13 => 'Natanggap ang manggagawa mula sa paliparan at naibigay sa kliyente',
+        14 => 'Ibinalik ang manggagawa sa kumpanya sa loob ng warranty (dalawang taon mula sa pagdating)',
+        15 => 'Naitala at naiulat ang pagtakas ng manggagawa',
+    ],
+
+    // ── Halimbawang petsa bawat yugto (pahiwatig sa form) ────────────────────
+    'status_example' => [
+        1  => 'hal. 2026-01-10 (petsa ng pagtanggap ng kahilingan)',
+        2  => 'hal. 2026-01-15 (petsa ng pagsumite sa embahada)',
+        3  => 'hal. 2026-01-20 (petsa ng pagpapadala sa opisina)',
+        4  => 'hal. 2026-01-25 (petsa ng pagdating ng pagtanggap)',
+        5  => 'hal. 2026-01-28 (petsa ng paghiling ng approval sa Musaned)',
+        6  => 'hal. 2026-02-01 (petsa ng paglagda sa kontrata)',
+        7  => 'hal. 2026-02-05 (petsa ng pagpapadala ng pasaporte)',
+        8  => 'hal. 2026-02-15 (petsa ng pagtanggap ng na-stamp na pasaporte)',
+        9  => 'hal. 2026-02-10 (petsa ng desisyong pagtanggi)',
+        10 => 'hal. 2026-02-20 (petsa ng paglabas ng travel permit)',
+        11 => 'hal. 2026-02-22 (petsa ng paghiling ng booking)',
+        12 => 'hal. 2026-03-01 (petsa at numero ng flight)',
+        13 => 'hal. 2026-03-01 (aktwal na petsa ng paghahatid)',
+        14 => 'hal. 2026-04-10 (petsa at dahilan ng pagbalik)',
+        15 => 'hal. 2026-04-15 (petsa ng pag-uulat ng pagtakas)',
+    ],
+
+    // ── Mga departamento ─────────────────────────────────────────────────────
+    'departments' => [
+        'customer_service' => 'Customer service',
+        'accounts'         => 'Accounts',
+        'coordination'     => 'Koordinasyon',
+    ],
+
+    // ── Katayuan ng bayad ────────────────────────────────────────────────────
+    'payment' => [
+        'pending' => 'Nakabinbin',
+        'partial' => 'Bahagi',
+        'full'    => 'Bayad na buo',
+    ],
+
+    // ── Mga uri ng visa ──────────────────────────────────────────────────────
+    'visa_types' => [
+        'domestic'       => 'Visa ng domestic worker',
+        'rehabilitation' => 'Comprehensive rehabilitation visa',
+    ],
+
+    // ── Mga field ng form ────────────────────────────────────────────────────
+    'fields' => [
+        'branch'          => 'Sangay',
+        'request_date'    => 'Petsa ng kahilingan (Gregorian)',
+        'department'      => 'Kontrata sa departamento',
+        'visa_data'       => 'Detalye ng visa',
+        'visa_image'      => 'Larawan ng visa',
+        'visa_type'       => 'Uri ng visa',
+        'arrival_airport' => 'Paliparan ng pagdating',
+        'origin'          => 'Bansang pinanggalingan (nasyonalidad)',
+        'delivery_city'   => 'Lungsod ng paghahatid',
+        'musaned_date'    => 'Petsa ng kontratang Musaned',
+        'musaned_file'    => 'File ng kontratang Musaned',
+        'worker_passport' => 'Numero ng pasaporte ng manggagawa',
+        'e_doc'           => 'Numero ng e-dokumentasyon sa Musaned',
+        'agent'           => 'Ahente',
+        'total_cost'      => 'Kabuuang halaga',
+        'dates'           => 'Mga petsa',
+        'trial_end'       => 'Petsa ng pagtatapos ng subok',
+        'contract_end'    => 'Petsa ng pagtatapos ng kontrata',
+        'choose_worker'   => '— Pumili ng manggagawa —',
+        'choose_client'   => '— Pumili ng kliyente —',
+        'choose_branch'   => '— Pumili ng sangay —',
+        'choose'          => '— Pumili —',
+    ],
+
+    // ── Mga mensahe ──────────────────────────────────────────────────────────
+    'messages' => [
+        'created'        => 'Matagumpay na nagawa ang kontratang :number',
+        'updated'        => 'Matagumpay na na-update ang kontrata',
+        'deleted'        => 'Nabura ang kontrata',
+        'restored'       => 'Naibalik ang kontrata',
+        'branch_hint'    => 'Awtomatikong napili mula sa sangay ng empleyadong nagreserba sa manggagawa — maaari mong baguhin.',
+        'passport_hint'  => 'Awtomatikong nase-save sa profile ng manggagawa.',
+        'worker_locked'  => 'Ang manggagawang ito ay nakatalaga sa ibang kliyente. Ang kontrata ay dapat para sa parehong kliyente.',
+        'dates_auto'     => 'Ang petsa ng pagtatapos ng subok at kontrata ay awtomatikong kinakalkula mula sa petsa ng pagdating',
+        'cs_only'        => 'Ang paggawa ng kontrata ay para lamang sa departamento ng customer service.',
+        'wrong_branch'   => 'Hindi ka maaaring magdagdag ng kontrata para sa ibang sangay. Ang iyong sangay: :branch',
+    ],
+
+];
