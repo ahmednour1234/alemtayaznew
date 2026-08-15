@@ -368,15 +368,28 @@ class WorkerService
                     ->limit(self::WHATSAPP_MAX_PER_MESSAGE)
                     ->get();
 
-        $lines = ["السلام عليكم، مرفق مجموعة CV عاملات للمراجعة:\n"];
+        // عزل الأجزاء اللاتينية (الأسماء والروابط) داخل نص عربي RTL
+        // حتى لا يقلب واتساب ترتيبها — U+2066 (LRI) ... U+2069 (PDI).
+        $lri = "\u{2066}";
+        $pdi = "\u{2069}";
+        $ltr = fn(string $s): string => $lri . $s . $pdi;
+
+        $lines = ['*مجموعة CV عاملات للمراجعة*', ''];
+
         foreach ($workers as $i => $w) {
-            $url     = Storage::disk('public')->url($w->cv_path);
-            $name    = $w->name ?: ('عاملة ' . ($i + 1));
-            $nat     = $w->nationality?->name ?? '';
-            $lines[] = ($i + 1) . ". {$name}" . ($nat ? " ({$nat})" : '') . "\n{$url}";
+            $url  = route('admin.workers.cv', $w->id);
+            $name = trim($w->name ?: ('عاملة ' . ($i + 1)));
+            $nat  = $w->nationality?->name;
+
+            $lines[] = '*' . ($i + 1) . '.* ' . $ltr($name);
+            if ($nat) {
+                $lines[] = "الجنسية: {$nat}";
+            }
+            $lines[] = $ltr($url);
+            $lines[] = '';
         }
 
-        $message = implode("\n\n", $lines);
+        $message = rtrim(implode("\n", $lines));
         $clean   = preg_replace('/[^0-9]/', '', $phone);
         return 'https://wa.me/' . $clean . '?text=' . rawurlencode($message);
     }

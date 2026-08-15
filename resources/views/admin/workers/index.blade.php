@@ -370,18 +370,31 @@ $workerCvMap = $workers->map(fn($w) => [
 <script>
 const workerCvData = @json($workerCvMap);
 
-/** يبني رسالة الواتساب ويفتحها فوراً — بلا تحميل أي صفحة. */
+/**
+ * يبني رسالة الواتساب ويفتحها فوراً — بلا تحميل أي صفحة.
+ *
+ * ترتيب النص: الأسماء لاتينية والروابط LTR بينما الرسالة عربية RTL، فلو
+ * وُضعت في سطر واحد يقلب واتساب ترتيبها. لذلك كل حقل في سطر مستقل،
+ * والأجزاء اللاتينية معزولة بـ U+2066/U+2069 (LRI/PDI) لتُعرض كما هي.
+ */
 function openWhatsapp(workers, waPhone) {
     if (!workers.length || !waPhone) return;
 
-    const lines = ['السلام عليكم، مرفق مجموعة CV عاملات للمراجعة:\n'];
+    const LRI = '⁦', PDI = '⁩';   // عزل اتجاه النص اللاتيني
+    const ltr = (s) => LRI + s + PDI;
+
+    const lines = ['*مجموعة CV عاملات للمراجعة*', ''];
+
     workers.forEach((w, i) => {
-        const name = w.name || ('عاملة ' + (i + 1));
-        const nat  = w.nationality ? ` (${w.nationality})` : '';
-        lines.push(`${i + 1}. ${name}${nat}\n${w.cv_url}`);
+        const name = (w.name || ('عاملة ' + (i + 1))).trim();
+
+        lines.push(`*${i + 1}.* ${ltr(name)}`);
+        if (w.nationality) lines.push(`الجنسية: ${w.nationality}`);
+        lines.push(ltr(w.cv_url));
+        lines.push('');                      // سطر فارغ يفصل كل عاملة
     });
 
-    const message = lines.join('\n\n');
+    const message = lines.join('\n').trimEnd();
     const clean   = waPhone.replace(/[^0-9]/g, '');
     window.open('https://wa.me/' + clean + '?text=' + encodeURIComponent(message), '_blank');
 }
