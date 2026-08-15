@@ -946,7 +946,6 @@
                         <th>المبلغ</th>
                         <th>تاريخ الطلب</th>
                         <th>مقدم الطلب</th>
-                        <th>الحالة</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -961,7 +960,6 @@
                             <td><span class="amount-orange">{{ number_format($expense->amount, 0) }}</span> ريال</td>
                             <td>{{ $expense->date?->format('d/m/Y') }}</td>
                             <td>{{ $expense->user?->name ?? $expense->branch?->name ?? '—' }}</td>
-                            <td><span class="badge orange">قيد المراجعة</span></td>
                             <td>
                                 <div class="action-group">
                                     <form action="{{ route('admin.expenses.approve', $expense->id) }}" method="POST" style="display:inline;">
@@ -977,7 +975,7 @@
                         </tr>
                     @empty
                         @if(($pendingTransfers->count() ?? 0) == 0)
-                            <tr><td colspan="8" class="empty-state">لا توجد طلبات موافقة معلقة</td></tr>
+                            <tr><td colspan="7" class="empty-state">لا توجد طلبات موافقة معلقة</td></tr>
                         @endif
                     @endforelse
 
@@ -989,7 +987,6 @@
                             <td><span class="amount-orange">{{ number_format($transfer->amount, 0) }}</span> ريال</td>
                             <td>{{ $transfer->date?->format('d/m/Y') ?? $transfer->created_at?->format('d/m/Y') }}</td>
                             <td>{{ $transfer->user?->name ?? $transfer->fromBranch?->name ?? '—' }}</td>
-                            <td><span class="badge orange">قيد المراجعة</span></td>
                             <td>
                                 <div class="action-group">
                                     <form action="{{ route('admin.transfers.approve', $transfer->id) }}" method="POST" style="display:inline;">
