@@ -38,7 +38,7 @@
         </div>
         <a href="{{ route('admin.contracts.index') }}"
            class="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-sm transition">
-            إلغاء
+            {{ __('common.actions.cancel') }}
         </a>
     </div>
 
@@ -209,7 +209,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('contracts.fields.visa_type') }} <span class="text-red-500">*</span></label>
                     <select name="visa_type" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                        <option value="">— اختر —</option>
+                        <option value="">{{ __('contracts.fields.choose') }}</option>
                         @foreach($visaTypes as $key => $label)
                         <option value="{{ $key }}" {{ old('visa_type') === $key ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
@@ -234,7 +234,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('contracts.fields.arrival_airport') }}</label>
                     <select name="arrival_airport_id" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                        <option value="">— اختر —</option>
+                        <option value="">{{ __('contracts.fields.choose') }}</option>
                         @foreach($airports as $ap)
                         <option value="{{ $ap->id }}" {{ old('arrival_airport_id') == $ap->id ? 'selected' : '' }}>{{ $ap->name }} ({{ $ap->code }})</option>
                         @endforeach
@@ -252,7 +252,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('contracts.fields.delivery_city') }}</label>
                     <select name="delivery_city_id" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                        <option value="">— اختر —</option>
+                        <option value="">{{ __('contracts.fields.choose') }}</option>
                         @foreach($cities as $city)
                         <option value="{{ $city->id }}" {{ old('delivery_city_id') == $city->id ? 'selected' : '' }}>{{ $city->name }}</option>
                         @endforeach
@@ -474,7 +474,7 @@
                                 class="text-indigo-500 hover:text-indigo-700 mr-1 font-normal text-xs underline">+ {{ __('contracts.form.add_worker') }}</button>
                     </label>
                     <select id="workerSelect" name="worker_id" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                        <option value="">— اختر عاملة —</option>
+                        <option value="">{{ __('contracts.fields.choose_worker') }}</option>
                         @foreach($workers as $w)
                         <option value="{{ $w->id }}" {{ old('worker_id', $prefill['worker_id'] ?? null) == $w->id ? 'selected' : '' }}>{{ $w->name }}</option>
                         @endforeach
@@ -510,7 +510,7 @@
             {{-- Status tracker --}}
             <div>
                 <div class="flex items-center justify-between mb-3">
-                    <h4 class="text-sm font-semibold text-slate-600">مراحل العقد ({{ count($statuses) }} مرحلة)</h4>
+                    <h4 class="text-sm font-semibold text-slate-600">{{ __('contracts.form.stages') }} ({{ count($statuses) }} {{ __('contracts.form.stage_unit') }})</h4>
                     <span class="text-xs text-slate-400 bg-slate-100 rounded-lg px-3 py-1">✦ {{ __('contracts.form.stages_hint') }}</span>
                 </div>
                 <div class="border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-100">
@@ -628,7 +628,7 @@
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('common.fields.nationality') }}</label>
                     <select x-model="workerModal.nationality_id"
                             class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
-                        <option value="">— اختر —</option>
+                        <option value="">{{ __('contracts.fields.choose') }}</option>
                         @foreach($nationalities as $nat)
                         <option value="{{ $nat->id }}">{{ $nat->name }}</option>
                         @endforeach

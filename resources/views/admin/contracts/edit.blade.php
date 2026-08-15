@@ -152,7 +152,7 @@
                     @endif
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-slate-600 mb-1.5">تاريخ الطلب <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('common.fields.request_date') }} <span class="text-red-500">*</span></label>
                     <input type="date" name="request_date" value="{{ old('request_date', $contract->request_date?->format('Y-m-d')) }}" required
                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
                 </div>
@@ -195,7 +195,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('contracts.fields.visa_type') }}</label>
                     <select name="visa_type" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                        <option value="">— اختر —</option>
+                        <option value="">{{ __('contracts.fields.choose') }}</option>
                         @foreach($visaTypes as $key => $label)
                         <option value="{{ $key }}" {{ old('visa_type', $contract->visa_type) === $key ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
@@ -204,7 +204,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('contracts.fields.visa_image') }}</label>
                     @if($contract->visa_image)
-                    <div class="mb-2"><a href="{{ file_url($contract->visa_image) }}" target="_blank" class="text-blue-600 text-xs hover:underline">الملف الحالي</a></div>
+                    <div class="mb-2"><a href="{{ file_url($contract->visa_image) }}" target="_blank" class="text-blue-600 text-xs hover:underline">{{ __('contracts.edit_extra.current_file') }}</a></div>
                     @endif
                     <input type="file" name="visa_image" accept=".jpg,.jpeg,.png,.pdf"
                            class="w-full border border-slate-200 rounded-xl px-4 py-2 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
@@ -217,7 +217,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('contracts.fields.arrival_airport') }}</label>
                     <select name="arrival_airport_id" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                        <option value="">— اختر —</option>
+                        <option value="">{{ __('contracts.fields.choose') }}</option>
                         @foreach($airports as $ap)
                         <option value="{{ $ap->id }}" {{ old('arrival_airport_id', $contract->arrival_airport_id) == $ap->id ? 'selected' : '' }}>{{ $ap->name }} ({{ $ap->code }})</option>
                         @endforeach
@@ -235,7 +235,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('contracts.fields.delivery_city') }}</label>
                     <select name="delivery_city_id" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                        <option value="">— اختر —</option>
+                        <option value="">{{ __('contracts.fields.choose') }}</option>
                         @foreach($cities as $city)
                         <option value="{{ $city->id }}" {{ old('delivery_city_id', $contract->delivery_city_id) == $city->id ? 'selected' : '' }}>{{ $city->name }}</option>
                         @endforeach
@@ -266,7 +266,7 @@
                 <div class="md:col-span-2">
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('contracts.fields.musaned_file') }}</label>
                     @if($contract->musaned_file)
-                    <div class="mb-2"><a href="{{ file_url($contract->musaned_file) }}" target="_blank" class="text-blue-600 text-xs hover:underline">الملف الحالي</a></div>
+                    <div class="mb-2"><a href="{{ file_url($contract->musaned_file) }}" target="_blank" class="text-blue-600 text-xs hover:underline">{{ __('contracts.edit_extra.current_file') }}</a></div>
                     @endif
                     <input type="file" name="musaned_file" accept=".jpg,.jpeg,.png,.pdf"
                            class="w-full border border-slate-200 rounded-xl px-4 py-2 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
@@ -280,23 +280,23 @@
             <div class="flex items-center gap-2 mb-4 pb-3 border-b border-blue-100">
                 <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                 <span class="text-sm font-semibold text-blue-700">{{ __('contracts.form.cs_data') }}</span>
-                <span class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-lg mr-auto">للاطلاع فقط</span>
+                <span class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-lg mr-auto">{{ __('contracts.edit_extra.read_only') }}</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
                 <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">{{ __('common.fields.client') }}:</span><span class="font-medium text-slate-800">{{ $contract->client?->name ?? '—' }}</span></div>
                 <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">{{ __('common.fields.branch') }}:</span><span class="font-medium text-slate-800">{{ $contract->branch?->name ?? '—' }}</span></div>
-                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">تاريخ الطلب:</span><span class="font-medium text-slate-800">{{ $contract->request_date?->format('Y-m-d') ?? '—' }}</span></div>
+                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">{{ __('common.fields.request_date') }}:</span><span class="font-medium text-slate-800">{{ $contract->request_date?->format('Y-m-d') ?? '—' }}</span></div>
                 <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">{{ __('contracts.fields.visa_type') }}:</span><span class="font-medium text-slate-800">{{ $contract->visa_type_label }}</span></div>
                 <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">{{ __('common.fields.visa_number') }}:</span><span class="font-medium text-slate-800">{{ $contract->visa_number ?? '—' }}</span></div>
                 <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">{{ __('contracts.fields.arrival_airport') }}:</span><span class="font-medium text-slate-800">{{ $contract->arrivalAirport?->name ?? '—' }}</span></div>
                 <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">{{ __('common.fields.nationality') }}:</span><span class="font-medium text-slate-800">{{ $contract->originNationality?->name ?? '—' }}</span></div>
-                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">رقم مساند:</span><span class="font-medium text-slate-800">{{ $contract->musaned_number ?? '—' }}</span></div>
-                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">تاريخ مساند:</span><span class="font-medium text-slate-800">{{ $contract->musaned_date?->format('Y-m-d') ?? '—' }}</span></div>
+                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">{{ __('common.fields.musaned_number') }}:</span><span class="font-medium text-slate-800">{{ $contract->musaned_number ?? '—' }}</span></div>
+                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">{{ __('contracts.fields.musaned_date') }}:</span><span class="font-medium text-slate-800">{{ $contract->musaned_date?->format('Y-m-d') ?? '—' }}</span></div>
                 @if($contract->visa_image)
-                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">التأشيرة:</span><a href="{{ file_url($contract->visa_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض الملف</a></div>
+                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">التأشيرة:</span><a href="{{ file_url($contract->visa_image) }}" target="_blank" class="text-blue-600 hover:underline text-xs">{{ __('contracts.show.view_file') }}</a></div>
                 @endif
                 @if($contract->musaned_file)
-                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">عقد مساند:</span><a href="{{ file_url($contract->musaned_file) }}" target="_blank" class="text-blue-600 hover:underline text-xs">عرض الملف</a></div>
+                <div class="flex gap-2"><span class="text-slate-400 w-28 shrink-0">عقد مساند:</span><a href="{{ file_url($contract->musaned_file) }}" target="_blank" class="text-blue-600 hover:underline text-xs">{{ __('contracts.show.view_file') }}</a></div>
                 @endif
             </div>
         </div>
@@ -322,7 +322,7 @@
                     {{-- CS dept: two options --}}
                     <button type="submit" onclick="document.getElementById('__advance_to').value=''"
                             class="bg-slate-500 hover:bg-slate-600 text-white text-sm px-5 py-2.5 rounded-xl shadow">
-                        حفظ فقط
+                        {{ __('common.actions.save') }}
                     </button>
                     <button type="submit" onclick="document.getElementById('__advance_to').value='accounts'"
                             class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-2.5 rounded-xl shadow flex items-center gap-2">
@@ -378,11 +378,11 @@
             <div class="flex items-center gap-2 mb-4 pb-3 border-b border-emerald-100">
                 <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                 <span class="text-sm font-semibold text-emerald-700">{{ __('contracts.form.acc_data') }}</span>
-                <span class="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-lg mr-auto">للاطلاع فقط</span>
+                <span class="text-xs bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-lg mr-auto">{{ __('contracts.edit_extra.read_only') }}</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
                 <div class="flex gap-2"><span class="text-slate-400 w-32 shrink-0">{{ __('common.fields.payment_status') }}:</span><span class="font-medium text-slate-800">{{ $payStatuses[$contract->payment_status] ?? $contract->payment_status ?? '—' }}</span></div>
-                <div class="flex gap-2"><span class="text-slate-400 w-32 shrink-0">{{ __('contracts.fields.total_cost') }}:</span><span class="font-medium text-slate-800">{{ $contract->total_cost ? number_format((float)$contract->total_cost, 2) . ' . __('contracts.show.currency') : '—' }}</span></div>
+                <div class="flex gap-2"><span class="text-slate-400 w-32 shrink-0">{{ __('contracts.fields.total_cost') }}:</span><span class="font-medium text-slate-800">{{ $contract->total_cost ? number_format((float)$contract->total_cost, 2) . ' ' . __('contracts.show.currency') : '—' }}</span></div>
             </div>
         </div>
         @endif
@@ -491,7 +491,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('contracts.form.rating_image') }}</label>
                     @if($contract->rating_image)
-                    <div class="mb-2"><a href="{{ file_url($contract->rating_image) }}" target="_blank" class="text-blue-600 text-xs hover:underline">الصورة الحالية</a></div>
+                    <div class="mb-2"><a href="{{ file_url($contract->rating_image) }}" target="_blank" class="text-blue-600 text-xs hover:underline">{{ __('contracts.edit_extra.current_image') }}</a></div>
                     @endif
                     <input type="file" name="rating_image" accept=".jpg,.jpeg,.png"
                            class="w-full border border-slate-200 rounded-xl px-4 py-2 text-sm bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
@@ -515,7 +515,7 @@
                                 class="text-indigo-500 hover:text-indigo-700 mr-1 font-normal text-xs underline">+ {{ __('contracts.form.add_worker') }}</button>
                     </label>
                     <select id="workerSelect" name="worker_id" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-                        <option value="">— اختر عاملة —</option>
+                        <option value="">{{ __('contracts.fields.choose_worker') }}</option>
                         @foreach($workers as $w)
                         <option value="{{ $w->id }}" {{ old('worker_id', $contract->worker_id) == $w->id ? 'selected' : '' }}>{{ $w->name }}</option>
                         @endforeach
@@ -539,8 +539,8 @@
 
             {{-- Status tracker --}}
             <div class="flex items-center justify-between mb-3">
-                <h4 class="text-sm font-semibold text-slate-600">مراحل العقد ({{ count($statuses) }} مرحلة) — المرحلة الحالية: <span class="text-blue-600">{{ $statuses[$contract->current_status]['label'] ?? $contract->current_status }}</span></h4>
-                <span class="text-xs text-slate-400 bg-slate-100 rounded-lg px-3 py-1">✦ حدد التاريخ وفعّل المرحلة الحالية بالضغط على الدائرة</span>
+                <h4 class="text-sm font-semibold text-slate-600">{{ __('contracts.form.stages') }} ({{ count($statuses) }} {{ __('contracts.form.stage_unit') }}) — {{ __('contracts.edit_extra.current_stage') }}: <span class="text-blue-600">{{ $statuses[$contract->current_status]['label'] ?? $contract->current_status }}</span></h4>
+                <span class="text-xs text-slate-400 bg-slate-100 rounded-lg px-3 py-1">✦ حدد التاريخ وفعّل {{ __('contracts.edit_extra.current_stage') }} بالضغط على الدائرة</span>
             </div>
             <div class="border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-100">
                 @foreach($statuses as $num => $st)
@@ -552,14 +552,14 @@
                                 {{ $isCurrent ? 'bg-blue-500 text-white ring-2 ring-blue-300' : 'bg-slate-100 text-slate-500' }}
                                 text-xs font-bold">{{ $num }}</span>
                             <input type="radio" name="update_status" value="{{ $num }}" {{ $isCurrent ? 'checked' : '' }}
-                                   class="accent-blue-600" title="تعيين كمرحلة حالية">
+                                   class="accent-blue-600" title="{{ __('contracts.edit_extra.set_current') }}">
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 mb-1">
                                 <span class="text-sm font-semibold {{ $isCurrent ? 'text-blue-700' : 'text-slate-800' }}">{{ $st['label'] }}</span>
-                                @if($isCurrent)<span class="text-xs text-white bg-blue-500 rounded px-1.5 py-0.5">◀ المرحلة الحالية</span>@endif
+                                @if($isCurrent)<span class="text-xs text-white bg-blue-500 rounded px-1.5 py-0.5">◀ {{ __('contracts.edit_extra.current_stage') }}</span>@endif
                                 @if($st['days'])<span class="text-xs text-orange-500 bg-orange-50 rounded px-1.5 py-0.5">⏱ {{ $st['days'] }} {{ __('contracts.form.expected_days') }}</span>@endif
-                                @if($h)<span class="text-xs text-emerald-600 bg-emerald-50 rounded px-1.5 py-0.5">✓ تم تسجيل التاريخ</span>@endif
+                                @if($h)<span class="text-xs text-emerald-600 bg-emerald-50 rounded px-1.5 py-0.5">✓ {{ __('contracts.edit_extra.date_saved') }}</span>@endif
                             </div>
                             <p class="text-xs text-slate-500 mb-0.5">{{ $st['desc'] }}</p>
                             <p class="text-xs text-indigo-400 italic">{{ $st['example'] }}</p>
@@ -575,8 +575,8 @@
             </div>
 
             <div class="mt-4">
-                <label class="block text-sm font-semibold text-slate-600 mb-1.5">رسالة واتساب عند الحفظ (اختياري)</label>
-                <input type="text" name="whatsapp_message" placeholder="رسالة تُرسل للعميل عبر واتساب..."
+                <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('contracts.edit_extra.wa_on_save') }} (اختياري)</label>
+                <input type="text" name="whatsapp_message" placeholder="{{ __('contracts.edit_extra.wa_hint') }}..."
                        class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
             </div>
         </div>
@@ -665,7 +665,7 @@
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">{{ __('common.fields.nationality') }}</label>
                     <select x-model="workerModal.nationality_id"
                             class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
-                        <option value="">— اختر —</option>
+                        <option value="">{{ __('contracts.fields.choose') }}</option>
                         @foreach($nationalities as $nat)
                         <option value="{{ $nat->id }}">{{ $nat->name }}</option>
                         @endforeach

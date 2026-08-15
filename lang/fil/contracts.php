@@ -142,6 +142,21 @@ return [
         'col_payment'  => 'Bayad',
     ],
 
+    // ── Para sa edit screen lamang ───────────────────────────────────────────
+    'edit_extra' => [
+        'current_file'  => 'Kasalukuyang file',
+        'current_image' => 'Kasalukuyang larawan',
+        'read_only'     => 'basahin lamang',
+        'current_stage' => 'Kasalukuyang yugto',
+        'set_current'   => 'Itakda bilang kasalukuyang yugto',
+        'date_saved'    => 'Naitala ang petsa',
+        'wa_on_save'    => 'Mensahe sa WhatsApp kapag nag-save',
+        'wa_hint'       => 'Mensaheng ipapadala sa kliyente sa pamamagitan ng WhatsApp',
+        'stage_hint'    => 'Itakda ang petsa at i-activate ang kasalukuyang yugto sa pamamagitan ng pag-click sa bilog',
+        'save_send'     => 'I-save at ipadala sa susunod na departamento',
+        'show_tab'      => 'Ipakita ang tab',
+    ],
+
     // ── Form ng paggawa/pag-edit ─────────────────────────────────────────────
     'form' => [
         'new_title'      => 'Bagong kontrata sa recruitment',

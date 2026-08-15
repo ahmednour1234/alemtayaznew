@@ -142,6 +142,21 @@ return [
         'col_payment'  => 'Payment',
     ],
 
+    // ── Edit screen only ─────────────────────────────────────────────────────
+    'edit_extra' => [
+        'current_file'  => 'Current file',
+        'current_image' => 'Current image',
+        'read_only'     => 'read only',
+        'current_stage' => 'Current stage',
+        'set_current'   => 'Set as current stage',
+        'date_saved'    => 'Date recorded',
+        'wa_on_save'    => 'WhatsApp message on save',
+        'wa_hint'       => 'A message sent to the client via WhatsApp',
+        'stage_hint'    => 'Set the date and activate the current stage by clicking the circle',
+        'save_send'     => 'Save and send to the next department',
+        'show_tab'      => 'Show tab',
+    ],
+
     // ── Create/edit form ─────────────────────────────────────────────────────
     'form' => [
         'new_title'      => 'New recruitment contract',
