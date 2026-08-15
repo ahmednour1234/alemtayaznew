@@ -84,7 +84,7 @@
 
         /* ── Sidebar ── */
         #sidebar {
-            position: fixed; top: 0; inset-inline-end: 0;
+            position: fixed; top: 0;
             width: var(--sidebar-w); height: 100vh;
             background: #0f172a;
             display: flex; flex-direction: column;
@@ -92,6 +92,9 @@
             transition: transform .25s cubic-bezier(.4,0,.2,1);
             overflow: hidden;
         }
+        /* تثبيت صريح لكل اتجاه — أوثق من الخصائص المنطقية مع تعدد المتصفحات */
+        [dir="rtl"] #sidebar { right: 0; left: auto; }
+        [dir="ltr"] #sidebar { left: 0; right: auto; }
         /* الإخفاء نحو الحافة الخارجية — يعكس اتجاهه حسب اللغة */
         [dir="rtl"] #sidebar.collapsed { transform: translateX(100%); }
         [dir="ltr"] #sidebar.collapsed { transform: translateX(-100%); }
@@ -115,12 +118,14 @@
 
         /* ── Main wrapper ── */
         #main-wrap {
-            margin-inline-end: var(--sidebar-w);
             display: flex; flex-direction: column; min-height: 100vh;
-            transition: margin-inline-end .25s cubic-bezier(.4,0,.2,1);
+            transition: margin .25s cubic-bezier(.4,0,.2,1);
             min-width: 0; overflow-x: hidden;
         }
-        #main-wrap.expanded { margin-inline-end: 0; }
+        [dir="rtl"] #main-wrap { margin-right: var(--sidebar-w); margin-left: 0; }
+        [dir="ltr"] #main-wrap { margin-left: var(--sidebar-w); margin-right: 0; }
+        [dir="rtl"] #main-wrap.expanded { margin-right: 0; margin-left: 0; }
+        [dir="ltr"] #main-wrap.expanded { margin-left: 0; margin-right: 0; }
         main { min-width: 0; overflow-x: hidden; }
 
         /* ── Topbar ── */
@@ -246,11 +251,10 @@
         .bnav-item:active, .bnav-item:hover { color: #e2e8f0; background: rgba(255,255,255,.05); }
 
         @media (max-width: 767px) {
-            #sidebar {
-                box-shadow: -6px 0 32px rgba(0,0,0,.45);
-            }
-            #main-wrap { margin-inline-end: 0 !important; }
-            #main-wrap.expanded { margin-inline-end: 0 !important; }
+            [dir="rtl"] #sidebar { box-shadow: -6px 0 32px rgba(0,0,0,.45); }
+            [dir="ltr"] #sidebar { box-shadow:  6px 0 32px rgba(0,0,0,.45); }
+            #main-wrap,
+            #main-wrap.expanded { margin-right: 0 !important; margin-left: 0 !important; }
             #topbar { height: 58px !important; padding: 0 10px !important; }
             .topbar-search-wrap { display: none !important; }
             .topbar-fullscreen  { display: none !important; }

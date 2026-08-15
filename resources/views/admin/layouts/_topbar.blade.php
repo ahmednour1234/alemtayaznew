@@ -28,7 +28,7 @@
 .tb-search-input {
     width: 100%; background: #f8fafc;
     border: 1.5px solid #e8edf5; border-radius: 12px;
-    padding: 9px 38px 9px 14px; font-size: 13px; color: #0f172a;
+    padding-block: 9px; font-size: 13px; color: #0f172a;
     font-family: var(--app-font); transition: all .18s ease; outline: none;
 }
 .tb-search-input::placeholder { color: #b0bec5; }
@@ -68,7 +68,7 @@
 .tb-icon-btn:hover { background: #f1f5f9; color: #0f172a; }
 .tb-icon-btn:focus { outline: none; }
 .tb-notif-badge {
-    position: absolute; top: 4px; inset-inline-start: 4px;
+    position: absolute; top: 4px;
     min-width: 16px; height: 16px; border-radius: 10px;
     background: linear-gradient(135deg,#ef4444,#f97316);
     color: #fff; font-size: 9px; font-weight: 800;
@@ -95,14 +95,14 @@
     box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px rgba(201,168,76,.4);
 }
 .tb-notif-panel {
-    position: absolute; top: calc(100% + 10px); inset-inline-start: 0;
+    position: absolute; top: calc(100% + 10px);
     width: 360px; background: #fff; border-radius: 16px;
     box-shadow: 0 20px 60px rgba(15,23,42,.16),0 4px 16px rgba(15,23,42,.08);
     border: 1px solid #e8edf5; z-index: 9999; overflow: hidden;
-    transform-origin: top start;
+    transform-origin: top center;
 }
 .tb-drop-panel {
-    position: absolute; inset-inline-start: 0; top: calc(100% + 8px);
+    position: absolute; top: calc(100% + 8px);
     width: 230px; direction: var(--app-dir); background: #fff; border-radius: 14px;
     box-shadow: 0 20px 60px rgba(15,23,42,.16),0 4px 16px rgba(15,23,42,.08);
     border: 1px solid #e8edf5; padding: 6px; z-index: 200;
@@ -123,6 +123,23 @@
     .tb-chevron     { display: none !important; }
     .tb-user-btn    { padding: 5px; border: 1.5px solid #e8edf5; }
 }
+
+/* ── تثبيت مواضع القوائم حسب الاتجاه (أوثق من الخصائص المنطقية) ── */
+[dir="rtl"] .tb-notif-badge { left: 4px;  right: auto; }
+[dir="ltr"] .tb-notif-badge { right: 4px; left: auto; }
+[dir="rtl"] .tb-notif-panel { left: 0;  right: auto; transform-origin: top left; }
+[dir="ltr"] .tb-notif-panel { right: 0; left: auto;  transform-origin: top right; }
+[dir="rtl"] .tb-drop-panel  { left: 0;  right: auto; }
+[dir="ltr"] .tb-drop-panel  { right: 0; left: auto; }
+
+[dir="rtl"] .tb-search-input { padding-right: 38px; padding-left: 14px; }
+[dir="ltr"] .tb-search-input { padding-left: 38px; padding-right: 14px; }
+[dir="rtl"] .gs-badge { margin-left: auto; margin-right: 0; }
+[dir="ltr"] .gs-badge { margin-right: auto; margin-left: 0; }
+[dir="rtl"] .gs-icon  { right: 12px; left: auto; }
+[dir="ltr"] .gs-icon  { left: 12px;  right: auto; }
+[dir="rtl"] .gs-clear { left: 12px;  right: auto; }
+[dir="ltr"] .gs-clear { right: 12px; left: auto; }
 </style>
 
 {{-- ── Topbar HTML ── --}}
@@ -207,7 +224,7 @@
              @keydown.escape="open = false">
 
             {{-- Icon + spinner --}}
-            <div style="position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;z-index:1;">
+            <div class="gs-icon" style="position:absolute;top:50%;transform:translateY(-50%);pointer-events:none;z-index:1;">
                 <div x-show="loading" class="gs-spinner"></div>
                 <svg x-show="!loading" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
                     <circle cx="11" cy="11" r="8" fill="none"/>
@@ -217,7 +234,8 @@
 
             {{-- Clear button --}}
             <button x-show="query.length > 0" @click="query='';results=[];open=false;"
-                    style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;line-height:1;font-size:16px;padding:0;z-index:1;"
+                    class="gs-clear"
+                    style="position:absolute;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;line-height:1;font-size:16px;padding:0;z-index:1;"
                     title="{{ __('common.actions.clear') }}">×</button>
 
             <input type="text"
