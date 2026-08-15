@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'عقود محذوفة')
+@section('title', __('contracts.deleted.title'))
 @section('content')
 <div class="w-full">
 
@@ -8,11 +8,11 @@
             <div class="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center">
                 <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </div>
-            <h2 class="text-xl font-bold text-slate-800">العقود المحذوفة</h2>
+            <h2 class="text-xl font-bold text-slate-800">{{ __('contracts.deleted.title') }}</h2>
         </div>
         <a href="{{ route('admin.contracts.index') }}" class="flex items-center gap-2 text-sm text-slate-600 bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-sm hover:text-blue-600 transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-            كل العقود
+            {{ __('contracts.deleted.all') }}
         </a>
     </div>
 
@@ -25,12 +25,12 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs font-semibold uppercase tracking-wide">
-                        <th class="px-4 py-3 text-right">رقم العقد</th>
-                        <th class="px-4 py-3 text-right">العميل</th>
-                        <th class="px-4 py-3 text-right">الفرع</th>
-                        <th class="px-4 py-3 text-right">الحالة</th>
-                        <th class="px-4 py-3 text-right">تاريخ الحذف</th>
-                        <th class="px-4 py-3 text-center">إجراءات</th>
+                        <th class="px-4 py-3 text-right">{{ __('contracts.list.col_number') }}</th>
+                        <th class="px-4 py-3 text-right">{{ __('common.fields.client') }}</th>
+                        <th class="px-4 py-3 text-right">{{ __('common.fields.branch') }}</th>
+                        <th class="px-4 py-3 text-right">{{ __('common.fields.status') }}</th>
+                        <th class="px-4 py-3 text-right">{{ __('common.fields.deleted_at') }}</th>
+                        <th class="px-4 py-3 text-center">{{ __('common.fields.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
@@ -47,19 +47,19 @@
                             <div class="flex items-center justify-center gap-2">
                                 <form action="{{ route('admin.contracts.restore', $c->id) }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="text-xs bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded-lg px-3 py-1.5 transition">استعادة</button>
+                                    <button type="submit" class="text-xs bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded-lg px-3 py-1.5 transition">{{ __('common.actions.restore') }}</button>
                                 </form>
                                 <form action="{{ route('admin.contracts.force-delete', $c->id) }}" method="POST"
-                                      onsubmit="return confirm('سيتم حذف العقد نهائياً ولا يمكن التراجع. متأكد؟')">
+                                      onsubmit="return confirm('{{ __('contracts.deleted.force_confirm') }}')">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="text-xs bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg px-3 py-1.5 transition">حذف نهائي</button>
+                                    <button type="submit" class="text-xs bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg px-3 py-1.5 transition">{{ __('contracts.deleted.force') }}</button>
                                 </form>
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center py-12 text-slate-400">لا توجد عقود محذوفة</td>
+                        <td colspan="6" class="text-center py-12 text-slate-400">{{ __('contracts.deleted.none') }}</td>
                     </tr>
                     @endforelse
                 </tbody>

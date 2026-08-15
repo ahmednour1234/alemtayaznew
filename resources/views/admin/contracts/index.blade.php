@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'عقود الاستقدام')
+@section('title', __('contracts.title'))
 @push('styles')
 <style>
 @media print {
@@ -46,7 +46,7 @@
                     <div class="w-9 h-9 rounded-xl bg-green-100 flex items-center justify-center">
                         <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                     </div>
-                    <h3 class="text-base font-bold text-slate-800">استيراد العقود من Excel</h3>
+                    <h3 class="text-base font-bold text-slate-800">{{ __('contracts.import.title') }} Excel</h3>
                 </div>
                 <button @click="importModal = false" class="text-slate-400 hover:text-slate-600 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
@@ -58,26 +58,26 @@
                 <div class="px-6 py-5 space-y-4">
                     {{-- Instructions --}}
                     <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700 space-y-1 leading-relaxed">
-                        <p class="font-semibold text-blue-800">تعليمات الاستيراد:</p>
+                        <p class="font-semibold text-blue-800">{{ __('contracts.import.instructions') }}</p>
                         <ul class="list-disc list-inside space-y-0.5">
-                            <li>يجب أن يكون الملف بصيغة <strong>.xlsx</strong> أو <strong>.xls</strong></li>
-                            <li>استخدم النموذج الرسمي لضمان قبول البيانات</li>
-                            <li>كود الفرع يجب أن يكون موجوداً في النظام</li>
-                            <li>الصف الأول عناوين، الصف الثاني شرح — تبدأ البيانات من الصف الثالث</li>
+                            <li>{{ __('contracts.import.file_format') }} <strong>.xlsx</strong> / <strong>.xls</strong></li>
+                            <li>{{ __('contracts.import.use_template') }}</li>
+                            <li>{{ __('contracts.import.branch_code') }}</li>
+                            <li>{{ __('contracts.import.rows_hint') }}</li>
                         </ul>
                     </div>
                     {{-- Template download --}}
                     <a href="{{ route('admin.contracts.template') }}"
                        class="flex items-center gap-2 w-full justify-center border border-dashed border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-medium py-2.5 rounded-xl transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-                        تحميل النموذج الرسمي
+                        {{ __('contracts.import.download_tpl') }}
                     </a>
                     {{-- File drop zone --}}
                     <div x-data="{ fileName: '' }">
                         <label for="import-file-modal"
                                class="flex flex-col items-center justify-center gap-2 w-full border-2 border-dashed border-slate-200 hover:border-green-400 bg-slate-50 hover:bg-green-50 rounded-xl py-8 cursor-pointer transition">
                             <svg class="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 4v-6M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
-                            <span class="text-sm text-slate-500" x-text="fileName || 'انقر لاختيار الملف أو اسحب وأفلت'"></span>
+                            <span class="text-sm text-slate-500" x-text="fileName || '{{ __('contracts.import.pick_file') }}'"></span>
                             <span class="text-xs text-slate-400">.xlsx / .xls / .csv</span>
                         </label>
                         <input type="file" name="file" id="import-file-modal" accept=".xlsx,.xls,.csv"
@@ -90,11 +90,11 @@
                     <button type="submit"
                             class="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2.5 rounded-xl shadow transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                        رفع واستيراد
+                        {{ __('contracts.import.submit') }}
                     </button>
                     <button type="button" @click="importModal = false"
                             class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-2.5 rounded-xl transition">
-                        إلغاء
+                        {{ __('common.actions.cancel') }}
                     </button>
                 </div>
             </form>
@@ -116,7 +116,7 @@
                     <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center">
                         <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                     </div>
-                    <h3 class="text-base font-bold text-slate-800">تحديث حالات العقود من Excel</h3>
+                    <h3 class="text-base font-bold text-slate-800">{{ __('contracts.import.status_title') }} Excel</h3>
                 </div>
                 <button @click="statusModal = false" class="text-slate-400 hover:text-slate-600 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
@@ -128,27 +128,27 @@
                 <div class="px-6 py-5 space-y-4">
                     {{-- Instructions --}}
                     <div class="bg-amber-50 border border-amber-100 rounded-xl p-3 text-xs text-amber-800 space-y-1 leading-relaxed">
-                        <p class="font-semibold text-amber-900">تعليمات التحديث:</p>
+                        <p class="font-semibold text-amber-900">{{ __('contracts.import.status_instr') }}</p>
                         <ul class="list-disc list-inside space-y-0.5">
-                            <li>يتم البحث عن العقد بواسطة <strong>رقم التأشيرة</strong></li>
-                            <li><strong>رقم الحالة</strong> من 1 إلى 15 (موضحة في النموذج)</li>
-                            <li><strong>تاريخ الحالة</strong> بصيغة YYYY-MM-DD — إن تُرك فارغاً يُستخدم تاريخ اليوم</li>
-                            <li>الصف الأول عناوين، الصف الثاني شرح — تبدأ البيانات من الصف الثالث</li>
-                            <li>يتم تسجيل التحديث في سجل الحالات وإشعار القسم المختص</li>
+                            <li>{{ __('contracts.import.find_by') }} <strong>{{ __('common.fields.visa_number') }}</strong></li>
+                            <li><strong>{{ __('contracts.import.status_num') }}</strong> {{ __('contracts.import.status_range') }}</li>
+                            <li><strong>{{ __('contracts.import.status_date') }}</strong> {{ __('contracts.import.date_format') }} YYYY-MM-DD — {{ __('contracts.import.date_empty') }}</li>
+                            <li>{{ __('contracts.import.rows_hint') }}</li>
+                            <li>{{ __('contracts.import.logged') }}</li>
                         </ul>
                     </div>
                     {{-- Template download --}}
                     <a href="{{ route('admin.contracts.status-template') }}"
                        class="flex items-center gap-2 w-full justify-center border border-dashed border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700 text-sm font-medium py-2.5 rounded-xl transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-                        تحميل نموذج تحديث الحالات
+                        {{ __('contracts.import.download_stat') }}
                     </a>
                     {{-- File drop zone --}}
                     <div x-data="{ fileName: '' }">
                         <label for="status-file-modal"
                                class="flex flex-col items-center justify-center gap-2 w-full border-2 border-dashed border-slate-200 hover:border-amber-400 bg-slate-50 hover:bg-amber-50 rounded-xl py-8 cursor-pointer transition">
                             <svg class="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 4v-6M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
-                            <span class="text-sm text-slate-500" x-text="fileName || 'انقر لاختيار الملف أو اسحب وأفلت'"></span>
+                            <span class="text-sm text-slate-500" x-text="fileName || '{{ __('contracts.import.pick_file') }}'"></span>
                             <span class="text-xs text-slate-400">.xlsx / .xls / .csv</span>
                         </label>
                         <input type="file" name="file" id="status-file-modal" accept=".xlsx,.xls,.csv"
@@ -161,11 +161,11 @@
                     <button type="submit"
                             class="flex-1 flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium py-2.5 rounded-xl shadow transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                        رفع وتحديث الحالات
+                        {{ __('contracts.import.submit_status') }}
                     </button>
                     <button type="button" @click="statusModal = false"
                             class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-2.5 rounded-xl transition">
-                        إلغاء
+                        {{ __('common.actions.cancel') }}
                     </button>
                 </div>
             </form>
@@ -176,34 +176,34 @@
     {{-- Header --}}
     <div class="flex items-center justify-between flex-wrap gap-3">
         <div>
-            <h2 class="text-xl font-bold text-slate-800">عقود الاستقدام</h2>
-            <p class="text-slate-400 text-xs mt-0.5">إجمالي: {{ $contracts->total() }} عقد</p>
+            <h2 class="text-xl font-bold text-slate-800">{{ __('contracts.title') }}</h2>
+            <p class="text-slate-400 text-xs mt-0.5">{{ __('contracts.list.total') }} {{ $contracts->total() }} {{ __('contracts.list.unit') }}</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
             <button @click="importModal = true"
                     class="flex items-center gap-1.5 text-sm bg-white border border-slate-200 text-slate-600 hover:text-green-700 hover:border-green-300 px-4 py-2 rounded-xl shadow-sm transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                استيراد
+                {{ __('contracts.list.import') }}
             </button>
             <a href="{{ route('admin.contracts.template') }}"
                class="flex items-center gap-1.5 text-sm bg-white border border-slate-200 text-slate-600 hover:text-blue-700 hover:border-blue-300 px-4 py-2 rounded-xl shadow-sm transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-                نموذج
+                {{ __('contracts.list.template') }}
             </a>
             <button @click="statusModal = true"
                     class="flex items-center gap-1.5 text-sm bg-white border border-slate-200 text-slate-600 hover:text-amber-700 hover:border-amber-300 px-4 py-2 rounded-xl shadow-sm transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                تحديث الحالات
+                {{ __('contracts.list.update_stat') }}
             </button>
             <a href="{{ route('admin.contracts.export', request()->query()) }}"
                class="flex items-center gap-1.5 text-sm bg-white border border-slate-200 text-slate-600 hover:text-emerald-700 hover:border-emerald-300 px-4 py-2 rounded-xl shadow-sm transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                تصدير Excel
+                {{ __('contracts.list.export') }} Excel
             </a>
             <a href="{{ route('admin.contracts.trashed') }}"
                class="flex items-center gap-1.5 text-sm bg-white border border-slate-200 text-red-500 hover:bg-red-50 px-4 py-2 rounded-xl shadow-sm transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                محذوف
+                {{ __('contracts.list.deleted') }}
             </a>
 @php
     $_u    = Auth::guard('admin')->user();
@@ -218,9 +218,9 @@
                       && ! in_array($_dept, ['accounts', 'accountant', 'coordination']);
     // Quick-forward: only dept users (not bosses) who are at a forwardable stage
     $fwdNextMap = [
-        'customer_service' => ['stage' => 'customer_service', 'next' => 'accounts',     'label' => 'إرسال للحسابات'],
-        'accounts'         => ['stage' => 'accounts',         'next' => 'coordination', 'label' => 'إرسال للتنسيق'],
-        'accountant'       => ['stage' => 'accounts',         'next' => 'coordination', 'label' => 'إرسال للتنسيق'],
+        'customer_service' => ['stage' => 'customer_service', 'next' => 'accounts',     'label' => '{{ __('contracts.list.to_accounts') }}'],
+        'accounts'         => ['stage' => 'accounts',         'next' => 'coordination', 'label' => '{{ __('contracts.list.to_coord') }}'],
+        'accountant'       => ['stage' => 'accounts',         'next' => 'coordination', 'label' => '{{ __('contracts.list.to_coord') }}'],
     ];
     $myForward = (!$_u->isSuperAdmin() && !in_array($_dept, ['branch_manager', 'chairman', 'coordination']))
                  ? ($fwdNextMap[$_dept] ?? null)
@@ -230,7 +230,7 @@
             <a href="{{ route('admin.contracts.create') }}"
                class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2.5 rounded-xl shadow transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                عقد جديد
+                {{ __('contracts.list.new') }}
             </a>
 @endif
         </div>
@@ -240,7 +240,7 @@
     <div class="flex gap-2 flex-wrap">
         <a href="{{ route('admin.contracts.index', array_merge(request()->query(), ['department' => ''])) }}"
            class="px-4 py-2 rounded-xl text-sm font-medium transition {{ !request('department') ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50' }}">
-            الكل
+            {{ __('common.all') }}
         </a>
         @foreach($departments as $key => $label)
         <a href="{{ route('admin.contracts.index', array_merge(request()->query(), ['department' => $key])) }}"
@@ -253,23 +253,23 @@
     {{-- Filters --}}
     <form method="GET" class="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="بحث برقم الجواز / الهوية / الجوال / اسم العاملة / اسم العميل / رقم التأشيرة / رقم عقد مساند..."
-                   title="أرقام الجواز والهوية والجوال يجب إدخالها كاملة (مطابقة تامة)"
+            <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="{{ __('contracts.search_ph') }}"
+                   title="{{ __('contracts.search_hint') }}"
                    class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
             <select name="status" class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <option value="">— كل الحالات —</option>
+                <option value="">{{ __('contracts.all_statuses') }}</option>
                 @foreach($statuses as $num => $st)
                 <option value="{{ $num }}" {{ ($filters['status'] ?? '') == $num ? 'selected' : '' }}>{{ $st['label'] }}</option>
                 @endforeach
             </select>
             <select name="payment_status" class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <option value="">— حالة الدفع —</option>
-                <option value="pending" {{ ($filters['payment_status'] ?? '') === 'pending' ? 'selected' : '' }}>معلق</option>
-                <option value="partial" {{ ($filters['payment_status'] ?? '') === 'partial' ? 'selected' : '' }}>جزئي</option>
-                <option value="full"    {{ ($filters['payment_status'] ?? '') === 'full' ? 'selected' : '' }}>كامل</option>
+                <option value="">— {{ __('common.fields.payment_status') }} —</option>
+                <option value="pending" {{ ($filters['payment_status'] ?? '') === 'pending' ? 'selected' : '' }}>{{ __('contracts.payment.pending') }}</option>
+                <option value="partial" {{ ($filters['payment_status'] ?? '') === 'partial' ? 'selected' : '' }}>{{ __('contracts.payment.partial') }}</option>
+                <option value="full"    {{ ($filters['payment_status'] ?? '') === 'full' ? 'selected' : '' }}>{{ __('contracts.payment.full') }}</option>
             </select>
             <select name="origin_nationality_id" class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <option value="">— الجنسية —</option>
+                <option value="">— {{ __('common.fields.nationality') }} —</option>
                 @foreach($nationalities as $nat)
                 <option value="{{ $nat->id }}" {{ ($filters['origin_nationality_id'] ?? '') == $nat->id ? 'selected' : '' }}>{{ $nat->name }}</option>
                 @endforeach
@@ -277,7 +277,7 @@
             @auth('admin')
             @if(Auth::guard('admin')->user()->isSuperAdmin())
             <select name="branch_id" class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <option value="">— كل الفروع —</option>
+                <option value="">{{ __('common.branches.all') }}</option>
                 @foreach($branches as $br)
                 <option value="{{ $br->id }}" {{ ($filters['branch_id'] ?? '') == $br->id ? 'selected' : '' }}>{{ $br->name }}</option>
                 @endforeach
@@ -285,8 +285,8 @@
             @endif
             @endauth
             <div class="flex gap-2">
-                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg">بحث</button>
-                <a href="{{ route('admin.contracts.index') }}" class="flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm px-4 py-2 rounded-lg">مسح</a>
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg">{{ __('common.actions.search') }}</button>
+                <a href="{{ route('admin.contracts.index') }}" class="flex-1 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm px-4 py-2 rounded-lg">{{ __('common.actions.clear') }}</a>
             </div>
         </div>
     </form>
@@ -302,24 +302,24 @@
     <div x-show="hasSelection" x-cloak x-transition
          class="no-print flex items-center justify-between bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
         <span class="text-sm text-blue-700 font-medium">
-            تم تحديد <span x-text="selected.length" class="font-bold"></span> عقد
+            {{ __('contracts.list.selected') }} <span x-text="selected.length" class="font-bold"></span> {{ __('contracts.list.unit') }}
         </span>
         <div class="flex items-center gap-2">
             {{-- Print selected --}}
             <button @click="printSelected()"
                     class="flex items-center gap-1.5 text-sm bg-white border border-slate-200 text-slate-600 hover:text-blue-700 hover:border-blue-300 px-3 py-1.5 rounded-lg transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-2 4H8v-6h8v6z"/></svg>
-                طباعة المحدد
+                {{ __('contracts.list.print_sel') }}
             </button>
             {{-- Deselect --}}
             <button @click="selected = []"
                     class="text-sm text-slate-500 hover:text-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 bg-white transition">
-                إلغاء التحديد
+                {{ __('common.actions.deselect_all') }}
             </button>
             {{-- Bulk delete --}}
             @if($canDeleteContract)
             <form action="{{ route('admin.contracts.bulk-delete') }}" method="POST"
-                  @submit.prevent="if(confirm('حذف ' + selected.length + ' عقد؟')) { $el.submit(); }">
+                  @submit.prevent="if(confirm(@json(__('contracts.list.confirm_bulk')).replace(':count', selected.length))) { $el.submit(); }">
                 @csrf
                 <template x-for="id in selected" :key="id">
                     <input type="hidden" name="ids[]" :value="id">
@@ -327,7 +327,7 @@
                 <button type="submit"
                         class="flex items-center gap-1.5 text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    حذف المحدد (<span x-text="selected.length"></span>)
+                    {{ __('contracts.list.delete_sel') }} (<span x-text="selected.length"></span>)
                 </button>
             </form>
             @endif
@@ -338,7 +338,7 @@
     <div id="print-area" class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-x-auto">
         {{-- Print header (only visible on print) --}}
         <div class="hidden print:block p-4 border-b border-slate-200 text-center">
-            <h2 class="text-lg font-bold">قائمة عقود الاستقدام</h2>
+            <h2 class="text-lg font-bold">{{ __('contracts.list.title') }}</h2>
             <p class="text-xs text-slate-500">{{ now()->format('Y/m/d H:i') }}</p>
         </div>
         <table class="w-full text-sm text-right">
@@ -351,17 +351,17 @@
                                :checked="isAllSelected({{ json_encode($allIds) }})"
                                @change="toggleAll({{ json_encode($allIds) }})">
                     </th>
-                    <th class="px-4 py-3 font-semibold text-slate-600">رقم العقد</th>
-                    <th class="px-4 py-3 font-semibold text-slate-600">العميل</th>
-                    <th class="px-4 py-3 font-semibold text-slate-600">الفرع</th>
-                    <th class="px-4 py-3 font-semibold text-slate-600">العاملة</th>
-                    <th class="px-4 py-3 font-semibold text-slate-600">الجنسية</th>
-                    <th class="px-4 py-3 font-semibold text-slate-600">الحالة</th>
-                    <th class="px-4 py-3 font-semibold text-slate-600">القسم</th>
-                    <th class="px-4 py-3 font-semibold text-slate-600">الدفع</th>
-                    <th class="px-4 py-3 font-semibold text-slate-600">تاريخ الطلب</th>
-                    <th class="px-4 py-3 font-semibold text-slate-600">تاريخ الوصول</th>
-                    <th class="px-4 py-3 font-semibold text-slate-600">إجراءات</th>
+                    <th class="px-4 py-3 font-semibold text-slate-600">{{ __('contracts.list.col_number') }}</th>
+                    <th class="px-4 py-3 font-semibold text-slate-600">{{ __('common.fields.client') }}</th>
+                    <th class="px-4 py-3 font-semibold text-slate-600">{{ __('common.fields.branch') }}</th>
+                    <th class="px-4 py-3 font-semibold text-slate-600">{{ __('common.fields.worker') }}</th>
+                    <th class="px-4 py-3 font-semibold text-slate-600">{{ __('common.fields.nationality') }}</th>
+                    <th class="px-4 py-3 font-semibold text-slate-600">{{ __('common.fields.status') }}</th>
+                    <th class="px-4 py-3 font-semibold text-slate-600">{{ __('contracts.list.col_dept') }}</th>
+                    <th class="px-4 py-3 font-semibold text-slate-600">{{ __('contracts.list.col_payment') }}</th>
+                    <th class="px-4 py-3 font-semibold text-slate-600">{{ __('common.fields.request_date') }}</th>
+                    <th class="px-4 py-3 font-semibold text-slate-600">{{ __('common.fields.arrival_date') }}</th>
+                    <th class="px-4 py-3 font-semibold text-slate-600">{{ __('common.fields.actions') }}</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-50">
@@ -374,7 +374,7 @@
                     </td>                    <td class="px-4 py-3">
                         <a href="{{ route('admin.contracts.show', $c->id) }}" class="font-mono text-blue-600 hover:underline">{{ $c->contract_number }}</a>
                         @if($c->musaned_number)
-                        <div class="text-xs text-slate-400">مساند: {{ $c->musaned_number }}</div>
+                        <div class="text-xs text-slate-400">{{ __('contracts.list.musaned') }} {{ $c->musaned_number }}</div>
                         @endif
                     </td>
                     <td class="px-4 py-3 font-medium text-slate-700">{{ $c->client->name ?? '—' }}</td>
@@ -401,13 +401,13 @@
                     <td class="px-4 py-3 text-slate-400 text-xs">{{ $c->arrival_date?->format('Y/m/d') ?? '—' }}</td>
                     <td class="px-4 py-3">
                         <div class="flex gap-2 items-center flex-wrap">
-                            <a href="{{ route('admin.contracts.show', $c->id) }}" class="text-blue-600 hover:text-blue-800 text-xs">عرض</a>
+                            <a href="{{ route('admin.contracts.show', $c->id) }}" class="text-blue-600 hover:text-blue-800 text-xs">{{ __('common.actions.view') }}</a>
                             @if($canEditContract)
-                            <a href="{{ route('admin.contracts.edit', $c->id) }}" class="text-slate-500 hover:text-slate-700 text-xs">تعديل</a>
+                            <a href="{{ route('admin.contracts.edit', $c->id) }}" class="text-slate-500 hover:text-slate-700 text-xs">{{ __('common.actions.edit') }}</a>
                             @endif
                             @if($myForward && $c->current_department === $myForward['stage'])
                             <form action="{{ route('admin.contracts.forward', $c->id) }}" method="POST"
-                                  onsubmit="return confirm('توجيه العقد للقسم التالي؟')">
+                                  onsubmit="return confirm('{{ __('contracts.list.confirm_next') }}')">
                                 @csrf
                                 <button type="submit"
                                         class="inline-flex items-center gap-1 text-xs text-emerald-700 hover:text-emerald-900 font-medium">
@@ -417,16 +417,16 @@
                             </form>
                             @endif
                             @if($canDeleteContract)
-                            <form action="{{ route('admin.contracts.destroy', $c->id) }}" method="POST" onsubmit="return confirm('حذف العقد؟')">
+                            <form action="{{ route('admin.contracts.destroy', $c->id) }}" method="POST" onsubmit="return confirm('{{ __('contracts.list.confirm_one') }}')">
                                 @csrf @method('DELETE')
-                                <button type="submit" class="text-red-500 hover:text-red-700 text-xs">حذف</button>
+                                <button type="submit" class="text-red-500 hover:text-red-700 text-xs">{{ __('common.actions.delete') }}</button>
                             </form>
                             @endif
                         </div>
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="11" class="text-center py-10 text-slate-400">لا توجد عقود</td></tr>
+                <tr><td colspan="11" class="text-center py-10 text-slate-400">{{ __('contracts.no_contracts') }}</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -437,7 +437,7 @@
         <button @click="printAll()"
                 class="flex items-center gap-1.5 text-sm bg-white border border-slate-200 text-slate-600 hover:text-blue-700 hover:border-blue-300 px-4 py-2 rounded-xl shadow-sm transition">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-2 4H8v-6h8v6z"/></svg>
-            طباعة الصفحة الحالية
+            {{ __('contracts.list.print_page') }}
         </button>
         <div>{{ $contracts->links() }}</div>
     </div>
