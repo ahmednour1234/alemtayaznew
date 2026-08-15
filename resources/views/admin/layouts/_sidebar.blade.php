@@ -52,7 +52,7 @@
     {{-- Logo --}}
     <div style="flex-shrink:0;display:flex;align-items:center;justify-content:center;
                 padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
-        <img src="{{ asset('1759760768-33.png') }}" alt="شركة الامتياز للاستقدام"
+        <img src="{{ asset('1759760768-33.png') }}" alt="{{ __('nav.company') }}"
              style="height:46px;max-width:190px;object-fit:contain;">
     </div>
 
@@ -74,7 +74,7 @@
                 <rect x="3" y="14" width="7" height="7" rx="1.5"/>
                 <rect x="14" y="14" width="7" height="7" rx="1.5"/>
             </svg>
-            لوحة التحكم
+            {{ __('nav.dashboard') }}
         </a>
 
         {{-- الأمن والتدقيق: مخفي من القائمة الجانبية (لا يزال يعمل عبر الروابط المباشرة) --}}
@@ -82,7 +82,7 @@
         {{-- Section label: الأمن والتدقيق --}}
         <div style="padding:10px 10px 4px;margin-top:4px;">
             <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
-                      text-transform:uppercase;color:#8fa3c0;margin:0;">الأمن والتدقيق</p>
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">{{ __('nav.security.group') }}</p>
         </div>
         <div x-data="{ sec: {{ request()->routeIs('admin.security.*') ? 'true' : 'false' }} }" style="margin-bottom:1px;">
             <button @click="sec=!sec"
@@ -93,7 +93,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 </svg>
-                <span style="flex:1;">الأمن والتدقيق</span>
+                <span style="flex:1;">{{ __('nav.security.group') }}</span>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                      style="flex-shrink:0;transition:transform .25s;" :style="{ transform: sec ? 'rotate(180deg)' : 'none' }">
                     <polyline points="6 9 12 15 18 9"/>
@@ -101,11 +101,11 @@
             </button>
             <div x-show="sec" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                 @php $secItems = [
-                    ['r'=>'admin.security.incidents',          'l'=>'الحوادث الأمنية'],
-                    ['r'=>'admin.security.access-logs',        'l'=>'سجلات الوصول'],
-                    ['r'=>'admin.security.failed-logins',      'l'=>'محاولات الدخول الفاشلة'],
-                    ['r'=>'admin.security.export-logs',        'l'=>'سجلات التصدير'],
-                    ['r'=>'admin.security.permission-changes', 'l'=>'تغييرات الصلاحيات'],
+                    ['r'=>'admin.security.incidents',          'l'=>__('nav.security.incidents')],
+                    ['r'=>'admin.security.access-logs',        'l'=>__('nav.security.access_logs')],
+                    ['r'=>'admin.security.failed-logins',      'l'=>__('nav.security.failed')],
+                    ['r'=>'admin.security.export-logs',        'l'=>__('nav.security.exports')],
+                    ['r'=>'admin.security.permission-changes', 'l'=>__('nav.security.permissions')],
                 ] @endphp
                 @foreach($secItems as $it)
                     @php $on = request()->routeIs($it['r']); @endphp
@@ -124,10 +124,10 @@
         @endif
 
         @if($showContractsGroup)
-        {{-- Section label: عقود الاستقدام --}}
+        {{-- Section label: {{ __('nav.contracts.group') }} --}}
         <div style="padding:10px 10px 4px;margin-top:4px;">
             <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
-                      text-transform:uppercase;color:#8fa3c0;margin:0;">عقود الاستقدام</p>
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">{{ __('nav.contracts.group') }}</p>
         </div>
 
         {{-- -- GROUP: Contracts -- --}}
@@ -143,7 +143,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                     <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/>
                 </svg>
-                <span style="flex:1;">عقود الاستقدام</span>
+                <span style="flex:1;">{{ __('nav.contracts.group') }}</span>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                      style="flex-shrink:0;transition:transform .25s;" :style="{ transform: c ? 'rotate(180deg)' : 'none' }">
                     <polyline points="6 9 12 15 18 9"/>
@@ -156,8 +156,8 @@
                     $sidebarCanCreate = ($_su->isSuperAdmin() || $_su->hasPermission('contracts.create'))
                                      && ! in_array($_sdept, ['accounts', 'accountant', 'coordination']);
                     $contractItems = array_filter([
-                        ['r'=>'admin.contracts.index',  'p'=>'admin.contracts.index',  'l'=>'قائمة العقود',    'd'=>'M4 6h16M4 10h16M4 14h8'],
-                        $sidebarCanCreate ? ['r'=>'admin.contracts.create', 'p'=>'admin.contracts.create', 'l'=>'إضافة عقد جديد', 'd'=>'M12 5v14M5 12h14'] : null,
+                        ['r'=>'admin.contracts.index',  'p'=>'admin.contracts.index',  'l'=>__('nav.contracts.list'),    'd'=>'M4 6h16M4 10h16M4 14h8'],
+                        $sidebarCanCreate ? ['r'=>'admin.contracts.create', 'p'=>'admin.contracts.create', 'l'=>__('nav.contracts.add'), 'd'=>'M12 5v14M5 12h14'] : null,
                     ]);
                 @endphp
                 @foreach($contractItems as $it)
@@ -176,12 +176,12 @@
                     </a>
                 @endforeach
 
-                {{-- -- تقارير العقود (sub-dropdown) – permission-filtered -- --}}
+                {{-- -- {{ __('nav.contracts.reports') }} (sub-dropdown) – permission-filtered -- --}}
                 @php
                     $_crAll = [
-                        ['r'=>'admin.reports.contracts-stats',    'perm'=>'reports.contracts-stats',    'l'=>'إحصائيات العقود', 'd'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
-                        ['r'=>'admin.reports.contracts-received', 'perm'=>'reports.contracts-received', 'l'=>'العقود المستلمة',  'd'=>'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        ['r'=>'admin.reports.contracts-delayed',  'perm'=>'reports.contracts-delayed',  'l'=>'العقود المتأخرة',   'd'=>'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['r'=>'admin.reports.contracts-stats',    'perm'=>'reports.contracts-stats',    'l'=>__('nav.contracts.stats'), 'd'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
+                        ['r'=>'admin.reports.contracts-received', 'perm'=>'reports.contracts-received', 'l'=>__('nav.contracts.received'),  'd'=>'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['r'=>'admin.reports.contracts-delayed',  'perm'=>'reports.contracts-delayed',  'l'=>__('nav.contracts.delayed'),   'd'=>'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
                     ];
                     $_crVisible = array_filter($_crAll, fn($it) => $_su->isSuperAdmin() || $_su->hasPermission($it['perm']));
                 @endphp
@@ -198,7 +198,7 @@
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                             <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                         </svg>
-                        <span style="flex:1;">تقارير العقود</span>
+                        <span style="flex:1;">{{ __('nav.contracts.reports') }}</span>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                              style="flex-shrink:0;transition:transform .25s;" :style="{ transform: cr ? 'rotate(180deg)' : 'none' }">
                             <polyline points="6 9 12 15 18 9"/>
@@ -226,13 +226,13 @@
         @endif
 
         @if($showSTGroup)
-        {{-- Section label: نقل الكفالة --}}
+        {{-- Section label: {{ __('nav.sponsorship.group') }} --}}
         <div style="padding:10px 10px 4px;margin-top:4px;">
             <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
-                      text-transform:uppercase;color:#8fa3c0;margin:0;">نقل الكفالة</p>
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">{{ __('nav.sponsorship.group') }}</p>
         </div>
 
-        {{-- -- GROUP: نقل الكفالة -- --}}
+        {{-- -- GROUP: {{ __('nav.sponsorship.group') }} -- --}}
         <div style="margin-bottom:1px;">
             <button @click="st=!st"
                     style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
@@ -245,7 +245,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                     <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <span style="flex:1;">نقل الكفالة</span>
+                <span style="flex:1;">{{ __('nav.sponsorship.group') }}</span>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                      style="flex-shrink:0;transition:transform .25s;" :style="{ transform: st ? 'rotate(180deg)' : 'none' }">
                     <polyline points="6 9 12 15 18 9"/>
@@ -253,9 +253,9 @@
             </button>
             <div x-show="st" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                 @php $stItems = [
-                    ['r'=>'admin.sponsorship-transfers.index',   'p'=>'admin.sponsorship-transfers.index',   'l'=>'قائمة نقل الكفالة',    'perm'=>'sponsorship-transfers.view',
+                    ['r'=>'admin.sponsorship-transfers.index',   'p'=>'admin.sponsorship-transfers.index',   'l'=>__('nav.sponsorship.list'),    'perm'=>'sponsorship-transfers.view',
                      'd'=>'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-                    ['r'=>'admin.sponsorship-transfers.reports', 'p'=>'admin.sponsorship-transfers.reports', 'l'=>'تقارير نقل الكفالة', 'perm'=>'sponsorship-transfers.view',
+                    ['r'=>'admin.sponsorship-transfers.reports', 'p'=>'admin.sponsorship-transfers.reports', 'l'=>__('nav.sponsorship.reports'), 'perm'=>'sponsorship-transfers.view',
                      'd'=>'M3 3v18h18 M7 14l4-4 4 4 5-5'],
                 ] @endphp
                 @foreach($stItems as $it)
@@ -280,13 +280,13 @@
         @endif
 
         @if($showOpsGroup)
-        {{-- Section label: السكن والرحلات --}}
+        {{-- Section label: {{ __('nav.housing.group') }} --}}
         <div style="padding:10px 10px 4px;margin-top:4px;">
             <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
-                      text-transform:uppercase;color:#8fa3c0;margin:0;">السكن والرحلات</p>
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">{{ __('nav.housing.group') }}</p>
         </div>
 
-        {{-- -- GROUP: السكن والرحلات -- --}}
+        {{-- -- GROUP: {{ __('nav.housing.group') }} -- --}}
         <div style="margin-bottom:1px;">
             <button @click="op=!op"
                     style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
@@ -299,7 +299,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
                 </svg>
-                <span style="flex:1;">السكن والرحلات</span>
+                <span style="flex:1;">{{ __('nav.housing.group') }}</span>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                      style="flex-shrink:0;transition:transform .25s;" :style="{ transform: op ? 'rotate(180deg)' : 'none' }">
                     <polyline points="6 9 12 15 18 9"/>
@@ -307,11 +307,11 @@
             </button>
             <div x-show="op" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                 @php $opItems = [
-                    ['r'=>'admin.trips.index',                'p'=>'admin.trips.*',                'l'=>'الرحلات الدولية',   'perm'=>'trips.view',
+                    ['r'=>'admin.trips.index',                'p'=>'admin.trips.*',                'l'=>__('nav.housing.trips'),   'perm'=>'trips.view',
                      'd'=>'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064'],
-                    ['r'=>'admin.housing-assignments.index',  'p'=>'admin.housing-assignments.*',  'l'=>'الإسكان والتوزيع', 'perm'=>'housing-assignments.view',
+                    ['r'=>'admin.housing-assignments.index',  'p'=>'admin.housing-assignments.*',  'l'=>__('nav.housing.assignments'), 'perm'=>'housing-assignments.view',
                      'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14h16V7M9 21V11h6v10'],
-                    ['r'=>'admin.housing-visits.index',       'p'=>'admin.housing-visits.index',    'l'=>'زيارات السكن', 'perm'=>'housing-visits.view',
+                    ['r'=>'admin.housing-visits.index',       'p'=>'admin.housing-visits.index',    'l'=>__('nav.housing.visits'), 'perm'=>'housing-visits.view',
                      'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14h16V7M8 13h8M8 17h5'],
                 ] @endphp
                 @foreach($opItems as $it)
@@ -347,7 +347,7 @@
                             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
                             <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
                         </svg>
-                        <span style="flex:1;">التقارير</span>
+                        <span style="flex:1;">{{ __('nav.housing.reports') }}</span>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                              style="flex-shrink:0;transition:transform .25s;" :style="{ transform: opr ? 'rotate(180deg)' : 'none' }">
                             <polyline points="6 9 12 15 18 9"/>
@@ -355,13 +355,13 @@
                     </button>
                     <div x-show="opr" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                         @php $opsRepItems = [
-                            ['r'=>'admin.calendar.index',             'p'=>'admin.calendar.*',             'l'=>'التقويم',               'perm'=>'calendar.view',
+                            ['r'=>'admin.calendar.index',             'p'=>'admin.calendar.*',             'l'=>__('nav.housing.calendar'),               'perm'=>'calendar.view',
                              'd'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
-                            ['r'=>'admin.housing-visits.reports',     'p'=>'admin.housing-visits.reports', 'l'=>'تقرير زيارات السكن',    'perm'=>'housing-visits.reports',
+                            ['r'=>'admin.housing-visits.reports',     'p'=>'admin.housing-visits.reports', 'l'=>__('nav.housing.visits_report'),    'perm'=>'housing-visits.reports',
                              'd'=>'M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v14a2 2 0 002 2z'],
-                            ['r'=>'admin.reports.housing-rentals',    'p'=>'admin.reports.housing-rentals',    'l'=>'تقرير العمالة المؤجرة', 'perm'=>'housing-rentals.reports',
+                            ['r'=>'admin.reports.housing-rentals',    'p'=>'admin.reports.housing-rentals',    'l'=>__('nav.housing.rented_report'), 'perm'=>'housing-rentals.reports',
                              'd'=>'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
-                            ['r'=>'admin.reports.housing-settlements','p'=>'admin.reports.housing-settlements','l'=>'تقرير التسويات',      'perm'=>'housing-settlements.reports',
+                            ['r'=>'admin.reports.housing-settlements','p'=>'admin.reports.housing-settlements','l'=>__('nav.housing.settle_report'),      'perm'=>'housing-settlements.reports',
                              'd'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'],
                         ] @endphp
                         @foreach($opsRepItems as $it)
@@ -387,13 +387,13 @@
         @endif
 
         @if($showFinanceGroup)
-        {{-- Section label: المالية --}}
+        {{-- Section label: {{ __('nav.finance.group') }} --}}
         <div style="padding:10px 10px 4px;margin-top:4px;">
             <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
-                      text-transform:uppercase;color:#8fa3c0;margin:0;">المالية</p>
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">{{ __('nav.finance.group') }}</p>
         </div>
 
-        {{-- -- OUTER: الإدارة المالية -- --}}
+        {{-- -- OUTER: {{ __('nav.finance.management') }} -- --}}
         <div style="margin-bottom:1px;">
             <button @click="f=!f"
                     style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
@@ -406,7 +406,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                     <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
                 </svg>
-                <span style="flex:1;">الإدارة المالية</span>
+                <span style="flex:1;">{{ __('nav.finance.management') }}</span>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                      style="flex-shrink:0;transition:transform .25s;" :style="{ transform: f ? 'rotate(180deg)' : 'none' }">
                     <polyline points="6 9 12 15 18 9"/>
@@ -417,7 +417,7 @@
                 <div style="padding:4px 0 4px 10px;border-right:2px solid rgba(255,255,255,.06);margin-right:12px;">
 
                     @if($can('income-types.view') || $can('expense-types.view'))
-                    {{-- SUB 1: الإعدادات المحاسبية --}}
+                    {{-- SUB 1: {{ __('nav.finance.accounting') }} --}}
                     <div style="margin-bottom:1px;">
                         <button @click="a=!a"
                                 style="width:100%;display:flex;align-items:center;gap:9px;padding:7px 10px;
@@ -430,7 +430,7 @@
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                                 <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
                             </svg>
-                            <span style="flex:1;">الإعدادات المحاسبية</span>
+                            <span style="flex:1;">{{ __('nav.finance.accounting') }}</span>
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                                  style="flex-shrink:0;transition:transform .25s;" :style="{ transform: a ? 'rotate(180deg)' : 'none' }">
                                 <polyline points="6 9 12 15 18 9"/>
@@ -438,8 +438,8 @@
                         </button>
                         <div x-show="a" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                             @php $acctItems = [
-                                ['r'=>'admin.income-types.index',  'p'=>'admin.income-types.*',  'l'=>'أنواع الإيرادات',  'd'=>'M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6',  'perm'=>'income-types.view'],
-                                ['r'=>'admin.expense-types.index', 'p'=>'admin.expense-types.*', 'l'=>'أنواع المصروفات', 'd'=>'M3 6h18M3 12h18M3 18h18',                                    'perm'=>'expense-types.view'],
+                                ['r'=>'admin.income-types.index',  'p'=>'admin.income-types.*',  'l'=>__('nav.finance.income_types'),  'd'=>'M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6',  'perm'=>'income-types.view'],
+                                ['r'=>'admin.expense-types.index', 'p'=>'admin.expense-types.*', 'l'=>__('nav.finance.expense_types'), 'd'=>'M3 6h18M3 12h18M3 18h18',                                    'perm'=>'expense-types.view'],
                             ] @endphp
                             @foreach($acctItems as $it)
                                 @if($can($it['perm']))
@@ -461,7 +461,7 @@
                     @endif
 
                     @if($can('incomes.view') || $can('expenses.view') || $can('transfers.view'))
-                    {{-- SUB 2: المعاملات --}}
+                    {{-- SUB 2: {{ __('nav.finance.transactions') }} --}}
                     <div style="margin-bottom:1px;">
                         <button @click="m=!m"
                                 style="width:100%;display:flex;align-items:center;gap:9px;padding:7px 10px;
@@ -474,7 +474,7 @@
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                                 <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
                             </svg>
-                            <span style="flex:1;">المعاملات</span>
+                            <span style="flex:1;">{{ __('nav.finance.transactions') }}</span>
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                                  style="flex-shrink:0;transition:transform .25s;" :style="{ transform: m ? 'rotate(180deg)' : 'none' }">
                                 <polyline points="6 9 12 15 18 9"/>
@@ -482,9 +482,9 @@
                         </button>
                         <div x-show="m" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                             @php $finItems = [
-                                ['r'=>'admin.incomes.index',   'p'=>'admin.incomes.*',   'l'=>'الإيرادات',             'd'=>'M22 7L13.5 15.5L8.5 10.5L2 17 M16 7h6v6',      'perm'=>'incomes.view'],
-                                ['r'=>'admin.expenses.index',  'p'=>'admin.expenses.*',  'l'=>'المصروفات',             'd'=>'M22 17L13.5 8.5L8.5 13.5L2 7 M16 17h6v-6',     'perm'=>'expenses.view'],
-                                ['r'=>'admin.transfers.index', 'p'=>'admin.transfers.*', 'l'=>'التحويلات بين الفروع', 'd'=>'M7 16l-4-4 4-4 M17 8l4 4-4 4 M14 4l-4 16',    'perm'=>'transfers.view'],
+                                ['r'=>'admin.incomes.index',   'p'=>'admin.incomes.*',   'l'=>__('nav.finance.incomes'),             'd'=>'M22 7L13.5 15.5L8.5 10.5L2 17 M16 7h6v6',      'perm'=>'incomes.view'],
+                                ['r'=>'admin.expenses.index',  'p'=>'admin.expenses.*',  'l'=>__('nav.finance.expenses'),             'd'=>'M22 17L13.5 8.5L8.5 13.5L2 7 M16 17h6v-6',     'perm'=>'expenses.view'],
+                                ['r'=>'admin.transfers.index', 'p'=>'admin.transfers.*', 'l'=>__('nav.finance.transfers'), 'd'=>'M7 16l-4-4 4-4 M17 8l4 4-4 4 M14 4l-4 16',    'perm'=>'transfers.view'],
                             ] @endphp
                             @foreach($finItems as $it)
                                 @if($can($it['perm']))
@@ -506,7 +506,7 @@
                     @endif
 
                     @if($can('reports.branch-statement') || $can('reports.income-statement') || $can('reports.view'))
-                    {{-- SUB 3: التقارير --}}
+                    {{-- SUB 3: {{ __('nav.housing.reports') }} --}}
                     <div style="margin-bottom:1px;">
                         <button @click="r=!r"
                                 style="width:100%;display:flex;align-items:center;gap:9px;padding:7px 10px;
@@ -520,7 +520,7 @@
                                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
                                 <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
                             </svg>
-                            <span style="flex:1;">التقارير</span>
+                            <span style="flex:1;">{{ __('nav.housing.reports') }}</span>
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                                  style="flex-shrink:0;transition:transform .25s;" :style="{ transform: r ? 'rotate(180deg)' : 'none' }">
                                 <polyline points="6 9 12 15 18 9"/>
@@ -528,9 +528,9 @@
                         </button>
                         <div x-show="r" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                             @php $repItems = [
-                                ['r'=>'admin.reports.branch-statement',   'p'=>'admin.reports.branch-statement',   'l'=>'كشف حساب الفرع',       'd'=>'M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v14a2 2 0 002 2z', 'perm'=>'reports.branch-statement'],
-                                ['r'=>'admin.reports.income-statement',   'p'=>'admin.reports.income-statement',   'l'=>'قائمة دخل كل الفروع', 'd'=>'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z',                                      'perm'=>'reports.income-statement'],
-                                ['r'=>'admin.reports.type-breakdown',     'p'=>'admin.reports.type-breakdown',     'l'=>'تقرير البنود المالية', 'd'=>'M9 17V7m4 10V11m4 6V9M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z',   'perm'=>'reports.income-statement'],
+                                ['r'=>'admin.reports.branch-statement',   'p'=>'admin.reports.branch-statement',   'l'=>__('nav.finance.branch_stmt'),       'd'=>'M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V8l-5-5H7a2 2 0 00-2 2v14a2 2 0 002 2z', 'perm'=>'reports.branch-statement'],
+                                ['r'=>'admin.reports.income-statement',   'p'=>'admin.reports.income-statement',   'l'=>__('nav.finance.income_stmt'), 'd'=>'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z',                                      'perm'=>'reports.income-statement'],
+                                ['r'=>'admin.reports.type-breakdown',     'p'=>'admin.reports.type-breakdown',     'l'=>__('nav.finance.items_report'), 'd'=>'M9 17V7m4 10V11m4 6V9M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z',   'perm'=>'reports.income-statement'],
                             ] @endphp
                             @foreach($repItems as $it)
                                 @if($can($it['perm']))
@@ -557,13 +557,13 @@
         @endif
 
         @if($showMarketingGroup)
-        {{-- Section label: التسويق --}}
+        {{-- Section label: {{ __('nav.marketing.group') }} --}}
         <div style="padding:10px 10px 4px;margin-top:4px;">
             <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
-                      text-transform:uppercase;color:#8fa3c0;margin:0;">التسويق</p>
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">{{ __('nav.marketing.group') }}</p>
         </div>
 
-        {{-- -- GROUP: التسويق -- --}}
+        {{-- -- GROUP: {{ __('nav.marketing.group') }} -- --}}
         <div style="margin-bottom:1px;">
             <button @click="mk=!mk"
                     style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
@@ -576,7 +576,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                     <path d="M3 11l18-8-8 18-2-8-8-2z"/>
                 </svg>
-                <span style="flex:1;">التسويق</span>
+                <span style="flex:1;">{{ __('nav.marketing.group') }}</span>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                      style="flex-shrink:0;transition:transform .25s;" :style="{ transform: mk ? 'rotate(180deg)' : 'none' }">
                     <polyline points="6 9 12 15 18 9"/>
@@ -584,15 +584,15 @@
             </button>
             <div x-show="mk" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                 @php $mkItems = [
-                    ['r'=>'admin.marketing.campaigns.index', 'p'=>'admin.marketing.campaigns.*', 'l'=>'الحملات',            'perm'=>'campaigns.view',
+                    ['r'=>'admin.marketing.campaigns.index', 'p'=>'admin.marketing.campaigns.*', 'l'=>__('nav.marketing.campaigns'),            'perm'=>'campaigns.view',
                      'd'=>'M3 11l18-8-8 18-2-8-8-2z'],
-                    ['r'=>'admin.marketing.leads.index',     'p'=>'admin.marketing.leads.*',     'l'=>'العملاء المحتملون', 'perm'=>'leads.view',
+                    ['r'=>'admin.marketing.leads.index',     'p'=>'admin.marketing.leads.*',     'l'=>__('nav.marketing.leads'), 'perm'=>'leads.view',
                      'd'=>'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z M22 11h-6 M19 8v6'],
-                    ['r'=>'admin.marketing.reports',         'p'=>'admin.marketing.reports',     'l'=>'تقارير التسويق',   'perm'=>'marketing.reports.view',
+                    ['r'=>'admin.marketing.reports',         'p'=>'admin.marketing.reports',     'l'=>__('nav.marketing.reports'),   'perm'=>'marketing.reports.view',
                      'd'=>'M3 3v18h18 M7 14l4-4 4 4 5-5'],
-                    ['r'=>'admin.marketing.staff-performance','p'=>'admin.marketing.staff-performance','l'=>'أداء الموظفين','perm'=>'marketing.reports.view','mgr'=>true,
+                    ['r'=>'admin.marketing.staff-performance','p'=>'admin.marketing.staff-performance','l'=>__('nav.marketing.performance'),'perm'=>'marketing.reports.view','mgr'=>true,
                      'd'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
-                    ['r'=>'admin.marketing.leads-board',     'p'=>'admin.marketing.leads-board',  'l'=>'لوحة الفروع',     'perm'=>'leads-board.view',
+                    ['r'=>'admin.marketing.leads-board',     'p'=>'admin.marketing.leads-board',  'l'=>__('nav.marketing.board'),     'perm'=>'leads-board.view',
                      'd'=>'M3 5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5zM9 9h6M9 13h6M9 17h4'],
                 ] @endphp
                 @foreach($mkItems as $it)
@@ -623,13 +623,13 @@
         @endif
 
         @if($showComplaintsGroup)
-        {{-- Section label: إدارة الشكاوي --}}
+        {{-- Section label: {{ __('nav.complaints.group') }} --}}
         <div style="padding:10px 10px 4px;margin-top:4px;">
             <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
-                      text-transform:uppercase;color:#8fa3c0;margin:0;">إدارة الشكاوي</p>
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">{{ __('nav.complaints.group') }}</p>
         </div>
 
-        {{-- -- GROUP: الشكاوي -- --}}
+        {{-- -- GROUP: {{ __('nav.complaints.title') }} -- --}}
         <div style="margin-bottom:1px;">
             <button @click="cp=!cp"
                     style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
@@ -642,7 +642,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                     <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
                 </svg>
-                <span style="flex:1;">الشكاوي</span>
+                <span style="flex:1;">{{ __('nav.complaints.title') }}</span>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                      style="flex-shrink:0;transition:transform .25s;" :style="{ transform: cp ? 'rotate(180deg)' : 'none' }">
                     <polyline points="6 9 12 15 18 9"/>
@@ -650,11 +650,11 @@
             </button>
             <div x-show="cp" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                 @php $cpItems = [
-                    ['r'=>'admin.complaints.index',   'p'=>'admin.complaints.index',   'l'=>'كل الشكاوي',      'perm'=>'complaints.view',
+                    ['r'=>'admin.complaints.index',   'p'=>'admin.complaints.index',   'l'=>__('nav.complaints.all'),      'perm'=>'complaints.view',
                      'd'=>'M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z'],
-                    ['r'=>'admin.complaints.create',  'p'=>'admin.complaints.create',  'l'=>'إضافة شكوى',     'perm'=>'complaints.create',
+                    ['r'=>'admin.complaints.create',  'p'=>'admin.complaints.create',  'l'=>__('nav.complaints.add'),     'perm'=>'complaints.create',
                      'd'=>'M12 4v16m8-8H4'],
-                    ['r'=>'admin.complaints.reports', 'p'=>'admin.complaints.reports', 'l'=>'تقارير الشكاوي', 'perm'=>'complaints.reports',
+                    ['r'=>'admin.complaints.reports', 'p'=>'admin.complaints.reports', 'l'=>__('nav.complaints.reports'), 'perm'=>'complaints.reports',
                      'd'=>'M3 3v18h18 M7 14l4-4 4 4 5-5'],
                 ] @endphp
                 @foreach($cpItems as $it)
@@ -682,7 +682,7 @@
         {{-- Section label: العمالة (CVs) --}}
         <div style="padding:10px 10px 4px;margin-top:4px;">
             <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
-                      text-transform:uppercase;color:#8fa3c0;margin:0;">العمالة (CVs)</p>
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">{{ __('nav.workers.group') }} (CVs)</p>
         </div>
 
         {{-- -- GROUP: العمالة -- --}}
@@ -698,7 +698,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                     <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
-                <span style="flex:1;">العمالة</span>
+                <span style="flex:1;">{{ __('nav.workers.group') }}</span>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                      style="flex-shrink:0;transition:transform .25s;" :style="{ transform: w ? 'rotate(180deg)' : 'none' }">
                     <polyline points="6 9 12 15 18 9"/>
@@ -706,11 +706,11 @@
             </button>
             <div x-show="w" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                 @php $workerItems = [
-                    ['r'=>'admin.workers.index', 'p'=>'admin.workers.index', 'l'=>'قائمة العمالة', 'perm'=>'workers.view',
+                    ['r'=>'admin.workers.index', 'p'=>'admin.workers.index', 'l'=>__('nav.workers.list'), 'perm'=>'workers.view',
                      'd'=>'M4 6h16M4 10h16M4 14h8'],
-                    ['r'=>'admin.workers.create','p'=>'admin.workers.create','l'=>'إضافة عامل',  'perm'=>'workers.create',
+                    ['r'=>'admin.workers.create','p'=>'admin.workers.create','l'=>__('nav.workers.add'),  'perm'=>'workers.create',
                      'd'=>'M12 5v14M5 12h14'],
-                    ['r'=>'admin.workers.bulk',  'p'=>'admin.workers.bulk',  'l'=>'رفع CVs جماعي', 'perm'=>'workers.create',
+                    ['r'=>'admin.workers.bulk',  'p'=>'admin.workers.bulk',  'l'=>__('nav.workers.bulk'), 'perm'=>'workers.create',
                      'd'=>'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12'],
                 ] @endphp
                 @foreach($workerItems as $it)
@@ -735,13 +735,13 @@
         @endif
 
         @if($showHRGroup)
-        {{-- Section label: الموارد البشرية --}}
+        {{-- Section label: {{ __('nav.hr.group') }} --}}
         <div style="padding:10px 10px 4px;margin-top:4px;">
             <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
-                      text-transform:uppercase;color:#8fa3c0;margin:0;">الموارد البشرية</p>
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">{{ __('nav.hr.group') }}</p>
         </div>
 
-        {{-- -- GROUP: الموارد البشرية -- --}}
+        {{-- -- GROUP: {{ __('nav.hr.group') }} -- --}}
         <div style="margin-bottom:1px;">
             <button @click="hr=!hr"
                     style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
@@ -754,7 +754,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                     <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75"/>
                 </svg>
-                <span style="flex:1;">الموارد البشرية</span>
+                <span style="flex:1;">{{ __('nav.hr.group') }}</span>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                      style="flex-shrink:0;transition:transform .25s;" :style="{ transform: hr ? 'rotate(180deg)' : 'none' }">
                     <polyline points="6 9 12 15 18 9"/>
@@ -762,13 +762,13 @@
             </button>
             <div x-show="hr" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                 @php $hrItems = [
-                    ['r'=>'admin.hr.employees.index',  'p'=>'admin.hr.employees.*',  'l'=>'الموظفين',       'perm'=>'employees.view',
+                    ['r'=>'admin.hr.employees.index',  'p'=>'admin.hr.employees.*',  'l'=>__('nav.hr.employees'),       'perm'=>'employees.view',
                      'd'=>'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z'],
-                    ['r'=>'admin.hr.documents.index',  'p'=>'admin.hr.documents.*',  'l'=>'وثائق الشركة',   'perm'=>'employee-documents.view',
+                    ['r'=>'admin.hr.documents.index',  'p'=>'admin.hr.documents.*',  'l'=>__('nav.hr.documents'),   'perm'=>'employee-documents.view',
                      'd'=>'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6'],
-                    ['r'=>'admin.hr.leaves.index',     'p'=>'admin.hr.leaves.*',     'l'=>'الإجازات',       'perm'=>'employee-leaves.view',
+                    ['r'=>'admin.hr.leaves.index',     'p'=>'admin.hr.leaves.*',     'l'=>__('nav.hr.leaves'),       'perm'=>'employee-leaves.view',
                      'd'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
-                    ['r'=>'admin.hr.insurances.index', 'p'=>'admin.hr.insurances.*', 'l'=>'التأمين الطبي', 'perm'=>'employee-insurances.view',
+                    ['r'=>'admin.hr.insurances.index', 'p'=>'admin.hr.insurances.*', 'l'=>__('nav.hr.insurance'), 'perm'=>'employee-insurances.view',
                      'd'=>'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4'],
                 ] @endphp
                 @foreach($hrItems as $it)
@@ -793,13 +793,13 @@
         @endif
 
         @if($showPeopleGroup)
-        {{-- Section label: الأشخاص والعملاء --}}
+        {{-- Section label: {{ __('nav.people.group') }} --}}
         <div style="padding:10px 10px 4px;margin-top:4px;">
             <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
-                      text-transform:uppercase;color:#8fa3c0;margin:0;">الأشخاص والعملاء</p>
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">{{ __('nav.people.group') }}</p>
         </div>
 
-        {{-- -- GROUP: الأشخاص والعملاء -- --}}
+        {{-- -- GROUP: {{ __('nav.people.group') }} -- --}}
         <div style="margin-bottom:1px;">
             <button @click="p=!p"
                     style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
@@ -813,7 +813,7 @@
                     <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
                     <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
                 </svg>
-                <span style="flex:1;">الأشخاص والعملاء</span>
+                <span style="flex:1;">{{ __('nav.people.group') }}</span>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                      style="flex-shrink:0;transition:transform .25s;" :style="{ transform: p ? 'rotate(180deg)' : 'none' }">
                     <polyline points="6 9 12 15 18 9"/>
@@ -821,9 +821,9 @@
             </button>
             <div x-show="p" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                 @php $peopleItems = [
-                    ['r'=>'admin.clients.index', 'p'=>'admin.clients.*', 'l'=>'العملاء', 'perm'=>'clients.view',
+                    ['r'=>'admin.clients.index', 'p'=>'admin.clients.*', 'l'=>__('nav.people.clients'), 'perm'=>'clients.view',
                      'd'=>'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 7a4 4 0 100 8 4 4 0 000-8z'],
-                    ['r'=>'admin.agents.index',  'p'=>'admin.agents.*',  'l'=>'الوسطاء',  'perm'=>'agents.view',
+                    ['r'=>'admin.agents.index',  'p'=>'admin.agents.*',  'l'=>__('nav.people.agents'),  'perm'=>'agents.view',
                      'd'=>'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75'],
                 ] @endphp
                 @foreach($peopleItems as $it)
@@ -848,13 +848,13 @@
         @endif
 
         @if($showSettingsGroup)
-        {{-- Section label: الإعدادات --}}
+        {{-- Section label: {{ __('nav.settings.group') }} --}}
         <div style="padding:10px 10px 4px;">
             <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
-                      text-transform:uppercase;color:#8fa3c0;margin:0;">الإعدادات</p>
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">{{ __('nav.settings.group') }}</p>
         </div>
 
-        {{-- -- GROUP 1: الإعدادات العامة -- --}}
+        {{-- -- GROUP 1: {{ __('nav.settings.general') }} -- --}}
         <div style="margin-bottom:1px;">
             <button @click="s=!s"
                     style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;
@@ -867,7 +867,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="flex-shrink:0;">
                     <circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 014-4h4a4 4 0 014 4v2"/>
                 </svg>
-                <span style="flex:1;">الإعدادات العامة</span>
+                <span style="flex:1;">{{ __('nav.settings.general') }}</span>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                      style="flex-shrink:0;transition:transform .25s;" :style="{ transform: s ? 'rotate(180deg)' : 'none' }">
                     <polyline points="6 9 12 15 18 9"/>
@@ -875,13 +875,13 @@
             </button>
             <div x-show="s" x-collapse style="overflow:hidden;padding:2px 0 2px 6px;">
                 @php $items = [
-                    ['r'=>'admin.branches.index',        'p'=>'admin.branches.*',        'l'=>'الفروع',              'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14M20 7v14M9 21V11h6v10',                                          'perm'=>'branches.view'],
-                    ['r'=>'admin.cities.index',          'p'=>'admin.cities.*',          'l'=>'المدن',               'd'=>'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z',                  'perm'=>null],
-                    ['r'=>'admin.nationalities.index',   'p'=>'admin.nationalities.*',   'l'=>'الجنسيات',            'd'=>'M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6H10.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9',       'perm'=>'nationalities.view'],
-                    ['r'=>'admin.airports.index',        'p'=>'admin.airports.*',        'l'=>'المطارات',            'd'=>'M2.5 19h19M6.5 12.5L4 19 M17.5 12.5L20 19 M12 3L6.5 12.5h11L12 3z',                       'perm'=>'airports.view'],
-                    ['r'=>'admin.housings.index',        'p'=>'admin.housings.*',        'l'=>'السكن',               'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14h16V7M9 21V11h6v10',                                            'perm'=>'housings.view'],
-                    ['r'=>'admin.settings.roles.index',  'p'=>'admin.settings.roles.*',  'l'=>'الأدوار والصلاحيات', 'd'=>'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',                                             'perm'=>'roles.manage'],
-                    ['r'=>'admin.settings.admins.index', 'p'=>'admin.settings.admins.*', 'l'=>'المسؤولون',            'd'=>'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z',                 'perm'=>'admins.manage'],
+                    ['r'=>'admin.branches.index',        'p'=>'admin.branches.*',        'l'=>__('nav.settings.branches'),              'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14M20 7v14M9 21V11h6v10',                                          'perm'=>'branches.view'],
+                    ['r'=>'admin.cities.index',          'p'=>'admin.cities.*',          'l'=>__('nav.settings.cities'),               'd'=>'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z',                  'perm'=>null],
+                    ['r'=>'admin.nationalities.index',   'p'=>'admin.nationalities.*',   'l'=>__('nav.settings.nationalities'),            'd'=>'M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6H10.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9',       'perm'=>'nationalities.view'],
+                    ['r'=>'admin.airports.index',        'p'=>'admin.airports.*',        'l'=>__('nav.settings.airports'),            'd'=>'M2.5 19h19M6.5 12.5L4 19 M17.5 12.5L20 19 M12 3L6.5 12.5h11L12 3z',                       'perm'=>'airports.view'],
+                    ['r'=>'admin.housings.index',        'p'=>'admin.housings.*',        'l'=>__('nav.settings.housings'), 'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14h16V7M9 21V11h6v10',                                            'perm'=>'housings.view'],
+                    ['r'=>'admin.settings.roles.index',  'p'=>'admin.settings.roles.*',  'l'=>__('nav.settings.roles'), 'd'=>'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',                                             'perm'=>'roles.manage'],
+                    ['r'=>'admin.settings.admins.index', 'p'=>'admin.settings.admins.*', 'l'=>__('nav.settings.admins'),            'd'=>'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z',                 'perm'=>'admins.manage'],
                 ] @endphp
                 @foreach($items as $it)
                     @if($it['perm'] ? $can($it['perm']) : $admin->isSuperAdmin())
@@ -922,7 +922,7 @@
                     {{ $admin?->name }}
                 </p>
                 <p style="color:#475569;font-size:10px;line-height:1.2;margin:0;">
-                    {{ $admin?->roles->first()?->name ?? 'مدير عام' }}
+                    {{ $admin?->roles->first()?->name ?? __('nav.user.super_admin') }}
                 </p>
             </div>
         </div>
@@ -938,7 +938,7 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path d="M17 16l4-4m0 0l-4-4m4 4H7"/><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
                 </svg>
-                تسجيل الخروج
+                {{ __('nav.user.logout') }}
             </button>
         </form>
     </div>

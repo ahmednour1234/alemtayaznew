@@ -18,7 +18,8 @@ class StoreRecruitmentContractRequest extends FormRequest
             // Visa
             'visa_image'           => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
             'visa_type'            => ['nullable', 'in:domestic,rehabilitation'],
-            'visa_number'          => ['nullable', 'string', 'max:100'],
+            // رقم التأشيرة إلزامي — العقد لا يُنشأ بدونه
+            'visa_number'          => ['required', 'string', 'max:100'],
             'arrival_airport_id'   => ['nullable', 'exists:airports,id'],
             'origin_nationality_id' => ['nullable', 'exists:nationalities,id'],
             'delivery_city_id'     => ['nullable', 'exists:cities,id'],
@@ -57,6 +58,7 @@ class StoreRecruitmentContractRequest extends FormRequest
     {
         return [
             'worker_passport_number' => 'رقم جواز العاملة',
+            'visa_number'            => 'رقم التأشيرة',
         ];
     }
 }

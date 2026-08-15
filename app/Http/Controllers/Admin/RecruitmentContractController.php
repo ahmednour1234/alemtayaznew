@@ -115,7 +115,8 @@ class RecruitmentContractController extends Controller
             abort(403, 'إنشاء العقود مخصص لقسم خدمة العملاء فقط.');
         }
         $data = $this->formData();
-        $data['defaultBranch'] = $me->branch_id;
+        $data['defaultBranch']   = $me->branch_id;
+        $data['suggestedBranch'] = null;
 
         // قادم من شاشة حجز العاملة (?worker_id=&client_id=) — املأ النموذج مسبقاً
         $data['prefill'] = [
@@ -124,7 +125,7 @@ class RecruitmentContractController extends Controller
         ];
 
         if ($data['prefill']['worker_id']) {
-            $worker = Worker::find($data['prefill']['worker_id']);
+            $worker = Worker::with('assignedBy')->find($data['prefill']['worker_id']);
 
             // قائمة العاملات تعرض المتاحات فقط، والعاملة المحجوزة حالتها
             // «reserved» — نضيفها يدوياً وإلا اختفت من القائمة.
@@ -134,6 +135,13 @@ class RecruitmentContractController extends Controller
                     ->unique('id')
                     ->sortBy('name')
                     ->values();
+
+                // المدير العام لا فرع له، فيبقى حقل الفرع فارغاً ويتعذّر حفظ العقد.
+                // نقترح فرع من حجز العاملة، ثم فرع العاملة، ثم فرع العميل —
+                // مع إبقاء القائمة قابلة للتغيير لأن المدير العام يرى كل الفروع.
+                $data['suggestedBranch'] = $worker->assignedBy?->branch_id
+                    ?? $worker->branch_id
+                    ?? Client::find($data['prefill']['client_id'])?->branch_id;
             }
 
             // رقم الجواز يُعرض للتأكيد لأنه إلزامي لإتمام العقد

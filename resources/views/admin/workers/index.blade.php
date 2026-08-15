@@ -1,10 +1,34 @@
 @extends('admin.layouts.app')
-@section('title', 'العاملات - CV')
+@section('title', __('workers.title'))
 @section('content')
 @php
     // معرّفات العاملات التي لديها CV — فقط هذه يمكن إرسالها عبر واتساب
     $cvIds = $workers->filter(fn($w) => (bool) $w->cv_path)->pluck('id')->values();
+
+    // نصوص تُستخدم داخل JavaScript — تُمرَّر مترجمة مع علامة :count كما هي
+    $js = [
+        'wa_ready'    => __('workers.whatsapp.ready',       ['count' => ':count']),
+        'wa_all'      => __('workers.whatsapp.all_results', ['count' => ':count']),
+        'sel_page'    => __('workers.selection.page_only',  ['count' => ':count']),
+        'sel_all'     => __('workers.selection.select_all', ['count' => ':count']),
+        'sel_matched' => __('workers.selection.all_matched',['count' => ':count']),
+        'no_cv_warn'  => __('workers.whatsapp.no_cv_warning',['count' => ':count']),
+        'del_bulk'    => __('workers.delete.confirm_bulk',  ['count' => ':count']),
+        'send'        => __('common.actions.send'),
+        'preparing'   => __('workers.whatsapp.preparing'),
+        'no_cv_msg'   => __('workers.whatsapp.no_cv_msg'),
+        'fetch_fail'  => __('workers.whatsapp.fetch_failed'),
+        'msg_header'  => __('workers.whatsapp.msg_header'),
+        'batch_conf'  => __('workers.whatsapp.batch_confirm', ['count' => ':count', 'batches' => ':batches']),
+        'batch_next'  => __('workers.whatsapp.batch_next', ['current' => ':current', 'total' => ':total', 'next' => ':next']),
+        'limit_conf'  => __('workers.whatsapp.limit_confirm', ['limit' => ':limit', 'total' => ':total']),
+        'nationality' => __('common.fields.nationality'),
+        'worker'      => __('common.fields.worker'),
+    ];
 @endphp
+
+{{-- نصوص الترجمة لـ JavaScript — قبل Alpine حتى تكون جاهزة عند التهيئة --}}
+<script>const LANG = @json($js);</script>
 <div class="w-full" x-data="{
         selected: [],
         waPhone: '',
@@ -23,6 +47,13 @@
         clearAllMatching() { this.selectAllMatching = false; },
         selectNone() { this.selected = []; this.selectAllMatching = false; },
 
+        // استبدال :count وغيره في النصوص المترجمة
+        t(key, params = {}) {
+            let s = LANG[key] || key;
+            for (const [k, v] of Object.entries(params)) s = s.replaceAll(':' + k, v);
+            return s;
+        },
+
         // الإرسال — يفتح واتساب مباشرة بلا تحميل أي صفحة
         async sendSelected() {
             if (!this.waPhone || this.sending) return;
@@ -33,11 +64,11 @@
             // تأكيد عدد الرسائل التي ستُفتح
             const confirmBatches = (n, available) => {
                 if (available > n) {
-                    if (!confirm('سيتم إرسال أول ' + n + ' عاملة من أصل ' + available + ' (الحد الأقصى للعملية الواحدة).')) return false;
+                    if (!confirm(this.t('limit_conf', {limit: n, total: available}))) return false;
                 }
                 const batches = Math.ceil(n / PER);
                 if (batches > 1) {
-                    return confirm(n + ' عاملة لا تتسع في رسالة واحدة، فستُقسَّم على ' + batches + ' رسائل متتابعة. متابعة؟');
+                    return confirm(this.t('batch_conf', {count: n, batches: batches}));
                 }
                 return true;
             };
@@ -45,7 +76,7 @@
             // الحالة العادية: البيانات موجودة في الصفحة → إرسال فوري
             if (!this.selectAllMatching) {
                 const ids = this.selectedWithCv;
-                if (!ids.length) { alert('لا توجد عاملات لديها CV ضمن التحديد.'); return; }
+                if (!ids.length) { alert(LANG.no_cv_msg); return; }
                 const take = Math.min(ids.length, TOTAL);
                 if (!confirmBatches(take, ids.length)) return;
                 sendWhatsapp(ids.slice(0, take), this.waPhone);
@@ -63,12 +94,12 @@
                 if (!res.ok) throw new Error('fetch failed');
                 const data = await res.json();
 
-                if (!data.workers.length) { alert('لا توجد عاملات لديها CV ضمن النتائج.'); return; }
+                if (!data.workers.length) { alert(LANG.no_cv_msg); return; }
                 if (!confirmBatches(data.workers.length, data.count)) return;
 
                 openWhatsapp(data.workers, this.waPhone);
             } catch (e) {
-                alert('تعذّر جلب قائمة العاملات. حاول مرة أخرى.');
+                alert(LANG.fetch_fail);
             } finally {
                 this.sending = false;
             }
@@ -77,17 +108,17 @@
 
     {{-- Header --}}
     <div class="flex items-center justify-between mb-5">
-        <h2 class="text-xl font-bold text-slate-800">العاملات — إدارة CV</h2>
+        <h2 class="text-xl font-bold text-slate-800">{{ __('workers.title') }}</h2>
         <div class="flex gap-2">
             <a href="{{ route('admin.workers.bulk') }}"
                class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg font-medium flex items-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                رفع CV متعددة
+                {{ __('workers.bulk_upload') }}
             </a>
             <a href="{{ route('admin.workers.create') }}"
                class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg font-medium flex items-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                إضافة عاملة
+                {{ __('workers.add') }}
             </a>
         </div>
     </div>
@@ -96,43 +127,39 @@
     <form method="GET" class="bg-white rounded-xl shadow-sm p-4 mb-5">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1">الجنسية</label>
+                <label class="block text-xs font-medium text-slate-500 mb-1">{{ __('common.fields.nationality') }}</label>
                 <select name="nationality_id" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    <option value="">كل الجنسيات</option>
+                    <option value="">{{ __('workers.all_nats') }}</option>
                     @foreach($nationalities as $nat)
                     <option value="{{ $nat->id }}" {{ ($filters['nationality_id'] ?? '') == $nat->id ? 'selected' : '' }}>{{ $nat->name }}</option>
                     @endforeach
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1">الحالة</label>
+                <label class="block text-xs font-medium text-slate-500 mb-1">{{ __('common.fields.status') }}</label>
                 <select name="status" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    <option value="">كل الحالات</option>
-                    <option value="available"            {{ ($filters['status'] ?? '') === 'available'            ? 'selected' : '' }}>متاحة</option>
-                    <option value="reserved"             {{ ($filters['status'] ?? '') === 'reserved'             ? 'selected' : '' }}>محجوزة</option>
-                    <option value="assigned"             {{ ($filters['status'] ?? '') === 'assigned'             ? 'selected' : '' }}>تم التعيين</option>
-                    <option value="in_housing"           {{ ($filters['status'] ?? '') === 'in_housing'           ? 'selected' : '' }}>في السكن</option>
-                    <option value="sponsorship_transfer" {{ ($filters['status'] ?? '') === 'sponsorship_transfer' ? 'selected' : '' }}>نقل كفالة</option>
-                    <option value="deportation"          {{ ($filters['status'] ?? '') === 'deportation'          ? 'selected' : '' }}>تسفير</option>
-                    <option value="returned"             {{ ($filters['status'] ?? '') === 'returned'             ? 'selected' : '' }}>عودة</option>
+                    <option value="">{{ __('workers.all_statuses') }}</option>
+                    @foreach(__('workers.statuses') as $key => $label)
+                    <option value="{{ $key }}" {{ ($filters['status'] ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1">المهنة</label>
+                <label class="block text-xs font-medium text-slate-500 mb-1">{{ __('common.fields.profession') }}</label>
                 <select name="profession" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    <option value="">كل المهن</option>
+                    <option value="">{{ __('workers.all_profs') }}</option>
                     @foreach($professions as $key => $label)
                     <option value="{{ $key }}" {{ ($filters['profession'] ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-500 mb-1">بحث</label>
+                <label class="block text-xs font-medium text-slate-500 mb-1">{{ __('common.actions.search') }}</label>
                 <div class="flex gap-2">
-                    <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="اسم، جواز، هاتف..."
+                    <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="{{ __('workers.search_ph') }}"
                            class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    <button type="submit" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm">بحث</button>
-                    <a href="{{ route('admin.workers.index') }}" class="bg-slate-100 text-slate-600 px-3 py-2 rounded-lg text-sm">مسح</a>
+                    <button type="submit" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm">{{ __('common.actions.search') }}</button>
+                    <a href="{{ route('admin.workers.index') }}" class="bg-slate-100 text-slate-600 px-3 py-2 rounded-lg text-sm">{{ __('common.actions.clear') }}</a>
                 </div>
             </div>
         </div>
@@ -146,22 +173,22 @@
                 <svg class="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                 </svg>
-                <span class="text-sm font-semibold text-green-700">إرسال عبر واتساب</span>
+                <span class="text-sm font-semibold text-green-700">{{ __('workers.whatsapp.send') }}</span>
                 <span class="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full"
-                      x-text="selectAllMatching ? ('كل النتائج (' + totalMatching + ')') : (selectedWithCv.length + ' CV جاهز للإرسال')"></span>
+                      x-text="selectAllMatching ? t('wa_all', {count: totalMatching}) : t('wa_ready', {count: selectedWithCv.length})"></span>
             </div>
             <form @submit.prevent="sendSelected()" class="flex gap-2 flex-1 min-w-0">
-                <input type="tel" x-model="waPhone" placeholder="رقم الواتساب (مثال: 966501234567)"
+                <input type="tel" x-model="waPhone" placeholder="{{ __('workers.whatsapp.phone_ph') }}"
                        class="flex-1 border border-green-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 min-w-0" required>
                 <button type="submit" :disabled="sending || (!selectAllMatching && selectedWithCv.length === 0)"
                         class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg font-medium whitespace-nowrap disabled:bg-slate-300 disabled:cursor-not-allowed">
-                    <span x-text="sending ? 'جارٍ التحضير...' : 'إرسال'"></span>
+                    <span x-text="sending ? LANG.preparing : LANG.send"></span>
                 </button>
             </form>
 
             {{-- حذف جماعي --}}
             <form method="POST" action="{{ route('admin.workers.bulk-destroy') }}" class="inline"
-                  @submit="return confirm('حذف ' + actionCount + ' عاملة؟ العاملات المرتبطة بعقود استقدام لن تُحذف.')">
+                  @submit="return confirm(t('del_bulk', {count: actionCount}))">
                 @csrf @method('DELETE')
                 {{-- في وضع «كل النتائج» نرسل الفلاتر بدل آلاف المعرّفات --}}
                 <template x-if="selectAllMatching">
@@ -182,11 +209,11 @@
                 </template>
                 <button type="submit"
                         class="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-lg font-medium whitespace-nowrap">
-                    حذف المحدد (<span x-text="actionCount"></span>)
+                    {{ __('common.actions.bulk_delete') }} (<span x-text="actionCount"></span>)
                 </button>
             </form>
 
-            <button @click="selectNone()" class="text-sm text-slate-500 hover:text-slate-700">إلغاء التحديد</button>
+            <button @click="selectNone()" class="text-sm text-slate-500 hover:text-slate-700">{{ __('common.actions.deselect_all') }}</button>
         </div>
 
         {{-- تحديد كل النتائج عبر كل الصفحات --}}
@@ -194,34 +221,28 @@
              class="mt-3 pt-3 border-t border-green-200 text-sm">
             <template x-if="!selectAllMatching">
                 <div class="flex items-center gap-2 flex-wrap">
-                    <span class="text-slate-600">
-                        تم تحديد <strong x-text="pageIds.length"></strong> في هذه الصفحة فقط.
-                    </span>
+                    <span class="text-slate-600" x-text="t('sel_page', {count: pageIds.length})"></span>
                     <button type="button" @click="selectAllMatching = true"
-                            class="text-blue-600 hover:text-blue-800 font-semibold underline">
-                        تحديد كل النتائج المطابقة (<span x-text="totalMatching"></span>)
-                    </button>
+                            class="text-blue-600 hover:text-blue-800 font-semibold underline"
+                            x-text="t('sel_all', {count: totalMatching})"></button>
                 </div>
             </template>
             <template x-if="selectAllMatching">
                 <div class="flex items-center gap-2 flex-wrap">
-                    <span class="text-green-800 font-semibold">
-                        محدَّد الآن كل النتائج المطابقة للفلتر (<span x-text="totalMatching"></span>) عبر كل الصفحات.
-                    </span>
+                    <span class="text-green-800 font-semibold" x-text="t('sel_matched', {count: totalMatching})"></span>
                     <button type="button" @click="selectAllMatching = false"
                             class="text-slate-500 hover:text-slate-700 underline">
-                        الاكتفاء بهذه الصفحة
+                        {{ __('workers.selection.page_enough') }}
                     </button>
                 </div>
             </template>
         </div>
 
         {{-- تنبيه عند تحديد عاملات بلا CV --}}
-        <p x-show="!selectAllMatching && selectedNoCv.length > 0" x-cloak class="text-xs text-amber-700 mt-2">
-            <span x-text="selectedNoCv.length"></span> من المحددات بلا CV — ستُستبعد من الإرسال عبر واتساب، لكنها ستُحذف لو ضغطت «حذف المحدد».
-        </p>
+        <p x-show="!selectAllMatching && selectedNoCv.length > 0" x-cloak class="text-xs text-amber-700 mt-2"
+           x-text="t('no_cv_warn', {count: selectedNoCv.length})"></p>
         <p x-show="selectAllMatching" x-cloak class="text-xs text-amber-700 mt-2">
-            عند الإرسال عبر واتساب ستُرسل فقط العاملات التي لديها CV من ضمن النتائج المطابقة.
+            {{ __('workers.whatsapp.only_with_cv') }}
         </p>
     </div>
 
@@ -237,15 +258,15 @@
                                @change="selectAllMatching = false;
                                         selected = $event.target.checked ? [...pageIds] : []">
                     </th>
-                    <th>العاملة</th>
-                    <th>الجنسية</th>
-                    <th>المهنة</th>
-                    <th>الخبرة</th>
-                    <th>الحالة</th>
-                    <th>العميل</th>
-                    <th>حجزها</th>
-                    <th>CV</th>
-                    <th>الإجراءات</th>
+                    <th>{{ __('workers.worker') }}</th>
+                    <th>{{ __('common.fields.nationality') }}</th>
+                    <th>{{ __('common.fields.profession') }}</th>
+                    <th>{{ __('common.fields.experience') }}</th>
+                    <th>{{ __('common.fields.status') }}</th>
+                    <th>{{ __('common.fields.client') }}</th>
+                    <th>{{ __('workers.reserved_by') }}</th>
+                    <th>{{ __('workers.cv') }}</th>
+                    <th>{{ __('common.fields.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -258,7 +279,7 @@
                 <td>
                     <div class="font-medium text-slate-800 text-sm">{{ $w->name ?: '—' }}</div>
                     @if($w->passport_number)
-                    <div class="text-xs text-slate-400">جواز: {{ $w->passport_number }}</div>
+                    <div class="text-xs text-slate-400">{{ __('common.fields.passport_number') }}: {{ $w->passport_number }}</div>
                     @endif
                 </td>
                 <td>
@@ -297,29 +318,29 @@
                         PDF
                     </a>
                     @else
-                    <span class="text-xs text-slate-400">لا يوجد</span>
+                    <span class="text-xs text-slate-400">{{ __('workers.no_cv') }}</span>
                     @endif
                 </td>
                 <td>
                     <div class="flex items-center gap-1">
                         <a href="{{ route('admin.workers.show', $w->id) }}"
-                           class="text-xs text-slate-500 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 px-2 py-1 rounded-lg">عرض</a>
+                           class="text-xs text-slate-500 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 px-2 py-1 rounded-lg">{{ __('common.actions.view') }}</a>
                         <a href="{{ route('admin.workers.edit', $w->id) }}"
-                           class="text-xs text-slate-500 hover:text-emerald-600 bg-slate-100 hover:bg-emerald-50 px-2 py-1 rounded-lg">تعديل</a>
+                           class="text-xs text-slate-500 hover:text-emerald-600 bg-slate-100 hover:bg-emerald-50 px-2 py-1 rounded-lg">{{ __('common.actions.edit') }}</a>
                         @if($w->status !== 'assigned')
                         <a href="{{ route('admin.workers.assign', $w->id) }}"
-                           class="text-xs text-white bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded-lg">تعيين</a>
+                           class="text-xs text-white bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded-lg">{{ __('common.actions.assign') }}</a>
                         @else
                         <form action="{{ route('admin.workers.unassign', $w->id) }}" method="POST" class="inline"
-                              onsubmit="return confirm('إلغاء تعيين العاملة وإرجاعها متاحة؟')">
+                              onsubmit="return confirm('{{ __('workers.assign.unassigned') }}')">
                             @csrf
-                            <button type="submit" class="text-xs text-amber-700 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded-lg">إلغاء التعيين</button>
+                            <button type="submit" class="text-xs text-amber-700 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded-lg">{{ __('common.actions.unassign') }}</button>
                         </form>
                         @endif
                         <form action="{{ route('admin.workers.destroy', $w->id) }}" method="POST" class="inline"
-                              onsubmit="return confirm('حذف هذه العاملة؟')">
+                              onsubmit="return confirm('{{ __('workers.delete.confirm_one') }}')">
                             @csrf @method('DELETE')
-                            <button type="submit" class="text-xs text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2 py-1 rounded-lg">حذف</button>
+                            <button type="submit" class="text-xs text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2 py-1 rounded-lg">{{ __('common.actions.delete') }}</button>
                         </form>
                     </div>
                 </td>
@@ -333,8 +354,8 @@
         @else
         <div class="text-center py-16 text-slate-400">
             <svg class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            <p class="text-sm">لا توجد عاملات</p>
-            <a href="{{ route('admin.workers.bulk') }}" class="mt-3 inline-block text-sm text-blue-600 hover:underline">رفع CVs الآن</a>
+            <p class="text-sm">{{ __('workers.no_workers') }}</p>
+            <a href="{{ route('admin.workers.bulk') }}" class="mt-3 inline-block text-sm text-blue-600 hover:underline">{{ __('workers.upload_now') }}</a>
         </div>
         @endif
     </div>
@@ -345,21 +366,21 @@
         <button @click="open=!open"
                 class="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 font-medium">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-            المحذوفون ({{ $trashed->count() }})
+            {{ __('workers.trashed') }} ({{ $trashed->count() }})
             <svg class="w-3 h-3 transition-transform" :class="open?'rotate-180':''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
         </button>
         <div x-show="open" x-collapse class="mt-3 bg-white rounded-xl shadow-sm overflow-hidden">
             <table class="data-table w-full">
-                <thead><tr><th>العاملة</th><th>الجنسية</th><th>استعادة</th></tr></thead>
+                <thead><tr><th>{{ __('workers.worker') }}</th><th>{{ __('common.fields.nationality') }}</th><th>{{ __('common.actions.restore') }}</th></tr></thead>
                 <tbody>
                 @foreach($trashed as $w)
                 <tr>
-                    <td class="text-sm text-slate-600">{{ $w->name ?: 'بدون اسم' }}</td>
+                    <td class="text-sm text-slate-600">{{ $w->name ?: __('workers.no_name') }}</td>
                     <td class="text-sm text-slate-600">{{ $w->nationality?->name ?? '—' }}</td>
                     <td>
                         <form action="{{ route('admin.workers.restore', $w->id) }}" method="POST" class="inline">
                             @csrf
-                            <button type="submit" class="text-xs text-emerald-600 hover:text-emerald-800 bg-emerald-50 px-3 py-1 rounded-lg">استعادة</button>
+                            <button type="submit" class="text-xs text-emerald-600 hover:text-emerald-800 bg-emerald-50 px-3 py-1 rounded-lg">{{ __('common.actions.restore') }}</button>
                         </form>
                     </td>
                 </tr>
@@ -407,18 +428,18 @@ function openWhatsapp(workers, waPhone) {
 
     const buildMessage = (batch, batchIndex) => {
         const header = batches.length > 1
-            ? `*مجموعة CV عاملات للمراجعة (${batchIndex + 1}/${batches.length})*`
-            : '*مجموعة CV عاملات للمراجعة*';
+            ? `*${LANG.msg_header} (${batchIndex + 1}/${batches.length})*`
+            : `*${LANG.msg_header}*`;
 
         const lines  = [header, ''];
         const offset = batchIndex * PER;
 
         batch.forEach((w, i) => {
             const num  = offset + i + 1;
-            const name = (w.name || ('عاملة ' + num)).trim();
+            const name = (w.name || (LANG.worker + ' ' + num)).trim();
 
             lines.push(`*${num}.* ${ltr(name)}`);
-            if (w.nationality) lines.push(`الجنسية: ${w.nationality}`);
+            if (w.nationality) lines.push(`${LANG.nationality}: ${w.nationality}`);
             lines.push(ltr(w.cv_url));
             lines.push('');                  // سطر فارغ يفصل كل عاملة
         });
@@ -433,7 +454,9 @@ function openWhatsapp(workers, waPhone) {
     if (batches.length > 1) {
         setTimeout(() => {
             for (let b = 1; b < batches.length; b++) {
-                if (!confirm(`تم فتح الرسالة ${b} من ${batches.length}. أرسلها ثم اضغط «موافق» لفتح الرسالة ${b + 1}.`)) return;
+                const msg = LANG.batch_next
+                    .replaceAll(':current', b).replaceAll(':total', batches.length).replaceAll(':next', b + 1);
+                if (!confirm(msg)) return;
                 window.open('https://wa.me/' + clean + '?text=' + encodeURIComponent(buildMessage(batches[b], b)), '_blank');
             }
         }, 600);
@@ -446,7 +469,7 @@ function sendWhatsapp(selected, waPhone) {
 
     const workers = workerCvData.filter(w => selected.includes(w.id) && w.cv_url);
     if (!workers.length) {
-        alert('العاملات المحددة لا تحتوي على CV');
+        alert(LANG.no_cv_msg);
         return;
     }
 

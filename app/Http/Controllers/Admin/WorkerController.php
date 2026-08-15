@@ -351,6 +351,10 @@ class WorkerController extends Controller
     {
         $worker = $this->service->find($id);
 
+        // «حجز وإنشاء عقد» يذهب مباشرة لنموذج العقد، وهناك رقم الجواز والتأشيرة
+        // إلزاميان — نفرضهما هنا بدل أن يكتشف المستخدم النقص في الشاشة التالية.
+        $goingToContract = $request->boolean('create_contract');
+
         $request->validate([
             'assignee' => ['required', 'string'],
             // رقم الجواز إلزامي لإتمام الحجز — يُقبل من النموذج أو يكون مسجّلاً مسبقاً
@@ -359,9 +363,16 @@ class WorkerController extends Controller
                 'string',
                 'max:50',
             ],
-            // رقم التأشيرة اختياري
-            'visa_number' => ['nullable', 'string', 'max:50'],
-        ], [], [
+            // رقم التأشيرة إلزامي فقط عند إنشاء العقد مباشرة
+            'visa_number' => [
+                $goingToContract && ! $worker->visa_number ? 'required' : 'nullable',
+                'string',
+                'max:50',
+            ],
+        ], [
+            'passport_number.required' => 'رقم جواز العاملة مطلوب لإنشاء عقد الاستقدام.',
+            'visa_number.required'     => 'رقم التأشيرة مطلوب لإنشاء عقد الاستقدام مباشرة.',
+        ], [
             'passport_number' => 'رقم جواز العاملة',
             'visa_number'     => 'رقم التأشيرة',
         ]);
@@ -417,7 +428,7 @@ class WorkerController extends Controller
         }
 
         // زر «حجز وإنشاء عقد» → ينتقل مباشرة لشاشة عقد الاستقدام بالبيانات جاهزة
-        if ($request->boolean('create_contract')) {
+        if ($goingToContract) {
             return redirect()->route('admin.contracts.create', [
                 'worker_id' => $id,
                 'client_id' => $clientId,

@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Run the Laravel scheduler on every web request (at most once per minute)
         $middleware->web(\App\Http\Middleware\RunScheduler::class);
 
+        // يضبط لغة الواجهة من الجلسة (ar / en / fil / si)
+        $middleware->web(\App\Http\Middleware\SetLocale::class);
+
         $middleware->alias([
             'auth.admin'      => \App\Http\Middleware\AdminAuthenticate::class,
             'permission'      => \App\Http\Middleware\CheckPermission::class,

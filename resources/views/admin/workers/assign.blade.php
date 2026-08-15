@@ -136,16 +136,18 @@
                             <label class="block text-xs font-medium text-slate-600 mb-1">
                                 رقم الجواز <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" name="passport_number" required
+                            <input type="text" name="passport_number" id="passportNumberInput" required
                                    value="{{ old('passport_number', $worker->passport_number) }}"
                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 @error('passport_number') border-red-400 @enderror">
                             @error('passport_number')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">
-                                رقم التأشيرة <span class="text-slate-400 font-normal">(اختياري)</span>
+                                رقم التأشيرة
+                                <span class="text-slate-400 font-normal">(مطلوب عند إنشاء العقد مباشرة)</span>
                             </label>
-                            <input type="text" name="visa_number" value="{{ old('visa_number', $worker->visa_number) }}"
+                            <input type="text" name="visa_number" id="visaNumberInput"
+                                   value="{{ old('visa_number', $worker->visa_number) }}"
                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 @error('visa_number') border-red-400 @enderror">
                             @error('visa_number')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
@@ -179,8 +181,10 @@
                 </div>
 
                 <div class="flex flex-wrap gap-3">
+                    {{-- إنشاء العقد مباشرة يتطلب رقم الجواز والتأشيرة — نتحقق قبل الإرسال --}}
                     <button type="submit" name="create_contract" value="1"
                             @if($clients->isEmpty() && $leads->isEmpty()) disabled @endif
+                            onclick="return requireContractFields()"
                             class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm px-6 py-2.5 rounded-lg font-medium inline-flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6m5 7H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -259,6 +263,27 @@
 
 @push('scripts')
 <script>
+/**
+ * «حجز وإنشاء عقد استقدام» ينتقل مباشرة لنموذج العقد حيث رقم الجواز
+ * والتأشيرة إلزاميان — نمنع الإرسال هنا بدل اكتشاف النقص في الشاشة التالية.
+ */
+function requireContractFields() {
+    var passport = document.getElementById('passportNumberInput');
+    var visa     = document.getElementById('visaNumberInput');
+
+    if (passport && !passport.value.trim()) {
+        alert('رقم جواز العاملة مطلوب لإنشاء عقد الاستقدام.');
+        passport.focus();
+        return false;
+    }
+    if (visa && !visa.value.trim()) {
+        alert('رقم التأشيرة مطلوب لإنشاء عقد الاستقدام مباشرة.');
+        visa.focus();
+        return false;
+    }
+    return true;
+}
+
 (function() {
     // ── Tom Select init for this page ──────────────────────────────────────────
     function initAssignSelect() {

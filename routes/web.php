@@ -38,6 +38,9 @@ use Illuminate\Support\Facades\Route;
 // ── Redirect root to admin dashboard ─────────────────────────────────────────
 Route::get('/', fn() => redirect()->route('admin.login'));
 
+// ── Language switch (ar / en / fil / si) ─────────────────────────────────────
+Route::get('/locale/{locale}', [\App\Http\Controllers\LocaleController::class, 'switch'])->name('locale.switch');
+
 // ── Public contract tracking ──────────────────────────────────────────────────
 Route::get('/track', [RecruitmentContractController::class, 'publicTrack'])->name('contract.track');
 

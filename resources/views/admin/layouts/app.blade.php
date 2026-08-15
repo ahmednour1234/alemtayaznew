@@ -1,10 +1,16 @@
+﻿@php
+    $locales    = config('locales.supported');
+    $currentLoc = app()->getLocale();
+    $locConf    = $locales[$currentLoc] ?? $locales[config('locales.default')];
+    $dir        = $locConf['dir'];
+@endphp
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="{{ $currentLoc }}" dir="{{ $dir }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'لوحة التحكم') - نظام الامتياز للاستقدام</title>
+    <title>@yield('title', __('common.dashboard')) - {{ __('common.system') }}</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -18,7 +24,7 @@
                         ink: { DEFAULT: '#0f172a', muted: '#64748b', faint: '#94a3b8' },
                         border: '#e8edf5',
                     },
-                    fontFamily: { sans: ['Cairo', 'sans-serif'] },
+                    fontFamily: { sans: @json($locConf['font_stack']) },
                     boxShadow: {
                         card: '0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04)',
                         'card-hover': '0 4px 16px rgba(15,23,42,.10), 0 2px 4px rgba(15,23,42,.06)',
@@ -30,7 +36,7 @@
     </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family={{ $locConf['google_font'] }}&display=swap" rel="stylesheet">
     <!-- Tom Select -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.default.min.css">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
@@ -55,12 +61,14 @@
             --border: #e8edf5;
             --radius: 12px;
         }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+        /* الخط والاتجاه يتغيّران حسب اللغة المختارة */
+        :root { --app-font: {{ implode(', ', array_map(fn($f) => str_contains($f, ' ') ? "'$f'" : $f, $locConf['font_stack'])) }}; --app-dir: {{ $dir }}; }
+        body { font-family: var(--app-font); background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
         [x-cloak] { display: none !important; }
 
         /* ── Sidebar ── */
         #sidebar {
-            position: fixed; top: 0; right: 0;
+            position: fixed; top: 0; inset-inline-end: 0;
             width: var(--sidebar-w); height: 100vh;
             background: #0f172a;
             display: flex; flex-direction: column;
@@ -68,7 +76,9 @@
             transition: transform .25s cubic-bezier(.4,0,.2,1);
             overflow: hidden;
         }
-        #sidebar.collapsed { transform: translateX(100%); }
+        /* الإخفاء نحو الحافة الخارجية — يعكس اتجاهه حسب اللغة */
+        [dir="rtl"] #sidebar.collapsed { transform: translateX(100%); }
+        [dir="ltr"] #sidebar.collapsed { transform: translateX(-100%); }
 
         /* Sidebar nav link */
         .nav-link {
@@ -89,12 +99,12 @@
 
         /* ── Main wrapper ── */
         #main-wrap {
-            margin-right: var(--sidebar-w);
+            margin-inline-end: var(--sidebar-w);
             display: flex; flex-direction: column; min-height: 100vh;
-            transition: margin-right .25s cubic-bezier(.4,0,.2,1);
+            transition: margin-inline-end .25s cubic-bezier(.4,0,.2,1);
             min-width: 0; overflow-x: hidden;
         }
-        #main-wrap.expanded { margin-right: 0; }
+        #main-wrap.expanded { margin-inline-end: 0; }
         main { min-width: 0; overflow-x: hidden; }
 
         /* ── Topbar ── */
@@ -152,7 +162,7 @@
             width: 100%; background: #f1f5f9;
             border: 1.5px solid transparent; border-radius: 10px;
             padding: 8px 36px 8px 14px;
-            font-size: 13px; color: var(--ink); font-family: 'Cairo', sans-serif;
+            font-size: 13px; color: var(--ink); font-family: var(--app-font);
             transition: border-color .15s, background .15s;
             outline: none;
         }
@@ -212,7 +222,7 @@
             gap: 3px;
             color: #64748b; font-size: 10px; font-weight: 600;
             text-decoration: none;
-            font-family: 'Cairo', sans-serif;
+            font-family: var(--app-font);
             transition: color .15s, background .15s;
             padding: 4px 2px;
         }
@@ -223,8 +233,8 @@
             #sidebar {
                 box-shadow: -6px 0 32px rgba(0,0,0,.45);
             }
-            #main-wrap { margin-right: 0 !important; }
-            #main-wrap.expanded { margin-right: 0 !important; }
+            #main-wrap { margin-inline-end: 0 !important; }
+            #main-wrap.expanded { margin-inline-end: 0 !important; }
             #topbar { height: 58px !important; padding: 0 10px !important; }
             .topbar-search-wrap { display: none !important; }
             .topbar-fullscreen  { display: none !important; }
@@ -249,12 +259,12 @@
 
     <!-- Tom Select RTL Theme -->
     <style>
-        .ts-wrapper { direction: rtl; font-family: 'Cairo', sans-serif; }
+        .ts-wrapper { direction: var(--app-dir); font-family: var(--app-font); }
         .ts-wrapper .ts-control {
             border: 1.5px solid #e2e8f0;
             border-radius: 8px;
             padding: 6px 10px 6px 32px;
-            font-family: 'Cairo', sans-serif;
+            font-family: var(--app-font);
             font-size: 13px;
             background: #fff;
             min-height: 38px;
@@ -284,9 +294,9 @@
             border: 1px solid #e2e8f0;
             border-radius: 10px;
             box-shadow: 0 8px 30px rgba(15,23,42,.13);
-            font-family: 'Cairo', sans-serif;
+            font-family: var(--app-font);
             font-size: 13px;
-            direction: rtl;
+            direction: var(--app-dir);
             z-index: 9999;
             margin-top: 4px;
             overflow: hidden;
@@ -305,11 +315,11 @@
             border: none;
             border-bottom: 1.5px solid #e8edf5;
             padding: 8px 12px;
-            font-family: 'Cairo', sans-serif;
+            font-family: var(--app-font);
             font-size: 13px;
             width: 100%;
             outline: none;
-            direction: rtl;
+            direction: var(--app-dir);
             background: #fafafa;
         }
         .ts-dropdown input.dropdown-input:focus { border-bottom-color: #c9a84c; background: #fff; }
@@ -394,7 +404,7 @@
                 <rect x="3" y="14" width="7" height="7" rx="1.5"/>
                 <rect x="14" y="14" width="7" height="7" rx="1.5"/>
             </svg>
-            الرئيسية
+            {{ __('common.home') }}
         </a>
         <a href="{{ route('admin.contracts.index') }}"
            class="bnav-item {{ request()->routeIs('admin.contracts.*') ? 'active' : '' }}">
@@ -404,7 +414,7 @@
                 <line x1="16" y1="13" x2="8" y2="13"/>
                 <line x1="16" y1="17" x2="8" y2="17"/>
             </svg>
-            العقود
+            {{ __('nav.contracts.group') }}
         </a>
         <a href="{{ route('admin.incomes.index') }}"
            class="bnav-item {{ request()->routeIs('admin.incomes.*','admin.expenses.*','admin.transfers.*','admin.reports.*') ? 'active' : '' }}">
@@ -412,7 +422,7 @@
                 <rect x="2" y="5" width="20" height="14" rx="2"/>
                 <path d="M2 10h20"/>
             </svg>
-            المالية
+            {{ __('nav.finance.group') }}
         </a>
         <a href="{{ route('admin.clients.index') }}"
            class="bnav-item {{ request()->routeIs('admin.clients.*','admin.agents.*','admin.workers.*') ? 'active' : '' }}">
@@ -421,7 +431,7 @@
                 <circle cx="9" cy="7" r="4"/>
                 <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
             </svg>
-            العملاء
+            {{ __('nav.people.clients') }}
         </a>
         <a href="#" @click.prevent="open = !open"
            class="bnav-item" :class="open ? 'active' : ''">
@@ -430,7 +440,7 @@
                 <line x1="3" y1="12" x2="21" y2="12"/>
                 <line x1="3" y1="18" x2="21" y2="18"/>
             </svg>
-            القائمة
+            {{ __('nav.menu') }}
         </a>
     </nav>
 </div>
@@ -447,10 +457,10 @@ function initTomSelects(root) {
             allowEmptyOption: true,
             plugins: [],
             searchField: ['text'],
-            placeholder: el.options[0] ? el.options[0].text : 'اختر...',
+            placeholder: el.options[0] ? el.options[0].text : @json(__('nav.choose_ph')),
             render: {
                 no_results: function() {
-                    return '<div class="no-results">لا توجد نتائج</div>';
+                    return '<div class="no-results">' + @json(__('nav.no_result')) + '</div>';
                 }
             }
         };

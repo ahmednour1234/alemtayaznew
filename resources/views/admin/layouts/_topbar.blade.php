@@ -29,13 +29,13 @@
     width: 100%; background: #f8fafc;
     border: 1.5px solid #e8edf5; border-radius: 12px;
     padding: 9px 38px 9px 14px; font-size: 13px; color: #0f172a;
-    font-family: 'Cairo', sans-serif; transition: all .18s ease; outline: none;
+    font-family: var(--app-font); transition: all .18s ease; outline: none;
 }
 .tb-search-input::placeholder { color: #b0bec5; }
 .tb-search-input:focus { background:#fff; border-color:#c9a84c; box-shadow:0 0 0 3px rgba(201,168,76,.13); }
 /* ── Global Search Dropdown ── */
 .gs-dropdown {
-    position:absolute; top:calc(100% + 6px); right:0; left:0;
+    position:absolute; top:calc(100% + 6px); inset-inline:0;
     background:#fff; border-radius:14px; border:1.5px solid #e8edf5;
     box-shadow:0 20px 60px rgba(15,23,42,.16),0 4px 16px rgba(15,23,42,.08);
     overflow:hidden; z-index:9999; max-height:420px; overflow-y:auto;
@@ -56,7 +56,7 @@
 }
 .gs-item-title { font-size:13px; font-weight:600; color:#1e293b; line-height:1.2; }
 .gs-item-sub   { font-size:11px; color:#94a3b8; margin-top:1px; }
-.gs-badge      { font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; margin-right:auto; }
+.gs-badge      { font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; margin-inline-start:auto; }
 .gs-empty      { padding:28px 14px; text-align:center; color:#94a3b8; font-size:13px; }
 .gs-spinner    { width:16px; height:16px; border:2px solid #e2e8f0; border-top-color:#c9a84c; border-radius:50%; animation:gsSpin .6s linear infinite; }
 @keyframes gsSpin { to { transform:rotate(360deg); } }
@@ -68,7 +68,7 @@
 .tb-icon-btn:hover { background: #f1f5f9; color: #0f172a; }
 .tb-icon-btn:focus { outline: none; }
 .tb-notif-badge {
-    position: absolute; top: 4px; left: 4px;
+    position: absolute; top: 4px; inset-inline-start: 4px;
     min-width: 16px; height: 16px; border-radius: 10px;
     background: linear-gradient(135deg,#ef4444,#f97316);
     color: #fff; font-size: 9px; font-weight: 800;
@@ -95,15 +95,15 @@
     box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px rgba(201,168,76,.4);
 }
 .tb-notif-panel {
-    position: absolute; top: calc(100% + 10px); left: 0;
+    position: absolute; top: calc(100% + 10px); inset-inline-start: 0;
     width: 360px; background: #fff; border-radius: 16px;
     box-shadow: 0 20px 60px rgba(15,23,42,.16),0 4px 16px rgba(15,23,42,.08);
     border: 1px solid #e8edf5; z-index: 9999; overflow: hidden;
-    transform-origin: top left;
+    transform-origin: top start;
 }
 .tb-drop-panel {
-    position: absolute; left: 0; top: calc(100% + 8px);
-    width: 230px; direction: rtl; background: #fff; border-radius: 14px;
+    position: absolute; inset-inline-start: 0; top: calc(100% + 8px);
+    width: 230px; direction: var(--app-dir); background: #fff; border-radius: 14px;
     box-shadow: 0 20px 60px rgba(15,23,42,.16),0 4px 16px rgba(15,23,42,.08);
     border: 1px solid #e8edf5; padding: 6px; z-index: 200;
 }
@@ -111,7 +111,7 @@
     display: flex; align-items: center; gap: 9px;
     padding: 9px 11px; border-radius: 8px; font-size: 13px; color: #475569;
     text-decoration: none; transition: background .12s; cursor: pointer;
-    border: none; background: transparent; width: 100%; font-family: 'Cairo', sans-serif;
+    border: none; background: transparent; width: 100%; font-family: var(--app-font);
 }
 .tb-drop-item:hover { background: #f8fafc; }
 .tb-drop-item.tb-danger { color: #ef4444; }
@@ -131,7 +131,7 @@
     {{-- ─── 1 · RIGHT: toggle + title ─── --}}
     <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
 
-        <button @click="open = !open" class="tb-toggle" title="القائمة الجانبية">
+        <button @click="open = !open" class="tb-toggle" title="{{ __('topbar.sidebar_toggle') }}">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                 <line x1="3" y1="6"  x2="21" y2="6"/>
                 <line x1="3" y1="12" x2="21" y2="12"/>
@@ -141,17 +141,17 @@
 
         <div style="min-width:0;padding-right:10px;border-right:3px solid #c9a84c;">
             <p style="font-size:15px;font-weight:800;color:#0f172a;margin:0;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                @yield('title', 'لوحة التحكم')
+                @yield('title', __('nav.dashboard'))
             </p>
             <div class="tb-breadcrumb">
                 <a href="{{ route('admin.dashboard') }}">
                     <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-left:2px;">
                         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                         <polyline points="9 22 9 12 15 12 15 22"/>
-                    </svg>الرئيسية
+                    </svg>{{ __('common.home') }}
                 </a>
                 <span class="crumb-sep">›</span>
-                <span class="crumb-cur">@yield('title', 'لوحة التحكم')</span>
+                <span class="crumb-cur">@yield('title', __('nav.dashboard'))</span>
             </div>
         </div>
     </div>
@@ -218,14 +218,14 @@
             {{-- Clear button --}}
             <button x-show="query.length > 0" @click="query='';results=[];open=false;"
                     style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;line-height:1;font-size:16px;padding:0;z-index:1;"
-                    title="مسح">×</button>
+                    title="{{ __('common.actions.clear') }}">×</button>
 
             <input type="text"
                    x-model="query"
                    @input="onInput()"
                    @focus="if(results.length) open=true"
                    @keydown.arrow-down.prevent="$refs.dropdown?.querySelector('a')?.focus()"
-                   placeholder="ابحث في النظام... (عاملات، عملاء، عقود...)"
+                   placeholder="{{ __('topbar.search.placeholder') }}"
                    class="tb-search-input"
                    autocomplete="off">
 
@@ -240,7 +240,7 @@
 
                 {{-- Loading state --}}
                 <div x-show="loading" style="padding:20px 14px;display:flex;align-items:center;gap:10px;color:#64748b;font-size:13px;">
-                    <div class="gs-spinner"></div> جاري البحث...
+                    <div class="gs-spinner"></div> {{ __('topbar.search.searching') }}
                 </div>
 
                 {{-- No results --}}
@@ -248,7 +248,7 @@
                     <svg width="32" height="32" fill="none" stroke="#cbd5e1" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 8px;display:block;">
                         <circle cx="11" cy="11" r="8" fill="none"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                     </svg>
-                    لا توجد نتائج لـ "<span x-text="query" style="color:#334155;font-weight:600;"></span>"
+                    {{ __('topbar.search.no_results') }} "<span x-text="query" style="color:#334155;font-weight:600;"></span>"
                 </div>
 
                 {{-- Results --}}
@@ -269,7 +269,7 @@
                             </a>
                         </template>
                         <div style="padding:8px 14px;font-size:11px;color:#94a3b8;text-align:center;border-top:1px solid #f1f5f9;">
-                            <span x-text="results.length"></span> نتيجة — اضغط Enter للبحث الكامل
+                            <span x-text="results.length"></span> {{ __('topbar.search.result') }} — {{ __('topbar.search.press') }} Enter {{ __('topbar.search.full_search') }}
                         </div>
                     </div>
                 </template>
@@ -283,7 +283,7 @@
         {{-- Fullscreen --}}
         <button class="tb-icon-btn tb-fullscreen topbar-fullscreen"
                 onclick="document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()"
-                title="ملء الشاشة">
+                title="{{ __('topbar.fullscreen') }}">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
                 <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
             </svg>
@@ -291,7 +291,7 @@
 
         {{-- Notifications --}}
         <div x-data="{ notifOpen: false }" style="position:relative;">
-            <button @click="notifOpen = !notifOpen" class="tb-icon-btn" title="الإشعارات">
+            <button @click="notifOpen = !notifOpen" class="tb-icon-btn" title="{{ __('topbar.notifications.title') }}">
                 <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
                     <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                     <path d="M13.73 21a2 2 0 01-3.46 0"/>
@@ -326,9 +326,9 @@
                             </svg>
                         </div>
                         <div>
-                            <p style="font-size:13px;font-weight:700;color:#0f172a;margin:0;line-height:1.2;">الإشعارات</p>
+                            <p style="font-size:13px;font-weight:700;color:#0f172a;margin:0;line-height:1.2;">{{ __('topbar.notifications.title') }}</p>
                             @if($unreadNotifCount > 0)
-                            <p style="font-size:11px;color:#94a3b8;margin:0;">{{ $unreadNotifCount }} غير مقروء</p>
+                            <p style="font-size:11px;color:#94a3b8;margin:0;">{{ $unreadNotifCount }} {{ __('topbar.notifications.unread') }}</p>
                             @endif
                         </div>
                     </div>
@@ -341,14 +341,14 @@
                                            border:1px solid #fde68a;border-radius:6px;
                                            cursor:pointer;padding:3px 8px;font-family:Cairo,sans-serif;font-weight:600;"
                                     onmouseover="this.style.background='#fef3c7'"
-                                    onmouseout="this.style.background='#fdf8e8'">✓ تحديد الكل</button>
+                                    onmouseout="this.style.background='#fdf8e8'">✓ {{ __('topbar.notifications.mark_all') }}</button>
                         </form>
                         @endif
                         <a href="{{ route('admin.notifications.index') }}"
                            style="font-size:11px;color:#64748b;text-decoration:none;
                                   padding:3px 8px;border-radius:6px;background:#f1f5f9;font-weight:500;"
                            onmouseover="this.style.background='#e2e8f0'"
-                           onmouseout="this.style.background='#f1f5f9'">عرض الكل</a>
+                           onmouseout="this.style.background='#f1f5f9'">{{ __('topbar.notifications.view_all') }}</a>
                     </div>
                 </div>
 
@@ -392,7 +392,7 @@
                                 <path d="M13.73 21a2 2 0 01-3.46 0"/>
                             </svg>
                         </div>
-                        <p style="font-size:13px;font-weight:600;color:#cbd5e1;margin:0;">لا توجد إشعارات</p>
+                        <p style="font-size:13px;font-weight:600;color:#cbd5e1;margin:0;">{{ __('topbar.notifications.empty') }}</p>
                     </div>
                     @endforelse
                 </div>
@@ -411,10 +411,10 @@
                 <div class="tb-avatar">{{ $initials }}</div>
                 <div class="tb-user-info-text" style="text-align:right;line-height:1.3;flex-shrink:0;">
                     <p style="font-size:13px;font-weight:700;color:#0f172a;margin:0;white-space:nowrap;">
-                        {{ $authAdmin?->name ?? 'المدير' }}
+                        {{ $authAdmin?->name ?? __('topbar.manager') }}
                     </p>
                     <p style="font-size:11px;color:#94a3b8;margin:0;white-space:nowrap;">
-                        {{ $authAdmin?->roles->first()?->name ?? 'مدير عام' }}
+                        {{ $authAdmin?->roles->first()?->name ?? __('nav.user.super_admin') }}
                     </p>
                 </div>
                 <svg class="tb-chevron" width="11" height="11" fill="none"
@@ -448,7 +448,7 @@
                         </div>
                         <div>
                             <p style="font-size:13px;font-weight:700;color:#fff;margin:0 0 2px;">{{ $authAdmin?->name }}</p>
-                            <p style="font-size:11px;color:#94a3b8;margin:0;">{{ $authAdmin?->roles->first()?->name ?? 'مدير النظام' }}</p>
+                            <p style="font-size:11px;color:#94a3b8;margin:0;">{{ $authAdmin?->roles->first()?->name ?? __('topbar.system_admin') }}</p>
                         </div>
                     </div>
                 </div>
@@ -461,8 +461,28 @@
                             <circle cx="12" cy="7" r="4"/>
                         </svg>
                     </div>
-                    الملف الشخصي
+                    {{ __('nav.user.profile') }}
                 </a>
+
+                <div style="height:1px;background:#f1f5f9;margin:3px 0;"></div>
+
+                {{-- مبدّل اللغة --}}
+                <div style="padding:6px 10px 2px;font-size:11px;color:#94a3b8;font-weight:600;">
+                    {{ __('common.language') }}
+                </div>
+                @foreach(config('locales.supported') as $code => $loc)
+                <a href="{{ route('locale.switch', $code) }}" class="tb-drop-item"
+                   style="{{ app()->getLocale() === $code ? 'background:#fdf8e8;color:#a88830;font-weight:600;' : '' }}">
+                    <div style="width:28px;height:28px;border-radius:8px;background:#f8fafc;
+                                display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">
+                        {{ $loc['flag'] }}
+                    </div>
+                    {{ $loc['native'] }}
+                    @if(app()->getLocale() === $code)
+                        <span style="margin-inline-start:auto;">✓</span>
+                    @endif
+                </a>
+                @endforeach
 
                 <div style="height:1px;background:#f1f5f9;margin:3px 0;"></div>
 
@@ -476,7 +496,7 @@
                                 <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
                             </svg>
                         </div>
-                        تسجيل الخروج
+                        {{ __('nav.user.logout') }}
                     </button>
                 </form>
             </div>

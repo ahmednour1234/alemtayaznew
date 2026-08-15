@@ -143,12 +143,19 @@
                     </div>
                     <input type="hidden" name="branch_id" value="{{ $defaultBranch }}">
                     @else
+                    @php
+                        // الفرع المختار مسبقاً: ما أدخله المستخدم، وإلا فرع من حجز العاملة
+                        $selectedBranch = old('branch_id', $suggestedBranch ?? null);
+                    @endphp
                     <select name="branch_id" required class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition @error('branch_id') border-red-400 @enderror">
                         <option value="">— اختر الفرع —</option>
                         @foreach($branches as $br)
-                        <option value="{{ $br->id }}" {{ old('branch_id') == $br->id ? 'selected' : '' }}>{{ $br->name }}</option>
+                        <option value="{{ $br->id }}" {{ (int) $selectedBranch === (int) $br->id ? 'selected' : '' }}>{{ $br->name }}</option>
                         @endforeach
                     </select>
+                    @if($suggestedBranch && ! old('branch_id'))
+                    <p class="text-xs text-slate-400 mt-1">تم اختياره تلقائياً من فرع الموظف الذي حجز العاملة — يمكنك تغييره.</p>
+                    @endif
                     @error('branch_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                     @endif
                 </div>
@@ -163,16 +170,18 @@
                 {{-- Current department --}}
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">العقد عند القسم</label>
-                    <input type="hidden" name="current_department" id="dept_input_create" value="{{ old('current_department', 'customer_service') }}">
+                    @php
+                        $deptColors = [
+                            'customer_service' => ['active' => 'bg-blue-500 text-white border-blue-500', 'icon' => '👥'],
+                            'accounts'         => ['active' => 'bg-emerald-500 text-white border-emerald-500', 'icon' => '💰'],
+                            'coordination'     => ['active' => 'bg-violet-500 text-white border-violet-500', 'icon' => '🔗'],
+                        ];
+                        // العقد القادم من حجز عاملة يبدأ «جديد» ويتوجّه لقسم الحسابات
+                        $defaultDept = ($prefill['worker_id'] ?? null) ? 'accounts' : 'customer_service';
+                        $currentDept = old('current_department', $defaultDept);
+                    @endphp
+                    <input type="hidden" name="current_department" id="dept_input_create" value="{{ $currentDept }}">
                     <div class="flex gap-2">
-                        @php
-                            $deptColors = [
-                                'customer_service' => ['active' => 'bg-blue-500 text-white border-blue-500', 'icon' => '👥'],
-                                'accounts'         => ['active' => 'bg-emerald-500 text-white border-emerald-500', 'icon' => '💰'],
-                                'coordination'     => ['active' => 'bg-violet-500 text-white border-violet-500', 'icon' => '🔗'],
-                            ];
-                            $currentDept = old('current_department', 'customer_service');
-                        @endphp
                         @foreach($departments as $key => $label)
                         <button type="button"
                             onclick="document.getElementById('dept_input_create').value='{{ $key }}'; document.querySelectorAll('.dept-tab-create').forEach(b=>b.classList.remove(...b.dataset.active.split(' '))); this.classList.add(...this.dataset.active.split(' '));"
@@ -213,9 +222,14 @@
                     <p class="text-slate-400 text-xs mt-1">JPG / PNG / PDF — حد أقصى 5 ميجا</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-slate-600 mb-1.5">رقم التأشيرة</label>
-                    <input type="text" name="visa_number" value="{{ old('visa_number') }}"
-                           class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+                    <label class="block text-sm font-semibold text-slate-600 mb-1.5">
+                        رقم التأشيرة <span class="text-red-500">*</span>
+                    </label>
+                    {{-- يُملأ تلقائياً من شاشة حجز العاملة --}}
+                    <input type="text" name="visa_number"
+                           value="{{ old('visa_number', $prefillWorker->visa_number ?? '') }}" required
+                           class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition @error('visa_number') border-red-400 @enderror">
+                    @error('visa_number')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">محطة الوصول</label>
@@ -264,7 +278,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-slate-600 mb-1.5">تاريخ عقد مساند</label>
-                    <input type="date" name="musaned_date" value="{{ old('musaned_date') }}"
+                    <input type="date" name="musaned_date" value="{{ old('musaned_date', date('Y-m-d')) }}"
                            class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
                 </div>
                 <div class="md:col-span-2">
@@ -645,6 +659,8 @@
 function contractForm() {
     return {
         tab: '{{ $defaultTab }}',
+        {{-- تاريخ الوصول يُترك فارغاً: العقد يبدأ «جديد» ولم تصل العاملة بعد.
+             نهاية التجربة والعقد تُحسبان تلقائياً عند إدخال تاريخ الوصول. --}}
         arrival: '{{ old('arrival_date') }}',
         trial: '{{ old('trial_end_date') }}',
         contractEnd: '{{ old('contract_end_date') }}',
