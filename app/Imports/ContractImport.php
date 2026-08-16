@@ -222,7 +222,8 @@ class ContractImport implements ToCollection, WithCalculatedFormulas
                     if ($passportNumber && ! $worker->passport_number) {
                         $updates['passport_number'] = $passportNumber;
                     }
-                    if ($nationality && ! $worker->nationality_id) {
+                    // الجنسية تُحدَّث دائماً من الملف — الملف هو المرجع لو اختلفت
+                    if ($nationality && $worker->nationality_id !== $nationality->id) {
                         $updates['nationality_id'] = $nationality->id;
                     }
                     if ($updates) {
@@ -297,10 +298,12 @@ class ContractImport implements ToCollection, WithCalculatedFormulas
                 $contractEndDate = \Carbon\Carbon::parse($arrivalDate)->addYears(2)->format('Y-m-d');
             }
 
-            // Status 1-15
-            $statusVal = $statusRaw !== null ? (int) $statusRaw : 1;
+            // Status 1-15 — نميّز بين "خانة فارغة" و"حالة مذكورة في الملف"
+            $hasStatus = $statusRaw !== null && trim((string) $statusRaw) !== '';
+            $statusVal = $hasStatus ? (int) $statusRaw : 1;
             if (! array_key_exists($statusVal, RecruitmentContract::statuses())) {
                 $statusVal = 1;
+                $hasStatus = false;
             }
 
             // Request date fallback — handle Excel serial numbers
@@ -350,8 +353,9 @@ class ContractImport implements ToCollection, WithCalculatedFormulas
                     fn ($val) => $val !== null && $val !== ''
                 );
 
-                // الحالة تتقدّم فقط — لا تتراجع لمرحلة أقدم
-                if ($statusVal < $existing->current_status) {
+                // الحالة تُؤخذ من الملف كما هي (تصحيح للأمام أو للخلف)،
+                // إلا إذا كانت الخانة فارغة أو غير صالحة فنُبقي الحالة الحالية.
+                if (! $hasStatus) {
                     unset($update['current_status']);
                 }
 
