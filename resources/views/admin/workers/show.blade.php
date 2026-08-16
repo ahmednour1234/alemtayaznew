@@ -286,6 +286,46 @@
 
         </div>
     </div>
+
+    {{-- ── سجل النشاط ──────────────────────────────────────────────────────── --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mt-6">
+        <h3 class="text-sm font-bold text-slate-700 mb-5 pb-3 border-b border-slate-100 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center">
+                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </span>
+            سجل النشاط
+            <span class="text-xs font-normal text-slate-400">— من عدّل أو حذف أو حجز هذه العاملة</span>
+        </h3>
+
+        @forelse($activityLogs as $log)
+        <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 mb-2">
+            <div class="w-8 h-8 rounded-lg {{ $log->actionColor() }} flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="{{ $log->actionIcon() }}"/>
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-sm font-semibold text-slate-700">
+                        {{ $log->admin?->name ?? $log->admin_name ?? 'مستخدم محذوف' }}
+                    </span>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full {{ $log->actionColor() }} font-semibold">
+                        {{ $log->actionLabel() }}
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">{{ $log->label }}</p>
+            </div>
+            <div class="text-left flex-shrink-0">
+                <p class="text-xs text-slate-400">{{ $log->created_at?->format('Y-m-d') }}</p>
+                <p class="text-[11px] text-slate-300">{{ $log->created_at?->format('H:i') }}</p>
+            </div>
+        </div>
+        @empty
+        <p class="text-sm text-slate-400 text-center py-6">لا توجد سجلات بعد</p>
+        @endforelse
+    </div>
 </div>
 @endsection
 

@@ -5,8 +5,11 @@ namespace App\Services;
 use App\Models\Admin;
 use App\Models\AdminNotification;
 use App\Models\Worker;
+use App\Models\WorkerActivityLog;
 use App\Repositories\Contracts\WorkerRepositoryInterface;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Storage;
 
 class WorkerService
@@ -15,6 +18,34 @@ class WorkerService
         private readonly WorkerRepositoryInterface $repo,
         private readonly NotificationService $notifications,
     ) {}
+
+    /**
+     * يسجّل إجراءً على عاملة في سجل التدقيق.
+     *
+     * نحفظ اسم العاملة واسم الموظّف نصّاً وقت الإجراء ليبقى السجل مقروءاً
+     * بعد الحذف. ولا نُدرج أرقام الجواز أو الهاتف في الوصف لأنها بيانات
+     * حساسة مشفّرة في قاعدة البيانات.
+     *
+     * التسجيل لا يجب أن يُفشل العملية الأصلية، لذا نبتلع أي خطأ.
+     */
+    private function log(?Worker $worker, string $action, ?string $label = null, ?int $workerId = null, ?string $workerName = null): void
+    {
+        try {
+            $admin = Auth::guard('admin')->user();
+
+            WorkerActivityLog::create([
+                'worker_id'   => $worker?->id ?? $workerId,
+                'worker_name' => $worker?->name ?? $workerName,
+                'admin_id'    => $admin?->id,
+                'admin_name'  => $admin?->name,
+                'action'      => $action,
+                'label'       => $label,
+                'ip_address'  => Request::ip(),
+            ]);
+        } catch (\Throwable) {
+            // لا نُعطّل العملية بسبب فشل التسجيل
+        }
+    }
 
     public function list(array $filters = []): mixed
     {
@@ -59,6 +90,8 @@ class WorkerService
 
         $worker = $this->repo->create($data);
 
+        $this->log($worker, 'created', 'تم إضافة العاملة' . ($cv ? ' مع رفع CV' : ''));
+
         $this->sendCvUploadNotifications($worker);
 
         return $worker;
@@ -91,7 +124,10 @@ class WorkerService
             $data['cv_path']          = $file->store('workers/cvs', 'public');
             $data['original_cv_name'] = $originalName;
             $data['name']             = pathinfo($originalName, PATHINFO_FILENAME);
-            $created[]                = $this->repo->create($data);
+
+            $newWorker = $this->repo->create($data);
+            $this->log($newWorker, 'created', 'تم إضافة العاملة ضمن رفع CV جماعي');
+            $created[] = $newWorker;
         }
 
         // One grouped notification for the whole batch
@@ -125,7 +161,10 @@ class WorkerService
             $data['cv_path']          = $finalPath;
             $data['original_cv_name'] = $originalName;
             $data['name']             = pathinfo($originalName, PATHINFO_FILENAME);
-            $created[]                = $this->repo->create($data);
+
+            $newWorker = $this->repo->create($data);
+            $this->log($newWorker, 'created', 'تم إضافة العاملة ضمن رفع CV جماعي');
+            $created[] = $newWorker;
         }
 
         // Clean up temp directory
@@ -144,7 +183,11 @@ class WorkerService
 
     // ── Update ────────────────────────────────────────────────────────────────
 
-    public function update(int $id, array $data, ?UploadedFile $cv = null, ?UploadedFile $passportImage = null): mixed
+    /**
+     * @param bool $logChange مرّر false حين يكون التعديل جزءاً من عملية أكبر
+     *                        (مثل الحجز) حتى لا يتكرر السطر في سجل التدقيق.
+     */
+    public function update(int $id, array $data, ?UploadedFile $cv = null, ?UploadedFile $passportImage = null, bool $logChange = true): mixed
     {
         if ($cv) {
             $old = $this->repo->findById($id);
@@ -161,7 +204,32 @@ class WorkerService
             }
             $data['passport_image'] = $passportImage->store('workers/passports', 'public');
         }
-        return $this->repo->update($id, $data);
+
+        $worker = $this->repo->update($id, $data);
+
+        if ($logChange) {
+            // أسماء عربية للحقول — لا نكتب قيمها لأن بعضها بيانات حساسة
+            $names = [
+                'name' => 'الاسم', 'passport_number' => 'رقم الجواز', 'visa_number' => 'رقم التأشيرة',
+                'phone' => 'الهاتف', 'age' => 'العمر', 'nationality_id' => 'الجنسية',
+                'profession' => 'المهنة', 'experience' => 'الخبرة', 'religion' => 'الديانة',
+                'gender' => 'الجنس', 'notes' => 'ملاحظات', 'status' => 'الحالة',
+                'branch_id' => 'الفرع', 'client_id' => 'العميل',
+            ];
+
+            $changed = array_values(array_intersect_key(
+                $names,
+                array_diff_key($data, array_flip(['cv_path', 'original_cv_name', 'passport_image']))
+            ));
+
+            $label = $cv
+                ? 'تم استبدال ملف الـ CV'
+                : 'تم تعديل بيانات العاملة' . ($changed ? ' — ' . implode('، ', array_slice($changed, 0, 6)) : '');
+
+            $this->log($this->repo->findById($id), $cv ? 'cv_uploaded' : 'updated', $label);
+        }
+
+        return $worker;
     }
 
     // ── Delete / Restore ──────────────────────────────────────────────────────
@@ -173,6 +241,9 @@ class WorkerService
         if ($worker->recruitmentContracts()->exists()) {
             throw new \RuntimeException('لا يمكن حذف عاملة مرتبطة بعقد استقدام.');
         }
+
+        // نسجّل قبل الحذف لنلتقط الاسم
+        $this->log($worker, 'deleted', 'تم حذف العاملة');
 
         $this->repo->delete($id);
     }
@@ -196,6 +267,8 @@ class WorkerService
         $deletable = [];
         $skipped   = [];
 
+        $toLog = [];
+
         foreach ($workers as $worker) {
             if ($worker->recruitment_contracts_count > 0) {
                 $skipped[] = $worker->name ?: ('عاملة #' . $worker->id);
@@ -203,10 +276,17 @@ class WorkerService
             }
 
             $deletable[] = $worker->id;
+            $toLog[]     = $worker;
         }
 
         $deleted = 0;
         if ($deletable) {
+            // الحذف الجماعي يتم باستعلام واحد فلا تعمل أحداث الموديل،
+            // لذا نسجّل كل عاملة يدوياً قبل الحذف.
+            foreach ($toLog as $worker) {
+                $this->log($worker, 'deleted', 'تم حذف العاملة ضمن حذف جماعي');
+            }
+
             $deleted = Worker::whereIn('id', $deletable)->delete();
         }
 
@@ -226,6 +306,8 @@ class WorkerService
     public function restore(int $id): void
     {
         $this->repo->restore($id);
+
+        $this->log($this->repo->findById($id), 'restored', 'تم استعادة العاملة من المحذوفات');
     }
 
     // ── Assign to Client ──────────────────────────────────────────────────────
@@ -271,6 +353,8 @@ class WorkerService
         $title      = 'تعيين عاملة لعميل';
         $body       = "تم تعيين العاملة «{$worker->name}» للعميل «{$clientName}»";
 
+        $this->log($worker, 'assigned', "تم حجز العاملة للعميل «{$clientName}»");
+
         // Notify coordination + branch manager (same branch)
         $branchAdmins = Admin::where('active', true)
             ->where('branch_id', $worker->branch_id)
@@ -307,6 +391,8 @@ class WorkerService
         $url        = route('admin.workers.show', $worker->id);
 
         $this->repo->unassign($id);
+
+        $this->log($worker, 'unassigned', "تم إلغاء تعيين العاملة من العميل «{$clientName}»");
 
         // Notify coordination + branch manager
         $title = 'إلغاء تعيين عاملة';

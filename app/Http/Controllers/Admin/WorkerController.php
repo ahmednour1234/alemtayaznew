@@ -202,8 +202,10 @@ class WorkerController extends Controller
     // ── Show ──────────────────────────────────────────────────────────────────
     public function show(int $id)
     {
-        $worker = $this->service->find($id);
-        return view('admin.workers.show', compact('worker'));
+        $worker       = $this->service->find($id);
+        $activityLogs = $worker->activityLogs()->limit(50)->get();
+
+        return view('admin.workers.show', compact('worker', 'activityLogs'));
     }
 
     // ── Edit ──────────────────────────────────────────────────────────────────
@@ -294,13 +296,41 @@ class WorkerController extends Controller
         return back()->with('success', 'تم استعادة العاملة.');
     }
 
-    // ── Serve CV / Passport files (no symlink needed) ─────────────────────────
+    /**
+     * ملف الـ CV العام — الرابط الذي يفتحه العميل من رسالة الواتساب.
+     *
+     * لا نُظهر 404 خاماً هنا: العميل ليس مستخدماً للنظام ولا يفهمها. نعرض
+     * صفحة توضّح السبب — إما أن الـ CV لم يعد متاحاً، أو أن العاملة حُجزت.
+     */
     public function serveCV(int $id)
     {
-        $worker = $this->service->find($id);
-        abort_if(! $worker->cv_path, 404);
-        $path = storage_path('app/public/' . $worker->cv_path);
-        abort_if(! file_exists($path), 404);
+        $worker = Worker::withTrashed()->find($id);
+
+        // العاملة محذوفة أو غير موجودة
+        if (! $worker || $worker->trashed()) {
+            return response()->view('public.cv-unavailable', [
+                'reason' => 'unavailable',
+                'worker' => $worker,
+            ], 404);
+        }
+
+        // حُجزت أو عُيّنت لعميل آخر → لم تعد معروضة
+        if (in_array($worker->status, ['reserved', 'assigned'], true)) {
+            return response()->view('public.cv-unavailable', [
+                'reason' => 'reserved',
+                'worker' => $worker,
+            ], 410);
+        }
+
+        $path = $worker->cv_path ? storage_path('app/public/' . $worker->cv_path) : null;
+
+        if (! $path || ! file_exists($path)) {
+            return response()->view('public.cv-unavailable', [
+                'reason' => 'unavailable',
+                'worker' => $worker,
+            ], 404);
+        }
+
         return response()->file($path, [
             'Content-Type'        => mime_content_type($path) ?: 'application/pdf',
             'Content-Disposition' => 'inline; filename="' . basename($worker->cv_path) . '"',
@@ -416,7 +446,8 @@ class WorkerController extends Controller
         ), fn($v) => $v !== null && $v !== '');
 
         if (!empty($data)) {
-            $this->service->update($id, $data);
+            // logChange=false — الحجز نفسه سيُسجَّل، فلا داعي لسطر «تعديل» إضافي
+            $this->service->update($id, $data, null, null, false);
         }
 
         $me = Auth::guard('admin')->user();
