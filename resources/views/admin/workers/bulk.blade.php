@@ -55,14 +55,19 @@
                     <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">بيانات مشتركة لكل CVs</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1.5">الجنسية</label>
-                            <select name="nationality_id"
-                                    class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                                <option value="">غير محدد</option>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                                الجنسية <span class="text-red-500">*</span>
+                            </label>
+                            <select name="nationality_id" required
+                                    class="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 @error('nationality_id') border-red-400 @else border-slate-300 @enderror">
+                                <option value="">اختر الجنسية</option>
                                 @foreach($nationalities as $nat)
                                 <option value="{{ $nat->id }}" {{ old('nationality_id') == $nat->id ? 'selected' : '' }}>{{ $nat->name }}</option>
                                 @endforeach
                             </select>
+                            @error('nationality_id')
+                            <p class="text-xs text-red-600 mt-1.5">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1.5">المهنة</label>
@@ -137,7 +142,7 @@
                 كيفية الاستخدام
             </h4>
             <ul class="text-xs text-blue-700 space-y-2">
-                <li class="flex gap-2"><span class="font-bold">1.</span> اختر جنسية ومهنة مشتركة لكل الملفات (اختياري)</li>
+                <li class="flex gap-2"><span class="font-bold">1.</span> اختر الجنسية (مطلوبة) والمهنة (اختيارية) لكل الملفات</li>
                 <li class="flex gap-2"><span class="font-bold">2.</span> اختر الحالة الأولية للعاملات (افتراضي: متاحة)</li>
                 <li class="flex gap-2"><span class="font-bold">3.</span> اسحب ملفات PDF أو انقر لاختيارها</li>
                 <li class="flex gap-2"><span class="font-bold">4.</span> انقر رفع — كل PDF سيصبح عاملة منفصلة</li>

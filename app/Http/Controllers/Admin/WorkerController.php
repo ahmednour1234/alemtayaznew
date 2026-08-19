@@ -152,6 +152,14 @@ class WorkerController extends Controller
             if (! empty($savedData)) {
                 $data = array_merge($data, $savedData);
             }
+
+            // الجنسية مطلوبة — تأتي من الرفع الأصلي الذي اجتاز التحقّق.
+            // هذا حارس احتياطي لئلا تُنشأ عاملات بلا جنسية لو تلفت الجلسة.
+            if (empty($data['nationality_id'])) {
+                return redirect()->route('admin.workers.bulk')
+                    ->with('error', 'تعذّر تحديد الجنسية. يرجى رفع الملفات مجدداً.');
+            }
+
             $result = $this->service->bulkStoreFromTempPaths($data, $tempPaths);
             session()->forget(['cv_temp_files', 'cv_temp_data']);
             $count = count($result['created']);
@@ -161,11 +169,13 @@ class WorkerController extends Controller
 
         // ── Normal upload path ────────────────────────────────────────────────
         $request->validate([
-            'nationality_id' => ['nullable', 'exists:nationalities,id'],
+            'nationality_id' => ['required', 'exists:nationalities,id'],
             'profession'     => ['nullable', 'string', 'max:100'],
             'status'         => ['nullable', 'in:available,reserved'],
             'cvs'            => ['required', 'array', 'min:1'],
             'cvs.*'          => ['file', 'mimes:pdf', 'max:10240'],
+        ], [
+            'nationality_id.required' => 'اختيار الجنسية مطلوب.',
         ]);
 
         $result = $this->service->bulkStore($data, $request->file('cvs'), false);
