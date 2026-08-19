@@ -77,6 +77,31 @@ class Worker extends Model
         return ['muslim' => 'مسلمة', 'christian' => 'مسيحية', 'other' => 'أخرى'];
     }
 
+    /**
+     * هل العاملة مرتبطة بعميل حالياً؟
+     * الحجز (reserved) والتعيين (assigned) كلاهما يمنع إعادة التعيين
+     * ويسمح بإلغائه — راجع WorkerRepository::assignToClient().
+     */
+    public function isBooked(): bool
+    {
+        return in_array($this->status, ['reserved', 'assigned'], true);
+    }
+
+    /**
+     * من يحق له إلغاء التعيين: مدير الفرع، أو من أجرى الحجز نفسه.
+     * نفس القاعدة المطبّقة في WorkerService::unassign().
+     */
+    public function canBeUnassignedBy(?Admin $actor): bool
+    {
+        if (! $actor || ! $this->isBooked()) {
+            return false;
+        }
+
+        return $actor->isSuperAdmin()
+            || $actor->department === 'branch_manager'
+            || $actor->id === $this->assigned_by_admin_id;
+    }
+
     // ── Accessors ────────────────────────────────────────────────────────────
 
     public function getStatusLabelAttribute(): string

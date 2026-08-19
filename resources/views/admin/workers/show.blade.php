@@ -30,26 +30,18 @@
             @endif
             <a href="{{ route('admin.workers.edit', $worker->id) }}"
                class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg">تعديل</a>
-            @if($worker->status !== 'assigned')
+            @if(! $worker->isBooked())
             <a href="{{ route('admin.workers.assign', $worker->id) }}"
                class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg">تعيين لعميل</a>
-            @else
-            @php
-                $me = Auth::guard('admin')->user();
-                $canUnassign = $me->isSuperAdmin()
-                    || $me->department === 'branch_manager'
-                    || $me->id === $worker->assigned_by_admin_id;
-            @endphp
-            @if($canUnassign)
+            @elseif($worker->canBeUnassignedBy(Auth::guard('admin')->user()))
             <form action="{{ route('admin.workers.unassign', $worker->id) }}" method="POST">
                 @csrf
                 <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white text-sm px-4 py-2 rounded-lg"
-                        onclick="return confirm('إلغاء التعيين وإرجاع العاملة متاحة؟')">إلغاء التعيين</button>
+                        onclick="return confirm('{{ __('workers.assign.confirm_unassign') }}')">{{ __('common.actions.unassign') }}</button>
             </form>
             @else
             <span class="text-xs text-slate-400 px-3 py-2 rounded-lg bg-slate-100 cursor-not-allowed"
-                  title="فقط مدير الفرع أو الموظف الذي أجرى التعيين يمكنه إلغاءه">إلغاء التعيين (غير مسموح)</span>
-            @endif
+                  title="{{ __('workers.assign.no_permission') }}">{{ __('common.actions.unassign') }} (غير مسموح)</span>
             @endif
         </div>
     </div>
@@ -248,7 +240,7 @@
             @else
             <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-center">
                 <p class="text-sm text-slate-400">لم يتم تعيين العاملة لعميل بعد</p>
-                @if($worker->status !== 'assigned')
+                @if(! $worker->isBooked())
                 <a href="{{ route('admin.workers.assign', $worker->id) }}"
                    class="mt-2 inline-block text-xs text-emerald-600 hover:underline">تعيين الآن</a>
                 @endif

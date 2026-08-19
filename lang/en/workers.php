@@ -72,6 +72,8 @@ return [
         'already'      => 'This worker is already reserved for the same client and cannot be reserved twice.',
         'other_client' => 'This worker is reserved for another client. Cancel the current reservation first.',
         'unassigned'   => 'Worker unassigned and is now available.',
+        'confirm_unassign' => 'Unassign this worker and make her available again?',
+        'no_permission'    => 'Only the branch manager or the employee who made the assignment can cancel it',
     ],
 
 ];

@@ -327,15 +327,18 @@
                            class="text-xs text-slate-500 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 px-2 py-1 rounded-lg">{{ __('common.actions.view') }}</a>
                         <a href="{{ route('admin.workers.edit', $w->id) }}"
                            class="text-xs text-slate-500 hover:text-emerald-600 bg-slate-100 hover:bg-emerald-50 px-2 py-1 rounded-lg">{{ __('common.actions.edit') }}</a>
-                        @if($w->status !== 'assigned')
+                        @if(! $w->isBooked())
                         <a href="{{ route('admin.workers.assign', $w->id) }}"
                            class="text-xs text-white bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded-lg">{{ __('common.actions.assign') }}</a>
-                        @else
+                        @elseif($w->canBeUnassignedBy(Auth::guard('admin')->user()))
                         <form action="{{ route('admin.workers.unassign', $w->id) }}" method="POST" class="inline"
-                              onsubmit="return confirm('{{ __('workers.assign.unassigned') }}')">
+                              onsubmit="return confirm('{{ __('workers.assign.confirm_unassign') }}')">
                             @csrf
                             <button type="submit" class="text-xs text-amber-700 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded-lg">{{ __('common.actions.unassign') }}</button>
                         </form>
+                        @else
+                        <span class="text-xs text-slate-300 bg-slate-50 px-2 py-1 rounded-lg cursor-not-allowed"
+                              title="{{ __('workers.assign.no_permission') }}">{{ __('common.actions.unassign') }}</span>
                         @endif
                         <form action="{{ route('admin.workers.destroy', $w->id) }}" method="POST" class="inline"
                               onsubmit="return confirm('{{ __('workers.delete.confirm_one') }}')">
