@@ -370,12 +370,19 @@ class ContractImport implements ToCollection, WithCalculatedFormulas
                 $this->imported++;
             }
 
-            // Mark worker as assigned and link to client
+            // ربط العاملة بالعميل وتثبيتها كـ«معيَّنة».
+            // «assigned» تعني مثبّتة بعقد ولا يفكّها أمر الـ72 ساعة، لذا لا
+            // نضعها إلا مع وجود عميل فعلي — وإلا تعلق العاملة في حالة
+            // محجوزة بلا عميل ولا assigned_at فلا يلتقطها الأمر أبداً.
             if ($worker) {
-                $worker->update([
-                    'status'    => 'assigned',
-                    'client_id' => $client?->id,
-                ]);
+                if ($client) {
+                    $worker->update([
+                        'status'    => 'assigned',
+                        'client_id' => $client->id,
+                    ]);
+                } else {
+                    $this->errors[] = "الصف {$rowNum}: العقد أُنشئ بلا عميل — لم تُغيَّر حالة العاملة";
+                }
             }
         }
     }

@@ -74,6 +74,7 @@ return [
         'unassigned'   => 'Worker unassigned and is now available.',
         'confirm_unassign' => 'Unassign this worker and make her available again?',
         'no_permission'    => 'Only the employee who made the assignment can cancel it',
+        'has_contract'     => 'Worker is linked to a recruitment contract — unlink from the contract page',
     ],
 
 ];

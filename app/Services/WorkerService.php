@@ -376,9 +376,15 @@ class WorkerService
     {
         $worker = $this->repo->findById($id);
 
+        if ($worker->hasActiveContract()) {
+            throw new \RuntimeException(
+                'العاملة مرتبطة بعقد استقدام — يتم فك الارتباط من صفحة العقد.'
+            );
+        }
+
         if (! $worker->canBeUnassignedBy($actor)) {
             throw new \RuntimeException(
-                'ليس لديك صلاحية إلغاء التعيين. فقط الموظف الذي أجرى التعيين يمكنه إلغاءه.'
+                'ليس لديك صلاحية فك التعيين. فقط الموظف الذي أجرى التعيين يمكنه ذلك.'
             );
         }
 

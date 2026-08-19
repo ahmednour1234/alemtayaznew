@@ -79,12 +79,28 @@ class Worker extends Model
 
     /**
      * هل العاملة مرتبطة بعميل حالياً؟
-     * الحجز (reserved) والتعيين (assigned) كلاهما يمنع إعادة التعيين
-     * ويسمح بإلغائه — راجع WorkerRepository::assignToClient().
+     *
+     * نعتمد على وجود العميل نفسه لا على الحالة وحدها، لأن مسارات إنهاء
+     * العقد وحذفه (RecruitmentContractService) تُرجع الحالة «available»
+     * دون تصفير client_id — فتظهر العاملة متاحة وهي ما زالت مربوطة بعميل.
      */
     public function isBooked(): bool
     {
-        return in_array($this->status, ['reserved', 'assigned'], true);
+        return $this->client_id !== null
+            || in_array($this->status, ['reserved', 'assigned'], true);
+    }
+
+    /**
+     * هل للعاملة عقد استقدام قائم؟ (العقود المحذوفة لا تُحتسب)
+     * وجود العقد يعني أن الارتباط يُدار من العقد لا من شاشة العمالة.
+     */
+    public function hasActiveContract(): bool
+    {
+        // نستخدم العلاقة المحمّلة مسبقاً (eager-loaded) إن وُجدت لتفادي
+        // استعلام لكل صف في قائمة العمالة.
+        return $this->relationLoaded('latestContract')
+            ? $this->latestContract !== null
+            : $this->latestContract()->exists();
     }
 
     /**
@@ -94,7 +110,9 @@ class Worker extends Model
      */
     public function canBeUnassignedBy(?Admin $actor): bool
     {
-        if (! $actor || ! $this->isBooked()) {
+        // العاملة المرتبطة بعقد استقدام يُدار فكّ ارتباطها من العقد نفسه،
+        // حتى لا تتعارض حالة العاملة مع العقد القائم.
+        if (! $actor || ! $this->isBooked() || $this->hasActiveContract()) {
             return false;
         }
 

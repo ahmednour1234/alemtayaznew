@@ -17,7 +17,7 @@ return [
         'print'        => 'Print',
         'restore'      => 'Restore',
         'assign'       => 'Assign',
-        'unassign'     => 'Unassign',
+        'unassign'     => 'Unassign from client',
         'confirm'      => 'Confirm',
         'back'         => 'Back',
         'close'        => 'Close',

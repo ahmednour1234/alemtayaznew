@@ -336,6 +336,9 @@
                             @csrf
                             <button type="submit" class="text-xs text-amber-700 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded-lg">{{ __('common.actions.unassign') }}</button>
                         </form>
+                        @elseif($w->hasActiveContract())
+                        <span class="text-xs text-slate-300 bg-slate-50 px-2 py-1 rounded-lg cursor-not-allowed"
+                              title="{{ __('workers.assign.has_contract') }}">{{ __('common.actions.unassign') }}</span>
                         @else
                         <span class="text-xs text-slate-300 bg-slate-50 px-2 py-1 rounded-lg cursor-not-allowed"
                               title="{{ __('workers.assign.no_permission') }}">{{ __('common.actions.unassign') }}</span>
