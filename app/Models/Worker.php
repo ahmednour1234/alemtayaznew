@@ -88,7 +88,8 @@ class Worker extends Model
     }
 
     /**
-     * من يحق له إلغاء التعيين: مدير الفرع، أو من أجرى الحجز نفسه.
+     * من يحق له إلغاء التعيين: الموظف الذي أجرى الحجز نفسه فقط
+     * (بالإضافة للسوبر أدمن). مدير الفرع لا يملك هذه الصلاحية.
      * نفس القاعدة المطبّقة في WorkerService::unassign().
      */
     public function canBeUnassignedBy(?Admin $actor): bool
@@ -98,7 +99,6 @@ class Worker extends Model
         }
 
         return $actor->isSuperAdmin()
-            || $actor->department === 'branch_manager'
             || $actor->id === $this->assigned_by_admin_id;
     }
 

@@ -369,18 +369,16 @@ class WorkerService
     // ── Unassign ──────────────────────────────────────────────────────────────
 
     /**
-     * Only branch_manager OR the admin who performed the assignment can unassign.
+     * إلغاء التعيين مقصور على الموظف الذي أجرى الحجز نفسه (والسوبر أدمن).
+     * مدير الفرع لا يملك هذه الصلاحية — القرار يرجع لصاحب الحجز.
      */
     public function unassign(int $id, Admin $actor): void
     {
         $worker = $this->repo->findById($id);
 
-        $isBranchManager = $actor->department === 'branch_manager' || $actor->isSuperAdmin();
-        $isAssigner      = $actor->id === $worker->assigned_by_admin_id;
-
-        if (! $isBranchManager && ! $isAssigner) {
+        if (! $worker->canBeUnassignedBy($actor)) {
             throw new \RuntimeException(
-                'ليس لديك صلاحية إلغاء التعيين. يجب أن تكون مدير الفرع أو الموظف الذي أجرى التعيين.'
+                'ليس لديك صلاحية إلغاء التعيين. فقط الموظف الذي أجرى التعيين يمكنه إلغاءه.'
             );
         }
 
