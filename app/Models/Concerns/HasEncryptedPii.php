@@ -27,9 +27,17 @@ trait HasEncryptedPii
     {
         static::saving(function ($model): void {
             foreach ($model->piiHashMap() as $field => $hashColumn) {
-                // Recompute the hash whenever the source field changed, or when the
-                // hash is still empty (e.g. a record created before encryption existed).
-                if ($model->isDirty($field) || empty($model->getAttribute($hashColumn))) {
+                // isDirty() يفكّ تشفير القيمة الأصلية للمقارنة، فيرمي
+                // DecryptException لو كان المخزَّن نصاً قديماً غير مشفّر أو
+                // مشفّراً بمفتاح APP_KEY سابق. نعتبر الحقل حينها «متغيّراً»
+                // فتُعاد كتابة قيمته وهاشه بالمفتاح الحالي بدل تعطيل الحفظ.
+                try {
+                    $changed = $model->isDirty($field);
+                } catch (DecryptException) {
+                    $changed = true;
+                }
+
+                if ($changed || empty($model->getAttribute($hashColumn))) {
                     $model->setAttribute(
                         $hashColumn,
                         static::hashPii($model->getAttribute($field))
