@@ -31,6 +31,16 @@ class Nationality extends Model
      */
     private const PHOTO_CODES = ['ET', 'PH', 'LK', 'BD', 'KE', 'BI', 'UG'];
 
+    /**
+     * مفتاح الجنسية في روابط الموقع العام.
+     * نستخدم كود ISO لأنه فريد ومستقر ولا يتغيّر بتغيّر الاسم العربي؛
+     * ونعود للمعرّف الرقمي للجنسيات التي لا كود لها.
+     */
+    public function getRouteKey(): string
+    {
+        return $this->code ? strtolower($this->code) : (string) $this->id;
+    }
+
     /** رابط صورة الجنسية، أو null إن لم تتوفر صورة لها. */
     public function photoUrl(): ?string
     {

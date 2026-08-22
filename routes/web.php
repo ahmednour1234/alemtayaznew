@@ -44,6 +44,12 @@ Route::controller(\App\Http\Controllers\PublicSite\PageController::class)->group
 Route::controller(\App\Http\Controllers\PublicSite\CvController::class)->group(function () {
     Route::get('/cvs',      'index')->name('site.cvs');
     Route::get('/cvs/{id}', 'show')->whereNumber('id')->name('site.cvs.show');
+
+    // رابط مختصر لكل جنسية: /nationality/et — أوضح للزائر ولمحرّكات البحث
+    // من ‎/cvs?nationality_id=3‎. يُقيَّد بالحروف والأرقام فقط.
+    Route::get('/nationality/{key}', 'byNationality')
+        ->where('key', '[A-Za-z0-9]{1,10}')
+        ->name('site.cvs.nationality');
 });
 
 Route::controller(\App\Http\Controllers\PublicSite\ContactController::class)->group(function () {

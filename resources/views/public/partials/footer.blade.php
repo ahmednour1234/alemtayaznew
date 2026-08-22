@@ -30,6 +30,13 @@
         ],
     ], fn ($s) => ! empty($s['url']));
 
+    // الجنسيات التي فيها عاملات متاحة — تظهر كروابط في التذييل
+    $footerNats = \App\Models\Nationality::where('active', true)
+        ->whereHas('workers', fn ($q) => $q->where('active', true)
+            ->where('status', 'available')->whereNotNull('cv_path'))
+        ->orderBy('name')
+        ->get(['id', 'name', 'code']);
+
     $services = [
         'استقدام عمالة منزلية',
         'تجديد الاستقدام',
@@ -96,6 +103,18 @@
                     <li>{{ $srv }}</li>
                     @endforeach
                 </ul>
+
+                @if($footerNats->isNotEmpty())
+                <h4 class="text-gold font-bold text-base mt-7 mb-4">الجنسيات</h4>
+                <ul class="flex flex-wrap gap-x-4 gap-y-2 text-sm justify-center md:justify-start">
+                    @foreach($footerNats as $nat)
+                    <li>
+                        <a href="{{ route('site.cvs.nationality', $nat->getRouteKey()) }}"
+                           class="hover:text-gold transition-colors">{{ $nat->name }}</a>
+                    </li>
+                    @endforeach
+                </ul>
+                @endif
             </div>
 
             {{-- تواصل معنا --}}

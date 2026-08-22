@@ -3,10 +3,32 @@
 
 @section('content')
 
-<section class="hero-grad text-white py-12">
+@php($activeNat = $activeNationality ?? null)
+<section class="hero-grad text-white py-10 sm:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        @if($activeNat)
+        <nav class="flex items-center gap-2 text-xs text-white/60 mb-3">
+            <a href="{{ route('site.home') }}" class="hover:text-white">الرئيسية</a>
+            <span>/</span>
+            <a href="{{ route('site.cvs') }}" class="hover:text-white">السير الذاتية</a>
+            <span>/</span>
+            <span class="text-white/90">{{ $activeNat->name }}</span>
+        </nav>
+
+        <div class="flex items-center gap-4">
+            @if($activeNat->photoUrl())
+            <img src="{{ $activeNat->photoUrl() }}" alt="{{ $activeNat->name }}" loading="lazy"
+                 class="w-16 h-16 rounded-2xl object-cover object-top border-2 border-white/25 flex-shrink-0">
+            @endif
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold">عاملات من {{ $activeNat->name }}</h1>
+                <p class="text-white/75 text-sm mt-1.5">{{ $workers->total() }} سيرة ذاتية متاحة</p>
+            </div>
+        </div>
+        @else
         <h1 class="text-2xl sm:text-3xl font-extrabold">السير الذاتية المتاحة</h1>
         <p class="text-white/75 text-sm mt-2">اختر العاملة المناسبة من بين {{ $workers->total() }} سيرة ذاتية متاحة</p>
+        @endif
     </div>
 </section>
 

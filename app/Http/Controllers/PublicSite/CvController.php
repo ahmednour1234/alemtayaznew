@@ -69,6 +69,28 @@ class CvController extends Controller
         ]);
     }
 
+    /**
+     * صفحة جنسية واحدة: /nationality/et
+     *
+     * تُترجم المفتاح إلى معرّف الجنسية ثم تُعيد استخدام index() نفسها،
+     * فتبقى الفلاتر والترقيم والبحث كما هي بلا تكرار للمنطق.
+     */
+    public function byNationality(Request $request, string $key)
+    {
+        $nationality = Nationality::where('active', true)
+            ->where(function ($q) use ($key) {
+                $q->whereRaw('LOWER(code) = ?', [strtolower($key)]);
+                if (ctype_digit($key)) {
+                    $q->orWhere('id', (int) $key);
+                }
+            })
+            ->firstOrFail();
+
+        $request->merge(['nationality_id' => $nationality->id]);
+
+        return $this->index($request)->with('activeNationality', $nationality);
+    }
+
     public function show(int $id)
     {
         $worker = $this->baseQuery()->with('nationality')->findOrFail($id);

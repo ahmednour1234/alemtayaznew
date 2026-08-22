@@ -151,7 +151,7 @@
          class="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 no-scrollbar">
         @foreach($nationalities as $nat)
         @php($photo = $nat->photoUrl())
-        <a href="{{ route('site.cvs', ['nationality_id' => $nat->id]) }}"
+        <a href="{{ route('site.cvs.nationality', $nat->getRouteKey()) }}"
            class="snap-start shrink-0 w-[85%] sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3rem)/3)]
                   relative rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 group">
 
