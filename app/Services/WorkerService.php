@@ -205,6 +205,25 @@ class WorkerService
             $data['passport_image'] = $passportImage->store('workers/passports', 'public');
         }
 
+        // ── فكّ الارتباط بالعميل عند التحويل إلى «متاحة» فقط ──────────────
+        // تغيير الحالة إلى محجوزة/تم التعيين لا يمسّ العميل، أما «متاحة»
+        // فتعني أن العاملة عادت للعرض فلا يصحّ بقاؤها مرتبطة بعميل.
+        // نسخة مستقلة عن الكائن الذي سيُحدَّث، لتبقى القيم القديمة سليمة
+        // بعد الحفظ فنستطيع تسجيل «من ← إلى» بدقّة.
+        $before = (clone $this->repo->findById($id))->syncOriginal();
+
+        if (
+            array_key_exists('status', $data)
+            && $data['status'] === 'available'
+            && $before->status !== 'available'
+            && $before->client_id !== null
+        ) {
+            $data['client_id']            = null;
+            $data['assigned_by_admin_id'] = null;
+            $data['assigned_at']          = null;
+            $releasedClientName = $before->client?->name;
+        }
+
         $worker = $this->repo->update($id, $data);
 
         if ($logChange) {
@@ -217,19 +236,69 @@ class WorkerService
                 'branch_id' => 'الفرع', 'client_id' => 'العميل',
             ];
 
-            $changed = array_values(array_intersect_key(
-                $names,
-                array_diff_key($data, array_flip(['cv_path', 'original_cv_name', 'passport_image']))
-            ));
+            // الحقول الحسّاسة نذكر أنها تغيّرت دون كتابة قيمها في السجل
+            $sensitive = ['passport_number', 'phone'];
+
+            $changed = [];
+            foreach (array_diff_key($data, array_flip(['cv_path', 'original_cv_name', 'passport_image'])) as $field => $newVal) {
+                if (! isset($names[$field])) {
+                    continue;
+                }
+
+                $oldVal = $before->getAttribute($field);
+                if ((string) $oldVal === (string) $newVal) {
+                    continue;   // لم يتغيّر فعلياً
+                }
+
+                if (in_array($field, $sensitive, true)) {
+                    $changed[] = $names[$field];
+                    continue;
+                }
+
+                // فكّ الارتباط يُذكر في نهاية الرسالة، فلا نكرّره هنا
+                if ($field === 'client_id' && isset($releasedClientName)) {
+                    continue;
+                }
+
+                $changed[] = $names[$field] . ': '
+                    . $this->labelFor($field, $oldVal) . ' ← ' . $this->labelFor($field, $newVal);
+            }
 
             $label = $cv
                 ? 'تم استبدال ملف الـ CV'
                 : 'تم تعديل بيانات العاملة' . ($changed ? ' — ' . implode('، ', array_slice($changed, 0, 6)) : '');
 
+            if (isset($releasedClientName)) {
+                $label .= ' — تم فكّ الارتباط بالعميل «' . $releasedClientName . '»';
+            }
+
             $this->log($this->repo->findById($id), $cv ? 'cv_uploaded' : 'updated', $label);
         }
 
         return $worker;
+    }
+
+    /**
+     * يحوّل قيمة حقل إلى نص مقروء في سجل التدقيق:
+     * المفاتيح الأجنبية إلى أسماء، وقوائم الخيارات إلى تسمياتها العربية.
+     */
+    private function labelFor(string $field, mixed $value): string
+    {
+        if ($value === null || $value === '') {
+            return '—';
+        }
+
+        return match ($field) {
+            'status'         => Worker::statusOptions()[$value]      ?? (string) $value,
+            'profession'     => Worker::professions()[$value]        ?? (string) $value,
+            'experience'     => Worker::experienceOptions()[$value]  ?? (string) $value,
+            'gender'         => Worker::genderOptions()[$value]      ?? (string) $value,
+            'religion'       => Worker::religionOptions()[$value]    ?? (string) $value,
+            'nationality_id' => \App\Models\Nationality::find($value)?->name ?? (string) $value,
+            'branch_id'      => \App\Models\Branch::find($value)?->name      ?? (string) $value,
+            'client_id'      => \App\Models\Client::find($value)?->name      ?? (string) $value,
+            default          => (string) $value,
+        };
     }
 
     // ── Delete / Restore ──────────────────────────────────────────────────────
@@ -389,14 +458,24 @@ class WorkerService
         }
 
         // Capture info before unassign
-        $clientName = $worker->client?->name ?? 'عميل';
-        $branchId   = $worker->branch_id;
-        $workerName = $worker->name ?: 'عاملة';
-        $url        = route('admin.workers.show', $worker->id);
+        $clientName   = $worker->client?->name ?? 'عميل';
+        $branchId     = $worker->branch_id;
+        $workerName   = $worker->name ?: 'عاملة';
+        $url          = route('admin.workers.show', $worker->id);
+        $statusBefore = $this->labelFor('status', $worker->status);
+        $assignedBy   = $worker->assignedBy?->name;
+        $assignedAt   = $worker->assigned_at?->format('Y-m-d H:i');
 
         $this->repo->unassign($id);
 
-        $this->log($worker, 'unassigned', "تم إلغاء تعيين العاملة من العميل «{$clientName}»");
+        // نسجّل «من ← إلى» للحالة، ومن كان قد حجزها ومتى، ليكون السجل مكتفياً بذاته
+        $label = "تم فكّ تعيين العاملة من العميل «{$clientName}» — الحالة: {$statusBefore} ← متاحة";
+        if ($assignedBy) {
+            $label .= " (كان الحجز بواسطة {$assignedBy}"
+                . ($assignedAt ? " بتاريخ {$assignedAt}" : '') . ')';
+        }
+
+        $this->log($worker, 'unassigned', $label);
 
         // Notify coordination + branch manager
         $title = 'إلغاء تعيين عاملة';

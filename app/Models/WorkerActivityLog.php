@@ -37,7 +37,7 @@ class WorkerActivityLog extends Model
             'deleted'     => 'حذف',
             'restored'    => 'استعادة',
             'assigned'    => 'حجز/تعيين',
-            'unassigned'  => 'إلغاء التعيين',
+            'unassigned'  => 'فك التعيين',
             'cv_uploaded' => 'رفع CV',
             default       => $this->action,
         };

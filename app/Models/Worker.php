@@ -43,6 +43,21 @@ class Worker extends Model
 
     // ── Static option lists ──────────────────────────────────────────────────
 
+    /** تسميات حالات العاملة — المصدر الوحيد للأسماء العربية. */
+    public static function statusOptions(): array
+    {
+        return [
+            'available'            => 'متاحة',
+            'reserved'             => 'محجوزة',
+            'assigned'             => 'تم التعيين',
+            'in_housing'           => 'في السكن',
+            'for_rent'             => 'للتأجير',
+            'sponsorship_transfer' => 'نقل كفالة',
+            'deportation'          => 'تسفير',
+            'returned'             => 'عودة',
+        ];
+    }
+
     public static function professions(): array
     {
         return [
@@ -124,17 +139,7 @@ class Worker extends Model
 
     public function getStatusLabelAttribute(): string
     {
-        return match ($this->status) {
-            'available'            => 'متاحة',
-            'reserved'             => 'محجوزة',
-            'assigned'             => 'تم التعيين',
-            'in_housing'           => 'في السكن',
-            'for_rent'             => 'للتأجير',
-            'sponsorship_transfer' => 'نقل كفالة',
-            'deportation'          => 'تسفير',
-            'returned'             => 'عودة',
-            default                => $this->status,
-        };
+        return self::statusOptions()[$this->status] ?? (string) $this->status;
     }
 
     public function getStatusColorAttribute(): string
