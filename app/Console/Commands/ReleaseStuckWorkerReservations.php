@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Worker;
+use App\Models\WorkerActivityLog;
 use Illuminate\Console\Command;
 
 /**
@@ -48,12 +49,33 @@ class ReleaseStuckWorkerReservations extends Command
             return self::SUCCESS;
         }
 
-        $count = Worker::whereIn('id', $workers->pluck('id'))->update([
+        $ids = $workers->pluck('id');
+
+        $count = Worker::whereIn('id', $ids)->update([
             'status'               => 'available',
             'client_id'            => null,
             'assigned_by_admin_id' => null,
             'assigned_at'          => null,
         ]);
+
+        // تسجيل في سجل نشاط كل عاملة — الفاعل هو النظام لا مستخدم
+        foreach ($workers as $w) {
+            try {
+                WorkerActivityLog::create([
+                    'worker_id'   => $w->id,
+                    'worker_name' => $w->name,
+                    'admin_id'    => null,
+                    'admin_name'  => 'النظام',
+                    'action'      => 'unassigned',
+                    'label'       => 'أرجع النظام العاملة إلى «متاحة» — كانت عالقة في حالة '
+                                   . (Worker::statusOptions()[$w->status] ?? $w->status)
+                                   . ' بلا عميل ولا عقد',
+                    'ip_address'  => null,
+                ]);
+            } catch (\Throwable) {
+                // لا نُعطّل التنظيف بسبب فشل التسجيل
+            }
+        }
 
         $this->info("تم إرجاع {$count} عاملة إلى حالة «متاحة».");
 

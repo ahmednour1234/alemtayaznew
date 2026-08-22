@@ -306,6 +306,9 @@
                     <span class="text-sm font-semibold text-slate-700">
                         {{ $log->admin?->name ?? $log->admin_name ?? 'مستخدم محذوف' }}
                     </span>
+                    @if($log->isSystem())
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 font-medium">آلي</span>
+                    @endif
                     <span class="text-[11px] px-2 py-0.5 rounded-full {{ $log->actionColor() }} font-semibold">
                         {{ $log->actionLabel() }}
                     </span>

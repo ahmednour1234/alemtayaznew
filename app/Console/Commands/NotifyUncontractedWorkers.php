@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Admin;
 use App\Models\AdminNotification;
 use App\Models\Worker;
+use App\Models\WorkerActivityLog;
 use Illuminate\Console\Command;
 
 /**
@@ -55,12 +56,26 @@ class NotifyUncontractedWorkers extends Command
 
             if ($hoursElapsed >= self::RESERVATION_HOURS) {
                 // ── انتهت المهلة: فكّ الحجز تلقائياً ─────────────────────────
+                // نلتقط بيانات الحجز قبل تصفيرها لتسجيلها في سجل النشاط
+                $statusBefore = $worker->status_label;
+                $reserverName = $worker->assignedBy?->name;
+                $reservedAt   = $assignedAt->format('Y-m-d H:i');
+
                 $worker->update([
                     'client_id'            => null,
                     'status'               => 'available',
                     'assigned_by_admin_id' => null,
                     'assigned_at'          => null,
                 ]);
+
+                // تسجيل في سجل نشاط العاملة — الفاعل هو النظام لا مستخدم،
+                // لأن الأمر يعمل عبر المجدول بلا جلسة مسجّلة.
+                $this->logAutoRelease(
+                    $worker,
+                    "فكّ النظام حجز العاملة تلقائياً من العميل «{$clientName}» بعد "
+                    . self::RESERVATION_HOURS . " ساعة دون إنشاء عقد — الحالة: {$statusBefore} ← متاحة"
+                    . ($reserverName ? " (كان الحجز بواسطة {$reserverName} بتاريخ {$reservedAt})" : '')
+                );
 
                 $title = 'انتهاء حجز عاملة تلقائياً';
                 $body  = "انتهت مهلة حجز العاملة «{$workerName}» للعميل «{$clientName}» (فرع {$branchName}) "
@@ -128,6 +143,30 @@ class NotifyUncontractedWorkers extends Command
         }
 
         $this->info("تذكيرات: {$reminded} — حجوزات مفكوكة: {$released}");
+    }
+
+    /**
+     * يسجّل فكّ الحجز التلقائي في سجل نشاط العاملة.
+     *
+     * الفاعل هنا هو النظام لا مستخدم، فنترك admin_id فارغاً ونكتب
+     * admin_name نصّاً ليظهر السطر مفهوماً في الواجهة.
+     * التسجيل لا يجب أن يُفشل فكّ الحجز، لذا نبتلع أي خطأ.
+     */
+    private function logAutoRelease(Worker $worker, string $label): void
+    {
+        try {
+            WorkerActivityLog::create([
+                'worker_id'   => $worker->id,
+                'worker_name' => $worker->name,
+                'admin_id'    => null,
+                'admin_name'  => 'النظام',
+                'action'      => 'unassigned',
+                'label'       => $label,
+                'ip_address'  => null,
+            ]);
+        } catch (\Throwable) {
+            // لا نُعطّل فكّ الحجز بسبب فشل التسجيل
+        }
     }
 
     private function upsertNotification(

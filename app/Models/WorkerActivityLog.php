@@ -29,6 +29,12 @@ class WorkerActivityLog extends Model
         return $this->belongsTo(Admin::class);
     }
 
+    /** إجراء نفّذه النظام تلقائياً (مجدول) لا مستخدم. */
+    public function isSystem(): bool
+    {
+        return $this->admin_id === null && $this->admin_name === 'النظام';
+    }
+
     public function actionLabel(): string
     {
         return match ($this->action) {
