@@ -118,12 +118,38 @@
             to   { transform: scale(1.07); }
         }
 
+        /* ── حركة الظهور عند التمرير ────────────────────────────────────
+           العنصر يبدأ خفياً ومزاحاً، ويظهر حين يدخل الشاشة عبر IntersectionObserver
+           الذي يضيف الصنف .in. التأخير المتتابع يُضبط بالمتغيّر --d. */
+        .reveal {
+            opacity: 0;
+            transform: translateY(26px);
+            transition: opacity .7s cubic-bezier(.22,.61,.36,1),
+                        transform .7s cubic-bezier(.22,.61,.36,1);
+            transition-delay: var(--d, 0s);
+            will-change: opacity, transform;
+        }
+        .reveal.in { opacity: 1; transform: none; }
+
+        /* تنويعات الاتجاه */
+        .reveal-start { transform: translateX(-26px); }
+        [dir="rtl"] .reveal-start { transform: translateX(26px); }
+        .reveal-scale { transform: scale(.94); }
+
+        .reveal-start.in,
+        .reveal-scale.in { transform: none; }
+
         /* احترام تفضيل تقليل الحركة في نظام المستخدم */
         @media (prefers-reduced-motion: reduce) {
             .hero-rise, .hero-reveal, .hero-line, .hero-photo img {
                 animation: none !important;
                 opacity: 1 !important;
                 transform: none !important;
+            }
+            .reveal, .reveal-start, .reveal-scale {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
             }
         }
 
@@ -280,6 +306,54 @@ function hSlider(delay = 3500) {
         prev() { this.move(-1); },
     };
 }
+</script>
+<script>
+/**
+ * إظهار العناصر عند دخولها الشاشة.
+ *
+ * كل عنصر يحمل الصنف .reveal يبقى خفياً حتى يظهر ثلثه تقريباً، فيُضاف .in
+ * ثم نتوقف عن مراقبته — الحركة لمرة واحدة فلا تتكرر مع كل تمرير.
+ *
+ * العناصر داخل مجموعة واحدة (data-reveal-group) تظهر متتابعة بفارق بسيط.
+ */
+(function () {
+    const start = () => {
+        const items = document.querySelectorAll('.reveal, .reveal-start, .reveal-scale');
+        if (!items.length) return;
+
+        // متصفح قديم بلا IntersectionObserver → نُظهر كل شيء فوراً
+        if (!('IntersectionObserver' in window)) {
+            items.forEach(el => el.classList.add('in'));
+            return;
+        }
+
+        // تأخير متتابع لأبناء كل مجموعة
+        document.querySelectorAll('[data-reveal-group]').forEach(group => {
+            [...group.children].forEach((child, i) => {
+                const target = child.matches('.reveal, .reveal-start, .reveal-scale')
+                    ? child
+                    : child.querySelector('.reveal, .reveal-start, .reveal-scale');
+                if (target && !target.style.getPropertyValue('--d')) {
+                    target.style.setProperty('--d', Math.min(i * 0.08, 0.5) + 's');
+                }
+            });
+        });
+
+        const io = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('in');
+                obs.unobserve(entry.target);   // الحركة لمرة واحدة
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+
+        items.forEach(el => io.observe(el));
+    };
+
+    document.readyState === 'loading'
+        ? document.addEventListener('DOMContentLoaded', start)
+        : start();
+})();
 </script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 @stack('scripts')

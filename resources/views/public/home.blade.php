@@ -73,9 +73,9 @@
 
 {{-- ══ مزايا ══ --}}
 <section class="max-w-7xl mx-auto px-4 sm:px-6 py-14 relative z-20">
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" data-reveal-group>
         @foreach($features as $f)
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 text-center hover:shadow-md hover:border-gold/40 transition-all group">
+        <div class="reveal bg-white rounded-2xl border border-slate-200 shadow-sm p-5 text-center hover:shadow-md hover:border-gold/40 transition-all group">
             <div class="w-14 h-14 rounded-xl bg-navy/5 flex items-center justify-center mx-auto mb-3 group-hover:bg-gold/10 transition-colors">
                 <x-icon :name="$f['icon']" class="w-9 h-9" />
             </div>
@@ -89,14 +89,14 @@
 {{-- ══ خدماتنا ══ --}}
 <section class="bg-white border-y border-slate-200 py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="text-center mb-10">
+        <div class="text-center mb-10 reveal">
             <span class="text-gold text-sm font-bold">ماذا نقدّم</span>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-1">خدماتنا</h2>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" data-reveal-group>
             @foreach($services as $srv)
-            <div class="bg-slate-50 rounded-2xl border border-slate-200 p-6 hover:bg-white hover:border-gold/50 hover:shadow-md transition-all group">
+            <div class="reveal bg-slate-50 rounded-2xl border border-slate-200 p-6 hover:bg-white hover:border-gold/50 hover:shadow-md transition-all group">
                 <div class="w-14 h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center mb-4 group-hover:border-gold/40 transition-colors">
                     <x-icon :name="$srv['icon']" class="w-9 h-9" />
                 </div>
@@ -113,7 +113,7 @@
 <section class="max-w-7xl mx-auto px-4 sm:px-6 py-20"
          x-data="hSlider(3500)" x-init="init()">
 
-    <div class="text-center mb-10">
+    <div class="text-center mb-10 reveal">
         <span class="text-gold text-sm font-bold">الجنسيات</span>
         <h2 class="text-2xl sm:text-4xl font-extrabold text-navy mt-1">الجنسيات المتاحة للاستقدام</h2>
         <p class="text-slate-500 text-sm mt-3 max-w-xl mx-auto">
@@ -195,14 +195,14 @@
 {{-- ══ خطوات الاستقدام ══ --}}
 <section class="bg-white border-y border-slate-200 py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="text-center mb-10">
+        <div class="text-center mb-10 reveal">
             <span class="text-gold text-sm font-bold">كيف نعمل</span>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-1">خطوات الاستقدام</h2>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" data-reveal-group>
             @foreach($steps as $step)
-            <div class="relative bg-slate-50 rounded-2xl p-6 border border-slate-200 hover:border-gold/50 hover:bg-white transition-all">
+            <div class="reveal relative bg-slate-50 rounded-2xl p-6 border border-slate-200 hover:border-gold/50 hover:bg-white transition-all">
                 <span class="absolute -top-3 start-6 w-8 h-8 rounded-lg bg-gold text-white font-extrabold text-sm flex items-center justify-center shadow">
                     {{ $step['n'] }}
                 </span>
@@ -220,7 +220,7 @@
 <section class="max-w-7xl mx-auto px-4 sm:px-6 py-20"
          x-data="hSlider(4500)" x-init="init()">
 
-    <div class="flex items-end justify-between mb-10 gap-4">
+    <div class="flex items-end justify-between mb-10 gap-4 reveal">
         <div>
             <span class="text-gold text-sm font-bold">العمالة</span>
             <h2 class="text-2xl sm:text-4xl font-extrabold text-navy mt-1">أحدث السير الذاتية</h2>
@@ -268,9 +268,9 @@
 
 {{-- ══ إحصائيات ══ --}}
 <section class="hero-grad text-white py-14">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center" data-reveal-group>
         @foreach($counters as $s)
-        <div>
+        <div class="reveal">
             <div class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-3">
                 <x-icon :name="$s['icon']" class="w-8 h-8 stat-icon" />
             </div>
@@ -285,14 +285,14 @@
 @if(!empty($testimonials))
 <section class="bg-white border-y border-slate-200 py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="text-center mb-10">
+        <div class="text-center mb-10 reveal">
             <span class="text-gold text-sm font-bold">شهادات</span>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-1">ماذا يقول عملاؤنا</h2>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5" data-reveal-group>
             @foreach($testimonials as $t)
-            <div class="bg-slate-50 rounded-2xl border border-slate-200 p-6 hover:bg-white hover:border-gold/40 hover:shadow-md transition-all">
+            <div class="reveal bg-slate-50 rounded-2xl border border-slate-200 p-6 hover:bg-white hover:border-gold/40 hover:shadow-md transition-all">
                 {{-- نجوم التقييم --}}
                 <div class="flex items-center gap-0.5 mb-4">
                     @for($i = 0; $i < 5; $i++)
@@ -321,7 +321,7 @@
 {{-- ══ الأسئلة الشائعة ══ --}}
 @if(!empty($faqs))
 <section class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
-    <div class="text-center mb-10">
+    <div class="text-center mb-10 reveal">
         <span class="text-gold text-sm font-bold">استفسارات</span>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-1">أسئلة شائعة</h2>
         <p class="text-slate-500 text-sm mt-3">
@@ -329,9 +329,9 @@
         </p>
     </div>
 
-    <div class="space-y-3" x-data="{ open: 0 }">
+    <div class="space-y-3" x-data="{ open: 0 }" data-reveal-group>
         @foreach($faqs as $i => $faq)
-        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden"
+        <div class="reveal bg-white rounded-2xl border border-slate-200 overflow-hidden"
              :class="open === {{ $i }} ? 'border-gold/50 shadow-md' : ''">
             <button type="button" @click="open = (open === {{ $i }} ? null : {{ $i }})"
                     class="w-full flex items-center justify-between gap-4 p-5 text-start hover:bg-slate-50 transition-colors">
@@ -365,7 +365,7 @@
 
 {{-- ══ شريط الدعوة قبل التذييل ══ --}}
 <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-  <div class="cta-band cta-shell text-white relative overflow-hidden rounded-3xl">
+  <div class="cta-band cta-shell reveal-scale text-white relative overflow-hidden rounded-3xl">
     {{-- نقوش خفيفة + هالتان ضوئيتان تمنحان البطاقة عمقاً --}}
     <div class="absolute inset-0 opacity-[0.07]"
          style="background-image:radial-gradient(circle at 15% 30%, #fff 1px, transparent 1px);background-size:28px 28px"></div>

@@ -107,14 +107,14 @@
 
 {{-- ══ أرقام سريعة ══ --}}
 <section class="cta-band text-white py-12">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center" data-reveal-group>
         @foreach([
             ['v' => $stats['available'] . '+',     'l' => 'عاملة متاحة',  'icon' => '22_workers_count'],
             ['v' => $stats['nationalities'] . '+', 'l' => 'جنسية متنوعة', 'icon' => '20_global_countries'],
             ['v' => '98%',                         'l' => 'رضا العملاء',  'icon' => '23_customer_satisfaction'],
             ['v' => '24/7',                        'l' => 'دعم ومتابعة',  'icon' => '01_headset_support'],
         ] as $st)
-        <div>
+        <div class="reveal">
             <div class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-3">
                 <x-icon :name="$st['icon']" class="w-8 h-8 stat-icon" />
             </div>
@@ -127,14 +127,14 @@
 
 {{-- ══ قيمنا ══ --}}
 <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-    <div class="text-center mb-10">
+    <div class="text-center mb-10 reveal">
         <span class="text-gold text-sm font-bold">ما نؤمن به</span>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-1">قيمنا</h2>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" data-reveal-group>
         @foreach($values as $v)
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 text-center hover:shadow-md hover:border-gold/40 transition-all group">
+        <div class="reveal bg-white rounded-2xl border border-slate-200 p-6 text-center hover:shadow-md hover:border-gold/40 transition-all group">
             <div class="w-14 h-14 rounded-xl bg-navy/5 flex items-center justify-center mx-auto mb-4 group-hover:bg-gold/10 transition-colors">
                 <x-icon :name="$v['icon']" class="w-9 h-9" />
             </div>
@@ -148,16 +148,16 @@
 {{-- ══ رحلتك معنا ══ --}}
 <section class="bg-white border-y border-slate-200 py-16">
     <div class="max-w-4xl mx-auto px-4 sm:px-6">
-        <div class="text-center mb-12">
+        <div class="text-center mb-12 reveal">
             <span class="text-gold text-sm font-bold">كيف نعمل</span>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-1">رحلتك معنا</h2>
             <p class="text-slate-500 text-sm mt-3">من تقديم الطلب حتى ما بعد وصول العاملة</p>
         </div>
 
         {{-- خط زمني رأسي؛ الخط على جهة البداية ليعمل في الاتجاهين --}}
-        <ol class="relative space-y-8 ps-8 border-s-2 border-slate-200">
+        <ol class="relative space-y-8 ps-8 border-s-2 border-slate-200" data-reveal-group>
             @foreach($journey as $i => $step)
-            <li class="relative">
+            <li class="reveal-start relative">
                 <span class="absolute -start-[2.55rem] top-0 w-8 h-8 rounded-full bg-gold text-white
                              font-extrabold text-sm flex items-center justify-center shadow ring-4 ring-white">
                     {{ $i + 1 }}
@@ -172,14 +172,14 @@
 
 {{-- ══ التزاماتنا ══ --}}
 <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-    <div class="text-center mb-10">
+    <div class="text-center mb-10 reveal">
         <span class="text-gold text-sm font-bold">ضماناتنا</span>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-1">التزاماتنا تجاهك</h2>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" data-reveal-group>
         @foreach($commitments as $c)
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 flex items-start gap-4 hover:shadow-md hover:border-gold/40 transition-all">
+        <div class="reveal bg-white rounded-2xl border border-slate-200 p-6 flex items-start gap-4 hover:shadow-md hover:border-gold/40 transition-all">
             <div class="w-12 h-12 rounded-xl bg-navy/5 flex items-center justify-center flex-shrink-0">
                 <x-icon :name="$c['icon']" class="w-8 h-8" />
             </div>
@@ -194,7 +194,7 @@
 
 {{-- ══ دعوة للتواصل ══ --}}
 <section class="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
-    <div class="cta-band cta-shell text-white relative overflow-hidden rounded-3xl">
+    <div class="cta-band cta-shell reveal-scale text-white relative overflow-hidden rounded-3xl">
         <div class="absolute inset-0 opacity-[0.07]"
              style="background-image:radial-gradient(circle at 15% 30%, #fff 1px, transparent 1px);background-size:28px 28px"></div>
         <div class="absolute -top-24 -start-16 w-80 h-80 rounded-full bg-gold/20 blur-3xl"></div>

@@ -22,7 +22,7 @@
 
         {{-- ══ النموذج ══ --}}
         <div class="lg:col-span-2">
-            <div class="bg-white rounded-2xl border border-slate-200 p-7">
+            <div class="reveal bg-white rounded-2xl border border-slate-200 p-7">
 
                 @if(session('success'))
                 <div class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3">
@@ -115,7 +115,7 @@
 
         {{-- ══ بيانات التواصل ══ --}}
         <aside class="space-y-5">
-            <div class="bg-white rounded-2xl border border-slate-200 p-6">
+            <div class="reveal bg-white rounded-2xl border border-slate-200 p-6">
                 <h3 class="font-bold text-navy text-sm mb-4">بيانات التواصل</h3>
                 <ul class="space-y-4 text-sm text-slate-600">
                     @if($S('phone'))
