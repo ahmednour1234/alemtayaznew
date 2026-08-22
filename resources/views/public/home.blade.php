@@ -11,11 +11,27 @@
          loading="eager" fetchpriority="high"
          class="absolute inset-0 w-full h-full object-cover">
 
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 lg:py-0">
-        <div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-10 lg:gap-6 lg:min-h-[34rem]">
+    {{-- الصورة ملتصقة بحافة الصفحة بلا حشو، والقوس على حافتها الداخلية --}}
+    <div class="hero-photo hidden lg:block">
+        <img src="{{ asset('09_hero_background.jpg') }}"
+             alt="عاملة منزلية مع أسرة سعودية"
+             loading="eager" fetchpriority="high" width="1448" height="1086"
+             class="w-full h-full object-cover object-[55%_center]">
+    </div>
 
-            {{-- النص (يمين في RTL) --}}
-            <div class="text-center lg:text-start order-2 lg:order-1">
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-10 lg:py-0">
+        <div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-6 lg:min-h-[38rem]">
+
+            {{-- الصورة على الجوال: بعرض الشاشة كاملاً --}}
+            <div class="lg:hidden -mx-4 sm:-mx-6 order-1">
+                <img src="{{ asset('09_hero_background.jpg') }}"
+                     alt="عاملة منزلية مع أسرة سعودية"
+                     loading="eager" fetchpriority="high"
+                     class="w-full h-72 sm:h-96 object-cover">
+            </div>
+
+            {{-- النص (يمين في RTL) — يُزاح قليلاً عن قوس الصورة --}}
+            <div class="text-center lg:text-start order-2 lg:order-1 lg:pe-6">
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy leading-tight">
                     {{ $S('company_name') }}<span class="text-gold">...</span>
                 </h1>
@@ -48,15 +64,8 @@
                 </div>
             </div>
 
-            {{-- الصورة (يسار في RTL) بقصّة منحنية وحدّ ذهبي --}}
-            <div class="order-1 lg:order-2 relative">
-                <div class="hero-photo relative mx-auto lg:mx-0 max-w-md lg:max-w-none">
-                    <img src="{{ asset('09_hero_background.jpg') }}"
-                         alt="عاملة منزلية مع أسرة سعودية"
-                         loading="eager" width="1448" height="1086"
-                         class="w-full h-64 sm:h-80 lg:h-[30rem] object-cover">
-                </div>
-            </div>
+            {{-- العمود الأيسر فارغ على الشاشات الكبيرة — مكان الصورة الملتصقة بالحافة --}}
+            <div class="hidden lg:block order-1 lg:order-2" aria-hidden="true"></div>
 
         </div>
     </div>

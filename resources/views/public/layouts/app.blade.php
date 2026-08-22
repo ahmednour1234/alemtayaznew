@@ -55,23 +55,20 @@
         body { font-family: {{ $stack }}; }
         .hero-grad { background: linear-gradient(135deg, #1e3a6d 0%, #2b4d8c 55%, #16294d 100%); }
 
-        /* صورة الواجهة: زوايا دائرية بسيطة على الجوال،
-           وقصّة منحنية بحدّ ذهبي على الشاشات الكبيرة كما في هوية الشركة. */
-        .hero-photo {
-            overflow: hidden;
-            border-radius: 1.25rem;
-            box-shadow: 0 18px 45px -20px rgba(22,41,77,.45);
-        }
-
+        /* صورة الواجهة على الشاشات الكبيرة: ملتصقة بحافة الصفحة بلا حشو،
+           تشغل نصف العرض بالكامل، والقوس على حافتها الداخلية (جهة النص).
+           inset-inline-end = الحافة الخارجية، فتنعكس تلقائياً مع اتجاه الصفحة. */
         @media (min-width: 1024px) {
             .hero-photo {
-                /* القوس على الجهة المواجهة للنص — ينعكس تلقائياً مع اتجاه الصفحة */
-                border-radius: 0 0 0 0;
-                border-start-start-radius: 14rem;
-                border-end-start-radius: 14rem;
-                border-start-end-radius: 1.5rem;
-                border-end-end-radius: 1.5rem;
-                border-inline-start: 4px solid #c9a84c;
+                position: absolute;
+                inset-block: 0;
+                inset-inline-end: 0;
+                width: 52%;
+                z-index: 1;              /* فوق الخلفية الزخرفية، وتحت النص */
+                overflow: hidden;
+                border-start-start-radius: 16rem;
+                border-end-start-radius: 16rem;
+                border-inline-start: 5px solid #c9a84c;
             }
         }
 
