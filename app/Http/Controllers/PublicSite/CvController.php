@@ -21,12 +21,6 @@ class CvController extends Controller
     {
         $filters = $request->validate([
             'nationality_id' => ['nullable', 'integer', 'exists:nationalities,id'],
-            'profession'     => ['nullable', 'string', 'max:50'],
-            'experience'     => ['nullable', 'string', 'max:10'],
-            'religion'       => ['nullable', 'string', 'max:20'],
-            'age_min'        => ['nullable', 'integer', 'min:18', 'max:60'],
-            'age_max'        => ['nullable', 'integer', 'min:18', 'max:60'],
-            'search'         => ['nullable', 'string', 'max:100'],
         ]);
 
         $query = $this->baseQuery()->with('nationality');
@@ -34,38 +28,24 @@ class CvController extends Controller
         if (! empty($filters['nationality_id'])) {
             $query->where('nationality_id', $filters['nationality_id']);
         }
-        if (! empty($filters['profession'])) {
-            $query->where('profession', $filters['profession']);
-        }
-        if (! empty($filters['experience'])) {
-            $query->where('experience', $filters['experience']);
-        }
-        if (! empty($filters['religion'])) {
-            $query->where('religion', $filters['religion']);
-        }
-        if (! empty($filters['age_min'])) {
-            $query->where('age', '>=', $filters['age_min']);
-        }
-        if (! empty($filters['age_max'])) {
-            $query->where('age', '<=', $filters['age_max']);
-        }
-
-        // البحث بالاسم فقط — رقم الجواز مشفّر ولا يجوز كشفه في واجهة عامة
-        if (! empty($filters['search'])) {
-            $query->where('name', 'like', '%' . $filters['search'] . '%');
-        }
 
         $workers = $query->latest('id')
             ->paginate(self::PER_PAGE)
             ->withQueryString();
 
+        // طلب التمرير اللانهائي يجلب البطاقات وحدها ليُلحقها بالقائمة
+        if ($request->boolean('partial')) {
+            return response()->view('public.cvs._cards', ['workers' => $workers]);
+        }
+
         return view('public.cvs.index', [
             'workers'       => $workers,
             'filters'       => $filters,
-            'nationalities' => Nationality::where('active', true)->orderBy('name')->get(),
-            'professions'   => Worker::professions(),
-            'experiences'   => Worker::experienceOptions(),
-            'religions'     => Worker::religionOptions(),
+            'nationalities' => Nationality::where('active', true)
+                ->whereHas('workers', fn ($q) => $q->where('active', true)
+                    ->where('status', 'available')->whereNotNull('cv_path'))
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
@@ -88,7 +68,12 @@ class CvController extends Controller
 
         $request->merge(['nationality_id' => $nationality->id]);
 
-        return $this->index($request)->with('activeNationality', $nationality);
+        $response = $this->index($request);
+
+        // طلب جزئي (تمرير لانهائي) يعود ببطاقات فقط، فلا بيانات إضافية له
+        return $request->boolean('partial')
+            ? $response
+            : $response->with('activeNationality', $nationality);
     }
 
     public function show(int $id)
