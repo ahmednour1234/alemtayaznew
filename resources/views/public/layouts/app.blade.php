@@ -54,6 +54,21 @@
     <style>
         body { font-family: {{ $stack }}; }
         .hero-grad { background: linear-gradient(135deg, #1e3a6d 0%, #2b4d8c 55%, #16294d 100%); }
+
+        /* تعتيم صورة الواجهة: داكن كلياً على الجوال ليبقى النص مقروءاً،
+           ومتدرّج على الشاشات الكبيرة فتظهر الصورة من الجهة المقابلة للنص. */
+        .hero-overlay { background: linear-gradient(to bottom, rgba(22,41,77,.82), rgba(22,41,77,.78)); }
+
+        @media (min-width: 1024px) {
+            /* RTL: النص يمين ← التعتيم يبدأ من اليمين */
+            [dir="rtl"] .hero-overlay {
+                background: linear-gradient(to left, rgba(22,41,77,.94) 0%, rgba(22,41,77,.86) 35%, rgba(22,41,77,.45) 65%, rgba(22,41,77,.15) 100%);
+            }
+            [dir="ltr"] .hero-overlay {
+                background: linear-gradient(to right, rgba(22,41,77,.94) 0%, rgba(22,41,77,.86) 35%, rgba(22,41,77,.45) 65%, rgba(22,41,77,.15) 100%);
+            }
+        }
+
         [x-cloak] { display: none !important; }
     </style>
     @stack('head')

@@ -5,52 +5,47 @@
 @section('content')
 
 {{-- ══ Hero ══ --}}
-<section class="hero-grad text-white relative overflow-hidden">
-    <div class="absolute inset-0 opacity-10"
-         style="background-image:radial-gradient(circle at 20% 30%, #fff 1px, transparent 1px);background-size:32px 32px"></div>
+<section class="relative overflow-hidden text-white bg-navy">
+    {{-- صورة الخلفية --}}
+    <img src="{{ asset('01_hero_family_worker.jpg') }}"
+         alt="عاملة منزلية مع أسرة سعودية"
+         loading="eager" fetchpriority="high"
+         class="absolute inset-0 w-full h-full object-cover object-[70%_center] lg:object-center">
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 relative">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-        <div>
-            <span class="inline-block bg-gold/20 text-gold text-xs font-bold px-3 py-1.5 rounded-full mb-5">
+    {{-- طبقة تعتيم متدرّجة: داكنة جهة النص (يمين في RTL) وشفافة فوق الصورة --}}
+    <div class="absolute inset-0 hero-overlay"></div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-28 sm:pt-28 sm:pb-32 lg:pt-32 lg:pb-36">
+        <div class="max-w-xl">
+            <span class="inline-block bg-gold/20 text-gold text-xs font-bold px-3 py-1.5 rounded-full mb-5 backdrop-blur-sm">
                 مرخّصة من وزارة الموارد البشرية
             </span>
-            <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight">
+            <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight drop-shadow-lg">
                 {{ $S('company_name') }}<span class="text-gold">...</span>
             </h1>
-            <p class="text-2xl sm:text-3xl font-bold text-gold mt-2">{{ $S('tagline') }}</p>
-            <p class="text-white/80 mt-5 leading-relaxed text-sm sm:text-base">
+            <p class="text-2xl sm:text-3xl font-bold text-gold mt-2 drop-shadow-lg">{{ $S('tagline') }}</p>
+            <p class="text-white/90 mt-5 leading-relaxed text-sm sm:text-base drop-shadow">
                 نوفّر لك عمالة منزلية مدرّبة وموثّقة، بإجراءات واضحة ومتابعة كاملة من تقديم الطلب
                 وحتى وصول العاملة إلى منزلك.
             </p>
 
             <div class="flex flex-wrap gap-3 mt-8">
                 <a href="{{ route('site.cvs') }}"
-                   class="inline-flex items-center gap-2 bg-gold hover:bg-gold-dark text-navy font-bold px-6 py-3 rounded-xl transition-colors">
+                   class="inline-flex items-center gap-2 bg-gold hover:bg-gold-dark text-navy font-bold px-6 py-3 rounded-xl transition-colors shadow-lg">
                     تصفّح السير الذاتية
                     <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 </a>
                 <a href="{{ route('site.contact') }}"
-                   class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/25 text-white font-bold px-6 py-3 rounded-xl transition-colors">
+                   class="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold px-6 py-3 rounded-xl transition-colors backdrop-blur-sm">
                     اطلب الآن
                 </a>
             </div>
         </div>
-
-        {{-- صورة الواجهة --}}
-        <div class="relative hidden lg:block">
-            <div class="absolute -inset-4 bg-gold/15 rounded-[2rem] rotate-3"></div>
-            <img src="{{ asset('01_hero_family_worker.jpg') }}"
-                 alt="عاملة منزلية مع أسرة سعودية"
-                 loading="eager" width="720" height="560"
-                 class="relative w-full h-[26rem] object-cover rounded-[2rem] shadow-2xl">
-        </div>
-      </div>
     </div>
 </section>
 
 {{-- ══ مزايا ══ --}}
-<section class="max-w-7xl mx-auto px-4 sm:px-6 -mt-10 relative z-10">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 -mt-12 relative z-20">
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         @foreach($features as $f)
         <div class="bg-white rounded-2xl border border-slate-200 p-5 text-center hover:shadow-md transition-shadow">
