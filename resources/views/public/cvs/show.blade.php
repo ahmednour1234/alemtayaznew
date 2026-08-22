@@ -1,5 +1,14 @@
 @extends('public.layouts.app')
-@php $S = fn(string $k) => \App\Models\SiteSetting::value($k); @endphp
+@php
+    $S = fn(string $k) => \App\Models\SiteSetting::value($k);
+
+    // قيم المشاركة — تُحسب هنا لا في منتصف القالب، فتبقى معرّفة
+    // مهما تغيّر ترتيب الأقسام لاحقاً.
+    $shareUrl  = route('site.cvs.show', $worker->id);
+    $shareText = $worker->name
+        . ($worker->nationality ? ' — ' . $worker->nationality->name : '')
+        . ($worker->profession  ? ' — ' . $worker->profession_label : '');
+@endphp
 @section('title', $worker->name . ' — سيرة ذاتية')
 
 @section('content')
@@ -83,13 +92,6 @@
                     </div>
 
                     {{-- ══ مشاركة الصفحة ══ --}}
-                    @php
-                        $shareUrl  = route('site.cvs.show', $worker->id);
-                        $shareText = $worker->name
-                            . ($worker->nationality ? ' — ' . $worker->nationality->name : '')
-                            . ($worker->profession ? ' — ' . $worker->profession_label : '');
-                    @endphp
-
                     <div class="mt-6 pt-5 border-t border-slate-100">
                         <p class="text-xs font-semibold text-slate-500 mb-3">مشاركة السيرة الذاتية</p>
 
