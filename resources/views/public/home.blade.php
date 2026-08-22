@@ -12,7 +12,7 @@
          class="absolute inset-0 w-full h-full object-cover">
 
     {{-- الصورة ملتصقة بحافة الصفحة بلا حشو، والقوس على حافتها الداخلية --}}
-    <div class="hero-photo hidden lg:block">
+    <div class="hero-photo hero-reveal hidden lg:block" style="--d:.05s">
         <img src="{{ asset('09_hero_background.jpg') }}"
              alt="عاملة منزلية مع أسرة سعودية"
              loading="eager" fetchpriority="high" width="1448" height="1086"
@@ -23,7 +23,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-6 lg:min-h-[38rem]">
 
             {{-- الصورة على الجوال: بعرض الشاشة كاملاً --}}
-            <div class="lg:hidden -mx-4 sm:-mx-6 order-1">
+            <div class="lg:hidden -mx-4 sm:-mx-6 order-1 hero-reveal" style="--d:.05s">
                 <img src="{{ asset('09_hero_background.jpg') }}"
                      alt="عاملة منزلية مع أسرة سعودية"
                      loading="eager" fetchpriority="high"
@@ -32,34 +32,34 @@
 
             {{-- النص (يسار في RTL) — يُزاح قليلاً عن قوس الصورة --}}
             <div class="text-center lg:text-end order-2 lg:order-2 lg:ps-6">
-                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy leading-tight">
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy leading-tight hero-rise" style="--d:.25s">
                     {{ $S('company_name') }}<span class="text-gold">...</span>
                 </h1>
-                <p class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gold mt-3">
+                <p class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gold mt-3 hero-rise" style="--d:.4s">
                     {{ $S('tagline') }}
                 </p>
 
                 {{-- فاصل ذهبي بنقطة، كما في هوية الشركة --}}
                 <div class="flex items-center gap-2 mt-6 justify-center lg:justify-end">
-                    <span class="h-px w-28 bg-gradient-to-r from-gold to-transparent"></span>
-                    <span class="w-2 h-2 rounded-full bg-gold"></span>
+                    <span class="h-px w-28 bg-gradient-to-r from-gold to-transparent hero-line" style="--d:.55s"></span>
+                    <span class="w-2 h-2 rounded-full bg-gold hero-rise" style="--d:.6s"></span>
                 </div>
 
-                <p class="text-slate-600 mt-5 leading-loose text-sm sm:text-base max-w-lg mx-auto lg:me-0 lg:ms-auto">
+                <p class="text-slate-600 mt-5 leading-loose text-sm sm:text-base max-w-lg mx-auto lg:me-0 lg:ms-auto hero-rise" style="--d:.65s">
                     نوفّر لك أفضل الخدمات لاستقدام العمالة المنزلية من مربيات، عاملات منزلية،
                     وسائقين من جنسيات مختارة بعناية، وبأعلى معايير الجودة والاحترافية.
                 </p>
 
-                <div class="flex flex-wrap gap-3 mt-8 justify-center lg:justify-end">
+                <div class="flex flex-wrap gap-3 mt-8 justify-center lg:justify-end hero-rise" style="--d:.8s">
                     <a href="{{ route('site.contact') }}"
-                       class="inline-flex items-center gap-2 bg-gold hover:bg-gold-dark text-white font-bold px-7 py-3.5 rounded-xl transition-colors shadow-md">
+                       class="inline-flex items-center gap-2 bg-gold hover:bg-gold-dark text-white font-bold px-7 py-3.5 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                         تواصل معنا الآن
                     </a>
                     <a href="{{ route('site.cvs') }}"
-                       class="inline-flex items-center gap-2 border-2 border-navy text-navy hover:bg-navy hover:text-white font-bold px-7 py-3.5 rounded-xl transition-colors">
+                       class="group inline-flex items-center gap-2 border-2 border-navy text-navy hover:bg-navy hover:text-white font-bold px-7 py-3.5 rounded-xl hover:-translate-y-0.5 transition-all duration-300">
                         تصفّح الخدمات
-                        <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <svg class="w-4 h-4 rtl:rotate-180 group-hover:-translate-x-1 rtl:group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
             </div>

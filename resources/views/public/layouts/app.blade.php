@@ -73,6 +73,60 @@
             }
         }
 
+        /* ── حركة دخول الواجهة ─────────────────────────────────────────
+           عناصر النص تدخل متتابعة، والصورة تتكشّف مع تكبير خفيف.
+           التأخير يُضبط عبر --d على كل عنصر. */
+        @keyframes heroRise {
+            from { opacity: 0; transform: translateY(22px); }
+            to   { opacity: 1; transform: none; }
+        }
+
+        @keyframes heroReveal {
+            from { opacity: 0; transform: scale(1.06); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes heroLine {
+            from { transform: scaleX(0); }
+            to   { transform: scaleX(1); }
+        }
+
+        .hero-rise {
+            opacity: 0;
+            animation: heroRise .7s cubic-bezier(.22,.61,.36,1) forwards;
+            animation-delay: var(--d, 0s);
+        }
+
+        .hero-reveal {
+            opacity: 0;
+            animation: heroReveal 1s cubic-bezier(.22,.61,.36,1) forwards;
+            animation-delay: var(--d, 0s);
+        }
+
+        .hero-line {
+            transform-origin: right center;
+            animation: heroLine .6s cubic-bezier(.22,.61,.36,1) forwards;
+            animation-delay: var(--d, 0s);
+        }
+        [dir="ltr"] .hero-line { transform-origin: left center; }
+
+        /* صورة الواجهة تكبر ببطء شديد بعد اكتمال ظهورها — إحساس بالحياة بلا إلهاء.
+           التأخير يساوي زمن heroReveal حتى لا يتزاحم التحويلان. */
+        .hero-photo img { animation: heroZoom 18s ease-out 1.1s forwards; }
+        @keyframes heroZoom {
+            from { transform: scale(1); }
+            to   { transform: scale(1.07); }
+        }
+
+        /* احترام تفضيل تقليل الحركة في نظام المستخدم */
+        @media (prefers-reduced-motion: reduce) {
+            .hero-rise, .hero-reveal, .hero-line, .hero-photo img {
+                animation: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
         [x-cloak] { display: none !important; }
     </style>
     @stack('head')
