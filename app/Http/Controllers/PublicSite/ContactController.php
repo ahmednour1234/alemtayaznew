@@ -30,7 +30,11 @@ class ContactController extends Controller
     public function show()
     {
         return view('public.contact', [
-            'branches'      => Branch::where('active', true)->orderBy('name')->get(),
+            // الفروع المعلَّمة للعرض العام فقط — الفروع الإدارية لا تُعرض للعميل
+            'branches'      => Branch::where('active', true)
+                ->where('public', true)
+                ->orderBy('name')
+                ->get(),
             'nationalities' => Nationality::where('active', true)->orderBy('name')->get(),
         ]);
     }
@@ -51,7 +55,11 @@ class ContactController extends Controller
             'phone'          => ['required', 'string', 'max:30'],
             'city'           => ['nullable', 'string', 'max:100'],
             'nationality_id' => ['nullable', 'integer', 'exists:nationalities,id'],
-            'branch_id'      => ['nullable', 'integer', 'exists:branches,id'],
+            'branch_id'      => [
+                'nullable', 'integer',
+                // نمنع تمرير معرّف فرع غير معروض عبر تعديل النموذج يدوياً
+                Rule::exists('branches', 'id')->where(fn ($q) => $q->where('active', true)->where('public', true)),
+            ],
             'service'        => ['required', 'string', Rule::in(self::SERVICES)],
             'notes'          => ['nullable', 'string', 'max:2000'],
             // حقل فخّ مخفي: تملؤه الروبوتات فقط

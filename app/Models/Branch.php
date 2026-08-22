@@ -9,13 +9,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Branch extends Model
 {
-    protected $fillable = ['name', 'code', 'phone', 'address', 'city', 'manager_name', 'active'];
+    protected $fillable = ['name', 'code', 'phone', 'address', 'city', 'manager_name', 'active', 'public'];
     use HasFactory, SoftDeletes;
 
     protected function casts(): array
     {
         return [
             'active' => 'boolean',
+            'public' => 'boolean',
         ];
     }
 

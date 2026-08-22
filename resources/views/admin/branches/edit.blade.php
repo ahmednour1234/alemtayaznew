@@ -46,6 +46,15 @@
                     <input type="checkbox" name="active" id="active" value="1" {{ old('active', $branch->active) ? 'checked' : '' }} class="rounded">
                     <label for="active" class="text-sm font-medium text-slate-700">فرع نشط</label>
                 </div>
+                <div class="flex items-start gap-3 mt-3">
+                    <input type="checkbox" name="public" id="public" value="1" {{ old('public', $branch->public) ? 'checked' : '' }} class="rounded mt-0.5">
+                    <label for="public" class="text-sm font-medium text-slate-700">
+                        يظهر في الموقع العام
+                        <span class="block text-xs font-normal text-slate-400 mt-0.5">
+                            يُعرض كخيار للعميل في نموذج «تواصل معنا». اتركه فارغاً للفروع الإدارية.
+                        </span>
+                    </label>
+                </div>
             </div>
 
             <div>

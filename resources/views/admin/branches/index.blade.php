@@ -147,6 +147,14 @@
                                     <span class="w-1.5 h-1.5 bg-red-400 rounded-full"></span> غير نشط
                                 </span>
                             @endif
+
+                            @if($branch->public)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 mt-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-xs font-medium"
+                                      title="يُعرض كخيار للعميل في الموقع العام">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0zM3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg>
+                                    في الموقع
+                                </span>
+                            @endif
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-1">

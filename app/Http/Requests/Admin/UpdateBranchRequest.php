@@ -19,6 +19,7 @@ class UpdateBranchRequest extends FormRequest
             'city'         => ['nullable', 'string', 'max:100'],
             'manager_name' => ['nullable', 'string', 'max:255'],
             'active'       => ['boolean'],
+            'public'       => ['boolean'],
         ];
     }
 }

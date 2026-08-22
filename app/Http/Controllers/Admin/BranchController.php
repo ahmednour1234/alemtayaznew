@@ -31,6 +31,7 @@ class BranchController extends Controller
     {
         $data = $request->validated();
         $data['active'] = $request->boolean('active', true);
+        $data['public'] = $request->boolean('public');
         $branch = $this->service->store($data);
         $this->notifService->notify(
             'branch_created',
@@ -57,6 +58,7 @@ class BranchController extends Controller
     {
         $data = $request->validated();
         $data['active'] = $request->boolean('active');
+        $data['public'] = $request->boolean('public');
         $this->service->update($id, $data);
         return redirect()->route('admin.branches.index')->with('success', 'تم تحديث الفرع بنجاح.');
     }
