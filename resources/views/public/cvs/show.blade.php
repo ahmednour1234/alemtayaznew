@@ -20,9 +20,21 @@
         {{-- ══ بطاقة البيانات ══ --}}
         <aside class="lg:col-span-1 space-y-5">
             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-                <div class="hero-grad h-28 relative flex items-end justify-center">
-                    <div class="absolute -bottom-10 w-20 h-20 rounded-2xl bg-white border-4 border-white shadow-md flex items-center justify-center">
+                @php($natPhoto = $worker->nationality?->photoUrl())
+                <div class="h-28 relative flex items-end justify-center overflow-hidden {{ $natPhoto ? '' : 'hero-grad' }}">
+                    @if($natPhoto)
+                    <img src="{{ $natPhoto }}" alt="" aria-hidden="true" loading="lazy"
+                         class="absolute inset-0 w-full h-full object-cover object-top">
+                    <div class="absolute inset-0 bg-navy/55"></div>
+                    @endif
+
+                    <div class="absolute -bottom-10 w-20 h-20 rounded-2xl bg-white border-4 border-white shadow-md flex items-center justify-center overflow-hidden">
+                        @if($natPhoto)
+                        <img src="{{ $natPhoto }}" alt="{{ $worker->nationality->name }}" loading="lazy"
+                             class="w-full h-full object-cover object-top">
+                        @else
                         <span class="text-3xl font-extrabold text-navy">{{ mb_substr($worker->name ?: '؟', 0, 1) }}</span>
+                        @endif
                     </div>
                 </div>
 

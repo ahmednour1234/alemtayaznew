@@ -25,6 +25,15 @@
     <title>@yield('title', $S('company_name'))</title>
     <meta name="description" content="@yield('meta_description', $S('company_name') . ' — ' . $S('tagline'))">
 
+    <link rel="icon" type="image/png" href="{{ asset('08_alemtyaz_logo_original.png') }}">
+
+    {{-- Open Graph — تظهر عند مشاركة الرابط في واتساب وتويتر --}}
+    <meta property="og:title" content="@yield('title', $S('company_name'))">
+    <meta property="og:description" content="@yield('meta_description', $S('company_name') . ' — ' . $S('tagline'))">
+    <meta property="og:image" content="{{ asset('01_hero_family_worker.jpg') }}">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family={{ $font }}&display=swap" rel="stylesheet">

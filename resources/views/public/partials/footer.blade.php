@@ -14,8 +14,8 @@
 
             <div class="lg:col-span-1">
                 <div class="flex items-center gap-2.5 mb-4">
-                    <span class="w-9 h-9 rounded-lg bg-gold flex items-center justify-center text-navy font-extrabold text-lg">ا</span>
-                    <span class="text-white font-bold">{{ $S('company_name') }}</span>
+                    <img src="{{ asset('08_alemtyaz_logo_original.png') }}" alt="{{ $S('company_name') }}"
+                         loading="lazy" class="h-11 w-auto object-contain">
                 </div>
                 <p class="text-sm leading-relaxed">{{ $S('tagline') }}</p>
             </div>

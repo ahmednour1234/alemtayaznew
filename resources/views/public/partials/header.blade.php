@@ -13,8 +13,9 @@
 
             {{-- الشعار --}}
             <a href="{{ route('site.home') }}" class="flex items-center gap-2.5 flex-shrink-0">
-                <span class="w-9 h-9 rounded-lg bg-gold flex items-center justify-center text-navy font-extrabold text-lg">ا</span>
-                <span class="text-white font-bold text-sm sm:text-base leading-tight">{{ $S('company_name') }}</span>
+                <img src="{{ asset('08_alemtyaz_logo_original.png') }}" alt="{{ $S('company_name') }}"
+                     class="h-10 w-auto object-contain">
+                <span class="hidden sm:block text-white font-bold text-sm leading-tight">{{ $S('company_name') }}</span>
             </a>
 
             {{-- روابط سطح المكتب --}}

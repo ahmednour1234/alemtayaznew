@@ -9,8 +9,9 @@
     <div class="absolute inset-0 opacity-10"
          style="background-image:radial-gradient(circle at 20% 30%, #fff 1px, transparent 1px);background-size:32px 32px"></div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 relative">
-        <div class="max-w-2xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 relative">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+        <div>
             <span class="inline-block bg-gold/20 text-gold text-xs font-bold px-3 py-1.5 rounded-full mb-5">
                 مرخّصة من وزارة الموارد البشرية
             </span>
@@ -35,6 +36,16 @@
                 </a>
             </div>
         </div>
+
+        {{-- صورة الواجهة --}}
+        <div class="relative hidden lg:block">
+            <div class="absolute -inset-4 bg-gold/15 rounded-[2rem] rotate-3"></div>
+            <img src="{{ asset('01_hero_family_worker.jpg') }}"
+                 alt="عاملة منزلية مع أسرة سعودية"
+                 loading="eager" width="720" height="560"
+                 class="relative w-full h-[26rem] object-cover rounded-[2rem] shadow-2xl">
+        </div>
+      </div>
     </div>
 </section>
 
@@ -63,13 +74,22 @@
 
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         @foreach($nationalities as $nat)
+        @php($photo = $nat->photoUrl())
         <a href="{{ route('site.cvs', ['nationality_id' => $nat->id]) }}"
-           class="bg-white rounded-2xl border border-slate-200 p-5 text-center hover:border-gold hover:shadow-md transition-all group">
-            <div class="w-12 h-12 rounded-full hero-grad text-white flex items-center justify-center mx-auto mb-3 text-lg font-extrabold">
-                {{ mb_substr($nat->name, 0, 1) }}
+           class="bg-white rounded-2xl border border-slate-200 overflow-hidden text-center hover:border-gold hover:shadow-lg transition-all group">
+            <div class="relative h-36 bg-slate-100 overflow-hidden">
+                @if($photo)
+                <img src="{{ $photo }}" alt="{{ $nat->name }}" loading="lazy"
+                     class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300">
+                @else
+                <div class="w-full h-full hero-grad flex items-center justify-center text-white text-3xl font-extrabold">
+                    {{ mb_substr($nat->name, 0, 1) }}
+                </div>
+                @endif
+                <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <h3 class="absolute bottom-2 inset-x-0 text-white font-bold text-sm drop-shadow">{{ $nat->name }}</h3>
             </div>
-            <h3 class="font-bold text-slate-800 text-sm group-hover:text-navy">{{ $nat->name }}</h3>
-            <p class="text-[11px] text-slate-400 mt-1">{{ $nat->workers_count }} عاملة متاحة</p>
+            <p class="text-[11px] text-slate-500 py-2.5">{{ $nat->workers_count }} عاملة متاحة</p>
         </a>
         @endforeach
     </div>
@@ -133,22 +153,29 @@
 
 {{-- ══ دعوة للتواصل ══ --}}
 <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-    <div class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 text-center">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-navy">ابدأ طلب الاستقدام الآن</h2>
-        <p class="text-slate-500 mt-3 text-sm max-w-xl mx-auto leading-relaxed">
-            فريقنا جاهز للرد على استفساراتك ومساعدتك في اختيار العاملة المناسبة لاحتياجات أسرتك.
-        </p>
-        <div class="flex flex-wrap gap-3 justify-center mt-7">
-            <a href="{{ route('site.contact') }}"
-               class="bg-navy hover:bg-navy-light text-white font-bold px-7 py-3 rounded-xl transition-colors">
-                اطلب الآن
-            </a>
-            @if($S('whatsapp'))
-            <a href="https://wa.me/{{ preg_replace('/\D/', '', $S('whatsapp')) }}" target="_blank" rel="noopener"
-               class="bg-green-600 hover:bg-green-700 text-white font-bold px-7 py-3 rounded-xl transition-colors">
-                تواصل عبر واتساب
-            </a>
-            @endif
+    <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden grid grid-cols-1 lg:grid-cols-2">
+        <div class="p-8 sm:p-12 flex flex-col justify-center text-center lg:text-start">
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-navy">ابدأ طلب الاستقدام الآن</h2>
+            <p class="text-slate-500 mt-3 text-sm leading-relaxed">
+                فريقنا جاهز للرد على استفساراتك ومساعدتك في اختيار العاملة المناسبة لاحتياجات أسرتك.
+            </p>
+            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mt-7">
+                <a href="{{ route('site.contact') }}"
+                   class="bg-navy hover:bg-navy-light text-white font-bold px-7 py-3 rounded-xl transition-colors">
+                    اطلب الآن
+                </a>
+                @if($S('whatsapp'))
+                <a href="https://wa.me/{{ preg_replace('/\D/', '', $S('whatsapp')) }}" target="_blank" rel="noopener"
+                   class="bg-green-600 hover:bg-green-700 text-white font-bold px-7 py-3 rounded-xl transition-colors">
+                    تواصل عبر واتساب
+                </a>
+                @endif
+            </div>
+        </div>
+
+        <div class="hidden lg:block">
+            <img src="{{ asset('07_footer_brand_visual.jpg') }}" alt="{{ $S('company_name') }}"
+                 loading="lazy" class="w-full h-full min-h-[18rem] object-cover">
         </div>
     </div>
 </section>
