@@ -87,6 +87,19 @@
                         </div>
 
                         <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">
+                                الخدمة المطلوبة <span class="text-red-500">*</span>
+                            </label>
+                            <select name="service" required
+                                    class="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy @error('service') border-red-400 @else border-slate-300 @enderror">
+                                <option value="">اختر الخدمة</option>
+                                @foreach(\App\Http\Controllers\PublicSite\ContactController::SERVICES as $srv)
+                                <option value="{{ $srv }}" @selected(old('service') === $srv)>{{ $srv }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="sm:col-span-2">
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5">الفرع الأقرب لك</label>
                             <select name="branch_id"
                                     class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy">

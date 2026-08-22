@@ -222,6 +222,11 @@
 
 @include('public.partials.footer')
 
+{{-- نافذة الطلب السريع — تُستثنى صفحة «تواصل معنا» لأن النموذج معروض فيها --}}
+@unless(request()->routeIs('site.contact'))
+    @include('public.partials.lead-popup')
+@endunless
+
 <script>
 /**
  * سلايدر أفقي عام — يعتمد على تمرير العنصر نفسه (scroll) لا على transform،
