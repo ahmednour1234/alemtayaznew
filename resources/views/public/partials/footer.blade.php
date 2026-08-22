@@ -14,8 +14,8 @@
 
             <div class="lg:col-span-1">
                 <div class="flex items-center gap-2.5 mb-4">
-                    <img src="{{ asset('08_alemtyaz_logo_original.png') }}" alt="{{ $S('company_name') }}"
-                         loading="lazy" class="h-11 w-auto object-contain">
+                    <img src="{{ asset('11_logo_white.png') }}" alt="{{ $S('company_name') }}"
+                         loading="lazy" width="600" height="600" class="h-14 w-auto object-contain">
                 </div>
                 <p class="text-sm leading-relaxed">{{ $S('tagline') }}</p>
             </div>

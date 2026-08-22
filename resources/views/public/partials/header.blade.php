@@ -13,8 +13,8 @@
 
             {{-- الشعار --}}
             <a href="{{ route('site.home') }}" class="flex items-center gap-2.5 flex-shrink-0">
-                <img src="{{ asset('08_alemtyaz_logo_original.png') }}" alt="{{ $S('company_name') }}"
-                     class="h-10 w-auto object-contain">
+                <img src="{{ asset('11_logo_white.png') }}" alt="{{ $S('company_name') }}"
+                     width="600" height="600" class="h-12 w-auto object-contain">
                 <span class="hidden sm:block text-white font-bold text-sm leading-tight">{{ $S('company_name') }}</span>
             </a>
 
