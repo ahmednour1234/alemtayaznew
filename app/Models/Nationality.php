@@ -29,7 +29,7 @@ class Nationality extends Model
      * نعتمد الكود لا الاسم لأن التسميات العربية تختلف بين مصادر البيانات
      * («بنغلاديش» / «بنجلاديشية»، «فليبين» / «الفلبين»).
      */
-    private const PHOTO_CODES = ['ET', 'PH', 'LK', 'BD', 'KE', 'UG'];
+    private const PHOTO_CODES = ['ET', 'PH', 'LK', 'BD', 'KE', 'BI', 'UG'];
 
     /** رابط صورة الجنسية، أو null إن لم تتوفر صورة لها. */
     public function photoUrl(): ?string

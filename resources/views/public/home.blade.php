@@ -110,30 +110,49 @@
 
 {{-- ══ الجنسيات المتاحة ══ --}}
 @if($nationalities->isNotEmpty())
-<section class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-    <div class="text-center mb-10">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 py-20">
+    <div class="text-center mb-12">
         <span class="text-gold text-sm font-bold">الجنسيات</span>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-1">الجنسيات المتاحة للاستقدام</h2>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-navy mt-1">الجنسيات المتاحة للاستقدام</h2>
+        <p class="text-slate-500 text-sm mt-3 max-w-xl mx-auto">
+            اختر الجنسية التي تناسب احتياجك وتصفّح السير الذاتية المتاحة
+        </p>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($nationalities as $nat)
         @php($photo = $nat->photoUrl())
         <a href="{{ route('site.cvs', ['nationality_id' => $nat->id]) }}"
-           class="bg-white rounded-2xl border border-slate-200 overflow-hidden text-center hover:border-gold hover:shadow-lg transition-all group">
-            <div class="relative h-48 bg-slate-100 overflow-hidden">
+           class="relative rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 group">
+
+            {{-- الصورة تملأ البطاقة بالكامل بنسبة بورتريه --}}
+            <div class="relative aspect-[4/5] bg-slate-100 overflow-hidden">
                 @if($photo)
                 <img src="{{ $photo }}" alt="{{ $nat->name }}" loading="lazy" width="600" height="750"
-                     class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300">
+                     class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500">
                 @else
-                <div class="w-full h-full hero-grad flex items-center justify-center text-white text-3xl font-extrabold">
+                <div class="w-full h-full hero-grad flex items-center justify-center text-white text-6xl font-extrabold">
                     {{ mb_substr($nat->name, 0, 1) }}
                 </div>
                 @endif
-                <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <h3 class="absolute bottom-2 inset-x-0 text-white font-bold text-sm drop-shadow">{{ $nat->name }}</h3>
+
+                {{-- تدرّج داكن أسفل الصورة ليظهر النص فوقها --}}
+                <div class="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-navy-dark/95 via-navy-dark/60 to-transparent"></div>
+
+                <div class="absolute inset-x-0 bottom-0 p-6">
+                    <h3 class="text-white font-extrabold text-2xl drop-shadow-lg">{{ $nat->name }}</h3>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-white/85 text-sm">{{ $nat->workers_count }} عاملة متاحة</p>
+                        <span class="inline-flex items-center gap-1.5 text-gold text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            تصفّح
+                            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </span>
+                    </div>
+                </div>
+
+                {{-- إطار ذهبي يظهر عند المرور --}}
+                <div class="absolute inset-0 rounded-3xl ring-0 ring-gold group-hover:ring-4 transition-all duration-300 pointer-events-none"></div>
             </div>
-            <p class="text-[11px] text-slate-500 py-2.5">{{ $nat->workers_count }} عاملة متاحة</p>
         </a>
         @endforeach
     </div>
