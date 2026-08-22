@@ -2,6 +2,9 @@
 @section('title', __('workers.title'))
 @section('content')
 @php
+    // المستخدم الحالي — يُحسب مرة واحدة ويُستخدم في صلاحية فكّ التعيين لكل صف
+    $me = Auth::guard('admin')->user();
+
     // معرّفات العاملات التي لديها CV — فقط هذه يمكن إرسالها عبر واتساب
     $cvIds = $workers->filter(fn($w) => (bool) $w->cv_path)->pluck('id')->values();
 
@@ -330,7 +333,7 @@
                         @if(! $w->isBooked())
                         <a href="{{ route('admin.workers.assign', $w->id) }}"
                            class="text-xs text-white bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded-lg">{{ __('common.actions.assign') }}</a>
-                        @elseif($w->canBeUnassignedBy(Auth::guard('admin')->user()))
+                        @elseif($w->canBeUnassignedBy($me))
                         <form action="{{ route('admin.workers.unassign', $w->id) }}" method="POST" class="inline"
                               onsubmit="return confirm('{{ __('workers.assign.confirm_unassign') }}')">
                             @csrf

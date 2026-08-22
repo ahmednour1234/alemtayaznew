@@ -4,6 +4,7 @@
 @php
     $contract = $worker->latestContract;
     $client   = $worker->effectiveClient();
+    $me       = Auth::guard('admin')->user();
 @endphp
 <div class="w-full space-y-5">
 
@@ -33,7 +34,7 @@
             @if(! $worker->isBooked())
             <a href="{{ route('admin.workers.assign', $worker->id) }}"
                class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg">تعيين لعميل</a>
-            @elseif($worker->canBeUnassignedBy(Auth::guard('admin')->user()))
+            @elseif($worker->canBeUnassignedBy($me))
             <form action="{{ route('admin.workers.unassign', $worker->id) }}" method="POST">
                 @csrf
                 <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white text-sm px-4 py-2 rounded-lg"
