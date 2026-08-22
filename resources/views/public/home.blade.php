@@ -121,9 +121,9 @@
         @php($photo = $nat->photoUrl())
         <a href="{{ route('site.cvs', ['nationality_id' => $nat->id]) }}"
            class="bg-white rounded-2xl border border-slate-200 overflow-hidden text-center hover:border-gold hover:shadow-lg transition-all group">
-            <div class="relative h-36 bg-slate-100 overflow-hidden">
+            <div class="relative h-48 bg-slate-100 overflow-hidden">
                 @if($photo)
-                <img src="{{ $photo }}" alt="{{ $nat->name }}" loading="lazy"
+                <img src="{{ $photo }}" alt="{{ $nat->name }}" loading="lazy" width="600" height="750"
                      class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300">
                 @else
                 <div class="w-full h-full hero-grad flex items-center justify-center text-white text-3xl font-extrabold">

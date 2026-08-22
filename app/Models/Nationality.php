@@ -24,23 +24,20 @@ class Nationality extends Model
     }
 
     /**
-     * صور الجنسيات المعروضة في الموقع العام، مفهرسة بكود ISO.
-     * الكود أثبت من الاسم لأن التسميات العربية تختلف بين مصادر البيانات
+     * أكواد ISO التي تتوفّر لها صورة في public/nationalities/nat_{CODE}.jpg
+     *
+     * نعتمد الكود لا الاسم لأن التسميات العربية تختلف بين مصادر البيانات
      * («بنغلاديش» / «بنجلاديشية»، «فليبين» / «الفلبين»).
      */
-    private const PHOTOS = [
-        'ET' => '02_worker_ethiopia.jpg',
-        'LK' => '03_worker_sri_lanka.jpg',
-        'KE' => '04_worker_kenya.jpg',
-        'BD' => '05_worker_bangladesh.jpg',
-        'PH' => '06_worker_philippines.jpg',
-    ];
+    private const PHOTO_CODES = ['ET', 'PH', 'LK', 'BD', 'KE', 'UG'];
 
     /** رابط صورة الجنسية، أو null إن لم تتوفر صورة لها. */
     public function photoUrl(): ?string
     {
-        $file = self::PHOTOS[strtoupper((string) $this->code)] ?? null;
+        $code = strtoupper((string) $this->code);
 
-        return $file ? asset($file) : null;
+        return in_array($code, self::PHOTO_CODES, true)
+            ? asset('nationalities/nat_' . $code . '.jpg')
+            : null;
     }
 }
