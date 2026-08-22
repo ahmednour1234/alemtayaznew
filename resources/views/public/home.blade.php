@@ -113,33 +113,38 @@
 <section class="max-w-7xl mx-auto px-4 sm:px-6 py-20"
          x-data="natSlider()" x-init="init()">
 
-    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
-        <div class="text-center sm:text-start">
-            <span class="text-gold text-sm font-bold">الجنسيات</span>
-            <h2 class="text-2xl sm:text-4xl font-extrabold text-navy mt-1">الجنسيات المتاحة للاستقدام</h2>
-            <p class="text-slate-500 text-sm mt-3 max-w-xl">
-                اختر الجنسية التي تناسب احتياجك وتصفّح السير الذاتية المتاحة
-            </p>
-        </div>
-
-        {{-- أزرار التنقّل — تُخفى إن كانت البطاقات تظهر كلها بلا تمرير --}}
-        <div class="flex items-center gap-2 justify-center sm:justify-end" x-show="scrollable" x-cloak>
-            <button type="button" @click="prev()" :disabled="atStart"
-                    class="w-11 h-11 rounded-full border-2 border-navy text-navy flex items-center justify-center
-                           hover:bg-navy hover:text-white transition-colors
-                           disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-navy"
-                    aria-label="السابق">
-                <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-            </button>
-            <button type="button" @click="next()" :disabled="atEnd"
-                    class="w-11 h-11 rounded-full border-2 border-navy text-navy flex items-center justify-center
-                           hover:bg-navy hover:text-white transition-colors
-                           disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-navy"
-                    aria-label="التالي">
-                <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </button>
-        </div>
+    <div class="text-center mb-10">
+        <span class="text-gold text-sm font-bold">الجنسيات</span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-navy mt-1">الجنسيات المتاحة للاستقدام</h2>
+        <p class="text-slate-500 text-sm mt-3 max-w-xl mx-auto">
+            اختر الجنسية التي تناسب احتياجك وتصفّح السير الذاتية المتاحة
+        </p>
     </div>
+
+    {{-- منطقة السلايدر: الأزرار تطفو فوق البطاقات على الجانبين --}}
+    <div class="relative"
+         @mouseenter="pause()" @mouseleave="resume()"
+         @focusin="pause()" @focusout="resume()">
+
+        {{-- زر السابق --}}
+        <button type="button" @click="prev()" x-show="scrollable" x-cloak
+                class="absolute top-1/2 -translate-y-1/2 start-2 sm:start-4 z-20
+                       w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm text-navy shadow-lg
+                       flex items-center justify-center
+                       hover:bg-navy hover:text-white hover:scale-110 transition-all duration-300"
+                aria-label="السابق">
+            <svg class="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+
+        {{-- زر التالي --}}
+        <button type="button" @click="next()" x-show="scrollable" x-cloak
+                class="absolute top-1/2 -translate-y-1/2 end-2 sm:end-4 z-20
+                       w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm text-navy shadow-lg
+                       flex items-center justify-center
+                       hover:bg-navy hover:text-white hover:scale-110 transition-all duration-300"
+                aria-label="التالي">
+            <svg class="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </button>
 
     {{-- شريط التمرير: بطاقة واحدة على الجوال، اثنتان ثم ثلاث على الشاشات الأكبر --}}
     <div x-ref="track" @scroll.debounce.100ms="sync()"
@@ -181,6 +186,8 @@
         </a>
         @endforeach
     </div>
+
+    </div>{{-- /منطقة السلايدر --}}
 </section>
 
 @push('scripts')
@@ -197,11 +204,40 @@ function natSlider() {
         scrollable: false,
         atStart: true,
         atEnd: false,
+        timer: null,
+        DELAY: 3500,           // المهلة بين كل انتقال تلقائي
 
         init() {
-            this.$nextTick(() => this.sync());
-            // إعادة الحساب عند تغيّر عرض النافذة (تتغيّر عدد البطاقات الظاهرة)
+            this.$nextTick(() => { this.sync(); this.resume(); });
+            // إعادة الحساب عند تغيّر عرض النافذة (يتغيّر عدد البطاقات الظاهرة)
             window.addEventListener('resize', () => this.sync(), { passive: true });
+
+            // نوقف الحركة إذا غادر الزائر التبويب، ونستأنفها عند عودته
+            document.addEventListener('visibilitychange', () => {
+                document.hidden ? this.pause() : this.resume();
+            });
+        },
+
+        /** يبدأ الدوران التلقائي، ما لم يكن المستخدم يفضّل تقليل الحركة */
+        resume() {
+            this.pause();
+            if (!this.scrollable) return;
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            this.timer = setInterval(() => this.advance(), this.DELAY);
+        },
+
+        pause() {
+            if (this.timer) { clearInterval(this.timer); this.timer = null; }
+        },
+
+        /** يتقدّم بطاقة، ويعود إلى البداية عند بلوغ النهاية */
+        advance() {
+            if (this.atEnd) {
+                this.$refs.track.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+                this.next();
+            }
         },
 
         /** مقدار الإزاحة = عرض بطاقة واحدة + الفجوة بينها وبين التالية */
@@ -220,9 +256,14 @@ function natSlider() {
             const pos = Math.abs(t.scrollLeft);
             const max = t.scrollWidth - t.clientWidth;
 
+            const was = this.scrollable;
             this.scrollable = max > 4;                 // هامش صغير لتفادي أخطاء التقريب
             this.atStart    = pos <= 4;
             this.atEnd      = pos >= max - 4;
+
+            // صار السلايدر قابلاً للتمرير بعد تغيّر المقاس → شغّل الدوران
+            if (!was && this.scrollable) this.resume();
+            if (was && !this.scrollable) this.pause();
         },
 
         /** الاتجاه المنطقي: في RTL يقلّ scrollLeft كلما تقدّمنا */
