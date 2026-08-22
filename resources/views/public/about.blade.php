@@ -40,7 +40,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div class="bg-white rounded-2xl border border-slate-200 p-6">
                     <div class="w-11 h-11 rounded-xl bg-navy/5 text-navy flex items-center justify-center mb-3">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <x-icon name="21_experience_medal" class="w-7 h-7" />
                     </div>
                     <h3 class="font-bold text-navy text-sm">رؤيتنا</h3>
                     <p class="text-xs text-slate-500 mt-2 leading-relaxed">
@@ -51,7 +51,7 @@
 
                 <div class="bg-white rounded-2xl border border-slate-200 p-6">
                     <div class="w-11 h-11 rounded-xl bg-navy/5 text-navy flex items-center justify-center mb-3">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <x-icon name="23_customer_satisfaction" class="w-7 h-7" />
                     </div>
                     <h3 class="font-bold text-navy text-sm">رسالتنا</h3>
                     <p class="text-xs text-slate-500 mt-2 leading-relaxed">
@@ -73,9 +73,7 @@
                         'فريق دعم متاح للرد على استفساراتك',
                     ] as $item)
                     <div class="flex items-start gap-2.5">
-                        <span class="w-5 h-5 rounded-full bg-gold/15 text-gold flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                        </span>
+                        <x-icon name="31_check_circle" class="w-5 h-5 flex-shrink-0 mt-0.5" />
                         <span class="text-sm text-slate-600">{{ $item }}</span>
                     </div>
                     @endforeach
@@ -90,19 +88,19 @@
                 <ul class="space-y-3 text-sm text-slate-600">
                     @if($S('phone'))
                     <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-gold flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                        <x-icon name="24_phone" class="w-4 h-4 flex-shrink-0 gold-icon" />
                         <a href="tel:{{ $S('phone') }}" dir="ltr" class="hover:text-navy">{{ $S('phone') }}</a>
                     </li>
                     @endif
                     @if($S('email'))
                     <li class="flex items-center gap-2.5">
-                        <svg class="w-4 h-4 text-gold flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        <x-icon name="26_email" class="w-4 h-4 flex-shrink-0 gold-icon" />
                         <a href="mailto:{{ $S('email') }}" dir="ltr" class="hover:text-navy">{{ $S('email') }}</a>
                     </li>
                     @endif
                     @if($S('address'))
                     <li class="flex items-start gap-2.5">
-                        <svg class="w-4 h-4 text-gold flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <x-icon name="27_location" class="w-4 h-4 flex-shrink-0 mt-0.5 gold-icon" />
                         <span>{{ $S('address') }}</span>
                     </li>
                     @endif

@@ -75,14 +75,36 @@
 <section class="max-w-7xl mx-auto px-4 sm:px-6 py-14 relative z-20">
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         @foreach($features as $f)
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 text-center hover:shadow-md hover:border-gold/40 transition-all">
-            <div class="w-11 h-11 rounded-xl bg-navy/5 text-navy flex items-center justify-center mx-auto mb-3">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $f['i'] }}"/></svg>
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 text-center hover:shadow-md hover:border-gold/40 transition-all group">
+            <div class="w-14 h-14 rounded-xl bg-navy/5 flex items-center justify-center mx-auto mb-3 group-hover:bg-gold/10 transition-colors">
+                <x-icon :name="$f['icon']" class="w-9 h-9" />
             </div>
             <h3 class="font-bold text-slate-800 text-sm">{{ $f['t'] }}</h3>
             <p class="text-xs text-slate-500 mt-1 leading-relaxed">{{ $f['d'] }}</p>
         </div>
         @endforeach
+    </div>
+</section>
+
+{{-- ══ خدماتنا ══ --}}
+<section class="bg-white border-y border-slate-200 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-10">
+            <span class="text-gold text-sm font-bold">ماذا نقدّم</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-1">خدماتنا</h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            @foreach($services as $srv)
+            <div class="bg-slate-50 rounded-2xl border border-slate-200 p-6 hover:bg-white hover:border-gold/50 hover:shadow-md transition-all group">
+                <div class="w-14 h-14 rounded-xl bg-white border border-slate-200 flex items-center justify-center mb-4 group-hover:border-gold/40 transition-colors">
+                    <x-icon :name="$srv['icon']" class="w-9 h-9" />
+                </div>
+                <h3 class="font-bold text-navy text-base">{{ $srv['t'] }}</h3>
+                <p class="text-sm text-slate-500 mt-2 leading-relaxed">{{ $srv['d'] }}</p>
+            </div>
+            @endforeach
+        </div>
     </div>
 </section>
 
@@ -128,11 +150,12 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             @foreach($steps as $step)
-            <div class="relative bg-slate-50 rounded-2xl p-6 border border-slate-200">
-                <span class="absolute -top-3 start-6 w-8 h-8 rounded-lg bg-gold text-navy font-extrabold text-sm flex items-center justify-center shadow">
+            <div class="relative bg-slate-50 rounded-2xl p-6 border border-slate-200 hover:border-gold/50 hover:bg-white transition-all">
+                <span class="absolute -top-3 start-6 w-8 h-8 rounded-lg bg-gold text-white font-extrabold text-sm flex items-center justify-center shadow">
                     {{ $step['n'] }}
                 </span>
-                <h3 class="font-bold text-slate-800 text-sm mt-3">{{ $step['t'] }}</h3>
+                <x-icon :name="$step['icon']" class="w-12 h-12 mt-3 mb-3" />
+                <h3 class="font-bold text-slate-800 text-sm">{{ $step['t'] }}</h3>
                 <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">{{ $step['d'] }}</p>
             </div>
             @endforeach
@@ -166,6 +189,9 @@
     <div class="max-w-5xl mx-auto px-4 sm:px-6 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
         @foreach($counters as $s)
         <div>
+            <div class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-3">
+                <x-icon :name="$s['icon']" class="w-8 h-8 stat-icon" />
+            </div>
             <p class="text-3xl sm:text-4xl font-extrabold text-gold">{{ $s['v'] }}</p>
             <p class="text-sm text-white/75 mt-1">{{ $s['l'] }}</p>
         </div>

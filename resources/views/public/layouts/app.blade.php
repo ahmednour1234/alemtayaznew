@@ -127,6 +127,17 @@
             }
         }
 
+        /* إعادة تلوين الأيقونات حسب الخلفية.
+           ملفات SVG تستخدم الكحلي #2F6798 والذهبي #D8BC4B، ونستهدفهما بالسمة. */
+
+        /* فوق خلفية داكنة: الكحلي يصبح أبيض */
+        .stat-icon [stroke="#2F6798"] { stroke: #ffffff; }
+        .stat-icon [fill="#2F6798"]   { fill: #ffffff; }
+
+        /* أيقونات ذهبية بالكامل (قوائم التواصل) */
+        .gold-icon [stroke="#2F6798"] { stroke: #c9a84c; }
+        .gold-icon [fill="#2F6798"]   { fill: #c9a84c; }
+
         [x-cloak] { display: none !important; }
     </style>
     @stack('head')
