@@ -138,6 +138,18 @@
         .gold-icon [stroke="#2F6798"] { stroke: #c9a84c; }
         .gold-icon [fill="#2F6798"]   { fill: #c9a84c; }
 
+        /* شريط الدعوة قبل التذييل — أزرق أفتح قليلاً من hero-grad ليبرز عن بقية الصفحة */
+        .cta-band { background: linear-gradient(120deg, #24457f 0%, #2f5596 50%, #1e3a6d 100%); }
+
+        /* توهّج ناعم حول الزرّ الذهبي عند المرور.
+           نستخدم box-shadow لا عنصراً زائفاً بـ z-index سالب، إذ يختفي الأخير
+           خلف خلفية القسم عندما تُنشئ الأخيرة سياق تراصّ خاصاً بها. */
+        .btn-glow { box-shadow: 0 10px 25px -10px rgba(201,168,76,.5); }
+        .btn-glow:hover {
+            box-shadow: 0 0 0 4px rgba(201,168,76,.25),
+                        0 12px 32px -8px rgba(201,168,76,.75);
+        }
+
         /* إخفاء شريط التمرير في السلايدر مع إبقاء التمرير باللمس فعّالاً */
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
