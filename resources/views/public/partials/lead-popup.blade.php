@@ -8,8 +8,8 @@
     تُخزَّن حالة الإغلاق في localStorage فلا تتكرر مع كل تصفّح،
     وتُتخطّى تماماً في صفحة «تواصل معنا» لأن النموذج معروض فيها أصلاً.
 --}}
-<div x-data="leadPopup()" x-init="init()" x-cloak>
-    <div x-show="open"
+<div x-data="leadPopup()" x-init="init()">
+    <div x-show="open" x-cloak
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
@@ -151,79 +151,3 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-/**
- * نافذة الطلب السريع.
- *
- * تظهر مرة واحدة لكل زائر: نخزّن علامة في localStorage عند الإغلاق أو الإرسال.
- * الوصول إلى localStorage قد يفشل (وضع التصفّح الخاص، حظر التخزين)،
- * لذا نغلّف كل قراءة وكتابة بـ try/catch ونعتبر الفشل «لم تُعرض بعد».
- */
-function leadPopup() {
-    const KEY   = 'lead_popup_seen';
-    const DELAY = 6000;   // مهلة قبل الظهور — تكفي لإلقاء نظرة على الصفحة
-
-    return {
-        open: false,
-        done: false,
-        sending: false,
-        errors: [],
-        form: { name: '', phone: '', city: '', nationality_id: '', service: '', notes: '', website: '' },
-
-        init() {
-            if (this.seen()) return;
-            setTimeout(() => { this.open = true; }, DELAY);
-        },
-
-        seen() {
-            try { return localStorage.getItem(KEY) === '1'; } catch { return false; }
-        },
-
-        remember() {
-            try { localStorage.setItem(KEY, '1'); } catch { /* التخزين محظور — نتجاهل */ }
-        },
-
-        close() {
-            this.open = false;
-            this.remember();
-        },
-
-        async submit() {
-            this.sending = true;
-            this.errors  = [];
-
-            try {
-                const res = await fetch('{{ route('site.lead.store') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
-                    },
-                    body: JSON.stringify(this.form),
-                });
-
-                const data = await res.json().catch(() => ({}));
-
-                if (res.ok) {
-                    this.done = true;
-                    this.remember();
-                    return;
-                }
-
-                // 422 من التحقّق: نعرض كل الرسائل؛ غير ذلك رسالة عامة
-                this.errors = data.errors
-                    ? Object.values(data.errors).flat()
-                    : [data.message || 'تعذّر إرسال الطلب. حاول مرة أخرى.'];
-            } catch {
-                this.errors = ['تعذّر الاتصال. تحقّق من الشبكة وحاول مجدداً.'];
-            } finally {
-                this.sending = false;
-            }
-        },
-    };
-}
-</script>
-@endpush

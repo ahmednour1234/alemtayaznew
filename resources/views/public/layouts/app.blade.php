@@ -360,6 +360,79 @@ function hSlider(delay = 3500) {
         : start();
 })();
 </script>
+<script>
+/**
+ * نافذة الطلب السريع.
+ *
+ * تظهر مرة واحدة لكل زائر: نخزّن علامة في localStorage عند الإغلاق أو الإرسال.
+ * الوصول إلى localStorage قد يفشل (وضع التصفّح الخاص، حظر التخزين)،
+ * لذا نغلّف كل قراءة وكتابة بـ try/catch ونعتبر الفشل «لم تُعرض بعد».
+ */
+function leadPopup() {
+    const KEY   = 'lead_popup_seen';
+    const DELAY = 6000;   // مهلة قبل الظهور — تكفي لإلقاء نظرة على الصفحة
+
+    return {
+        open: false,
+        done: false,
+        sending: false,
+        errors: [],
+        form: { name: '', phone: '', city: '', nationality_id: '', service: '', notes: '', website: '' },
+
+        init() {
+            if (this.seen()) return;
+            setTimeout(() => { this.open = true; }, DELAY);
+        },
+
+        seen() {
+            try { return localStorage.getItem(KEY) === '1'; } catch { return false; }
+        },
+
+        remember() {
+            try { localStorage.setItem(KEY, '1'); } catch { /* التخزين محظور — نتجاهل */ }
+        },
+
+        close() {
+            this.open = false;
+            this.remember();
+        },
+
+        async submit() {
+            this.sending = true;
+            this.errors  = [];
+
+            try {
+                const res = await fetch('{{ route('site.lead.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                    },
+                    body: JSON.stringify(this.form),
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (res.ok) {
+                    this.done = true;
+                    this.remember();
+                    return;
+                }
+
+                // 422 من التحقّق: نعرض كل الرسائل؛ غير ذلك رسالة عامة
+                this.errors = data.errors
+                    ? Object.values(data.errors).flat()
+                    : [data.message || 'تعذّر إرسال الطلب. حاول مرة أخرى.'];
+            } catch {
+                this.errors = ['تعذّر الاتصال. تحقّق من الشبكة وحاول مجدداً.'];
+            } finally {
+                this.sending = false;
+            }
+        },
+    };
+}
+</script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 @stack('scripts')
 </body>
