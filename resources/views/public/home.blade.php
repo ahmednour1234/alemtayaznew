@@ -30,8 +30,8 @@
                      class="w-full h-72 sm:h-96 object-cover">
             </div>
 
-            {{-- النص (يمين في RTL) — يُزاح قليلاً عن قوس الصورة --}}
-            <div class="text-center lg:text-start order-2 lg:order-1 lg:pe-6">
+            {{-- النص (يسار في RTL) — يُزاح قليلاً عن قوس الصورة --}}
+            <div class="text-center lg:text-end order-2 lg:order-2 lg:ps-6">
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy leading-tight">
                     {{ $S('company_name') }}<span class="text-gold">...</span>
                 </h1>
@@ -40,17 +40,17 @@
                 </p>
 
                 {{-- فاصل ذهبي بنقطة، كما في هوية الشركة --}}
-                <div class="flex items-center gap-2 mt-6 justify-center lg:justify-start">
+                <div class="flex items-center gap-2 mt-6 justify-center lg:justify-end">
+                    <span class="h-px w-28 bg-gradient-to-r from-gold to-transparent"></span>
                     <span class="w-2 h-2 rounded-full bg-gold"></span>
-                    <span class="h-px w-28 bg-gradient-to-l from-gold to-transparent"></span>
                 </div>
 
-                <p class="text-slate-600 mt-5 leading-loose text-sm sm:text-base max-w-lg mx-auto lg:mx-0">
+                <p class="text-slate-600 mt-5 leading-loose text-sm sm:text-base max-w-lg mx-auto lg:me-0 lg:ms-auto">
                     نوفّر لك أفضل الخدمات لاستقدام العمالة المنزلية من مربيات، عاملات منزلية،
                     وسائقين من جنسيات مختارة بعناية، وبأعلى معايير الجودة والاحترافية.
                 </p>
 
-                <div class="flex flex-wrap gap-3 mt-8 justify-center lg:justify-start">
+                <div class="flex flex-wrap gap-3 mt-8 justify-center lg:justify-end">
                     <a href="{{ route('site.contact') }}"
                        class="inline-flex items-center gap-2 bg-gold hover:bg-gold-dark text-white font-bold px-7 py-3.5 rounded-xl transition-colors shadow-md">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -64,8 +64,8 @@
                 </div>
             </div>
 
-            {{-- العمود الأيسر فارغ على الشاشات الكبيرة — مكان الصورة الملتصقة بالحافة --}}
-            <div class="hidden lg:block order-1 lg:order-2" aria-hidden="true"></div>
+            {{-- عمود فارغ على الشاشات الكبيرة — مكان الصورة الملتصقة بالحافة --}}
+            <div class="hidden lg:block order-1 lg:order-1" aria-hidden="true"></div>
 
         </div>
     </div>

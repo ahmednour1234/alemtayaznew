@@ -56,19 +56,20 @@
         .hero-grad { background: linear-gradient(135deg, #1e3a6d 0%, #2b4d8c 55%, #16294d 100%); }
 
         /* صورة الواجهة على الشاشات الكبيرة: ملتصقة بحافة الصفحة بلا حشو،
-           تشغل نصف العرض بالكامل، والقوس على حافتها الداخلية (جهة النص).
-           inset-inline-end = الحافة الخارجية، فتنعكس تلقائياً مع اتجاه الصفحة. */
+           تشغل نصف العرض بالكامل. في RTL تقع يميناً والنص يساراً،
+           والقوس على حافتها الداخلية (جهة النص). كل الخصائص منطقية
+           فتنعكس تلقائياً عند تبديل اتجاه الصفحة. */
         @media (min-width: 1024px) {
             .hero-photo {
                 position: absolute;
                 inset-block: 0;
-                inset-inline-end: 0;
+                inset-inline-start: 0;
                 width: 52%;
                 z-index: 1;              /* فوق الخلفية الزخرفية، وتحت النص */
                 overflow: hidden;
-                border-start-start-radius: 16rem;
-                border-end-start-radius: 16rem;
-                border-inline-start: 5px solid #c9a84c;
+                border-start-end-radius: 16rem;
+                border-end-end-radius: 16rem;
+                border-inline-end: 5px solid #c9a84c;
             }
         }
 
