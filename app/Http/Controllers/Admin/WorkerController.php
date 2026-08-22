@@ -324,8 +324,10 @@ class WorkerController extends Controller
             ], 404);
         }
 
-        // حُجزت أو عُيّنت لعميل آخر → لم تعد معروضة
-        if (in_array($worker->status, ['reserved', 'assigned'], true)) {
+        // حُجزت أو عُيّنت لعميل آخر، أو أُوقفت → لم تعد معروضة.
+        // هذا المسار عام (يُفتح من واتساب ومن الموقع)، فالشرط هنا هو
+        // خطّ الدفاع الوحيد الذي يمنع كشف سير غير معروضة للعامة.
+        if (! $worker->active || in_array($worker->status, ['reserved', 'assigned'], true)) {
             return response()->view('public.cv-unavailable', [
                 'reason' => 'reserved',
                 'worker' => $worker,

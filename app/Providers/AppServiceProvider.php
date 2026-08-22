@@ -7,6 +7,7 @@ use App\Models\Admin;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -27,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // ترقيم صفحات بتنسيق Tailwind — يستخدمه الموقع العام (صفحة السير الذاتية).
+        Paginator::useTailwind();
+
         // Make @can() / @cannot() / Gate::allows() work with the 'admin' guard.
         // Nullable first param = callback runs even when no web-guard user is present.
         Gate::before(function (?Authenticatable $user, string $ability): ?bool {

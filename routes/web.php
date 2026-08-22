@@ -35,8 +35,21 @@ use App\Http\Controllers\Admin\RecruitmentContractController;
 use App\Http\Controllers\Admin\WorkerController;
 use Illuminate\Support\Facades\Route;
 
-// ── Redirect root to admin dashboard ─────────────────────────────────────────
-Route::get('/', fn() => redirect()->route('admin.login'));
+// ── Public website ───────────────────────────────────────────────────────────
+Route::controller(\App\Http\Controllers\PublicSite\PageController::class)->group(function () {
+    Route::get('/',      'home')->name('site.home');
+    Route::get('/about', 'about')->name('site.about');
+});
+
+Route::controller(\App\Http\Controllers\PublicSite\CvController::class)->group(function () {
+    Route::get('/cvs',      'index')->name('site.cvs');
+    Route::get('/cvs/{id}', 'show')->whereNumber('id')->name('site.cvs.show');
+});
+
+Route::controller(\App\Http\Controllers\PublicSite\ContactController::class)->group(function () {
+    Route::get('/contact',  'show')->name('site.contact');
+    Route::post('/contact', 'store')->name('site.contact.store');
+});
 
 // ── Language switch (ar / en / fil / si) ─────────────────────────────────────
 Route::get('/locale/{locale}', [\App\Http\Controllers\LocaleController::class, 'switch'])->name('locale.switch');
@@ -182,6 +195,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             // Permissions (read-only view)
             Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
+
+            // محتوى الموقع العام (بيانات التواصل والنصوص التعريفية)
+            Route::get('site',  [\App\Http\Controllers\Admin\Settings\SiteSettingController::class, 'edit'])->name('site.edit');
+            Route::put('site',  [\App\Http\Controllers\Admin\Settings\SiteSettingController::class, 'update'])->name('site.update');
         });
 
         // Clients

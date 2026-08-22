@@ -882,6 +882,7 @@
                     ['r'=>'admin.housings.index',        'p'=>'admin.housings.*',        'l'=>__('nav.settings.housings'), 'd'=>'M3 21h18M3 7l9-4 9 4M4 7v14h16V7M9 21V11h6v10',                                            'perm'=>'housings.view'],
                     ['r'=>'admin.settings.roles.index',  'p'=>'admin.settings.roles.*',  'l'=>__('nav.settings.roles'), 'd'=>'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',                                             'perm'=>'roles.manage'],
                     ['r'=>'admin.settings.admins.index', 'p'=>'admin.settings.admins.*', 'l'=>__('nav.settings.admins'),            'd'=>'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z',                 'perm'=>'admins.manage'],
+                    ['r'=>'admin.settings.site.edit',    'p'=>'admin.settings.site.*',   'l'=>'إعدادات الموقع',                       'd'=>'M21 12a9 9 0 11-18 0 9 9 0 0118 0z M3.6 9h16.8 M3.6 15h16.8 M12 3a15 15 0 010 18 M12 3a15 15 0 000 18', 'perm'=>null],
                 ] @endphp
                 @foreach($items as $it)
                     @if($it['perm'] ? $can($it['perm']) : $admin->isSuperAdmin())
