@@ -281,6 +281,88 @@
     </div>
 </section>
 
+{{-- ══ آراء العملاء ══ --}}
+@if(!empty($testimonials))
+<section class="bg-white border-y border-slate-200 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-10">
+            <span class="text-gold text-sm font-bold">شهادات</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-1">ماذا يقول عملاؤنا</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            @foreach($testimonials as $t)
+            <div class="bg-slate-50 rounded-2xl border border-slate-200 p-6 hover:bg-white hover:border-gold/40 hover:shadow-md transition-all">
+                {{-- نجوم التقييم --}}
+                <div class="flex items-center gap-0.5 mb-4">
+                    @for($i = 0; $i < 5; $i++)
+                    <svg class="w-4 h-4 text-gold" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.958a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.446a1 1 0 00-.363 1.118l1.286 3.958c.3.921-.755 1.688-1.538 1.118l-3.366-2.446a1 1 0 00-1.176 0l-3.367 2.446c-.783.57-1.838-.197-1.538-1.118l1.286-3.958a1 1 0 00-.363-1.118L2.064 9.385c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.951-.69l1.284-3.958z"/></svg>
+                    @endfor
+                </div>
+
+                <p class="text-sm text-slate-600 leading-loose">{{ $t['text'] }}</p>
+
+                <div class="flex items-center gap-3 mt-5 pt-5 border-t border-slate-200">
+                    <span class="w-11 h-11 rounded-full hero-grad text-white flex items-center justify-center font-extrabold flex-shrink-0">
+                        {{ mb_substr($t['name'], 0, 1) }}
+                    </span>
+                    <div>
+                        <p class="font-bold text-navy text-sm">{{ $t['name'] }}</p>
+                        <p class="text-xs text-slate-400">{{ $t['city'] }}</p>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+
+{{-- ══ الأسئلة الشائعة ══ --}}
+@if(!empty($faqs))
+<section class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
+    <div class="text-center mb-10">
+        <span class="text-gold text-sm font-bold">استفسارات</span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-1">أسئلة شائعة</h2>
+        <p class="text-slate-500 text-sm mt-3">
+            إجابات عن أكثر ما يُسأل عنه بخصوص منصة مساند وإجراءات التأشيرة
+        </p>
+    </div>
+
+    <div class="space-y-3" x-data="{ open: 0 }">
+        @foreach($faqs as $i => $faq)
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden"
+             :class="open === {{ $i }} ? 'border-gold/50 shadow-md' : ''">
+            <button type="button" @click="open = (open === {{ $i }} ? null : {{ $i }})"
+                    class="w-full flex items-center justify-between gap-4 p-5 text-start hover:bg-slate-50 transition-colors">
+                <span class="flex items-center gap-3 font-bold text-navy text-sm sm:text-base">
+                    <x-icon name="19_faq" class="w-6 h-6 flex-shrink-0" />
+                    {{ $faq['q'] }}
+                </span>
+                <svg class="w-5 h-5 text-gold flex-shrink-0 transition-transform duration-300"
+                     :class="open === {{ $i }} ? 'rotate-180' : ''"
+                     fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+
+            <div x-show="open === {{ $i }}" x-cloak
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-1"
+                 x-transition:enter-end="opacity-100 translate-y-0">
+                <p class="px-5 pb-5 text-sm text-slate-600 leading-loose">{{ $faq['a'] }}</p>
+            </div>
+        </div>
+        @endforeach
+    </div>
+
+    <p class="text-center text-sm text-slate-500 mt-8">
+        لم تجد إجابة سؤالك؟
+        <a href="{{ route('site.contact') }}" class="text-navy hover:text-gold font-bold transition-colors">تواصل معنا</a>
+    </p>
+</section>
+@endif
+
 {{-- ══ دعوة للتواصل ══ --}}
 <section class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
     <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden grid grid-cols-1 lg:grid-cols-2">
