@@ -5,50 +5,68 @@
 @section('content')
 
 {{-- ══ Hero ══ --}}
-<section class="relative overflow-hidden text-white bg-navy">
-    {{-- صورة الخلفية --}}
-    <img src="{{ asset('01_hero_family_worker.jpg') }}"
-         alt="عاملة منزلية مع أسرة سعودية"
+<section class="relative overflow-hidden bg-white">
+    {{-- خلفية زخرفية (أشكال كحلي وذهبي في الأركان) --}}
+    <img src="{{ asset('10_hero_pattern.jpg') }}" alt="" aria-hidden="true"
          loading="eager" fetchpriority="high"
-         class="absolute inset-0 w-full h-full object-cover object-[70%_center] lg:object-center">
+         class="absolute inset-0 w-full h-full object-cover">
 
-    {{-- طبقة تعتيم متدرّجة: داكنة جهة النص (يمين في RTL) وشفافة فوق الصورة --}}
-    <div class="absolute inset-0 hero-overlay"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 lg:py-0">
+        <div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-10 lg:gap-6 lg:min-h-[34rem]">
 
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 pt-20 pb-28 sm:pt-28 sm:pb-32 lg:pt-32 lg:pb-36">
-        <div class="max-w-xl">
-            <span class="inline-block bg-gold/20 text-gold text-xs font-bold px-3 py-1.5 rounded-full mb-5 backdrop-blur-sm">
-                مرخّصة من وزارة الموارد البشرية
-            </span>
-            <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight drop-shadow-lg">
-                {{ $S('company_name') }}<span class="text-gold">...</span>
-            </h1>
-            <p class="text-2xl sm:text-3xl font-bold text-gold mt-2 drop-shadow-lg">{{ $S('tagline') }}</p>
-            <p class="text-white/90 mt-5 leading-relaxed text-sm sm:text-base drop-shadow">
-                نوفّر لك عمالة منزلية مدرّبة وموثّقة، بإجراءات واضحة ومتابعة كاملة من تقديم الطلب
-                وحتى وصول العاملة إلى منزلك.
-            </p>
+            {{-- النص (يمين في RTL) --}}
+            <div class="text-center lg:text-start order-2 lg:order-1">
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy leading-tight">
+                    {{ $S('company_name') }}<span class="text-gold">...</span>
+                </h1>
+                <p class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gold mt-3">
+                    {{ $S('tagline') }}
+                </p>
 
-            <div class="flex flex-wrap gap-3 mt-8">
-                <a href="{{ route('site.cvs') }}"
-                   class="inline-flex items-center gap-2 bg-gold hover:bg-gold-dark text-navy font-bold px-6 py-3 rounded-xl transition-colors shadow-lg">
-                    تصفّح السير الذاتية
-                    <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                </a>
-                <a href="{{ route('site.contact') }}"
-                   class="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/30 text-white font-bold px-6 py-3 rounded-xl transition-colors backdrop-blur-sm">
-                    اطلب الآن
-                </a>
+                {{-- فاصل ذهبي بنقطة، كما في هوية الشركة --}}
+                <div class="flex items-center gap-2 mt-6 justify-center lg:justify-start">
+                    <span class="w-2 h-2 rounded-full bg-gold"></span>
+                    <span class="h-px w-28 bg-gradient-to-l from-gold to-transparent"></span>
+                </div>
+
+                <p class="text-slate-600 mt-5 leading-loose text-sm sm:text-base max-w-lg mx-auto lg:mx-0">
+                    نوفّر لك أفضل الخدمات لاستقدام العمالة المنزلية من مربيات، عاملات منزلية،
+                    وسائقين من جنسيات مختارة بعناية، وبأعلى معايير الجودة والاحترافية.
+                </p>
+
+                <div class="flex flex-wrap gap-3 mt-8 justify-center lg:justify-start">
+                    <a href="{{ route('site.contact') }}"
+                       class="inline-flex items-center gap-2 bg-gold hover:bg-gold-dark text-white font-bold px-7 py-3.5 rounded-xl transition-colors shadow-md">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        تواصل معنا الآن
+                    </a>
+                    <a href="{{ route('site.cvs') }}"
+                       class="inline-flex items-center gap-2 border-2 border-navy text-navy hover:bg-navy hover:text-white font-bold px-7 py-3.5 rounded-xl transition-colors">
+                        تصفّح الخدمات
+                        <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
             </div>
+
+            {{-- الصورة (يسار في RTL) بقصّة منحنية وحدّ ذهبي --}}
+            <div class="order-1 lg:order-2 relative">
+                <div class="hero-photo relative mx-auto lg:mx-0 max-w-md lg:max-w-none">
+                    <img src="{{ asset('09_hero_background.jpg') }}"
+                         alt="عاملة منزلية مع أسرة سعودية"
+                         loading="eager" width="1448" height="1086"
+                         class="w-full h-64 sm:h-80 lg:h-[30rem] object-cover">
+                </div>
+            </div>
+
         </div>
     </div>
 </section>
 
 {{-- ══ مزايا ══ --}}
-<section class="max-w-7xl mx-auto px-4 sm:px-6 -mt-12 relative z-20">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 py-14 relative z-20">
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         @foreach($features as $f)
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 text-center hover:shadow-md transition-shadow">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 text-center hover:shadow-md hover:border-gold/40 transition-all">
             <div class="w-11 h-11 rounded-xl bg-navy/5 text-navy flex items-center justify-center mx-auto mb-3">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $f['i'] }}"/></svg>
             </div>

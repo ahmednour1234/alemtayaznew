@@ -30,7 +30,7 @@
     {{-- Open Graph — تظهر عند مشاركة الرابط في واتساب وتويتر --}}
     <meta property="og:title" content="@yield('title', $S('company_name'))">
     <meta property="og:description" content="@yield('meta_description', $S('company_name') . ' — ' . $S('tagline'))">
-    <meta property="og:image" content="{{ asset('01_hero_family_worker.jpg') }}">
+    <meta property="og:image" content="{{ asset('09_hero_background.jpg') }}">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
 
@@ -55,17 +55,23 @@
         body { font-family: {{ $stack }}; }
         .hero-grad { background: linear-gradient(135deg, #1e3a6d 0%, #2b4d8c 55%, #16294d 100%); }
 
-        /* تعتيم صورة الواجهة: داكن كلياً على الجوال ليبقى النص مقروءاً،
-           ومتدرّج على الشاشات الكبيرة فتظهر الصورة من الجهة المقابلة للنص. */
-        .hero-overlay { background: linear-gradient(to bottom, rgba(22,41,77,.82), rgba(22,41,77,.78)); }
+        /* صورة الواجهة: زوايا دائرية بسيطة على الجوال،
+           وقصّة منحنية بحدّ ذهبي على الشاشات الكبيرة كما في هوية الشركة. */
+        .hero-photo {
+            overflow: hidden;
+            border-radius: 1.25rem;
+            box-shadow: 0 18px 45px -20px rgba(22,41,77,.45);
+        }
 
         @media (min-width: 1024px) {
-            /* RTL: النص يمين ← التعتيم يبدأ من اليمين */
-            [dir="rtl"] .hero-overlay {
-                background: linear-gradient(to left, rgba(22,41,77,.94) 0%, rgba(22,41,77,.86) 35%, rgba(22,41,77,.45) 65%, rgba(22,41,77,.15) 100%);
-            }
-            [dir="ltr"] .hero-overlay {
-                background: linear-gradient(to right, rgba(22,41,77,.94) 0%, rgba(22,41,77,.86) 35%, rgba(22,41,77,.45) 65%, rgba(22,41,77,.15) 100%);
+            .hero-photo {
+                /* القوس على الجهة المواجهة للنص — ينعكس تلقائياً مع اتجاه الصفحة */
+                border-radius: 0 0 0 0;
+                border-start-start-radius: 14rem;
+                border-end-start-radius: 14rem;
+                border-start-end-radius: 1.5rem;
+                border-end-end-radius: 1.5rem;
+                border-inline-start: 4px solid #c9a84c;
             }
         }
 
