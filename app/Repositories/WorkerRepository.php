@@ -10,7 +10,7 @@ class WorkerRepository implements WorkerRepositoryInterface
     public function getAll(array $filters = []): mixed
     {
         return $this->filteredQuery($filters)
-                    ->with(['nationality', 'client', 'branch', 'assignedBy', 'latestContract'])
+                    ->with(['nationality', 'client', 'branch', 'assignedBy', 'latestContract.client'])
                     ->orderBy('created_at', 'desc')
                     ->paginate(20)
                     ->withQueryString();

@@ -3,7 +3,7 @@
 @section('content')
 @php
     $contract = $worker->latestContract;
-    $client   = $worker->client ?? $contract?->client;
+    $client   = $worker->effectiveClient();
 @endphp
 <div class="w-full space-y-5">
 
