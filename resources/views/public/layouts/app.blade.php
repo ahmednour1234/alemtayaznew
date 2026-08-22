@@ -138,8 +138,36 @@
         .gold-icon [stroke="#2F6798"] { stroke: #c9a84c; }
         .gold-icon [fill="#2F6798"]   { fill: #c9a84c; }
 
-        /* شريط الدعوة قبل التذييل — أزرق أفتح قليلاً من hero-grad ليبرز عن بقية الصفحة */
+        /* بطاقة الدعوة قبل التذييل — أزرق أفتح قليلاً من hero-grad لتبرز عن الصفحة */
         .cta-band { background: linear-gradient(120deg, #24457f 0%, #2f5596 50%, #1e3a6d 100%); }
+
+        /* هالة مضيئة حول البطاقة تنبض ببطء لتلفت النظر دون إزعاج */
+        .cta-shell {
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,.08),
+                0 18px 40px -12px rgba(30,58,109,.45),
+                0 0 60px -12px rgba(201,168,76,.35);
+            animation: ctaPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes ctaPulse {
+            0%, 100% {
+                box-shadow:
+                    0 0 0 1px rgba(255,255,255,.08),
+                    0 18px 40px -12px rgba(30,58,109,.45),
+                    0 0 60px -12px rgba(201,168,76,.30);
+            }
+            50% {
+                box-shadow:
+                    0 0 0 1px rgba(255,255,255,.14),
+                    0 18px 46px -12px rgba(30,58,109,.5),
+                    0 0 90px -8px rgba(201,168,76,.55);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .cta-shell { animation: none; }
+        }
 
         /* توهّج ناعم حول الزرّ الذهبي عند المرور.
            نستخدم box-shadow لا عنصراً زائفاً بـ z-index سالب، إذ يختفي الأخير
