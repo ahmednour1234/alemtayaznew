@@ -34,12 +34,18 @@ class WorkerRepository implements WorkerRepositoryInterface
             $q->where('profession', $filters['profession']);
         }
         if (!empty($filters['search'])) {
-            $term = $filters['search'];
+            $term = trim($filters['search']);
             // passport_number & phone are encrypted at rest → exact-match via hash columns.
             $q->where(function ($q2) use ($term) {
                 $q2->where('name', 'like', '%' . $term . '%')
                    ->orWhere('passport_number_hash', Worker::hashPii($term))
                    ->orWhere('phone_hash', Worker::hashPii($term));
+
+                // رقم العاملة: مطابقة تامة حين يكون البحث أرقاماً فقط،
+                // فلا يتحوّل كل بحث نصّي إلى مقارنة على المفتاح.
+                if (ctype_digit($term)) {
+                    $q2->orWhere('id', (int) $term);
+                }
             });
         }
 

@@ -12,7 +12,7 @@ return [
     'no_workers'   => 'لا توجد عاملات',
     'upload_now'   => 'رفع CVs الآن',
     'trashed'      => 'المحذوفون',
-    'search_ph'    => 'اسم، جواز، هاتف...',
+    'search_ph'    => 'رقم، اسم، جواز، هاتف...',
     'all_nats'     => 'كل الجنسيات',
     'all_statuses' => 'كل الحالات',
     'all_profs'    => 'كل المهن',

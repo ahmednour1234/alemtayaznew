@@ -12,7 +12,7 @@ return [
     'no_workers'   => 'No workers found',
     'upload_now'   => 'Upload CVs now',
     'trashed'      => 'Deleted',
-    'search_ph'    => 'Name, passport, phone...',
+    'search_ph'    => 'ID, name, passport, phone...',
     'all_nats'     => 'All nationalities',
     'all_statuses' => 'All statuses',
     'all_profs'    => 'All professions',
