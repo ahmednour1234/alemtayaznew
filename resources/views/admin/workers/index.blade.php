@@ -298,8 +298,7 @@
                     </span>
                 </td>
                 <td class="text-sm text-slate-600">
-                    @php($rowClient = $w->effectiveClient())
-                    {{ $rowClient?->name ?? '—' }}
+                    {{ $w->effectiveClient()?->name ?? '—' }}
                 </td>
                 <td class="text-sm text-slate-600">
                     @if($w->assignedBy)
