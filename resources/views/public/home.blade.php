@@ -110,20 +110,45 @@
 
 {{-- ══ الجنسيات المتاحة ══ --}}
 @if($nationalities->isNotEmpty())
-<section class="max-w-7xl mx-auto px-4 sm:px-6 py-20">
-    <div class="text-center mb-12">
-        <span class="text-gold text-sm font-bold">الجنسيات</span>
-        <h2 class="text-2xl sm:text-4xl font-extrabold text-navy mt-1">الجنسيات المتاحة للاستقدام</h2>
-        <p class="text-slate-500 text-sm mt-3 max-w-xl mx-auto">
-            اختر الجنسية التي تناسب احتياجك وتصفّح السير الذاتية المتاحة
-        </p>
+<section class="max-w-7xl mx-auto px-4 sm:px-6 py-20"
+         x-data="natSlider()" x-init="init()">
+
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+        <div class="text-center sm:text-start">
+            <span class="text-gold text-sm font-bold">الجنسيات</span>
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-navy mt-1">الجنسيات المتاحة للاستقدام</h2>
+            <p class="text-slate-500 text-sm mt-3 max-w-xl">
+                اختر الجنسية التي تناسب احتياجك وتصفّح السير الذاتية المتاحة
+            </p>
+        </div>
+
+        {{-- أزرار التنقّل — تُخفى إن كانت البطاقات تظهر كلها بلا تمرير --}}
+        <div class="flex items-center gap-2 justify-center sm:justify-end" x-show="scrollable" x-cloak>
+            <button type="button" @click="prev()" :disabled="atStart"
+                    class="w-11 h-11 rounded-full border-2 border-navy text-navy flex items-center justify-center
+                           hover:bg-navy hover:text-white transition-colors
+                           disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-navy"
+                    aria-label="السابق">
+                <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button type="button" @click="next()" :disabled="atEnd"
+                    class="w-11 h-11 rounded-full border-2 border-navy text-navy flex items-center justify-center
+                           hover:bg-navy hover:text-white transition-colors
+                           disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-navy"
+                    aria-label="التالي">
+                <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {{-- شريط التمرير: بطاقة واحدة على الجوال، اثنتان ثم ثلاث على الشاشات الأكبر --}}
+    <div x-ref="track" @scroll.debounce.100ms="sync()"
+         class="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 no-scrollbar">
         @foreach($nationalities as $nat)
         @php($photo = $nat->photoUrl())
         <a href="{{ route('site.cvs', ['nationality_id' => $nat->id]) }}"
-           class="relative rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 group">
+           class="snap-start shrink-0 w-[85%] sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3rem)/3)]
+                  relative rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 group">
 
             {{-- الصورة تملأ البطاقة بالكامل بنسبة بورتريه --}}
             <div class="relative aspect-[4/5] bg-slate-100 overflow-hidden">
@@ -157,6 +182,62 @@
         @endforeach
     </div>
 </section>
+
+@push('scripts')
+<script>
+/**
+ * سلايدر الجنسيات — يعتمد على تمرير العنصر الأصلي (scroll) لا على transform،
+ * فيبقى التمرير باللمس والسحب يعمل تلقائياً على الجوال.
+ *
+ * ملاحظة RTL: قيمة scrollLeft تكون سالبة في المتصفحات الحديثة عند dir="rtl"،
+ * لذا نتعامل مع قيمتها المطلقة في كل الحسابات.
+ */
+function natSlider() {
+    return {
+        scrollable: false,
+        atStart: true,
+        atEnd: false,
+
+        init() {
+            this.$nextTick(() => this.sync());
+            // إعادة الحساب عند تغيّر عرض النافذة (تتغيّر عدد البطاقات الظاهرة)
+            window.addEventListener('resize', () => this.sync(), { passive: true });
+        },
+
+        /** مقدار الإزاحة = عرض بطاقة واحدة + الفجوة بينها وبين التالية */
+        step() {
+            const t = this.$refs.track;
+            const card = t.firstElementChild;
+            if (!card) return t.clientWidth;
+
+            const gap = parseFloat(getComputedStyle(t).columnGap || '0') || 0;
+            return card.offsetWidth + gap;
+        },
+
+        /** يحدّث حالة الأزرار بعد أي تمرير */
+        sync() {
+            const t = this.$refs.track;
+            const pos = Math.abs(t.scrollLeft);
+            const max = t.scrollWidth - t.clientWidth;
+
+            this.scrollable = max > 4;                 // هامش صغير لتفادي أخطاء التقريب
+            this.atStart    = pos <= 4;
+            this.atEnd      = pos >= max - 4;
+        },
+
+        /** الاتجاه المنطقي: في RTL يقلّ scrollLeft كلما تقدّمنا */
+        move(dir) {
+            const t = this.$refs.track;
+            const rtl = getComputedStyle(t).direction === 'rtl';
+            t.scrollBy({ left: this.step() * dir * (rtl ? -1 : 1), behavior: 'smooth' });
+        },
+
+        next() { this.move(1); },
+        prev() { this.move(-1); },
+    };
+}
+</script>
+@endpush
 @endif
 
 {{-- ══ خطوات الاستقدام ══ --}}

@@ -138,6 +138,10 @@
         .gold-icon [stroke="#2F6798"] { stroke: #c9a84c; }
         .gold-icon [fill="#2F6798"]   { fill: #c9a84c; }
 
+        /* إخفاء شريط التمرير في السلايدر مع إبقاء التمرير باللمس فعّالاً */
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
         [x-cloak] { display: none !important; }
     </style>
     @stack('head')
