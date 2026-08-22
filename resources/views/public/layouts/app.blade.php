@@ -156,6 +156,91 @@
 
 @include('public.partials.footer')
 
+<script>
+/**
+ * سلايدر أفقي عام — يعتمد على تمرير العنصر نفسه (scroll) لا على transform،
+ * فيبقى السحب باللمس على الجوال يعمل تلقائياً ومعه snap.
+ *
+ * ملاحظة RTL: قيمة scrollLeft تكون سالبة في المتصفحات الحديثة عند dir="rtl"،
+ * لذا نتعامل مع قيمتها المطلقة في كل الحسابات ونعكس اتجاه الإزاحة.
+ *
+ * الاستخدام: x-data="hSlider(4000)" حيث الوسيط هو مهلة الدوران بالمللي ثانية.
+ */
+function hSlider(delay = 3500) {
+    return {
+        scrollable: false,
+        timer: null,
+
+        init() {
+            this.$nextTick(() => { this.sync(); this.resume(); });
+            window.addEventListener('resize', () => this.sync(), { passive: true });
+
+            // نوقف الحركة إذا غادر الزائر التبويب، ونستأنفها عند عودته
+            document.addEventListener('visibilitychange', () => {
+                document.hidden ? this.pause() : this.resume();
+            });
+        },
+
+        /** مقدار الإزاحة = عرض بطاقة واحدة + الفجوة بينها وبين التالية */
+        step() {
+            const t = this.$refs.track;
+            const card = t.firstElementChild;
+            if (!card) return t.clientWidth;
+
+            const gap = parseFloat(getComputedStyle(t).columnGap || '0') || 0;
+            return card.offsetWidth + gap;
+        },
+
+        /** يحدّث حالة إمكانية التمرير بعد أي تغيّر */
+        sync() {
+            const t = this.$refs.track;
+            const max = t.scrollWidth - t.clientWidth;
+
+            const was = this.scrollable;
+            this.scrollable = max > 4;      // هامش صغير لتفادي أخطاء التقريب
+
+            if (!was && this.scrollable) this.resume();
+            if (was && !this.scrollable) this.pause();
+        },
+
+        /** هل بلغنا نهاية الشريط؟ */
+        atEnd() {
+            const t = this.$refs.track;
+            return Math.abs(t.scrollLeft) >= (t.scrollWidth - t.clientWidth) - 4;
+        },
+
+        /** يبدأ الدوران، ما لم يفضّل المستخدم تقليل الحركة */
+        resume() {
+            this.pause();
+            if (!this.scrollable) return;
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            this.timer = setInterval(() => this.advance(), delay);
+        },
+
+        pause() {
+            if (this.timer) { clearInterval(this.timer); this.timer = null; }
+        },
+
+        /** يتقدّم بطاقة، ويعود إلى البداية عند بلوغ النهاية */
+        advance() {
+            this.atEnd()
+                ? this.$refs.track.scrollTo({ left: 0, behavior: 'smooth' })
+                : this.next();
+        },
+
+        /** الاتجاه المنطقي: في RTL يقلّ scrollLeft كلما تقدّمنا */
+        move(dir) {
+            const t = this.$refs.track;
+            const rtl = getComputedStyle(t).direction === 'rtl';
+            t.scrollBy({ left: this.step() * dir * (rtl ? -1 : 1), behavior: 'smooth' });
+        },
+
+        next() { this.move(1); },
+        prev() { this.move(-1); },
+    };
+}
+</script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 @stack('scripts')
 </body>

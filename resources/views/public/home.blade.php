@@ -111,7 +111,7 @@
 {{-- ══ الجنسيات المتاحة ══ --}}
 @if($nationalities->isNotEmpty())
 <section class="max-w-7xl mx-auto px-4 sm:px-6 py-20"
-         x-data="natSlider()" x-init="init()">
+         x-data="hSlider(3500)" x-init="init()">
 
     <div class="text-center mb-10">
         <span class="text-gold text-sm font-bold">الجنسيات</span>
@@ -190,95 +190,6 @@
     </div>{{-- /منطقة السلايدر --}}
 </section>
 
-@push('scripts')
-<script>
-/**
- * سلايدر الجنسيات — يعتمد على تمرير العنصر الأصلي (scroll) لا على transform،
- * فيبقى التمرير باللمس والسحب يعمل تلقائياً على الجوال.
- *
- * ملاحظة RTL: قيمة scrollLeft تكون سالبة في المتصفحات الحديثة عند dir="rtl"،
- * لذا نتعامل مع قيمتها المطلقة في كل الحسابات.
- */
-function natSlider() {
-    return {
-        scrollable: false,
-        atStart: true,
-        atEnd: false,
-        timer: null,
-        DELAY: 3500,           // المهلة بين كل انتقال تلقائي
-
-        init() {
-            this.$nextTick(() => { this.sync(); this.resume(); });
-            // إعادة الحساب عند تغيّر عرض النافذة (يتغيّر عدد البطاقات الظاهرة)
-            window.addEventListener('resize', () => this.sync(), { passive: true });
-
-            // نوقف الحركة إذا غادر الزائر التبويب، ونستأنفها عند عودته
-            document.addEventListener('visibilitychange', () => {
-                document.hidden ? this.pause() : this.resume();
-            });
-        },
-
-        /** يبدأ الدوران التلقائي، ما لم يكن المستخدم يفضّل تقليل الحركة */
-        resume() {
-            this.pause();
-            if (!this.scrollable) return;
-            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-            this.timer = setInterval(() => this.advance(), this.DELAY);
-        },
-
-        pause() {
-            if (this.timer) { clearInterval(this.timer); this.timer = null; }
-        },
-
-        /** يتقدّم بطاقة، ويعود إلى البداية عند بلوغ النهاية */
-        advance() {
-            if (this.atEnd) {
-                this.$refs.track.scrollTo({ left: 0, behavior: 'smooth' });
-            } else {
-                this.next();
-            }
-        },
-
-        /** مقدار الإزاحة = عرض بطاقة واحدة + الفجوة بينها وبين التالية */
-        step() {
-            const t = this.$refs.track;
-            const card = t.firstElementChild;
-            if (!card) return t.clientWidth;
-
-            const gap = parseFloat(getComputedStyle(t).columnGap || '0') || 0;
-            return card.offsetWidth + gap;
-        },
-
-        /** يحدّث حالة الأزرار بعد أي تمرير */
-        sync() {
-            const t = this.$refs.track;
-            const pos = Math.abs(t.scrollLeft);
-            const max = t.scrollWidth - t.clientWidth;
-
-            const was = this.scrollable;
-            this.scrollable = max > 4;                 // هامش صغير لتفادي أخطاء التقريب
-            this.atStart    = pos <= 4;
-            this.atEnd      = pos >= max - 4;
-
-            // صار السلايدر قابلاً للتمرير بعد تغيّر المقاس → شغّل الدوران
-            if (!was && this.scrollable) this.resume();
-            if (was && !this.scrollable) this.pause();
-        },
-
-        /** الاتجاه المنطقي: في RTL يقلّ scrollLeft كلما تقدّمنا */
-        move(dir) {
-            const t = this.$refs.track;
-            const rtl = getComputedStyle(t).direction === 'rtl';
-            t.scrollBy({ left: this.step() * dir * (rtl ? -1 : 1), behavior: 'smooth' });
-        },
-
-        next() { this.move(1); },
-        prev() { this.move(-1); },
-    };
-}
-</script>
-@endpush
 @endif
 
 {{-- ══ خطوات الاستقدام ══ --}}
@@ -306,22 +217,52 @@ function natSlider() {
 
 {{-- ══ أحدث السير الذاتية ══ --}}
 @if($featured->isNotEmpty())
-<section class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-    <div class="flex items-end justify-between mb-8 gap-4">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 py-20"
+         x-data="hSlider(4500)" x-init="init()">
+
+    <div class="flex items-end justify-between mb-10 gap-4">
         <div>
             <span class="text-gold text-sm font-bold">العمالة</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-1">أحدث السير الذاتية</h2>
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-navy mt-1">أحدث السير الذاتية</h2>
         </div>
         <a href="{{ route('site.cvs') }}" class="text-navy hover:text-gold text-sm font-bold whitespace-nowrap transition-colors">
             عرض الكل ←
         </a>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        @foreach($featured as $w)
-            @include('public.partials.worker-card', ['w' => $w])
-        @endforeach
-    </div>
+    {{-- منطقة السلايدر: الأزرار تطفو فوق البطاقات على الجانبين --}}
+    <div class="relative"
+         @mouseenter="pause()" @mouseleave="resume()"
+         @focusin="pause()" @focusout="resume()">
+
+        <button type="button" @click="prev()" x-show="scrollable" x-cloak
+                class="absolute top-1/3 -translate-y-1/2 start-2 sm:-start-3 z-20
+                       w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm text-navy shadow-lg
+                       flex items-center justify-center
+                       hover:bg-navy hover:text-white hover:scale-110 transition-all duration-300"
+                aria-label="السابق">
+            <svg class="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+
+        <button type="button" @click="next()" x-show="scrollable" x-cloak
+                class="absolute top-1/3 -translate-y-1/2 end-2 sm:-end-3 z-20
+                       w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm text-navy shadow-lg
+                       flex items-center justify-center
+                       hover:bg-navy hover:text-white hover:scale-110 transition-all duration-300"
+                aria-label="التالي">
+            <svg class="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </button>
+
+        <div x-ref="track" @scroll.debounce.100ms="sync()"
+             class="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 no-scrollbar">
+            @foreach($featured as $w)
+            <div class="snap-start shrink-0 w-[80%] sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-4.5rem)/4)]">
+                @include('public.partials.worker-card', ['w' => $w])
+            </div>
+            @endforeach
+        </div>
+
+    </div>{{-- /منطقة السلايدر --}}
 </section>
 @endif
 
