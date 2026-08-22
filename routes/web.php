@@ -260,6 +260,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('leads/{lead}/convert', [\App\Http\Controllers\Admin\Marketing\LeadController::class, 'convert'])->name('leads.convert');
             Route::resource('leads', \App\Http\Controllers\Admin\Marketing\LeadController::class)->except(['create', 'edit']);
 
+            // طلبات الموقع الإلكتروني — قائمة مستقلة غير مقيّدة بالمُسند إليه
+            Route::get('website-leads', [\App\Http\Controllers\Admin\Marketing\WebsiteLeadController::class, 'index'])->name('website-leads.index');
+            Route::post('website-leads/{lead}/assign', [\App\Http\Controllers\Admin\Marketing\WebsiteLeadController::class, 'assign'])->name('website-leads.assign');
+
             Route::get('reports', [\App\Http\Controllers\Admin\Marketing\ReportsController::class, 'index'])->name('reports');
             Route::get('staff-performance', [\App\Http\Controllers\Admin\Marketing\StaffPerformanceController::class, 'index'])->name('staff-performance');
 

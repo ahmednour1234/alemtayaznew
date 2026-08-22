@@ -19,23 +19,23 @@
              class="w-full h-full object-cover object-[55%_center]">
     </div>
 
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-10 lg:py-0">
-        <div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-6 lg:min-h-[38rem]">
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 lg:py-0">
+        <div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-6 sm:gap-8 lg:gap-6 lg:min-h-[38rem]">
 
             {{-- الصورة على الجوال: بعرض الشاشة كاملاً --}}
             <div class="lg:hidden -mx-4 sm:-mx-6 order-1 hero-reveal" style="--d:.05s">
                 <img src="{{ asset('09_hero_background.jpg') }}"
                      alt="عاملة منزلية مع أسرة سعودية"
                      loading="eager" fetchpriority="high"
-                     class="w-full h-72 sm:h-96 object-cover">
+                     class="w-full h-56 sm:h-80 object-cover">
             </div>
 
             {{-- النص (يسار في RTL) — يُزاح قليلاً عن قوس الصورة --}}
             <div class="text-center lg:text-end order-2 lg:order-2 lg:ps-6">
-                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-navy leading-tight hero-rise" style="--d:.25s">
+                <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-navy leading-tight hero-rise" style="--d:.25s">
                     {{ $S('company_name') }}<span class="text-gold">...</span>
                 </h1>
-                <p class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gold mt-3 hero-rise" style="--d:.4s">
+                <p class="text-xl sm:text-3xl lg:text-4xl font-extrabold text-gold mt-2 sm:mt-3 hero-rise" style="--d:.4s">
                     {{ $S('tagline') }}
                 </p>
 
@@ -72,7 +72,7 @@
 </section>
 
 {{-- ══ مزايا ══ --}}
-<section class="max-w-7xl mx-auto px-4 sm:px-6 py-14 relative z-20">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-20">
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" data-reveal-group>
         @foreach($features as $f)
         <div class="reveal bg-white rounded-2xl border border-slate-200 shadow-sm p-5 text-center hover:shadow-md hover:border-gold/40 transition-all group">
@@ -87,7 +87,7 @@
 </section>
 
 {{-- ══ خدماتنا ══ --}}
-<section class="bg-white border-y border-slate-200 py-16">
+<section class="bg-white border-y border-slate-200 py-12 sm:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="text-center mb-10 reveal">
             <span class="text-gold text-sm font-bold">ماذا نقدّم</span>
@@ -110,7 +110,7 @@
 
 {{-- ══ الجنسيات المتاحة ══ --}}
 @if($nationalities->isNotEmpty())
-<section class="max-w-7xl mx-auto px-4 sm:px-6 py-20"
+<section class="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20"
          x-data="hSlider(3500)" x-init="init()">
 
     <div class="text-center mb-10 reveal">
@@ -129,17 +129,17 @@
         {{-- زر السابق --}}
         <button type="button" @click="prev()" x-show="scrollable" x-cloak
                 class="absolute top-1/2 -translate-y-1/2 start-2 sm:start-4 z-20
-                       w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm text-navy shadow-lg
+                       w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 backdrop-blur-sm text-navy shadow-lg
                        flex items-center justify-center
                        hover:bg-navy hover:text-white hover:scale-110 transition-all duration-300"
                 aria-label="السابق">
-            <svg class="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         </button>
 
         {{-- زر التالي --}}
         <button type="button" @click="next()" x-show="scrollable" x-cloak
                 class="absolute top-1/2 -translate-y-1/2 end-2 sm:end-4 z-20
-                       w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm text-navy shadow-lg
+                       w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 backdrop-blur-sm text-navy shadow-lg
                        flex items-center justify-center
                        hover:bg-navy hover:text-white hover:scale-110 transition-all duration-300"
                 aria-label="التالي">
@@ -193,7 +193,7 @@
 @endif
 
 {{-- ══ خطوات الاستقدام ══ --}}
-<section class="bg-white border-y border-slate-200 py-16">
+<section class="bg-white border-y border-slate-200 py-12 sm:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="text-center mb-10 reveal">
             <span class="text-gold text-sm font-bold">كيف نعمل</span>
@@ -217,7 +217,7 @@
 
 {{-- ══ أحدث السير الذاتية ══ --}}
 @if($featured->isNotEmpty())
-<section class="max-w-7xl mx-auto px-4 sm:px-6 py-20"
+<section class="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20"
          x-data="hSlider(4500)" x-init="init()">
 
     <div class="flex items-end justify-between mb-10 gap-4 reveal">
@@ -237,16 +237,16 @@
 
         <button type="button" @click="prev()" x-show="scrollable" x-cloak
                 class="absolute top-1/3 -translate-y-1/2 start-2 sm:-start-3 z-20
-                       w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm text-navy shadow-lg
+                       w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 backdrop-blur-sm text-navy shadow-lg
                        flex items-center justify-center
                        hover:bg-navy hover:text-white hover:scale-110 transition-all duration-300"
                 aria-label="السابق">
-            <svg class="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         </button>
 
         <button type="button" @click="next()" x-show="scrollable" x-cloak
                 class="absolute top-1/3 -translate-y-1/2 end-2 sm:-end-3 z-20
-                       w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm text-navy shadow-lg
+                       w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 backdrop-blur-sm text-navy shadow-lg
                        flex items-center justify-center
                        hover:bg-navy hover:text-white hover:scale-110 transition-all duration-300"
                 aria-label="التالي">
@@ -283,7 +283,7 @@
 
 {{-- ══ آراء العملاء ══ --}}
 @if(!empty($testimonials))
-<section class="bg-white border-y border-slate-200 py-16">
+<section class="bg-white border-y border-slate-200 py-12 sm:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="text-center mb-10 reveal">
             <span class="text-gold text-sm font-bold">شهادات</span>
@@ -320,7 +320,7 @@
 
 {{-- ══ الأسئلة الشائعة ══ --}}
 @if(!empty($faqs))
-<section class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
+<section class="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
     <div class="text-center mb-10 reveal">
         <span class="text-gold text-sm font-bold">استفسارات</span>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-navy mt-1">أسئلة شائعة</h2>
@@ -364,7 +364,7 @@
 @endif
 
 {{-- ══ شريط الدعوة قبل التذييل ══ --}}
-<section class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
   <div class="cta-band cta-shell reveal-scale text-white relative overflow-hidden rounded-3xl">
     {{-- نقوش خفيفة + هالتان ضوئيتان تمنحان البطاقة عمقاً --}}
     <div class="absolute inset-0 opacity-[0.07]"
@@ -384,7 +384,7 @@
 
             <div class="flex flex-wrap gap-3 justify-center lg:justify-end">
                 <a href="{{ route('site.contact') }}"
-                   class="btn-glow inline-flex items-center gap-2 bg-gold hover:bg-gold-dark text-white font-bold px-8 py-4 rounded-xl hover:-translate-y-0.5 transition-all duration-300">
+                   class="btn-glow inline-flex items-center justify-center gap-2 bg-gold hover:bg-gold-dark text-white font-bold px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl hover:-translate-y-0.5 transition-all duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6m9-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     اطلب الآن
                 </a>

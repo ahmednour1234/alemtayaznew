@@ -20,7 +20,7 @@
     $showSettingsGroup   = $can('branches.view')||$can('nationalities.view')||$can('airports.view')||$can('housings.view')||$can('roles.manage')||$can('admins.manage')||$can('income-types.view')||$can('expense-types.view');
     $showFinanceGroup    = $can('incomes.view')||$can('expenses.view')||$can('transfers.view')||$can('reports.view')||$can('income-types.view')||$can('expense-types.view')||$can('reports.branch-statement')||$can('reports.income-statement');
     $showPeopleGroup     = $can('clients.view')||$can('agents.view');
-    $showMarketingGroup  = $can('campaigns.view')||$can('leads.view')||$can('marketing.reports.view')||$can('calendar.view');
+    $showMarketingGroup  = $can('campaigns.view')||$can('leads.view')||$can('website-leads.view')||$can('marketing.reports.view')||$can('calendar.view');
     $showComplaintsGroup = $can('complaints.view');
     $showOpsGroup        = $can('trips.view')||$can('housing-assignments.view')||$can('housing-visits.view')||$can('housing-visits.reports')||$can('calendar.view')||$can('housing-rentals.reports')||$can('housing-settlements.reports');
     $showSTGroup         = $can('sponsorship-transfers.view');
@@ -588,6 +588,8 @@
                      'd'=>'M3 11l18-8-8 18-2-8-8-2z'],
                     ['r'=>'admin.marketing.leads.index',     'p'=>'admin.marketing.leads.*',     'l'=>__('nav.marketing.leads'), 'perm'=>'leads.view',
                      'd'=>'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z M22 11h-6 M19 8v6'],
+                    ['r'=>'admin.marketing.website-leads.index', 'p'=>'admin.marketing.website-leads.*', 'l'=>'طلبات الموقع', 'perm'=>'website-leads.view',
+                     'd'=>'M21 12a9 9 0 11-18 0 9 9 0 0118 0zM3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 010 18M12 3a15 15 0 000 18'],
                     ['r'=>'admin.marketing.reports',         'p'=>'admin.marketing.reports',     'l'=>__('nav.marketing.reports'),   'perm'=>'marketing.reports.view',
                      'd'=>'M3 3v18h18 M7 14l4-4 4 4 5-5'],
                     ['r'=>'admin.marketing.staff-performance','p'=>'admin.marketing.staff-performance','l'=>__('nav.marketing.performance'),'perm'=>'marketing.reports.view','mgr'=>true,

@@ -9,12 +9,12 @@
 @endphp
 <header x-data="{ open: false }" class="sticky top-0 z-50 bg-navy shadow-lg">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="flex items-center justify-between h-20 gap-4">
+        <div class="flex items-center justify-between h-16 sm:h-20 gap-3 sm:gap-4">
 
             {{-- الشعار --}}
             <a href="{{ route('site.home') }}" class="flex items-center gap-2.5 flex-shrink-0">
                 <img src="{{ asset('11_logo_white.png') }}" alt="{{ $S('company_name') }}"
-                     width="600" height="600" class="h-16 w-auto object-contain">
+                     width="600" height="600" class="h-12 sm:h-16 w-auto object-contain">
                 <span class="hidden lg:block text-white font-bold text-sm leading-tight">{{ $S('company_name') }}</span>
             </a>
 
