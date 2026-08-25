@@ -190,11 +190,18 @@ class RecruitmentContractService
     public function delete(int $id): void
     {
         $contract = $this->repo->findById($id);
-        // Free the worker when contract is deleted
-        if ($contract->worker_id) {
-            Worker::where('id', $contract->worker_id)->update(['status' => 'available']);
-        }
+        // نحذف العقد أولاً ثم نُحرّر العاملة، لأن حارس الاتساق في Worker
+        // يمنع «available» ما دام هناك عقد قائم لم ينتهِ.
+        $workerId = $contract->worker_id;
+
         $this->repo->delete($id);
+
+        if ($workerId) {
+            Worker::where('id', $workerId)->update([
+                'status'    => 'available',
+                'client_id' => null,
+            ]);
+        }
     }
 
     public function getTrashed(?int $branchId): \Illuminate\Pagination\LengthAwarePaginator

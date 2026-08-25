@@ -32,6 +32,27 @@ class Worker extends Model
         ];
     }
 
+    /** حالات العقد التي تعني انتهاء الارتباط فتعود العاملة متاحة. */
+    private const CONTRACT_ENDED = [14, 15];
+
+    protected static function booted(): void
+    {
+        // حارس اتساق: لا تُصبح العاملة «متاحة» ولها عقد قائم لم ينتهِ.
+        // ظهرت عاملات في حالة «تم الاستلام» ومع ذلك معروضات للحجز، فكان
+        // بالإمكان حجزهنّ لعميل ثانٍ. نصحّح الحالة هنا لا في كل مسار على حدة.
+        static::updating(function (Worker $worker): void {
+            if (! $worker->isDirty('status') || $worker->status !== 'available') {
+                return;
+            }
+
+            $status = $worker->latestContract?->current_status;
+
+            if ($status !== null && ! in_array((int) $status, self::CONTRACT_ENDED, true)) {
+                $worker->status = 'assigned';
+            }
+        });
+    }
+
     /** Encrypted-at-rest PII fields and their searchable hash columns. */
     public function piiHashMap(): array
     {
