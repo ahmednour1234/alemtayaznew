@@ -89,8 +89,13 @@
                     <select name="status"
                             class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                         <option value="available"            {{ old('status', $worker->status) === 'available'            ? 'selected' : '' }}>متاحة</option>
+                        {{-- «محجوزة» و«تم التعيين» تُضبطان من شاشة التعيين لا من هنا،
+                             لأنهما تعنيان ارتباطاً بعميل ولا حقل عميل في هذا النموذج.
+                             تُعرضان للاطّلاع فقط حين تكون العاملة عليهما بالفعل. --}}
+                        @if(in_array($worker->status, ['reserved', 'assigned'], true))
                         <option value="reserved"             {{ old('status', $worker->status) === 'reserved'             ? 'selected' : '' }}>محجوزة</option>
                         <option value="assigned"             {{ old('status', $worker->status) === 'assigned'             ? 'selected' : '' }}>تم التعيين</option>
+                        @endif
                         <option value="in_housing"           {{ old('status', $worker->status) === 'in_housing'           ? 'selected' : '' }}>في السكن</option>
                         <option value="sponsorship_transfer" {{ old('status', $worker->status) === 'sponsorship_transfer' ? 'selected' : '' }}>نقل كفالة</option>
                         <option value="deportation"          {{ old('status', $worker->status) === 'deportation'          ? 'selected' : '' }}>تسفير</option>

@@ -243,6 +243,19 @@ class WorkerController extends Controller
         if ($me->isBranchAdmin()) {
             $data['branch_id'] = $me->branch_id;
         }
+        // «محجوزة» و«تم التعيين» تعنيان ارتباطاً بعميل، وهذا النموذج لا حقل
+        // عميل فيه. نرفض الاختيار صراحةً بدل أن يتجاهله حارس الموديل بصمت.
+        if (in_array($data['status'] ?? null, ['reserved', 'assigned'], true)) {
+            $worker = $this->service->find($id);
+
+            if (! $worker->client_id && ! $worker->hasActiveContract()) {
+                return back()->withInput()->withErrors([
+                    'status' => 'لا يمكن ضبط الحالة «' . (Worker::statusOptions()[$data['status']] ?? $data['status'])
+                        . '» من هنا — استخدم زرّ «تعيين لعميل» لربط العاملة بعميل.',
+                ]);
+            }
+        }
+
         $this->service->update($id, $data, $request->file('cv'), $request->file('passport_image'));
         return redirect()->route('admin.workers.index')->with('success', 'تم تحديث بيانات العاملة.');
     }

@@ -41,14 +41,28 @@ class Worker extends Model
         // ظهرت عاملات في حالة «تم الاستلام» ومع ذلك معروضات للحجز، فكان
         // بالإمكان حجزهنّ لعميل ثانٍ. نصحّح الحالة هنا لا في كل مسار على حدة.
         static::updating(function (Worker $worker): void {
-            if (! $worker->isDirty('status') || $worker->status !== 'available') {
+            if (! $worker->isDirty('status')) {
                 return;
             }
 
-            $status = $worker->latestContract?->current_status;
+            // (أ) لا تُصبح العاملة «متاحة» ولها عقد قائم لم ينتهِ.
+            if ($worker->status === 'available') {
+                $status = $worker->latestContract?->current_status;
 
-            if ($status !== null && ! in_array((int) $status, self::CONTRACT_ENDED, true)) {
-                $worker->status = 'assigned';
+                if ($status !== null && ! in_array((int) $status, self::CONTRACT_ENDED, true)) {
+                    $worker->status = 'assigned';
+                }
+
+                return;
+            }
+
+            // (ب) «محجوزة» و«تم التعيين» تعنيان ارتباطاً بعميل، فلا تُضبطان
+            // يدوياً من شاشة التعديل التي لا حقل عميل فيها. بلا عميل ولا عقد
+            // تبقى العاملة عالقة: لا يفكّها أمر الـ72 ساعة ولا تظهر للحجز.
+            if (in_array($worker->status, ['reserved', 'assigned'], true)
+                && ! $worker->client_id
+                && ! $worker->hasActiveContract()) {
+                $worker->status = $worker->getOriginal('status');
             }
         });
     }
