@@ -127,6 +127,13 @@ class RecruitmentContractController extends Controller
         if ($data['prefill']['worker_id']) {
             $worker = Worker::with('assignedBy')->find($data['prefill']['worker_id']);
 
+            // العاملة المحجوزة التزام شخصي تجاه عميل بعينه: من حجزها وحده
+            // (والسوبر أدمن) يبني عليها عقداً. إخفاء الزرّ وحده لا يكفي —
+            // الرابط قابل للفتح يدوياً.
+            if ($worker && $worker->status === 'reserved' && ! $worker->canCreateContractBy($me)) {
+                abort(403, 'هذه العاملة محجوزة بواسطة موظف آخر — لا يمكنك إنشاء عقد لها.');
+            }
+
             // قائمة العاملات تعرض المتاحات فقط، والعاملة المحجوزة حالتها
             // «reserved» — نضيفها يدوياً وإلا اختفت من القائمة.
             if ($worker) {
@@ -171,6 +178,16 @@ class RecruitmentContractController extends Controller
         $contractWorker = null;
         if (! empty($data['worker_id'])) {
             $contractWorker = Worker::find($data['worker_id']);
+
+            // حجز العاملة التزام شخصي: من حجزها وحده (والسوبر أدمن) يبني
+            // عليها عقداً. الفحص هنا لا في create() وحدها، لأن النموذج
+            // قابل للإرسال مباشرةً دون المرور بالصفحة.
+            if ($contractWorker
+                && $contractWorker->status === 'reserved'
+                && ! $contractWorker->canCreateContractBy($me)) {
+                abort(403, 'هذه العاملة محجوزة بواسطة موظف آخر — لا يمكنك إنشاء عقد لها.');
+            }
+
             if ($contractWorker && $contractWorker->client_id && (int)$contractWorker->client_id !== (int)($data['client_id'] ?? 0)) {
                 return back()
                     ->withInput()

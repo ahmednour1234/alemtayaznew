@@ -18,6 +18,7 @@ return [
         'restore'      => 'استعادة',
         'assign'       => 'تعيين',
         'unassign'     => 'فك التعيين من العميل',
+        'create_contract' => 'إنشاء عقد',
         'confirm'      => 'تأكيد',
         'back'         => 'رجوع',
         'close'        => 'إغلاق',

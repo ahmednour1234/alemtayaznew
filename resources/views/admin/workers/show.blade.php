@@ -34,6 +34,16 @@
             @if(! $worker->isBooked())
             <a href="{{ route('admin.workers.assign', $worker->id) }}"
                class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg">تعيين لعميل</a>
+            @elseif($worker->canCreateContractBy($me))
+            <a href="{{ route('admin.contracts.create', ['worker_id' => $worker->id, 'client_id' => $worker->client_id]) }}"
+               class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition-colors">
+                {{ __('common.actions.create_contract') }}
+            </a>
+            <form action="{{ route('admin.workers.unassign', $worker->id) }}" method="POST">
+                @csrf
+                <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white text-sm px-4 py-2 rounded-lg transition-colors"
+                        onclick="return confirm('{{ __('workers.assign.confirm_unassign') }}')">{{ __('common.actions.unassign') }}</button>
+            </form>
             @elseif($worker->canBeUnassignedBy($me))
             <form action="{{ route('admin.workers.unassign', $worker->id) }}" method="POST">
                 @csrf

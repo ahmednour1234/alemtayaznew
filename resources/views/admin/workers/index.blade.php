@@ -333,7 +333,16 @@
                         @if(! $w->isBooked())
                         <a href="{{ route('admin.workers.assign', $w->id) }}"
                            class="text-xs text-white bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded-lg">{{ __('common.actions.assign') }}</a>
-                        @elseif($w->canBeUnassignedBy($me))
+                        @else
+                        {{-- العاملة المحجوزة: مَن حجزها وحده يبني عليها عقداً --}}
+                        @if($w->canCreateContractBy($me))
+                        <a href="{{ route('admin.contracts.create', ['worker_id' => $w->id, 'client_id' => $w->client_id]) }}"
+                           class="text-xs text-white bg-emerald-600 hover:bg-emerald-700 px-2 py-1 rounded-lg whitespace-nowrap">
+                            {{ __('common.actions.create_contract') }}
+                        </a>
+                        @endif
+
+                        @if($w->canBeUnassignedBy($me))
                         <form action="{{ route('admin.workers.unassign', $w->id) }}" method="POST" class="inline"
                               onsubmit="return confirm('{{ __('workers.assign.confirm_unassign') }}')">
                             @csrf
@@ -345,6 +354,7 @@
                         @else
                         <span class="text-xs text-slate-300 bg-slate-50 px-2 py-1 rounded-lg cursor-not-allowed"
                               title="{{ __('workers.assign.no_permission') }}">{{ __('common.actions.unassign') }}</span>
+                        @endif
                         @endif
                         <form action="{{ route('admin.workers.destroy', $w->id) }}" method="POST" class="inline"
                               onsubmit="return confirm('{{ __('workers.delete.confirm_one') }}')">

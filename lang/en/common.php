@@ -18,6 +18,7 @@ return [
         'restore'      => 'Restore',
         'assign'       => 'Assign',
         'unassign'     => 'Unassign from client',
+        'create_contract' => 'Create contract',
         'confirm'      => 'Confirm',
         'back'         => 'Back',
         'close'        => 'Close',

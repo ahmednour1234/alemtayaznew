@@ -131,6 +131,22 @@ class Worker extends Model
     }
 
     /**
+     * من يحق له إنشاء عقد استقدام لهذه العاملة.
+     *
+     * مقصور على الموظف الذي حجزها (والسوبر أدمن)، لأن الحجز التزام شخصي
+     * تجاه عميل بعينه ولا يصحّ أن يبني عليه موظف آخر عقداً.
+     */
+    public function canCreateContractBy(?Admin $actor): bool
+    {
+        if (! $actor || $this->status !== 'reserved' || $this->hasActiveContract()) {
+            return false;
+        }
+
+        return $actor->isSuperAdmin()
+            || $actor->id === $this->assigned_by_admin_id;
+    }
+
+    /**
      * من يحق له إلغاء التعيين: الموظف الذي أجرى الحجز نفسه فقط
      * (بالإضافة للسوبر أدمن). مدير الفرع لا يملك هذه الصلاحية.
      * نفس القاعدة المطبّقة في WorkerService::unassign().
