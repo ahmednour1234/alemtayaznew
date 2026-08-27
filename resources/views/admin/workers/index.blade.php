@@ -439,19 +439,17 @@ function openWhatsapp(workers, waPhone) {
     const LRI = '⁦', PDI = '⁩';   // عزل اتجاه النص اللاتيني
     const ltr = (s) => LRI + s + PDI;
 
-    // تقسيم إلى دفعات — رابط wa.me لا يتسع لأكثر من PER عاملة
-    const batches = [];
-    for (let i = 0; i < workers.length; i += PER) {
-        batches.push(workers.slice(i, i + PER));
-    }
-
-    const buildMessage = (batch, batchIndex) => {
-        const header = batches.length > 1
-            ? `*${LANG.msg_header} (${batchIndex + 1}/${batches.length})*`
+    /**
+     * يبني نص الرسالة لدفعة واحدة.
+     * نمرّر الترقيم والإزاحة كوسائط لا نقرأها من الخارج، لأن الدالة تُستدعى
+     * أثناء حساب الدفعات نفسها (قبل اكتمالها) ولأن أحجام الدفعات متفاوتة.
+     */
+    const buildMessage = (batch, offset = 0, batchIndex = 0, batchCount = 1) => {
+        const header = batchCount > 1
+            ? `*${LANG.msg_header} (${batchIndex + 1}/${batchCount})*`
             : `*${LANG.msg_header}*`;
 
-        const lines  = [header, ''];
-        const offset = batchIndex * PER;
+        const lines = [header, ''];
 
         batch.forEach((w, i) => {
             const num  = offset + i + 1;
@@ -466,8 +464,33 @@ function openWhatsapp(workers, waPhone) {
         return lines.join('\n').trimEnd();
     };
 
+    // تقسيم إلى دفعات.
+    // العدد وحده لا يكفي: طول رابط wa.me هو القيد الحقيقي (تقصّه المتصفحات
+    // حوالي 32k حرف)، وطول الأسماء والروابط يتفاوت. لذا نقسّم بالعدد ثم
+    // نتحقق من الطول الفعلي ونُصغّر الدفعة عند تجاوزه — فلا تُقصّ رسالة صامتاً.
+    const MAX_URL = {{ \App\Services\WorkerService::WHATSAPP_MAX_URL_LENGTH }};
+
+    const batches = [];
+    let cursor = 0;
+
+    while (cursor < workers.length) {
+        let size = Math.min(PER, workers.length - cursor);
+
+        // نُقلّص الدفعة حتى يصبح الرابط ضمن الحد
+        while (size > 1) {
+            const probe = workers.slice(cursor, cursor + size);
+            const url   = 'https://wa.me/' + clean + '?text=' + encodeURIComponent(buildMessage(probe, cursor));
+            if (url.length <= MAX_URL) break;
+            size = Math.floor(size * 0.8);   // تقليص تدريجي أسرع من خطوة واحدة
+        }
+
+        batches.push(workers.slice(cursor, cursor + size));
+        cursor += size;
+    }
+
+
     // الرسالة الأولى فوراً (ضمن حدث الضغط حتى لا يحجبها المتصفح)
-    window.open('https://wa.me/' + clean + '?text=' + encodeURIComponent(buildMessage(batches[0], 0)), '_blank');
+    window.open('https://wa.me/' + clean + '?text=' + encodeURIComponent(buildMessage(batches[0], 0, 0, batches.length)), '_blank');
 
     // الباقي بتأكيد يدوي — الفتح التلقائي لعدة نوافذ يحجبه المتصفح
     if (batches.length > 1) {
@@ -476,7 +499,8 @@ function openWhatsapp(workers, waPhone) {
                 const msg = LANG.batch_next
                     .replaceAll(':current', b).replaceAll(':total', batches.length).replaceAll(':next', b + 1);
                 if (!confirm(msg)) return;
-                window.open('https://wa.me/' + clean + '?text=' + encodeURIComponent(buildMessage(batches[b], b)), '_blank');
+                const offset = batches.slice(0, b).reduce((sum, x) => sum + x.length, 0);
+                window.open('https://wa.me/' + clean + '?text=' + encodeURIComponent(buildMessage(batches[b], offset, b, batches.length)), '_blank');
             }
         }, 600);
     }

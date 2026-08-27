@@ -503,7 +503,14 @@ class WorkerService
      * و80 عاملة تتجاوز حد Chrome (~32,000) فتفشل. اخترنا 60 لهامش أمان،
      * وما زاد عنه يُقسَّم تلقائياً على رسائل متتابعة.
      */
-    public const WHATSAPP_MAX_PER_MESSAGE = 60;
+    public const WHATSAPP_MAX_PER_MESSAGE = 150;
+
+    /**
+     * أقصى طول لرابط wa.me قبل أن تقصّه المتصفحات.
+     * كروم يقف عند ~32k حرف، وواتساب ويب يقصّ قبل ذلك، فنترك هامشاً.
+     * الرسالة الواحدة ≈ 250 حرفاً لكل عاملة بعد ترميز الرابط.
+     */
+    public const WHATSAPP_MAX_URL_LENGTH = 30000;
 
     /** الحد الأقصى لإجمالي العاملات عبر كل الرسائل في عملية إرسال واحدة. */
     public const WHATSAPP_MAX_TOTAL = 300;
@@ -566,7 +573,17 @@ class WorkerService
 
         $message = rtrim(implode("\n", $lines));
         $clean   = preg_replace('/[^0-9]/', '', $phone);
-        return 'https://wa.me/' . $clean . '?text=' . rawurlencode($message);
+        $url     = 'https://wa.me/' . $clean . '?text=' . rawurlencode($message);
+
+        // المتصفحات تقصّ الروابط الطويلة صامتةً، فنحذف عاملات من الآخر
+        // حتى يصبح الرابط ضمن الحد بدل أن تصل رسالة مبتورة.
+        while (strlen($url) > self::WHATSAPP_MAX_URL_LENGTH && count($lines) > 2) {
+            array_splice($lines, -4);   // كل عاملة تشغل 3–4 أسطر
+            $message = rtrim(implode(PHP_EOL, $lines));
+            $url     = 'https://wa.me/' . $clean . '?text=' . rawurlencode($message);
+        }
+
+        return $url;
     }
 
     // ── Internal helpers ──────────────────────────────────────────────────────
