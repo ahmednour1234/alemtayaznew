@@ -18,6 +18,36 @@ return [
     'all_profs'    => 'كل المهن',
     'no_name'      => 'بدون اسم',
 
+    // تسميات حقول نموذج العاملة
+    'fields' => [
+        'name'           => 'الاسم (عربي)',
+        'passport'       => 'رقم الجواز',
+        'nationality'    => 'الجنسية',
+        'profession'     => 'المهنة',
+        'gender'         => 'الجنس',
+        'experience'     => 'الخبرة',
+        'religion'       => 'الديانة',
+        'age'            => 'العمر',
+        'phone'          => 'الهاتف',
+        'status'         => 'الحالة',
+        'branch'         => 'الفرع',
+        'notes'          => 'ملاحظات',
+        'cv_file'        => 'ملف CV (PDF)',
+        'passport_image' => 'صورة الجواز',
+        'choose'         => 'اختر...',
+        'no_branch'      => 'بدون فرع',
+        'basic_data'     => 'البيانات الأساسية',
+        'edit_title'     => 'تعديل بيانات العاملة',
+        'cv_current'     => 'CV الحالي — انقر للعرض',
+        'cv_replace'     => 'ارفع ملفاً جديداً للاستبدال',
+        'max_size'       => 'JPG / PNG — الحد الأقصى 5MB',
+        'save'           => 'حفظ التعديلات',
+        'cancel'         => 'إلغاء',
+        'img_replace'    => 'ارفع صورة جديدة للاستبدال',
+        'passport_alt'   => 'جواز السفر',
+    ],
+
+
     'statuses' => [
         'available'            => 'متاحة',
         'reserved'             => 'محجوزة',

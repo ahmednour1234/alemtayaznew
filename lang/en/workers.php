@@ -18,6 +18,36 @@ return [
     'all_profs'    => 'All professions',
     'no_name'      => 'Unnamed',
 
+    // Worker form field labels
+    'fields' => [
+        'name'           => 'Name (Arabic)',
+        'passport'       => 'Passport number',
+        'nationality'    => 'Nationality',
+        'profession'     => 'Profession',
+        'gender'         => 'Gender',
+        'experience'     => 'Experience',
+        'religion'       => 'Religion',
+        'age'            => 'Age',
+        'phone'          => 'Phone',
+        'status'         => 'Status',
+        'branch'         => 'Branch',
+        'notes'          => 'Notes',
+        'cv_file'        => 'CV file (PDF)',
+        'passport_image' => 'Passport image',
+        'choose'         => 'Select...',
+        'no_branch'      => 'No branch',
+        'basic_data'     => 'Basic information',
+        'edit_title'     => 'Edit worker details',
+        'cv_current'     => 'Current CV — click to view',
+        'cv_replace'     => 'Upload a new file to replace',
+        'max_size'       => 'JPG / PNG — max 5MB',
+        'save'           => 'Save changes',
+        'cancel'         => 'Cancel',
+        'img_replace'    => 'Upload a new image to replace',
+        'passport_alt'   => 'Passport',
+    ],
+
+
     'statuses' => [
         'available'            => 'Available',
         'reserved'             => 'Reserved',
