@@ -110,7 +110,7 @@
                     @foreach($footerNats as $nat)
                     <li>
                         <a href="{{ route('site.cvs.nationality', $nat->getRouteKey()) }}"
-                           class="hover:text-gold transition-colors">{{ $nat->name }}</a>
+                           class="hover:text-gold transition-colors">{{ $nat->display_name }}</a>
                     </li>
                     @endforeach
                 </ul>

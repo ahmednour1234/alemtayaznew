@@ -78,53 +78,36 @@ class Worker extends Model
 
     // ── Static option lists ──────────────────────────────────────────────────
 
-    /** تسميات حالات العاملة — المصدر الوحيد للأسماء العربية. */
+    /**
+     * قوائم التسميات — تُقرأ من ملفات اللغة لا من نصوص ثابتة،
+     * فتتبع لغة الواجهة تلقائياً في القوائم والجداول والتقارير.
+     *
+     * المفاتيح (available, nanny, ...) هي ما يُخزَّن في قاعدة البيانات
+     * ولا يتغيّر بتغيّر اللغة.
+     */
     public static function statusOptions(): array
     {
-        return [
-            'available'            => 'متاحة',
-            'reserved'             => 'محجوزة',
-            'assigned'             => 'تم التعيين',
-            'in_housing'           => 'في السكن',
-            'for_rent'             => 'للتأجير',
-            'sponsorship_transfer' => 'نقل كفالة',
-            'deportation'          => 'تسفير',
-            'returned'             => 'عودة',
-        ];
+        return __('workers.statuses');
     }
 
     public static function professions(): array
     {
-        return [
-            'domestic_worker' => 'عاملة منزلية',
-            'nanny'           => 'مربية أطفال',
-            'cook'            => 'طباخة',
-            'driver'          => 'سائق',
-            'nurse'           => 'ممرضة',
-            'housekeeper'     => 'مدبرة منزل',
-            'security'        => 'حارس أمن',
-            'other'           => 'أخرى',
-        ];
+        return __('workers.professions');
     }
 
     public static function experienceOptions(): array
     {
-        return [
-            'none' => 'بدون خبرة',
-            '1-3'  => '1-3 سنوات',
-            '3-5'  => '3-5 سنوات',
-            '5+'   => 'أكثر من 5 سنوات',
-        ];
+        return __('workers.experiences');
     }
 
     public static function genderOptions(): array
     {
-        return ['female' => 'أنثى', 'male' => 'ذكر'];
+        return __('workers.genders');
     }
 
     public static function religionOptions(): array
     {
-        return ['muslim' => 'مسلمة', 'christian' => 'مسيحية', 'other' => 'أخرى'];
+        return __('workers.religions');
     }
 
     /**

@@ -1,12 +1,12 @@
 @extends('admin.layouts.app')
-@section('title', 'رفع CVs متعددة')
+@section('title', __('workers.bulk.title'))
 @section('content')
 <div class="w-full">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('admin.workers.index') }}" class="text-slate-400 hover:text-slate-600">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
-        <h2 class="text-xl font-bold text-slate-800">رفع CVs متعددة</h2>
+        <h2 class="text-xl font-bold text-slate-800">{{ __('workers.bulk.title') }}</h2>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -24,11 +24,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                         </svg>
                         <div>
-                            <p class="text-sm font-semibold text-amber-800">تحذير: ملفات مرفوعة مسبقاً</p>
+                            <p class="text-sm font-semibold text-amber-800">{{ __('workers.bulk.dup_title') }}</p>
                             @if(session('cv_created_count') > 0)
-                            <p class="text-xs text-amber-700 mt-0.5">تم رفع {{ session('cv_created_count') }} ملف جديد بنجاح.</p>
+                            <p class="text-xs text-amber-700 mt-0.5">{{ __('workers.bulk.dup_created', ['count' => session('cv_created_count')]) }}</p>
                             @endif
-                            <p class="text-xs text-amber-700 mt-1">الملفات التالية موجودة مسبقاً:</p>
+                            <p class="text-xs text-amber-700 mt-1">{{ __('workers.bulk.dup_list') }}</p>
                             <ul class="list-disc list-inside text-xs text-amber-800 mt-1 space-y-0.5">
                                 @foreach(session('cv_duplicate_files', []) as $fname)
                                 <li>{{ $fname }}</li>
@@ -43,26 +43,26 @@
                             <input type="hidden" name="force_upload" value="1">
                             <button type="submit"
                                     class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-4 py-2 rounded-lg font-medium">
-                                رفع الكل على أي حال
+                                {{ __('workers.bulk.dup_force') }}
                             </button>
                         </form>
-                        <a href="{{ route('admin.workers.bulk') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-4 py-2 rounded-lg font-medium self-center">إلغاء</a>
+                        <a href="{{ route('admin.workers.bulk') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-4 py-2 rounded-lg font-medium self-center">{{ __('workers.fields.cancel') }}</a>
                     </div>
                 </div>
                 @endif
 
                 <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">بيانات مشتركة لكل CVs</h3>
+                    <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">{{ __('workers.bulk.shared_data') }}</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1.5">
-                                الجنسية <span class="text-red-500">*</span>
+                                {{ __('workers.fields.nationality') }} <span class="text-red-500">*</span>
                             </label>
                             <select name="nationality_id" required
                                     class="w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 @error('nationality_id') border-red-400 @else border-slate-300 @enderror">
-                                <option value="">اختر الجنسية</option>
+                                <option value="">{{ __('workers.bulk.pick_nat') }}</option>
                                 @foreach($nationalities as $nat)
-                                <option value="{{ $nat->id }}" {{ old('nationality_id') == $nat->id ? 'selected' : '' }}>{{ $nat->name }}</option>
+                                <option value="{{ $nat->id }}" {{ old('nationality_id') == $nat->id ? 'selected' : '' }}>{{ $nat->display_name }}</option>
                                 @endforeach
                             </select>
                             @error('nationality_id')
@@ -70,21 +70,22 @@
                             @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1.5">المهنة</label>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ __('workers.fields.profession') }}</label>
                             <select name="profession"
                                     class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                                <option value="">غير محدد</option>
+                                <option value="">{{ __('workers.bulk.unset') }}</option>
                                 @foreach($professions as $key => $label)
                                 <option value="{{ $key }}" {{ old('profession') === $key ? 'selected' : '' }}>{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1.5">الحالة الأولية</label>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ __('workers.bulk.initial') }}</label>
                             <select name="status"
                                     class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                                <option value="available" selected>متاحة</option>
-                                <option value="reserved">محجوزة</option>
+                                @foreach(['available','reserved'] as $st)
+                                <option value="{{ $st }}" @selected($st === 'available')>{{ __('workers.statuses.'.$st) }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -92,7 +93,7 @@
 
                 {{-- Drop Zone --}}
                 <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">ملفات PDF</h3>
+                    <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">{{ __('workers.bulk.pdf_files') }}</h3>
 
                     <div class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
                          :class="dropped ? 'border-blue-500 bg-blue-50' : ''"
@@ -103,8 +104,8 @@
                         <svg class="w-10 h-10 mx-auto mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                         </svg>
-                        <p class="text-sm font-medium text-slate-600">اسحب ملفات PDF هنا أو <span class="text-blue-600">انقر للاختيار</span></p>
-                        <p class="text-xs text-slate-400 mt-1">يمكن رفع ملفات متعددة في وقت واحد — PDF فقط — حتى 10MB لكل ملف</p>
+                        <p class="text-sm font-medium text-slate-600">{{ __('workers.bulk.drop_here') }} <span class="text-blue-600">{{ __('workers.bulk.click_pick') }}</span></p>
+                        <p class="text-xs text-slate-400 mt-1">{{ __('workers.bulk.drop_hint') }}</p>
                         <input type="file" name="cvs[]" multiple accept=".pdf" x-ref="fileInput"
                                class="hidden"
                                @change="files = Array.from($event.target.files)">
@@ -115,7 +116,7 @@
 
                     {{-- File list preview --}}
                     <div x-show="files.length > 0" class="mt-4 space-y-1">
-                        <p class="text-xs font-semibold text-slate-500 mb-2" x-text="files.length + ' ملف محدد'"></p>
+                        <p class="text-xs font-semibold text-slate-500 mb-2" x-text="files.length + ' ' + @json(__('workers.bulk.files_picked'))"></p>
                         <template x-for="(f, i) in files" :key="i">
                             <div class="flex items-center gap-2 py-1.5 px-3 bg-red-50 rounded-lg">
                                 <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
@@ -129,8 +130,8 @@
                 <div class="flex gap-3">
                     <button type="submit" x-bind:disabled="files.length === 0"
                             class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm px-6 py-2.5 rounded-lg font-medium"
-                            x-text="files.length ? 'رفع ' + files.length + ' ملف' : 'اختر ملفات أولاً'"></button>
-                    <a href="{{ route('admin.workers.index') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm px-6 py-2.5 rounded-lg font-medium">إلغاء</a>
+                            x-text="files.length ? @json(__('workers.bulk.upload_n')).replace(':count', files.length) : @json(__('workers.bulk.pick_first'))"></button>
+                    <a href="{{ route('admin.workers.index') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm px-6 py-2.5 rounded-lg font-medium">{{ __('workers.fields.cancel') }}</a>
                 </div>
             </form>
         </div>
@@ -139,21 +140,21 @@
         <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 h-fit">
             <h4 class="text-sm font-bold text-blue-800 mb-3 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                كيفية الاستخدام
+                {{ __('workers.bulk.how_to') }}
             </h4>
             <ul class="text-xs text-blue-700 space-y-2">
-                <li class="flex gap-2"><span class="font-bold">1.</span> اختر الجنسية (مطلوبة) والمهنة (اختيارية) لكل الملفات</li>
-                <li class="flex gap-2"><span class="font-bold">2.</span> اختر الحالة الأولية للعاملات (افتراضي: متاحة)</li>
-                <li class="flex gap-2"><span class="font-bold">3.</span> اسحب ملفات PDF أو انقر لاختيارها</li>
-                <li class="flex gap-2"><span class="font-bold">4.</span> انقر رفع — كل PDF سيصبح عاملة منفصلة</li>
-                <li class="flex gap-2"><span class="font-bold">5.</span> بعد الرفع يمكنك تعديل كل عاملة وإضافة بياناتها</li>
+                <li class="flex gap-2"><span class="font-bold">1.</span> {{ __('workers.bulk.step1') }}</li>
+                <li class="flex gap-2"><span class="font-bold">2.</span> {{ __('workers.bulk.step2') }}</li>
+                <li class="flex gap-2"><span class="font-bold">3.</span> {{ __('workers.bulk.step3') }}</li>
+                <li class="flex gap-2"><span class="font-bold">4.</span> {{ __('workers.bulk.step4') }}</li>
+                <li class="flex gap-2"><span class="font-bold">5.</span> {{ __('workers.bulk.step5') }}</li>
             </ul>
             <div class="mt-4 p-3 bg-blue-100 rounded-lg">
-                <p class="text-xs font-semibold text-blue-800 mb-1">حالات العاملة:</p>
+                <p class="text-xs font-semibold text-blue-800 mb-1">{{ __('workers.bulk.legend') }}</p>
                 <div class="space-y-1">
-                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-xs text-blue-700">متاحة — جاهزة للعرض على العملاء</span></div>
-                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-500"></span><span class="text-xs text-blue-700">محجوزة — قيد الدراسة</span></div>
-                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span><span class="text-xs text-blue-700">تم التعيين — محجوزة لعميل</span></div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-xs text-blue-700">{{ __('workers.bulk.legend_avail') }}</span></div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-500"></span><span class="text-xs text-blue-700">{{ __('workers.bulk.legend_res') }}</span></div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span><span class="text-xs text-blue-700">{{ __('workers.bulk.legend_asg') }}</span></div>
                 </div>
             </div>
         </div>

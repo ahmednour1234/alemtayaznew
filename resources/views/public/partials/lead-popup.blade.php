@@ -96,7 +96,7 @@
                                 class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy">
                             <option value="">غير محدد</option>
                             @foreach($popupNationalities as $nat)
-                            <option value="{{ $nat->id }}">{{ $nat->name }}</option>
+                            <option value="{{ $nat->id }}">{{ $nat->display_name }}</option>
                             @endforeach
                         </select>
                     </div>

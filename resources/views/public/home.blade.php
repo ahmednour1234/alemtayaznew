@@ -162,7 +162,7 @@
             {{-- الصورة تملأ البطاقة بالكامل بنسبة بورتريه --}}
             <div class="relative aspect-[4/5] bg-slate-100 overflow-hidden">
                 @if($photo)
-                <img src="{{ $photo }}" alt="{{ $nat->name }}" loading="lazy" width="600" height="750"
+                <img src="{{ $photo }}" alt="{{ $nat->display_name }}" loading="lazy" width="600" height="750"
                      class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500">
                 @else
                 <div class="w-full h-full hero-grad flex items-center justify-center text-white text-6xl font-extrabold">
@@ -174,7 +174,7 @@
                 <div class="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-navy-dark/95 via-navy-dark/60 to-transparent"></div>
 
                 <div class="absolute inset-x-0 bottom-0 p-6">
-                    <h3 class="text-white font-extrabold text-2xl drop-shadow-lg">{{ $nat->name }}</h3>
+                    <h3 class="text-white font-extrabold text-2xl drop-shadow-lg">{{ $nat->display_name }}</h3>
                     <div class="flex items-center justify-between mt-2">
                         <p class="text-white/85 text-sm">{{ $nat->workers_count }} عاملة متاحة</p>
                         <span class="inline-flex items-center gap-1.5 text-gold text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300">

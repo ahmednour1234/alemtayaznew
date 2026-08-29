@@ -1,12 +1,12 @@
 ﻿@extends('admin.layouts.app')
-@section('title', 'تعيين عاملة لعميل')
+@section('title', __('workers.assignment.title'))
 @section('content')
 <div class="w-full">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('admin.workers.index') }}" class="text-slate-400 hover:text-slate-600">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
-        <h2 class="text-xl font-bold text-slate-800">تعيين عاملة لعميل</h2>
+        <h2 class="text-xl font-bold text-slate-800">{{ __('workers.assignment.title') }}</h2>
     </div>
 
     {{-- Already-assigned warning --}}
@@ -16,11 +16,11 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
         </svg>
         <div>
-            <p class="font-semibold text-amber-800 text-sm">هذه العاملة معيَّنة بالفعل</p>
+            <p class="font-semibold text-amber-800 text-sm">{{ __('workers.assignment.already_title') }}</p>
             <p class="text-amber-700 text-xs mt-0.5">
-                تم تعيينها مسبقاً للعميل <strong>{{ $existingClient->name }}</strong>
+                {{ __('workers.assignment.already_body') }} <strong>{{ $existingClient->name }}</strong>
                 @if($existingClient->phone) ({{ $existingClient->phone }}) @endif.
-                إعادة التعيين ستنقلها لعميل آخر.
+                {{ __('workers.assignment.already_note') }}
             </p>
         </div>
     </div>
@@ -29,26 +29,26 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {{-- Worker info card --}}
         <div class="bg-white rounded-xl shadow-sm p-5">
-            <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">بيانات العاملة</h3>
+            <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">{{ __('workers.assignment.worker_data') }}</h3>
             <dl class="space-y-3 text-sm">
                 <div class="flex justify-between">
-                    <dt class="text-slate-500">الاسم</dt>
+                    <dt class="text-slate-500">{{ __('workers.fields.name') }}</dt>
                     <dd class="font-medium text-slate-800">{{ $worker->name ?: '—' }}</dd>
                 </div>
                 <div class="flex justify-between">
-                    <dt class="text-slate-500">الجنسية</dt>
-                    <dd class="font-medium">{{ $worker->nationality?->name ?? '—' }}</dd>
+                    <dt class="text-slate-500">{{ __('workers.fields.nationality') }}</dt>
+                    <dd class="font-medium">{{ $worker->nationality?->display_name ?? '—' }}</dd>
                 </div>
                 <div class="flex justify-between">
-                    <dt class="text-slate-500">المهنة</dt>
+                    <dt class="text-slate-500">{{ __('workers.fields.profession') }}</dt>
                     <dd class="font-medium">{{ $worker->profession_label }}</dd>
                 </div>
                 <div class="flex justify-between">
-                    <dt class="text-slate-500">الخبرة</dt>
+                    <dt class="text-slate-500">{{ __('workers.fields.experience') }}</dt>
                     <dd class="font-medium">{{ $worker->experience_label }}</dd>
                 </div>
                 <div class="flex justify-between">
-                    <dt class="text-slate-500">الحالة</dt>
+                    <dt class="text-slate-500">{{ __('workers.fields.status') }}</dt>
                     <dd>
                         <span class="px-2 py-0.5 rounded-full text-xs font-semibold"
                               style="background: {{ $worker->status_bg }}; color: {{ $worker->status_color }}">
@@ -61,7 +61,7 @@
                     <a href="{{ route('admin.workers.cv', $worker->id) }}" target="_blank"
                        class="flex items-center gap-2 text-sm text-red-600 hover:text-red-800">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                        عرض ملف CV
+                        {{ __('workers.assignment.view_cv') }}
                     </a>
                 </div>
                 @endif
@@ -76,23 +76,23 @@
                 {{-- Select client / lead --}}
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
-                        <h3 class="text-sm font-semibold text-slate-600">اختر العميل</h3>
+                        <h3 class="text-sm font-semibold text-slate-600">{{ __('workers.assignment.pick_client') }}</h3>
                         <button type="button"
                                 onclick="document.getElementById('addClientModal').style.display='flex'"
                                 class="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
-                            إضافة عميل جديد
+                            {{ __('workers.assignment.add_client') }}
                         </button>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1.5">العميل أو العميل المحتمل <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ __('workers.assignment.client_or_lead') }} <span class="text-red-500">*</span></label>
                         <select name="assignee" id="assigneeSelect" required data-ts-ignore="1"
                                 class="w-full border border-slate-300 rounded-lg text-sm @error('assignee') border-red-400 @enderror">
-                            <option value="">ابحث أو اختر...</option>
+                            <option value="">{{ __('workers.assignment.search_pick') }}</option>
                             @if($clients->isNotEmpty())
-                            <optgroup label="✅ عملاء مؤكدون ({{ $clients->count() }})">
+                            <optgroup label="✅ {{ __('workers.assignment.grp_confirmed') }} ({{ $clients->count() }})">
                                 @foreach($clients as $client)
                                 <option value="client:{{ $client->id }}"
                                         {{ old('assignee') === 'client:'.$client->id ? 'selected' : '' }}>
@@ -102,11 +102,11 @@
                             </optgroup>
                             @endif
                             @if($leads->isNotEmpty())
-                            <optgroup label="🔶 عملاء محتملون ({{ $leads->count() }})">
+                            <optgroup label="🔶 {{ __('workers.assignment.grp_potential') }} ({{ $leads->count() }})">
                                 @foreach($leads as $lead)
                                 <option value="lead:{{ $lead->id }}"
                                         {{ old('assignee') === 'lead:'.$lead->id ? 'selected' : '' }}>
-                                    {{ $lead->name }}{{ $lead->phone ? ' — '.$lead->phone : '' }} (محتمل)
+                                    {{ $lead->name }}{{ $lead->phone ? ' — '.$lead->phone : '' }} {{ __('workers.assignment.potential') }}
                                 </option>
                                 @endforeach
                             </optgroup>
@@ -114,27 +114,27 @@
                         </select>
                         @error('assignee')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         @if($clients->isEmpty() && $leads->isEmpty())
-                        <p class="text-amber-600 text-xs mt-2">لا يوجد عملاء أو عملاء محتملون. يرجى إضافة عميل أولاً.</p>
+                        <p class="text-amber-600 text-xs mt-2">{{ __('workers.assignment.no_clients') }}</p>
                         @endif
                         @if($leads->isNotEmpty())
-                        <p class="text-blue-600 text-xs mt-2">اختيار عميل محتمل سيحوله تلقائياً إلى عميل مؤكد عند التعيين.</p>
+                        <p class="text-blue-600 text-xs mt-2">{{ __('workers.assignment.lead_hint') }}</p>
                         @endif
                     </div>
                 </div>
 
                 {{-- Update worker details --}}
                 <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h3 class="text-sm font-semibold text-slate-600 mb-1 pb-2 border-b border-slate-100">تحديث بيانات العاملة <span class="text-slate-400 font-normal text-xs">(اختياري — يمكن تركها فارغة)</span></h3>
-                    <p class="text-xs text-slate-400 mb-4">البيانات التالية ستُحدَّث إذا مُلئت</p>
+                    <h3 class="text-sm font-semibold text-slate-600 mb-1 pb-2 border-b border-slate-100">{{ __('workers.assignment.update_data') }} <span class="text-slate-400 font-normal text-xs">{{ __('workers.assignment.optional') }}</span></h3>
+                    <p class="text-xs text-slate-400 mb-4">{{ __('workers.assignment.update_hint') }}</p>
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">الاسم</label>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">{{ __('workers.fields.name') }}</label>
                             <input type="text" name="name" value="{{ old('name', $worker->name) }}"
                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">
-                                رقم الجواز <span class="text-red-500">*</span>
+                                {{ __('workers.fields.passport') }} <span class="text-red-500">*</span>
                             </label>
                             <input type="text" name="passport_number" id="passportNumberInput" required
                                    value="{{ old('passport_number', $worker->passport_number) }}"
@@ -143,8 +143,8 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">
-                                رقم التأشيرة
-                                <span class="text-slate-400 font-normal">(مطلوب عند إنشاء العقد مباشرة)</span>
+                                {{ __('workers.fields.visa') }}
+                                <span class="text-slate-400 font-normal">{{ __('workers.assignment.visa_required') }}</span>
                             </label>
                             <input type="text" name="visa_number" id="visaNumberInput"
                                    value="{{ old('visa_number', $worker->visa_number) }}"
@@ -152,17 +152,17 @@
                             @error('visa_number')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">الهاتف</label>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">{{ __('workers.fields.phone') }}</label>
                             <input type="text" name="phone" value="{{ old('phone', $worker->phone) }}"
                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">العمر</label>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">{{ __('workers.fields.age') }}</label>
                             <input type="number" name="age" value="{{ old('age', $worker->age) }}" min="18" max="60"
                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                         </div>
                         <div class="col-span-2 lg:col-span-4">
-                            <label class="block text-xs font-medium text-slate-600 mb-1">ملاحظات</label>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">{{ __('workers.fields.notes') }}</label>
                             <textarea name="notes" rows="2"
                                       class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none">{{ old('notes', $worker->notes) }}</textarea>
                         </div>
@@ -175,8 +175,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                     <p class="text-xs text-amber-800 leading-relaxed">
-                        الحجز صالح لمدة <strong>{{ \App\Console\Commands\NotifyUncontractedWorkers::RESERVATION_HOURS }} ساعة</strong> فقط. إذا لم يُنشأ عقد استقدام خلالها
-                        يُفكّ الحجز تلقائياً وتعود العاملة متاحة، مع إرسال إشعار لك ولمدير الفرع.
+                        {{ __('workers.assignment.reserve_valid', ['hours' => \App\Console\Commands\NotifyUncontractedWorkers::RESERVATION_HOURS]) }}
                     </p>
                 </div>
 
@@ -189,13 +188,13 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6m5 7H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        حجز وإنشاء عقد استقدام
+                        {{ __('workers.assignment.reserve_create') }}
                     </button>
                     <button type="submit" @if($clients->isEmpty() && $leads->isEmpty()) disabled @endif
                             class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm px-6 py-2.5 rounded-lg font-medium">
-                        حجز فقط
+                        {{ __('workers.assignment.reserve_only') }}
                     </button>
-                    <a href="{{ route('admin.workers.index') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm px-6 py-2.5 rounded-lg font-medium">إلغاء</a>
+                    <a href="{{ route('admin.workers.index') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm px-6 py-2.5 rounded-lg font-medium">{{ __('workers.fields.cancel') }}</a>
                 </div>
             </form>
         </div>
@@ -209,7 +208,7 @@
 
         {{-- Header --}}
         <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid #f1f5f9;">
-            <span style="font-weight:700; font-size:15px; color:#1e293b;">إضافة عميل جديد</span>
+            <span style="font-weight:700; font-size:15px; color:#1e293b;">{{ __('workers.assignment.add_client') }}</span>
             <button type="button"
                     onclick="document.getElementById('addClientModal').style.display='none'"
                     style="background:none; border:none; cursor:pointer; color:#94a3b8; padding:4px;">
@@ -226,23 +225,23 @@
 
             <div>
                 <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">
-                    اسم العميل <span style="color:#ef4444;">*</span>
+                    {{ __('workers.assignment.client_name') }} <span style="color:#ef4444;">*</span>
                 </label>
-                <input type="text" id="qcName" placeholder="أدخل الاسم الكامل"
+                <input type="text" id="qcName" placeholder="{{ __('workers.assignment.ph_full_name') }}"
                        style="width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:10px 12px; font-size:13px; font-family:'Cairo',sans-serif; outline:none; box-sizing:border-box;">
             </div>
 
             <div>
-                <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">رقم الجوال</label>
+                <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">{{ __('workers.assignment.client_phone') }}</label>
                 <input type="text" id="qcPhone" placeholder="05xxxxxxxx"
                        style="width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:10px 12px; font-size:13px; font-family:'Cairo',sans-serif; outline:none; box-sizing:border-box;">
             </div>
 
             <div>
-                <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">رقم الهوية / الإقامة</label>
-                <input type="text" id="qcNationalId" placeholder="10 أرقام"
+                <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">{{ __('workers.assignment.client_id_no') }}</label>
+                <input type="text" id="qcNationalId" placeholder="{{ __('workers.assignment.ph_ten_digits') }}"
                        style="width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:10px 12px; font-size:13px; font-family:'Cairo',sans-serif; outline:none; box-sizing:border-box;">
-                <p style="font-size:11px; color:#94a3b8; margin-top:4px;">إدخال الهوية يحوِّل العميل إلى عميل مؤكد تلقائياً</p>
+                <p style="font-size:11px; color:#94a3b8; margin-top:4px;">{{ __('workers.assignment.id_hint') }}</p>
             </div>
         </div>
 
@@ -250,12 +249,12 @@
         <div style="display:flex; gap:12px; padding:0 24px 20px;">
             <button type="button" id="saveAddClientBtn"
                     style="flex:1; background:#2563eb; color:#fff; border:none; border-radius:8px; padding:11px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Cairo',sans-serif;">
-                حفظ وإضافة للقائمة
+                {{ __('workers.assignment.save_add') }}
             </button>
             <button type="button"
                     onclick="document.getElementById('addClientModal').style.display='none'"
                     style="background:#f1f5f9; color:#475569; border:none; border-radius:8px; padding:11px 20px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Cairo',sans-serif;">
-                إلغاء
+                {{ __('workers.fields.cancel') }}
             </button>
         </div>
     </div>
@@ -264,7 +263,7 @@
 @push('scripts')
 <script>
 /**
- * «حجز وإنشاء عقد استقدام» ينتقل مباشرة لنموذج العقد حيث رقم الجواز
+ * «{{ __('workers.assignment.reserve_create') }}» ينتقل مباشرة لنموذج العقد حيث رقم الجواز
  * والتأشيرة إلزاميان — نمنع الإرسال هنا بدل اكتشاف النقص في الشاشة التالية.
  */
 function requireContractFields() {
@@ -272,12 +271,12 @@ function requireContractFields() {
     var visa     = document.getElementById('visaNumberInput');
 
     if (passport && !passport.value.trim()) {
-        alert('رقم جواز العاملة مطلوب لإنشاء عقد الاستقدام.');
+        alert(@json(__('workers.assignment.js_passport_req')));
         passport.focus();
         return false;
     }
     if (visa && !visa.value.trim()) {
-        alert('رقم التأشيرة مطلوب لإنشاء عقد الاستقدام مباشرة.');
+        alert(@json(__('workers.assignment.js_visa_req')));
         visa.focus();
         return false;
     }
@@ -290,12 +289,12 @@ function requireContractFields() {
         var el = document.getElementById('assigneeSelect');
         if (!el || el.tomselect) return;
         new TomSelect(el, {
-            placeholder: 'ابحث بالاسم أو الهاتف...',
+            placeholder: @json(__('workers.assignment.js_search_ph')),
             searchField: ['text'],
             allowEmptyOption: true,
             maxOptions: 500,
             render: {
-                no_results: function() { return '<div class="no-results">لا توجد نتائج</div>'; }
+                no_results: function() { return '<div class="no-results">' + @json(__('workers.assignment.js_no_results')) + '</div>'; }
             }
         });
     }
@@ -336,14 +335,14 @@ function requireContractFields() {
         errBox.style.display = 'none';
         var name = nameEl.value.trim();
         if (!name) {
-            errBox.textContent = 'اسم العميل مطلوب.';
+            errBox.textContent = @json(__('workers.assignment.js_name_req'));
             errBox.style.display = 'block';
             nameEl.focus();
             return;
         }
 
         btn.disabled = true;
-        btn.textContent = 'جارٍ الحفظ...';
+        btn.textContent = @json(__('workers.assignment.js_saving'));
 
         fetch('{{ route('admin.clients.quick-store') }}', {
             method: 'POST',
@@ -364,7 +363,7 @@ function requireContractFields() {
             if (!result.ok) {
                 var msgs = result.data.errors
                     ? Object.values(result.data.errors).flat().join(' ')
-                    : (result.data.message || 'حدث خطأ. حاول مجدداً.');
+                    : (result.data.message || @json(__('workers.assignment.js_error')));
                 errBox.textContent = msgs;
                 errBox.style.display = 'block';
                 return;
@@ -390,12 +389,12 @@ function requireContractFields() {
             natEl.value = '';
         })
         .catch(function() {
-            errBox.textContent = 'حدث خطأ في الاتصال. حاول مجدداً.';
+            errBox.textContent = @json(__('workers.assignment.js_net_error'));
             errBox.style.display = 'block';
         })
         .finally(function() {
             btn.disabled = false;
-            btn.textContent = 'حفظ وإضافة للقائمة';
+            btn.textContent = @json(__('workers.assignment.save_add'));
         });
     }
 })();

@@ -6,7 +6,7 @@
     {{-- صورة كبيرة بنسبة بورتريه تملأ أعلى البطاقة --}}
     <div class="relative aspect-[4/5] bg-slate-100 overflow-hidden">
         @if($natPhoto)
-        <img src="{{ $natPhoto }}" alt="{{ $w->nationality->name }}" loading="lazy" width="600" height="750"
+        <img src="{{ $natPhoto }}" alt="{{ $w->nationality->display_name }}" loading="lazy" width="600" height="750"
              class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500">
         @else
         <div class="w-full h-full hero-grad flex items-center justify-center text-white text-6xl font-extrabold">
@@ -17,7 +17,7 @@
         {{-- شارة الجنسية --}}
         @if($w->nationality)
         <span class="absolute top-4 start-4 bg-white/95 backdrop-blur-sm text-navy text-xs font-bold px-3 py-1.5 rounded-full shadow z-10">
-            {{ $w->nationality->name }}
+            {{ $w->nationality->display_name }}
         </span>
         @endif
 
@@ -26,7 +26,7 @@
              نمنع انتشار الحدث حتى لا يُفتح رابط البطاقة معه. --}}
         <button type="button"
                 onclick="event.preventDefault(); event.stopPropagation(); window.open(this.dataset.share, '_blank', 'noopener');"
-                data-share="https://wa.me/?text={{ urlencode($w->name . ($w->nationality ? ' — ' . $w->nationality->name : '') . PHP_EOL . route('site.cvs.show', $w->id)) }}"
+                data-share="https://wa.me/?text={{ urlencode($w->name . ($w->nationality ? ' — ' . $w->nationality->display_name : '') . PHP_EOL . route('site.cvs.show', $w->id)) }}"
                 class="absolute top-4 end-4 w-9 h-9 rounded-full bg-white/95 backdrop-blur-sm text-green-600
                        hover:bg-green-500 hover:text-white flex items-center justify-center shadow z-10 transition-colors"
                 aria-label="مشاركة عبر واتساب" title="مشاركة عبر واتساب">

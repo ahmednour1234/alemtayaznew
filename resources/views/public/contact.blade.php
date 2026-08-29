@@ -81,7 +81,7 @@
                                     class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy">
                                 <option value="">غير محدد</option>
                                 @foreach($nationalities as $nat)
-                                <option value="{{ $nat->id }}" @selected(old('nationality_id') == $nat->id)>{{ $nat->name }}</option>
+                                <option value="{{ $nat->id }}" @selected(old('nationality_id') == $nat->id)>{{ $nat->display_name }}</option>
                                 @endforeach
                             </select>
                         </div>

@@ -134,7 +134,7 @@
                 <select name="nationality_id" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                     <option value="">{{ __('workers.all_nats') }}</option>
                     @foreach($nationalities as $nat)
-                    <option value="{{ $nat->id }}" {{ ($filters['nationality_id'] ?? '') == $nat->id ? 'selected' : '' }}>{{ $nat->name }}</option>
+                    <option value="{{ $nat->id }}" {{ ($filters['nationality_id'] ?? '') == $nat->id ? 'selected' : '' }}>{{ $nat->display_name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -287,7 +287,7 @@
                 </td>
                 <td>
                     @if($w->nationality)
-                    <span style="background:#e0f2fe;color:#0369a1;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;white-space:nowrap;">{{ $w->nationality->name }}</span>
+                    <span style="background:#e0f2fe;color:#0369a1;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;white-space:nowrap;">{{ $w->nationality->display_name }}</span>
                     @else
                     <span class="text-slate-300 text-xs">—</span>
                     @endif
@@ -395,7 +395,7 @@
                 @foreach($trashed as $w)
                 <tr>
                     <td class="text-sm text-slate-600">{{ $w->name ?: __('workers.no_name') }}</td>
-                    <td class="text-sm text-slate-600">{{ $w->nationality?->name ?? '—' }}</td>
+                    <td class="text-sm text-slate-600">{{ $w->nationality?->display_name ?? '—' }}</td>
                     <td>
                         <form action="{{ route('admin.workers.restore', $w->id) }}" method="POST" class="inline">
                             @csrf
@@ -415,7 +415,7 @@
 $workerCvMap = $workers->map(fn($w) => [
     'id'          => $w->id,
     'name'        => $w->name,
-    'nationality' => $w->nationality?->name,
+    'nationality' => $w->nationality?->display_name,
     'cv_url'      => $w->cv_path ? route('admin.workers.cv', $w->id) : null,
 ])->values();
 @endphp

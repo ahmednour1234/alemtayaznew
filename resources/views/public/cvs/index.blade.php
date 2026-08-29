@@ -1,6 +1,6 @@
 @extends('public.layouts.app')
 @php($activeNat = $activeNationality ?? null)
-@section('title', $activeNat ? 'عاملات من ' . $activeNat->name : 'السير الذاتية المتاحة')
+@section('title', $activeNat ? 'عاملات من ' . $activeNat->display_name : 'السير الذاتية المتاحة')
 
 @section('content')
 
@@ -12,16 +12,16 @@
             <span>/</span>
             <a href="{{ route('site.cvs') }}" class="hover:text-white">السير الذاتية</a>
             <span>/</span>
-            <span class="text-white/90">{{ $activeNat->name }}</span>
+            <span class="text-white/90">{{ $activeNat->display_name }}</span>
         </nav>
 
         <div class="flex items-center gap-4">
             @if($activeNat->photoUrl())
-            <img src="{{ $activeNat->photoUrl() }}" alt="{{ $activeNat->name }}" loading="lazy"
+            <img src="{{ $activeNat->photoUrl() }}" alt="{{ $activeNat->display_name }}" loading="lazy"
                  class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover object-top border-2 border-white/25 flex-shrink-0">
             @endif
             <div>
-                <h1 class="text-xl sm:text-3xl font-extrabold">عاملات من {{ $activeNat->name }}</h1>
+                <h1 class="text-xl sm:text-3xl font-extrabold">عاملات من {{ $activeNat->display_name }}</h1>
                 <p class="text-white/75 text-sm mt-1.5">{{ $workers->total() }} سيرة ذاتية متاحة</p>
             </div>
         </div>
@@ -55,7 +55,7 @@
             <img src="{{ $nat->photoUrl() }}" alt="" aria-hidden="true" loading="lazy"
                  class="w-6 h-6 rounded-full object-cover object-top">
             @endif
-            {{ $nat->name }}
+            {{ $nat->display_name }}
         </a>
         @endforeach
     </div>

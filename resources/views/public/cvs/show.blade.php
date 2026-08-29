@@ -6,7 +6,7 @@
     // مهما تغيّر ترتيب الأقسام لاحقاً.
     $shareUrl  = route('site.cvs.show', $worker->id);
     $shareText = $worker->name
-        . ($worker->nationality ? ' — ' . $worker->nationality->name : '')
+        . ($worker->nationality ? ' — ' . $worker->nationality->display_name : '')
         . ($worker->profession  ? ' — ' . $worker->profession_label : '');
 @endphp
 @section('title', $worker->name . ' — سيرة ذاتية')
@@ -39,7 +39,7 @@
 
                     <div class="absolute -bottom-10 w-20 h-20 rounded-2xl bg-white border-4 border-white shadow-md flex items-center justify-center overflow-hidden">
                         @if($natPhoto)
-                        <img src="{{ $natPhoto }}" alt="{{ $worker->nationality->name }}" loading="lazy"
+                        <img src="{{ $natPhoto }}" alt="{{ $worker->nationality->display_name }}" loading="lazy"
                              class="w-full h-full object-cover object-top">
                         @else
                         <span class="text-3xl font-extrabold text-navy">{{ mb_substr($worker->name ?: '؟', 0, 1) }}</span>
@@ -53,7 +53,7 @@
 
                     @if($worker->nationality)
                     <span class="inline-block mt-3 bg-navy/5 text-navy text-xs font-bold px-3 py-1.5 rounded-full">
-                        {{ $worker->nationality->name }}
+                        {{ $worker->nationality->display_name }}
                     </span>
                     @endif
 

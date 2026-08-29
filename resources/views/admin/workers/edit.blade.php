@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', 'تعديل عاملة')
+@section('title', __('workers.fields.edit_title'))
 @section('content')
 <div class="w-full">
     <div class="flex items-center gap-3 mb-6">
@@ -30,7 +30,7 @@
                             class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                         <option value="">{{ __('workers.fields.choose') }}</option>
                         @foreach($nationalities as $nat)
-                        <option value="{{ $nat->id }}" {{ old('nationality_id', $worker->nationality_id) == $nat->id ? 'selected' : '' }}>{{ $nat->name }}</option>
+                        <option value="{{ $nat->id }}" {{ old('nationality_id', $worker->nationality_id) == $nat->id ? 'selected' : '' }}>{{ $nat->display_name }}</option>
                         @endforeach
                     </select>
                 </div>
