@@ -108,7 +108,7 @@ return [
         'upload_n'     => 'Upload :count file(s)',
         'pick_first'   => 'Select files first',
         'how_to'       => 'How to use',
-        'step1'        => 'Pick the nationality (required) and profession (optional) for all files',
+        'step1'        => 'Pick the nationality (required), profession and experience (optional) for all files',
         'step2'        => 'Pick the initial status for the workers (default: Available)',
         'step3'        => 'Drag PDF files in or click to select them',
         'step4'        => 'Click upload — each PDF becomes a separate worker',

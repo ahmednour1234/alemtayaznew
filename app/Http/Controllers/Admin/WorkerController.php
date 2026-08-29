@@ -14,6 +14,7 @@ use App\Services\WorkerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class WorkerController extends Controller
 {
@@ -125,7 +126,8 @@ class WorkerController extends Controller
     {
         $nationalities = Nationality::where('active', true)->orderBy('name')->get();
         $professions   = Worker::professions();
-        return view('admin.workers.bulk', compact('nationalities', 'professions'));
+        $experiences   = Worker::experienceOptions();
+        return view('admin.workers.bulk', compact('nationalities', 'professions', 'experiences'));
     }
 
     public function bulkStore(Request $request)
@@ -134,6 +136,7 @@ class WorkerController extends Controller
         $data = [
             'nationality_id' => $request->nationality_id,
             'profession'     => $request->profession,
+            'experience'     => $request->experience,
             'status'         => $request->status ?? 'available',
             'admin_id'       => $me->id,
             'branch_id'      => $me->isBranchAdmin() ? $me->branch_id : $request->branch_id,
@@ -171,6 +174,7 @@ class WorkerController extends Controller
         $request->validate([
             'nationality_id' => ['required', 'exists:nationalities,id'],
             'profession'     => ['nullable', 'string', 'max:100'],
+            'experience'     => ['nullable', Rule::in(array_keys(Worker::experienceOptions()))],
             'status'         => ['nullable', 'in:available,reserved'],
             'cvs'            => ['required', 'array', 'min:1'],
             'cvs.*'          => ['file', 'mimes:pdf', 'max:10240'],
@@ -195,6 +199,7 @@ class WorkerController extends Controller
             session()->put('cv_temp_data', [
                 'nationality_id' => $request->nationality_id,
                 'profession'     => $request->profession,
+                'experience'     => $request->experience,
                 'status'         => $request->status ?? 'available',
             ]);
 

@@ -80,6 +80,17 @@
                             </select>
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ __('workers.fields.experience') }}</label>
+                            <select name="experience"
+                                    class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                <option value="">{{ __('workers.bulk.unset') }}</option>
+                                @foreach($experiences as $key => $label)
+                                <option value="{{ $key }}" @selected(old('experience') === $key)>{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1.5">{{ __('workers.bulk.initial') }}</label>
                             <select name="status"
                                     class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
