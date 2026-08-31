@@ -899,10 +899,12 @@
 
             {{-- إجراءات جماعية — تظهر فقط لمن يملك صلاحية الموافقة ووُجدت طلبات.
                  الخادم يتحقّق من الصلاحية نفسها، فالإخفاء هنا للراحة لا للحماية. --}}
-            @php($canApproveAll = auth('admin')->user()->isSuperAdmin()
-                                  || auth('admin')->user()->hasPermission('expenses.approve'))
-
-            @php($pendingCount = ($pendingExpenses->count() ?? 0) + ($pendingTransfers->count() ?? 0))
+            @php
+                $me            = auth('admin')->user();
+                $canApproveAll = $me->isSuperAdmin() || $me->hasPermission('expenses.approve');
+                $pendingCount  = ($pendingExpenses->count() ?? 0) + ($pendingTransfers->count() ?? 0);
+                $rowNumber     = 1;   // ترقيم متصل عبر جدولَي المصروفات والتحويلات
+            @endphp
 
             @if($canApproveAll && $pendingCount > 0)
             <div style="display:flex; gap:8px; align-items:center;">
@@ -946,7 +948,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @php $rowNumber = 1; @endphp
 
                     @forelse($pendingExpenses as $expense)
                         <tr>
