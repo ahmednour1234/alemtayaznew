@@ -16,6 +16,8 @@ class AutoPermission
     private const MAP = [
         // ── Dashboard ────────────────────────────────
         'admin.dashboard'             => null,
+        'admin.dashboard.approve-all-pending' => 'expenses.approve',
+        'admin.dashboard.reject-all-pending'  => 'expenses.approve',
 
         // Notifications — every authenticated admin can see their own
         'admin.notifications.index'   => null,

@@ -896,6 +896,41 @@
                 </span>
                 طلبات الموافقة المعلقة
             </h3>
+
+            {{-- إجراءات جماعية — تظهر فقط لمن يملك صلاحية الموافقة ووُجدت طلبات.
+                 الخادم يتحقّق من الصلاحية نفسها، فالإخفاء هنا للراحة لا للحماية. --}}
+            @php($canApproveAll = auth('admin')->user()->isSuperAdmin()
+                                  || auth('admin')->user()->hasPermission('expenses.approve'))
+
+            @php($pendingCount = ($pendingExpenses->count() ?? 0) + ($pendingTransfers->count() ?? 0))
+
+            @if($canApproveAll && $pendingCount > 0)
+            <div style="display:flex; gap:8px; align-items:center;">
+                <form method="POST" action="{{ route('admin.dashboard.approve-all-pending') }}"
+                      onsubmit="return confirm('الموافقة على جميع الطلبات المعلقة ({{ $pendingCount }})؟')"
+                      style="margin:0;">
+                    @csrf
+                    <button type="submit"
+                            style="background:#16a34a; color:#fff; border:none; border-radius:8px;
+                                   padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer;
+                                   display:inline-flex; align-items:center; gap:6px;">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        موافقة على الكل
+                    </button>
+                </form>
+
+                <form method="POST" action="{{ route('admin.dashboard.reject-all-pending') }}"
+                      onsubmit="return confirm('رفض جميع الطلبات المعلقة ({{ $pendingCount }})؟ لا يمكن التراجع.')"
+                      style="margin:0;">
+                    @csrf
+                    <button type="submit"
+                            style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca; border-radius:8px;
+                                   padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer;">
+                        رفض الكل
+                    </button>
+                </form>
+            </div>
+            @endif
         </div>
         <div class="dash-table-wrap">
             <table class="dash-table">
