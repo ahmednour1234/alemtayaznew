@@ -27,17 +27,14 @@ class SyncWorkerStatusFromContracts extends Command
 
     public function handle(): int
     {
+        // «متاحة» مع ارتباط قائم — سواء بعقد أو بعميل فقط
         $workers = Worker::where('status', 'available')
-            ->whereHas('recruitmentContracts')
+            ->where(fn ($q) => $q->whereHas('recruitmentContracts')->orWhereNotNull('client_id'))
             ->with('latestContract')
             ->orderBy('id')
             ->get();
 
-        $affected = $workers->filter(function (Worker $w) {
-            $status = $w->latestContract?->current_status;
-
-            return $status !== null && ! in_array((int) $status, self::ENDED, true);
-        });
+        $affected = $workers->filter(fn (Worker $w) => $this->correctStatusFor($w) !== null);
 
         if ($affected->isEmpty()) {
             $this->info('لا توجد عاملات بحاجة إلى مواءمة.');
@@ -46,14 +43,17 @@ class SyncWorkerStatusFromContracts extends Command
 
         $statuses = \App\Models\RecruitmentContract::statuses();
 
+        $workerStatuses = Worker::statusOptions();
+
         $this->table(
-            ['#', 'الاسم', 'رقم العقد', 'حالة العقد', 'الحالة الجديدة'],
+            ['#', 'الاسم', 'رقم العقد', 'حالة العقد', 'العميل', 'الحالة الجديدة'],
             $affected->map(fn (Worker $w) => [
                 $w->id,
-                mb_substr($w->name ?? '—', 0, 26),
+                mb_substr($w->name ?? '—', 0, 24),
                 $w->latestContract?->contract_number ?? '—',
-                $statuses[$w->latestContract?->current_status]['label'] ?? $w->latestContract?->current_status,
-                'تم التعيين',
+                $statuses[$w->latestContract?->current_status]['label'] ?? '—',
+                $w->client_id ?? '—',
+                $workerStatuses[$this->correctStatusFor($w)] ?? '—',
             ])->all()
         );
 
@@ -64,9 +64,10 @@ class SyncWorkerStatusFromContracts extends Command
 
         foreach ($affected as $w) {
             $contract = $w->latestContract;
+            $target   = $this->correctStatusFor($w);
 
             $w->update([
-                'status'    => 'assigned',
+                'status'    => $target,
                 // نستكمل العميل من العقد إن كان ناقصاً على صف العاملة
                 'client_id' => $w->client_id ?? $contract?->client_id,
             ]);
@@ -78,9 +79,11 @@ class SyncWorkerStatusFromContracts extends Command
                     'admin_id'    => null,
                     'admin_name'  => 'النظام',
                     'action'      => 'updated',
-                    'label'       => 'صحّح النظام الحالة: متاحة ← تم التعيين — لوجود عقد قائم '
-                                   . ($contract?->contract_number ?? '') . ' بحالة «'
-                                   . ($statuses[$contract?->current_status]['label'] ?? '—') . '»',
+                    'label'       => 'صحّح النظام الحالة: متاحة ← ' . ($workerStatuses[$target] ?? $target)
+                                   . ' — ' . ($target === 'assigned'
+                                        ? 'لوجود عقد قائم ' . ($contract?->contract_number ?? '')
+                                          . ' بحالة «' . ($statuses[$contract?->current_status]['label'] ?? '—') . '»'
+                                        : 'لارتباطها بعميل دون عقد'),
                     'ip_address'  => null,
                 ]);
             } catch (\Throwable) {
@@ -91,5 +94,22 @@ class SyncWorkerStatusFromContracts extends Command
         $this->info("تمت مواءمة {$affected->count()} عاملة.");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * الحالة الصحيحة لعاملة «متاحة» ظاهرياً، أو null إن كانت الحالة سليمة.
+     *
+     * عقد قائم لم ينتهِ  → «تم التعيين»
+     * عميل بلا عقد قائم  → «محجوزة» (حجز لم يُبنَ عليه عقد بعد)
+     */
+    private function correctStatusFor(Worker $w): ?string
+    {
+        $contractStatus = $w->latestContract?->current_status;
+
+        if ($contractStatus !== null && ! in_array((int) $contractStatus, self::ENDED, true)) {
+            return 'assigned';
+        }
+
+        return $w->client_id !== null ? 'reserved' : null;
     }
 }

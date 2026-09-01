@@ -45,12 +45,21 @@ class Worker extends Model
                 return;
             }
 
-            // (أ) لا تُصبح العاملة «متاحة» ولها عقد قائم لم ينتهِ.
+            // (أ) «متاحة» تعني معروضة للحجز، فلا تجتمع مع ارتباط قائم بعميل.
             if ($worker->status === 'available') {
-                $status = $worker->latestContract?->current_status;
+                $contractStatus = $worker->latestContract?->current_status;
 
-                if ($status !== null && ! in_array((int) $status, self::CONTRACT_ENDED, true)) {
+                // عقد قائم لم ينتهِ → العاملة مرتبطة فعلياً: «تم التعيين»
+                if ($contractStatus !== null && ! in_array((int) $contractStatus, self::CONTRACT_ENDED, true)) {
                     $worker->status = 'assigned';
+                    return;
+                }
+
+                // عميل بلا عقد → حجز قائم: «محجوزة».
+                // نتجاهل الحالة إن كان العميل نفسه يُصفَّر في هذا التحديث،
+                // فذلك هو مسار فكّ التعيين المشروع.
+                if ($worker->client_id !== null && ! $worker->isDirty('client_id')) {
+                    $worker->status = 'reserved';
                 }
 
                 return;
