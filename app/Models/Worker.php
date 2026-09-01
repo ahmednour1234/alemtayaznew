@@ -19,6 +19,7 @@ class Worker extends Model
         'cv_path', 'original_cv_name', 'passport_image',
         'status', 'client_id', 'branch_id', 'admin_id',
         'assigned_by_admin_id', 'assigned_at',
+        'tamara_paid_at', 'tamara_paid_by_admin_id',
         'notes', 'active',
     ];
 
@@ -27,6 +28,7 @@ class Worker extends Model
         return [
             'active'          => 'boolean',
             'assigned_at'     => 'datetime',
+            'tamara_paid_at'  => 'datetime',
             'passport_number' => 'encrypted',
             'phone'           => 'encrypted',
         ];
@@ -155,6 +157,42 @@ class Worker extends Model
         return $this->relationLoaded('latestContract')
             ? $this->latestContract !== null
             : $this->latestContract()->exists();
+    }
+
+    /** مهلة الحجز بالأيام بعد تسجيل سداد تمارا. */
+    public const TAMARA_RESERVATION_DAYS = 5;
+
+    /** هل سُجّل سداد تمارا لهذا الحجز؟ */
+    public function hasTamaraPayment(): bool
+    {
+        return $this->tamara_paid_at !== null;
+    }
+
+    /**
+     * مهلة الحجز بالساعات لهذه العاملة.
+     *
+     * السداد عبر تمارا يمدّدها إلى 5 أيام — محسوبة من تاريخ الحجز الأصلي
+     * لا من لحظة السداد، فالمهلة الكلية ثابتة أياً كان وقت الدفع.
+     */
+    public function reservationHours(): int
+    {
+        return $this->hasTamaraPayment()
+            ? self::TAMARA_RESERVATION_DAYS * 24
+            : \App\Console\Commands\NotifyUncontractedWorkers::RESERVATION_HOURS;
+    }
+
+    /**
+     * من يحق له تسجيل سداد تمارا: صاحب الحجز نفسه (والسوبر أدمن)،
+     * وللعاملة المحجوزة فقط — السداد امتداد للحجز لا إجراء مستقل.
+     */
+    public function canRecordTamaraBy(?Admin $actor): bool
+    {
+        if (! $actor || $this->status !== 'reserved' || $this->hasTamaraPayment()) {
+            return false;
+        }
+
+        return $actor->isSuperAdmin()
+            || $actor->id === $this->assigned_by_admin_id;
     }
 
     /**

@@ -501,6 +501,37 @@ class WorkerController extends Controller
     }
 
     // ── Unassign ──────────────────────────────────────────────────────────────
+    /**
+     * تسجيل سداد العميل عبر «تمارا».
+     *
+     * يمدّد مهلة الحجز من 72 ساعة إلى 5 أيام (محسوبة من تاريخ الحجز الأصلي)،
+     * فيبقى للعميل وقت أطول لاستكمال العقد قبل أن يفكّ النظام الحجز.
+     * لا يغيّر حالة العاملة — تبقى «محجوزة» حتى يُنشأ العقد.
+     */
+    public function recordTamara(int $id)
+    {
+        $me     = Auth::guard('admin')->user();
+        $worker = $this->service->find($id);
+
+        // الحجز التزام شخصي: صاحبه وحده (والسوبر أدمن) يسجّل سداده.
+        // الفحص هنا لا في العرض وحده، فالمسار قابل للاستدعاء مباشرةً.
+        if (! $worker->canRecordTamaraBy($me)) {
+            return back()->withErrors([
+                'tamara' => $worker->hasTamaraPayment()
+                    ? 'سداد تمارا مسجَّل لهذا الحجز بالفعل.'
+                    : 'لا يمكنك تسجيل السداد — الحجز يخصّ موظفاً آخر أو العاملة غير محجوزة.',
+            ]);
+        }
+
+        $this->service->recordTamaraPayment($worker, $me);
+
+        return back()->with(
+            'success',
+            'تم تسجيل سداد تمارا — مهلة الحجز أصبحت '
+            . Worker::TAMARA_RESERVATION_DAYS . ' أيام من تاريخ الحجز.'
+        );
+    }
+
     public function unassign(int $id)
     {
         $me = Auth::guard('admin')->user();

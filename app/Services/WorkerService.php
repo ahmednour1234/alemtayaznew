@@ -435,6 +435,42 @@ class WorkerService
         }
     }
 
+    // ── Tamara payment ────────────────────────────────────────────────────────
+
+    /**
+     * يسجّل سداد العميل عبر «تمارا» على حجز قائم.
+     *
+     * لا يمسّ حالة العاملة ولا عميلها — أثره الوحيد تمديد مهلة الحجز،
+     * وهو ما يقرؤه أمر workers:notify-uncontracted من reservationHours().
+     */
+    public function recordTamaraPayment(Worker $worker, Admin $actor): void
+    {
+        $worker->update([
+            'tamara_paid_at'         => now(),
+            'tamara_paid_by_admin_id' => $actor->id,
+        ]);
+
+        $days       = Worker::TAMARA_RESERVATION_DAYS;
+        $clientName = $worker->client?->name ?? 'عميل';
+        $until      = $worker->assigned_at?->copy()->addDays($days)->format('Y-m-d H:i');
+
+        $this->log(
+            $worker,
+            'updated',
+            "سُجِّل سداد تمارا للعميل «{$clientName}» — مهلة الحجز مُدّدت إلى {$days} أيام"
+            . ($until ? " (حتى {$until})" : '')
+        );
+
+        // إشعار المعنيين بأن الحجز صار مدفوعاً فلا يُتابَع كحجز معلّق
+        $this->notifications->notify(
+            'worker_tamara_paid',
+            'سداد تمارا على حجز عاملة',
+            "سجّل {$actor->name} سداد تمارا للعاملة «{$worker->name}» — مهلة الحجز {$days} أيام.",
+            route('admin.workers.show', $worker->id),
+            $worker->branch_id ? [$worker->branch_id] : []
+        );
+    }
+
     // ── Unassign ──────────────────────────────────────────────────────────────
 
     /**

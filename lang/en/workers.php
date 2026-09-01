@@ -217,6 +217,16 @@ return [
         'dep_coord'     => 'Coordination',
     ],
 
+    // Tamara payment — extends the reservation window
+    'tamara' => [
+        'button'  => 'Tamara paid',
+        'confirm' => 'Record Tamara payment? The reservation window extends to :days days from the reservation date.',
+        'paid'    => 'Tamara ✓',
+        'paid_at' => 'Tamara payment recorded on :at',
+        'hint'    => 'A Tamara payment extends the reservation to :days days instead of :hours hours.',
+    ],
+
+
 
 
 

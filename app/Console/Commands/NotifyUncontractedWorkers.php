@@ -54,7 +54,10 @@ class NotifyUncontractedWorkers extends Command
             $branchName = $worker->branch?->name   ?? '—';
             $url        = route('admin.workers.show', $worker->id);
 
-            if ($hoursElapsed >= self::RESERVATION_HOURS) {
+            // المهلة تُقرأ من العاملة لا من الثابت: سداد تمارا يمدّدها إلى 5 أيام
+            $limitHours = $worker->reservationHours();
+
+            if ($hoursElapsed >= $limitHours) {
                 // ── انتهت المهلة: فكّ الحجز تلقائياً ─────────────────────────
                 // نلتقط بيانات الحجز قبل تصفيرها لتسجيلها في سجل النشاط
                 $statusBefore = $worker->status_label;
@@ -73,13 +76,15 @@ class NotifyUncontractedWorkers extends Command
                 $this->logAutoRelease(
                     $worker,
                     "فكّ النظام حجز العاملة تلقائياً من العميل «{$clientName}» بعد "
-                    . self::RESERVATION_HOURS . " ساعة دون إنشاء عقد — الحالة: {$statusBefore} ← متاحة"
+                    . "{$limitHours} ساعة دون إنشاء عقد"
+                    . ($worker->hasTamaraPayment() ? ' (مهلة ممددة بسداد تمارا)' : '')
+                    . " — الحالة: {$statusBefore} ← متاحة"
                     . ($reserverName ? " (كان الحجز بواسطة {$reserverName} بتاريخ {$reservedAt})" : '')
                 );
 
                 $title = 'انتهاء حجز عاملة تلقائياً';
                 $body  = "انتهت مهلة حجز العاملة «{$workerName}» للعميل «{$clientName}» (فرع {$branchName}) "
-                       . "بعد " . self::RESERVATION_HOURS . " ساعة دون إنشاء عقد، وأصبحت متاحة مرة أخرى.";
+                       . "بعد {$limitHours} ساعة دون إنشاء عقد، وأصبحت متاحة مرة أخرى.";
 
                 // إشعار الموظّف الذي حجزها
                 if ($worker->assigned_by_admin_id) {
@@ -121,7 +126,7 @@ class NotifyUncontractedWorkers extends Command
                 continue;
             }
 
-            $hoursLeft = self::RESERVATION_HOURS - (int) $hoursElapsed;
+            $hoursLeft = $limitHours - (int) $hoursElapsed;
 
             if ($hoursLeft > self::REMINDER_BEFORE_HOURS) {
                 continue; // ما زال أمامه وقت — لا تُزعج الموظّف

@@ -191,6 +191,7 @@ class AutoPermission
         'admin.workers.assign'        => 'workers.assign',
         'admin.workers.do-assign'     => 'workers.assign',
         'admin.workers.unassign'      => 'workers.assign',
+        'admin.workers.tamara'        => 'workers.assign',
         'admin.workers.send-whatsapp' => 'workers.view',
 
         // ── Contracts ─────────────────────────────────────────────────────────

@@ -12,6 +12,7 @@ class NotificationService
      * null = superadmin only (system-level events).
      */
     private const SLUG_MAP = [
+        'worker_tamara_paid'  => 'workers.view',
         'income_created'      => 'incomes.view',
         'expense_created'     => 'expenses.view',
         'expense_approved'    => 'expenses.view',

@@ -228,6 +228,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('workers/{id}/assign',       [WorkerController::class, 'assign'])->name('workers.assign');
         Route::post('workers/{id}/assign',      [WorkerController::class, 'doAssign'])->name('workers.do-assign');
         Route::post('workers/{id}/unassign',    [WorkerController::class, 'unassign'])->name('workers.unassign');
+        Route::post('workers/{id}/tamara',      [WorkerController::class, 'recordTamara'])->name('workers.tamara');
 
         Route::resource('workers', WorkerController::class);
 

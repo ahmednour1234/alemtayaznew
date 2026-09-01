@@ -342,6 +342,23 @@
                         </a>
                         @endif
 
+                        {{-- سداد تمارا: يمدّد مهلة الحجز إلى 5 أيام --}}
+                        @if($w->canRecordTamaraBy($me))
+                        <form action="{{ route('admin.workers.tamara', $w->id) }}" method="POST" class="inline"
+                              onsubmit="return confirm('{{ __('workers.tamara.confirm', ['days' => \App\Models\Worker::TAMARA_RESERVATION_DAYS]) }}')">
+                            @csrf
+                            <button type="submit"
+                                    class="text-xs text-white bg-violet-600 hover:bg-violet-700 px-2 py-1 rounded-lg whitespace-nowrap">
+                                {{ __('workers.tamara.button') }}
+                            </button>
+                        </form>
+                        @elseif($w->hasTamaraPayment())
+                        <span class="text-xs text-violet-700 bg-violet-50 border border-violet-200 px-2 py-1 rounded-lg whitespace-nowrap"
+                              title="{{ __('workers.tamara.paid_at', ['at' => $w->tamara_paid_at?->format('Y-m-d H:i')]) }}">
+                            {{ __('workers.tamara.paid') }}
+                        </span>
+                        @endif
+
                         @if($w->canBeUnassignedBy($me))
                         <form action="{{ route('admin.workers.unassign', $w->id) }}" method="POST" class="inline"
                               onsubmit="return confirm('{{ __('workers.assign.confirm_unassign') }}')">
