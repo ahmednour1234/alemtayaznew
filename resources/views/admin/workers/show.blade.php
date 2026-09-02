@@ -31,6 +31,20 @@
             @endif
             <a href="{{ route('admin.workers.edit', $worker->id) }}"
                class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg">{{ __('common.actions.edit') }}</a>
+
+            {{-- إلغاء التأشيرة — قسم التنسيق فقط، وقبل مرحلة الاستلام.
+                 يفكّ ربط العاملة بالعقد ويعيدها متاحة. --}}
+            @if($contract?->canCancelVisaBy($me))
+            <form action="{{ route('admin.contracts.cancel-visa', $contract->id) }}" method="POST"
+                  onsubmit="return confirm('{{ __('contracts.visa_cancel.confirm') }}')">
+                @csrf
+                <button type="submit"
+                        class="bg-rose-600 hover:bg-rose-700 text-white text-sm px-4 py-2 rounded-lg transition-colors"
+                        title="{{ __('contracts.visa_cancel.hint') }}">
+                    {{ __('contracts.visa_cancel.button') }}
+                </button>
+            </form>
+            @endif
             @if(! $worker->isBooked())
             <a href="{{ route('admin.workers.assign', $worker->id) }}"
                class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg">{{ __('workers.view.assign_client') }}</a>
