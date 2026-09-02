@@ -201,6 +201,59 @@
                     </div>
                 </form>
                 @endif
+
+                {{-- إلغاء التأشيرة — قسم التنسيق فقط، وقبل مرحلة الاستلام.
+                     يفكّ ربط العاملة ويُبقي العقد قائماً بانتظار بديلة. --}}
+                @if($contract->canCancelVisaBy($_su))
+                <div x-data="{ open: false }" class="mt-4 p-4 bg-rose-50 rounded-xl border border-rose-200">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <p class="text-sm font-semibold text-rose-800">{{ __('contracts.visa_cancel.title') }}</p>
+                            <p class="text-xs text-rose-600 mt-1 leading-relaxed">
+                                {{ __('contracts.visa_cancel.hint') }}
+                            </p>
+                        </div>
+                        <button type="button" @click="open = ! open"
+                                class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2 rounded-lg whitespace-nowrap transition-colors">
+                            {{ __('contracts.visa_cancel.button') }}
+                        </button>
+                    </div>
+
+                    <form x-show="open" x-cloak x-transition
+                          action="{{ route('admin.contracts.cancel-visa', $contract->id) }}" method="POST"
+                          onsubmit="return confirm('{{ __('contracts.visa_cancel.confirm') }}')"
+                          class="mt-4 pt-4 border-t border-rose-200">
+                        @csrf
+                        <label class="block text-xs font-medium text-rose-700 mb-1.5">
+                            {{ __('contracts.visa_cancel.reason') }}
+                        </label>
+                        <input type="text" name="reason" maxlength="500"
+                               placeholder="{{ __('contracts.visa_cancel.reason_ph') }}"
+                               class="w-full border border-rose-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+                        <div class="flex gap-2 mt-3">
+                            <button type="submit"
+                                    class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-5 py-2 rounded-lg transition-colors">
+                                {{ __('contracts.visa_cancel.submit') }}
+                            </button>
+                            <button type="button" @click="open = false"
+                                    class="bg-white hover:bg-slate-50 text-slate-600 text-xs px-4 py-2 rounded-lg border border-slate-200">
+                                {{ __('common.actions.cancel') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                @elseif($contract->isVisaCancelled())
+                <div class="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-200">
+                    <p class="text-sm font-semibold text-amber-800">{{ __('contracts.visa_cancel.cancelled_title') }}</p>
+                    <p class="text-xs text-amber-700 mt-1">
+                        {{ __('contracts.visa_cancel.cancelled_at', ['at' => $contract->visa_cancelled_at?->format('Y-m-d H:i')]) }}
+                        @if($contract->visa_cancel_reason)
+                            — {{ $contract->visa_cancel_reason }}
+                        @endif
+                    </p>
+                </div>
+                @endif
+
             </div>
         </div>
 

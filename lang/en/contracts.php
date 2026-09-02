@@ -14,6 +14,20 @@ return [
     'no_contracts' => 'No contracts found',
 
     // ── Contract stages (15) ─────────────────────────────────────────────────
+
+    // Visa cancellation and worker unlinking
+    'visa_cancel' => [
+        'title'          => 'Cancel visa',
+        'hint'           => 'Cancels the visa and unlinks the worker from this contract. The contract stays open awaiting a replacement, and the worker becomes available again. Allowed before the hand-over stage only.',
+        'button'         => 'Cancel visa',
+        'confirm'        => 'Cancel the visa and unlink the worker from this contract?',
+        'reason'         => 'Cancellation reason (optional)',
+        'reason_ph'      => 'e.g. embassy rejection, worker withdrew...',
+        'submit'         => 'Confirm cancellation',
+        'cancelled_title'=> 'Visa cancelled',
+        'cancelled_at'   => 'Cancelled on :at — contract awaiting a replacement worker',
+    ],
+
     'statuses' => [
         1  => 'New',
         2  => 'Foreign embassy approval',

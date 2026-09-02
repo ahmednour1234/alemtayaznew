@@ -36,5 +36,8 @@ Schedule::command('housing:check-rental-expiry')->dailyAt('08:45');
 // حجز العاملة صالح 72 ساعة — يعمل كل ساعة ليفكّ الحجز فور انتهاء المهلة
 Schedule::command('workers:notify-uncontracted')->hourly();
 
+// تذكير يومي بالعقود التي أُلغيت تأشيرتها وتنتظر عاملة بديلة
+Schedule::command('contracts:notify-unlinked')->dailyAt('09:00');
+
 // HR: notify before iqama renewal, probation end, insurance & document expiry (within 30 days)
 Schedule::command('hr:check-expiries')->dailyAt('07:30');

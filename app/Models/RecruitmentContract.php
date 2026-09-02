@@ -16,6 +16,7 @@ class RecruitmentContract extends Model
 
     protected $fillable = [
         'contract_number', 'client_id', 'branch_id', 'admin_id', 'request_date',
+        'visa_cancelled_at', 'visa_cancelled_by_admin_id', 'previous_worker_id', 'visa_cancel_reason',
         'visa_image', 'visa_type', 'visa_number',
         'arrival_airport_id', 'origin_nationality_id', 'delivery_city_id',
         'musaned_number', 'musaned_date', 'musaned_file',
@@ -30,6 +31,7 @@ class RecruitmentContract extends Model
     {
         return [
             'request_date'      => 'date',
+            'visa_cancelled_at' => 'datetime',
             'musaned_date'      => 'date',
             'arrival_date'      => 'date',
             'trial_end_date'    => 'date',
@@ -56,6 +58,44 @@ class RecruitmentContract extends Model
      * مراحل العقد الـ15. التسميات والأوصاف تأتي من ملفات الترجمة
      * contracts.php داخل مجلد lang فتتغيّر مع لغة الواجهة.
      */
+    /** حالة «إلغاء التأشير» في مسار العقد. */
+    public const STATUS_VISA_CANCELLED = 9;
+
+    /** حالة «تم الاستلام» — بعدها لا يصحّ إلغاء التأشيرة. */
+    public const STATUS_RECEIVED = 13;
+
+    /** هل أُلغيت تأشيرة هذا العقد؟ */
+    public function isVisaCancelled(): bool
+    {
+        return $this->visa_cancelled_at !== null;
+    }
+
+    /**
+     * هل يمكن إلغاء تأشيرة هذا العقد؟
+     *
+     * الإلغاء مقصور على ما قبل التسليم: بعد وصول العاملة واستلامها يصبح
+     * العقد منفَّذاً، وأي تراجع عنه يمرّ بمسار الرجيع لا بإلغاء التأشيرة.
+     */
+    public function canCancelVisa(): bool
+    {
+        return ! $this->isVisaCancelled()
+            && $this->worker_id !== null
+            && (int) $this->current_status < self::STATUS_RECEIVED;
+    }
+
+    /**
+     * من يحق له إلغاء التأشيرة: قسم التنسيق وحده (والسوبر أدمن)،
+     * فهو القسم الذي يتابع إجراءات التأشيرة لدى الجهات الخارجية.
+     */
+    public function canCancelVisaBy(?Admin $actor): bool
+    {
+        if (! $actor || ! $this->canCancelVisa()) {
+            return false;
+        }
+
+        return $actor->isSuperAdmin() || $actor->department === 'coordination';
+    }
+
     public static function statuses(): array
     {
         $out = [];

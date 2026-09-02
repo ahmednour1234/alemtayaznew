@@ -401,6 +401,37 @@ class RecruitmentContractController extends Controller
             "تم توجيه العقد {$contract->contract_number} إلى {$deptLabels[$next]}.");
     }
 
+    /**
+     * إلغاء التأشيرة وفكّ ربط العاملة بالعقد.
+     *
+     * مقصور على قسم التنسيق (والسوبر أدمن) وعلى العقود التي لم تصل
+     * مرحلة الاستلام — بعدها يكون العقد منفَّذاً ويمرّ التراجع بمسار الرجيع.
+     */
+    public function cancelVisa(Request $request, int $id): RedirectResponse
+    {
+        $me       = $this->me();
+        $contract = RecruitmentContract::with('worker')->findOrFail($id);
+
+        // الفحص هنا لا في العرض وحده — المسار قابل للاستدعاء مباشرةً
+        if (! $contract->canCancelVisaBy($me)) {
+            $reason = $contract->isVisaCancelled()
+                ? 'تأشيرة هذا العقد ملغاة بالفعل.'
+                : ((int) $contract->current_status >= RecruitmentContract::STATUS_RECEIVED
+                    ? 'لا يمكن إلغاء التأشيرة بعد استلام العاملة.'
+                    : 'إلغاء التأشيرة مقصور على قسم التنسيق.');
+
+            return back()->withErrors(['visa' => $reason]);
+        }
+
+        $data = $request->validate([
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $this->service->cancelVisa($contract, $me, $data['reason'] ?? null);
+
+        return back()->with('success', 'تم إلغاء التأشيرة وفكّ ربط العاملة — العقد بحاجة إلى عاملة بديلة.');
+    }
+
     public function destroy(int $id): RedirectResponse
     {
         $contract = $this->service->findById($id);

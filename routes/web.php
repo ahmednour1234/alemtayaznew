@@ -235,6 +235,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Recruitment Contracts
         Route::post('contracts/{id}/update-status',  [RecruitmentContractController::class, 'updateStatus'])->name('contracts.update-status');
         Route::post('contracts/{id}/forward',        [RecruitmentContractController::class, 'forward'])->name('contracts.forward');
+        Route::post('contracts/{id}/cancel-visa',    [RecruitmentContractController::class, 'cancelVisa'])->name('contracts.cancel-visa');
         Route::get('contracts/trashed',              [RecruitmentContractController::class, 'trashed'])->name('contracts.trashed');
         Route::post('contracts/{id}/restore',        [RecruitmentContractController::class, 'restore'])->name('contracts.restore');
         Route::delete('contracts/{id}/force-delete', [RecruitmentContractController::class, 'forceDelete'])->name('contracts.force-delete');

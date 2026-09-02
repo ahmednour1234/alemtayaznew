@@ -10,6 +10,7 @@ use App\Models\Worker;
 use App\Repositories\Contracts\RecruitmentContractRepositoryInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class RecruitmentContractService
@@ -185,6 +186,60 @@ class RecruitmentContractService
             'coordination'     => 'التنسيق',
             default            => 'الإدارة',
         };
+    }
+
+    /**
+     * إلغاء تأشيرة العقد وفكّ ربط العاملة به.
+     *
+     * يبقى العقد قائماً بلا عاملة حتى يربطه المنسّق بعاملة بديلة، ويلتقطه
+     * أمر contracts:notify-unlinked يومياً فلا يُنسى.
+     *
+     * العاملة تعود «متاحة» لأنها لم تعد مرتبطة بأي عقد؛ ونصفّر عميلها أيضاً
+     * وإلا بقيت مرتبطة بعميل بلا سبب — وهو ما يمنعه حارس الاتساق في Worker.
+     */
+    public function cancelVisa(RecruitmentContract $contract, Admin $actor, ?string $reason = null): void
+    {
+        $worker = $contract->worker;
+
+        DB::transaction(function () use ($contract, $worker, $actor, $reason) {
+            $contract->update([
+                'worker_id'                 => null,
+                'previous_worker_id'        => $worker?->id,
+                'current_status'            => RecruitmentContract::STATUS_VISA_CANCELLED,
+                'visa_cancelled_at'         => now(),
+                'visa_cancelled_by_admin_id' => $actor->id,
+                'visa_cancel_reason'        => $reason,
+            ]);
+
+            // نحرّر العاملة بعد فكّ الربط لا قبله، فحارس الاتساق في Worker
+            // يمنع «available» ما دام هناك عقد قائم مرتبط بها.
+            $worker?->update([
+                'status'               => 'available',
+                'client_id'            => null,
+                'assigned_by_admin_id' => null,
+                'assigned_at'          => null,
+                'tamara_paid_at'       => null,
+                'tamara_paid_by_admin_id' => null,
+            ]);
+        });
+
+        ContractActivityLog::create([
+            'contract_id' => $contract->id,
+            'admin_id'    => $actor->id,
+            'action'      => 'visa_cancelled',
+            'section'     => 'coordination',
+            'label'       => 'أُلغيت التأشيرة وفُكّ ربط العاملة «' . ($worker?->name ?? '—') . '» بالعقد'
+                           . ($reason ? " — السبب: {$reason}" : ''),
+        ]);
+
+        $this->notifyDepartment(
+            $contract,
+            'coordination',
+            'contract_visa_cancelled',
+            'إلغاء تأشيرة عقد',
+            "أُلغيت تأشيرة العقد {$contract->contract_number} وفُكّ ربط العاملة "
+            . '«' . ($worker?->name ?? '—') . '» — العقد بحاجة إلى عاملة بديلة.'
+        );
     }
 
     public function delete(int $id): void

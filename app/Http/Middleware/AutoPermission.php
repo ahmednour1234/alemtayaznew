@@ -207,6 +207,7 @@ class AutoPermission
         'admin.contracts.edit'          => 'contracts.edit',
         'admin.contracts.update'        => 'contracts.edit',
         'admin.contracts.update-status' => 'contracts.edit',
+        'admin.contracts.cancel-visa'   => 'contracts.edit',
         'admin.contracts.restore'       => 'contracts.edit',
         'admin.contracts.destroy'       => 'contracts.delete',
         'admin.contracts.force-delete'  => 'contracts.delete',
