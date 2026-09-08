@@ -13,7 +13,9 @@
 @else
 <div class="space-y-4">
     @foreach($coordinators as $coordinator)
-    @php($assigned = $coordinator->managedNationalities->pluck('id')->all())
+    @php
+        $assigned = $coordinator->managedNationalities->pluck('id')->all();
+    @endphp
     <form method="POST" action="{{ route('cv-panel.coordinators.update', $coordinator->id) }}"
           class="bg-white rounded-2xl border border-slate-200 p-5">
         @csrf

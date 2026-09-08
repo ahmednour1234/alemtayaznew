@@ -83,7 +83,9 @@
 
         <nav class="flex items-center gap-1 overflow-x-auto -mb-px">
             @foreach($nav as $item)
-                @php($isActive = request()->routeIs($item['route']))
+                @php
+                    $isActive = request()->routeIs($item['route']);
+                @endphp
                 <a href="{{ route($item['route']) }}"
                    class="inline-flex items-center gap-2 px-4 py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors
                           {{ $isActive ? 'border-primary text-primary' : 'border-transparent text-white/70 hover:text-white' }}">
