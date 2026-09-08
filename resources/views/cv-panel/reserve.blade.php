@@ -40,7 +40,7 @@
                 <input type="radio" name="mode" value="existing" x-model="mode" class="text-primary focus:ring-primary/40">
                 {{ __('cv-panel.reserve.existing_client') }}
             </label>
-            <select name="client_id" x-bind:disabled="mode !== 'existing'"
+            <select name="client_id" id="cvClientSelect" x-bind:disabled="mode !== 'existing'"
                     class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm disabled:bg-slate-50 disabled:text-slate-400
                            focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
                 <option value="">{{ __('cv-panel.reserve.choose_client') }}</option>
@@ -83,6 +83,52 @@
 
 @endsection
 
+@push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.default.min.css">
+@endpush
+
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+<script>
+/**
+ * بحث داخل قائمة العملاء.
+ *
+ * القائمة تضمّ آلاف العملاء، و<select> العادي لا يُبحث فيه إلا بالحرف الأول،
+ * فيتعذّر الوصول لعميل بعينه. نستخدم Tom Select كما في شاشة الحجز بلوحة
+ * الإدارة ليبقى سلوك البحث واحداً في النظامين.
+ */
+(function () {
+    function initClientSelect() {
+        var el = document.getElementById('cvClientSelect');
+        if (! el || el.tomselect) return;
+
+        var ts = new TomSelect(el, {
+            placeholder: @json(__('cv-panel.reserve.choose_client')),
+            searchField: ['text'],
+            allowEmptyOption: true,
+            maxOptions: 500,
+            render: {
+                no_results: function () {
+                    return '<div class="no-results">' + @json(__('cv-panel.reserve.no_client_results')) + '</div>';
+                }
+            }
+        });
+
+        // Tom Select يبني عنصراً بديلاً، فلا يصله x-bind:disabled من ألبين.
+        // نراقب الحقل الأصلي ونعكس حالته على الأداة يدوياً.
+        new MutationObserver(function () {
+            el.disabled ? ts.disable() : ts.enable();
+        }).observe(el, { attributes: true, attributeFilter: ['disabled'] });
+
+        if (el.disabled) ts.disable();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initClientSelect);
+    } else {
+        initClientSelect();
+    }
+})();
+</script>
 @endpush

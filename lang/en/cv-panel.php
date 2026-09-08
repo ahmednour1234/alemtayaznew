@@ -82,6 +82,7 @@ return [
         'client_phone'    => 'Phone number',
         'submit'          => 'Confirm reservation',
         'cancel'          => 'Cancel',
+        'no_client_results' => 'No client matches that name.',
         'client_required' => 'Pick an existing client or enter a new client name and phone.',
         'unavailable'     => 'This CV is no longer available — another employee may have just reserved it.',
         'denied'          => 'Reserving is restricted to customer service and managers.',
