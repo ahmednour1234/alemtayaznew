@@ -88,6 +88,7 @@ return [
     ],
 
     'coordinators_page' => [
+        'nav'         => 'Coordinators',
         'title'       => 'Assign nationalities to coordinators',
         'intro'       => 'A coordinator uploads CVs for their nationalities and is notified when one is reserved.',
         'coordinator' => 'Coordinator',
