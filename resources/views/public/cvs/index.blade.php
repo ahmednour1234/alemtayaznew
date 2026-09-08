@@ -61,14 +61,104 @@
     </div>
     @endif
 
+    {{-- ══ تصفية بالخبرة والديانة ══
+         نُبقي الجنسية في المسار كما هي ونمرّر الباقي كوسائط، فيبقى رابط
+         الجنسية القصير صالحاً للمشاركة مع الفلاتر. --}}
+    @php
+        $baseUrl = $activeNat
+            ? route('site.cvs.nationality', $activeNat->getRouteKey())
+            : route('site.cvs');
+
+        // بناء رابط يحافظ على بقية الفلاتر ويبدّل واحداً منها
+        $filterUrl = function (string $key, ?string $value) use ($baseUrl, $filters, $activeNat) {
+            $params = array_filter([
+                'experience' => $filters['experience'] ?? null,
+                'religion'   => $filters['religion']   ?? null,
+            ]);
+
+            if ($value === null) {
+                unset($params[$key]);
+            } else {
+                $params[$key] = $value;
+            }
+
+            // صفحة «كل الجنسيات» تحمل الجنسية كوسيط لا في المسار
+            if (! $activeNat && ! empty($filters['nationality_id'])) {
+                $params['nationality_id'] = $filters['nationality_id'];
+            }
+
+            return $baseUrl . ($params ? '?' . http_build_query($params) : '');
+        };
+
+        $hasFilter = ! empty($filters['experience']) || ! empty($filters['religion']);
+    @endphp
+
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+            {{-- الخبرة --}}
+            <div>
+                <p class="text-xs font-bold text-slate-500 mb-2.5">الخبرة</p>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ $filterUrl('experience', null) }}"
+                       class="px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors
+                              {{ empty($filters['experience'])
+                                    ? 'bg-navy text-white border-navy'
+                                    : 'bg-white text-navy border-slate-200 hover:border-navy' }}">
+                        الكل
+                    </a>
+                    @foreach($experiences as $key => $label)
+                    <a href="{{ $filterUrl('experience', $key) }}"
+                       class="px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors
+                              {{ ($filters['experience'] ?? null) === $key
+                                    ? 'bg-navy text-white border-navy'
+                                    : 'bg-white text-navy border-slate-200 hover:border-navy' }}">
+                        {{ $label }}
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- الديانة --}}
+            <div>
+                <p class="text-xs font-bold text-slate-500 mb-2.5">الديانة</p>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ $filterUrl('religion', null) }}"
+                       class="px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors
+                              {{ empty($filters['religion'])
+                                    ? 'bg-navy text-white border-navy'
+                                    : 'bg-white text-navy border-slate-200 hover:border-navy' }}">
+                        الكل
+                    </a>
+                    @foreach($religions as $key => $label)
+                    <a href="{{ $filterUrl('religion', $key) }}"
+                       class="px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors
+                              {{ ($filters['religion'] ?? null) === $key
+                                    ? 'bg-navy text-white border-navy'
+                                    : 'bg-white text-navy border-slate-200 hover:border-navy' }}">
+                        {{ $label }}
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        @if($hasFilter)
+        <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+            <p class="text-xs text-slate-500">{{ $workers->total() }} نتيجة</p>
+            <a href="{{ $baseUrl }}" class="text-xs font-bold text-navy hover:text-gold">إزالة الفلاتر</a>
+        </div>
+        @endif
+    </div>
+
     @if($workers->isEmpty())
     <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center">
         <div class="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
             <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </div>
         <h3 class="font-bold text-slate-700">لا توجد سير ذاتية متاحة</h3>
-        <p class="text-sm text-slate-500 mt-1.5">جرّب اختيار جنسية أخرى.</p>
-        <a href="{{ route('site.cvs') }}" class="inline-block mt-4 text-navy hover:text-gold text-sm font-bold">عرض كل الجنسيات</a>
+        <p class="text-sm text-slate-500 mt-1.5">جرّب تغيير الفلاتر أو اختيار جنسية أخرى.</p>
+        <a href="{{ $hasFilter ? $baseUrl : route('site.cvs') }}" class="inline-block mt-4 text-navy hover:text-gold text-sm font-bold">{{ $hasFilter ? 'إزالة الفلاتر' : 'عرض كل الجنسيات' }}</a>
     </div>
     @else
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Nationality;
 use App\Models\Worker;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 /**
  * تصفّح السير الذاتية المتاحة للعامة، مع بحث وفلاتر.
@@ -21,12 +22,18 @@ class CvController extends Controller
     {
         $filters = $request->validate([
             'nationality_id' => ['nullable', 'integer', 'exists:nationalities,id'],
+            // الخبرة والديانة يُختاران من قوائم النظام لا نصاً حرّاً،
+            // فلا يمرّ إلى الاستعلام إلا مفتاح معروف.
+            'experience'     => ['nullable', Rule::in(array_keys(Worker::experienceOptions()))],
+            'religion'       => ['nullable', Rule::in(array_keys(Worker::religionOptions()))],
         ]);
 
         $query = $this->baseQuery()->with('nationality');
 
-        if (! empty($filters['nationality_id'])) {
-            $query->where('nationality_id', $filters['nationality_id']);
+        foreach (['nationality_id', 'experience', 'religion'] as $field) {
+            if (! empty($filters[$field])) {
+                $query->where($field, $filters[$field]);
+            }
         }
 
         $workers = $query->latest('id')
@@ -41,6 +48,8 @@ class CvController extends Controller
         return view('public.cvs.index', [
             'workers'       => $workers,
             'filters'       => $filters,
+            'experiences'   => Worker::experienceOptions(),
+            'religions'     => Worker::religionOptions(),
             'nationalities' => Nationality::where('active', true)
                 ->whereHas('workers', fn ($q) => $q->where('active', true)
                     ->where('status', 'available')->whereNotNull('cv_path'))
