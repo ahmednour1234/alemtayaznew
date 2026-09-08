@@ -45,7 +45,14 @@
                 <input type="checkbox" name="nationality_ids[]" value="{{ $nat->id }}"
                        @checked(in_array($nat->id, $assigned, true))
                        class="rounded border-slate-300 text-primary focus:ring-primary/40">
-                <span class="text-sm font-semibold truncate">{{ $nat->display_name }}</span>
+                <span class="text-sm font-semibold truncate flex-1">{{ $nat->display_name }}</span>
+                {{-- الصفحة العامة لهذه الجنسية — للمعاينة السريعة --}}
+                <a href="{{ route('site.cvs.nationality', $nat->getRouteKey()) }}"
+                   target="_blank" rel="noopener" onclick="event.stopPropagation()"
+                   title="{{ __('cv-panel.open_public') }}" aria-label="{{ __('cv-panel.open_public') }}"
+                   class="flex-shrink-0 text-ink-muted hover:text-primary transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
+                </a>
             </label>
             @endforeach
         </div>

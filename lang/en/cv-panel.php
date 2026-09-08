@@ -46,6 +46,12 @@ return [
         'skipped'              => ':count duplicate file(s) skipped (:names).',
     ],
 
+    // روابط الصفحات العامة لكل جنسية
+        'public_link'   => 'Public link',
+        'copy_link'     => 'Copy nationality link',
+        'copied'        => 'Link copied',
+        'open_public'   => 'Open public page',
+
     'reserve' => [
         'title'           => 'Reserve a CV',
         'action'          => 'Reserve for client',
