@@ -558,7 +558,9 @@
 
         {{-- لوحة السير الذاتية: منظومة مستقلة، الوصول إليها بالقسم لا بالصلاحيات،
              ولذلك تُعرض خارج مجموعات الصلاحيات المعتادة. --}}
-        @php($showCvPanel = \App\Http\Middleware\CvPanelAccess::allows(Auth::guard('admin')->user()))
+        @php
+            $showCvPanel = \App\Http\Middleware\CvPanelAccess::allows(Auth::guard('admin')->user());
+        @endphp
         @if($showCvPanel)
         <div style="padding:10px 10px 4px;margin-top:4px;">
             <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
