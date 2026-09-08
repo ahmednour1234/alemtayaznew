@@ -90,6 +90,31 @@ class CvController extends Controller
         return view('public.cvs.show', compact('worker', 'similar'));
     }
 
+    /**
+     * يعرض ملف السيرة الذاتية PDF للزائر.
+     *
+     * لا يخدم إلا ما تخدمه الصفحة العامة نفسها (baseQuery): عاملة نشطة متاحة
+     * ولها ملف. فور حجزها تختفي من القائمة ويُمنع ملفها كذلك، فلا يبقى الرابط
+     * المنسوخ صالحاً بعد الحجز.
+     *
+     * نعرضه inline لا كتنزيل ليقرأه العميل في المتصفح مباشرة، وبلا اسم الملف
+     * الأصلي لأنه قد يحمل بيانات داخلية.
+     */
+    public function pdf(int $id)
+    {
+        $worker = $this->baseQuery()->findOrFail($id);
+
+        abort_unless($worker->hasCvFile(), 404);
+
+        return response()->file(
+            \Illuminate\Support\Facades\Storage::disk($worker->cvDisk())->path($worker->cv_path),
+            [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="cv-' . $worker->id . '.pdf"',
+            ]
+        );
+    }
+
     /** الشرط الموحّد لما يجوز عرضه للعامة. */
     private function baseQuery()
     {

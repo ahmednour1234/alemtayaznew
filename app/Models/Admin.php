@@ -53,6 +53,26 @@ class Admin extends Authenticatable
         return $this->branch_id !== null && ! $this->isSuperAdmin();
     }
 
+    /**
+     * الجنسيات التي يديرها هذا الموظف في لوحة إدارة السير الذاتية.
+     * تحدّد ما يراه ويرفعه، ومَن يصله إشعار الحجز.
+     */
+    public function managedNationalities(): BelongsToMany
+    {
+        return $this->belongsToMany(Nationality::class, 'admin_nationality')->withTimestamps();
+    }
+
+    /** هل يدير هذا الموظف الجنسية المحدّدة؟ (السوبر أدمن يدير الكل) */
+    public function managesNationality(?int $nationalityId): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $nationalityId !== null
+            && $this->managedNationalities->contains('id', $nationalityId);
+    }
+
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'admin_role');

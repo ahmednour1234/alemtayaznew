@@ -71,6 +71,7 @@ class AdminNotification extends Model
             'worker_unassigned'          => '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg>',
             'worker_no_contract'         => '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>',
             'worker_assignment_cancelled'=> '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+            'cv_reserved'                => '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
             'worker_no_contract_warning' => '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
             default               => '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
         };
@@ -109,6 +110,7 @@ class AdminNotification extends Model
             'critical_lead_warning'=> '#dc2626',
             'worker_cv_uploaded'         => '#0891b2',
             'worker_assigned'            => '#6366f1',
+            'cv_reserved'                => '#ca8a04',
             'worker_unassigned'          => '#ef4444',
             'worker_no_contract'         => '#f59e0b',
             'worker_no_contract_warning' => '#dc2626',
@@ -148,6 +150,7 @@ class AdminNotification extends Model
             'critical_lead_warning'=> '#fee2e2',
             'worker_cv_uploaded'         => '#e0f2fe',
             'worker_assigned'            => '#e0e7ff',
+            'cv_reserved'                => '#fef9c3',
             'worker_unassigned'          => '#fee2e2',
             'worker_no_contract'         => '#fef3c7',
             'worker_no_contract_warning' => '#fee2e2',

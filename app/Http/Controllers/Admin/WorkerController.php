@@ -352,14 +352,15 @@ class WorkerController extends Controller
             ], 410);
         }
 
-        $path = $worker->cv_path ? storage_path('app/public/' . $worker->cv_path) : null;
-
-        if (! $path || ! file_exists($path)) {
+        // الملف قد يكون على القرص العام (سير قديمة) أو الخاص (لوحة إدارة CV)
+        if (! $worker->hasCvFile()) {
             return response()->view('public.cv-unavailable', [
                 'reason' => 'unavailable',
                 'worker' => $worker,
             ], 404);
         }
+
+        $path = Storage::disk($worker->cvDisk())->path($worker->cv_path);
 
         return response()->file($path, [
             'Content-Type'        => mime_content_type($path) ?: 'application/pdf',

@@ -556,6 +556,24 @@
         </div>
         @endif
 
+        {{-- لوحة السير الذاتية: منظومة مستقلة، الوصول إليها بالقسم لا بالصلاحيات،
+             ولذلك تُعرض خارج مجموعات الصلاحيات المعتادة. --}}
+        @php($showCvPanel = \App\Http\Middleware\CvPanelAccess::allows(Auth::guard('admin')->user()))
+        @if($showCvPanel)
+        <div style="padding:10px 10px 4px;margin-top:4px;">
+            <p style="font-size:10px;font-weight:700;letter-spacing:.06em;
+                      text-transform:uppercase;color:#8fa3c0;margin:0;">{{ __('cv-panel.title') }}</p>
+        </div>
+        <div style="margin-bottom:1px;">
+            <a href="{{ route('cv-panel.dashboard') }}"
+               style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;
+                      color:#c9d6e8;font-size:13px;font-weight:600;text-decoration:none;">
+                <svg style="width:16px;height:16px;flex-shrink:0;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span style="flex:1;">{{ __('cv-panel.title') }}</span>
+            </a>
+        </div>
+        @endif
+
         @if($showMarketingGroup)
         {{-- Section label: {{ __('nav.marketing.group') }} --}}
         <div style="padding:10px 10px 4px;margin-top:4px;">

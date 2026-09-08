@@ -97,6 +97,18 @@ class NotifyUncontractedWorkers extends Command
                     );
                 }
 
+                // إشعار منسّقي الجنسية: هم أصحاب هذه السيرة في لوحة CV،
+                // فعودتها للإتاحة تعنيهم مباشرة.
+                foreach ($this->nationalityCoordinators($worker->nationality_id) as $coordinator) {
+                    $this->upsertNotification(
+                        $coordinator->id,
+                        'worker_reservation_expired',
+                        $title,
+                        $body,
+                        $url
+                    );
+                }
+
                 // إشعار مديري الفرع والمديرين العامين
                 $managers = Admin::where('active', true)
                     ->where(function ($q) use ($worker) {
@@ -144,10 +156,39 @@ class NotifyUncontractedWorkers extends Command
                 $url
             );
 
+            // ومنسّقو الجنسية كذلك — هم من يتابع إنشاء العقد على سيرهم
+            foreach ($this->nationalityCoordinators($worker->nationality_id) as $coordinator) {
+                $this->upsertNotification(
+                    $coordinator->id,
+                    'worker_reservation_expiring',
+                    $title,
+                    $body,
+                    $url
+                );
+            }
+
             $reminded++;
         }
 
         $this->info("تذكيرات: {$reminded} — حجوزات مفكوكة: {$released}");
+    }
+
+    /**
+     * منسّقو جنسية بعينها — المسندة إليهم في لوحة السير الذاتية.
+     *
+     * الإسناد هنا بالجنسية لا بالفرع، فلا يُزعَج منسّقو الجنسيات الأخرى
+     * بسير لا شأن لهم بها.
+     */
+    private function nationalityCoordinators(?int $nationalityId)
+    {
+        if (! $nationalityId) {
+            return collect();
+        }
+
+        return Admin::where('active', true)
+            ->where('department', 'coordination')
+            ->whereHas('managedNationalities', fn ($q) => $q->where('nationalities.id', $nationalityId))
+            ->get();
     }
 
     /**

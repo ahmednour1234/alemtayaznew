@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission'      => \App\Http\Middleware\CheckPermission::class,
             'auto.permission' => \App\Http\Middleware\AutoPermission::class,
             'log.access'      => \App\Http\Middleware\LogAccess::class,
+            'cv.panel'        => \App\Http\Middleware\CvPanelAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

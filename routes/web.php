@@ -45,6 +45,10 @@ Route::controller(\App\Http\Controllers\PublicSite\CvController::class)->group(f
     Route::get('/cvs',      'index')->name('site.cvs');
     Route::get('/cvs/{id}', 'show')->whereNumber('id')->name('site.cvs.show');
 
+    // ملف السيرة PDF للزائر — يُخدَم من الكنترولر لا من القرص العام،
+    // فالسير الجديدة على قرص خاص ولا تُخدَم إلا وهي متاحة.
+    Route::get('/cvs/{id}/pdf', 'pdf')->whereNumber('id')->name('site.cvs.pdf');
+
     // رابط مختصر لكل جنسية: /nationality/et — أوضح للزائر ولمحرّكات البحث
     // من ‎/cvs?nationality_id=3‎. يُقيَّد بالحروف والأرقام فقط.
     Route::get('/nationality/{key}', 'byNationality')
@@ -352,6 +356,37 @@ Route::prefix('admin')->name('admin.')->group(function () {
 | storage symlink, and when the link is missing or stale Apache answers 403
 | before PHP ever runs. /file/... has no such collision.
 */
+/*
+|--------------------------------------------------------------------------
+| لوحة إدارة السير الذاتية (CV Panel)
+|--------------------------------------------------------------------------
+| منظومة مستقلة عن لوحة الإدارة العامة: المنسّق يرفع سير الجنسيات المسندة
+| إليه، وخدمة العملاء تحجز، والمديرون يشرفون ويُسندون الجنسيات.
+| تستخدم حارس admin نفسه، والوصول محكوم بـ cv.panel لا بالصلاحيات العامة.
+*/
+Route::prefix('cv-panel')->name('cv-panel.')
+    ->middleware(['auth.admin', 'cv.panel', 'log.access'])
+    ->group(function () {
+        Route::get('/', [\App\Http\Controllers\CvPanel\DashboardController::class, 'index'])->name('dashboard');
+
+        // رفع السير دفعة واحدة
+        Route::get('upload',  [\App\Http\Controllers\CvPanel\CvUploadController::class, 'create'])->name('upload');
+        Route::post('upload', [\App\Http\Controllers\CvPanel\CvUploadController::class, 'store'])->name('upload.store');
+
+        // قائمة السير
+        Route::get('cvs', [\App\Http\Controllers\CvPanel\CvController::class, 'index'])->name('cvs.index');
+
+        // الحجز — خدمة العملاء تحجز السيرة للعميل لمدة محدودة
+        Route::get('cvs/{id}/reserve',  [\App\Http\Controllers\CvPanel\ReservationController::class, 'create'])
+            ->whereNumber('id')->name('reserve');
+        Route::post('cvs/{id}/reserve', [\App\Http\Controllers\CvPanel\ReservationController::class, 'store'])
+            ->whereNumber('id')->name('reserve.store');
+
+        // إسناد الجنسيات للمنسّقين — للمديرين فقط (يتحقّق الكنترولر)
+        Route::get('coordinators',       [\App\Http\Controllers\CvPanel\CoordinatorController::class, 'index'])->name('coordinators.index');
+        Route::put('coordinators/{id}',  [\App\Http\Controllers\CvPanel\CoordinatorController::class, 'update'])->name('coordinators.update');
+    });
+
 Route::get('file/{path}', function (string $path) {
     // Block traversal outside storage/app/public.
     if (str_contains($path, '..')) {

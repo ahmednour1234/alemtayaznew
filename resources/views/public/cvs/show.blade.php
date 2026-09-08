@@ -79,13 +79,13 @@
                             اطلب هذه العاملة
                         </a>
                         @if($S('whatsapp'))
-                        <a href="https://wa.me/{{ preg_replace('/\D/', '', $S('whatsapp')) }}?text={{ urlencode('استفسار عن العاملة: ' . $worker->name . ' (رقم ' . $worker->id . ')') }}"
+                        <a href="https://wa.me/{{ preg_replace('/\D/', '', $S('whatsapp')) }}?text={{ urlencode('أرغب في حجز هذه العاملة: ' . $worker->name . ' (رقم ' . $worker->id . ')' . PHP_EOL . $shareUrl) }}"
                            target="_blank" rel="noopener"
                            class="block w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-3 rounded-xl transition-colors">
-                            استفسار عبر واتساب
+                            اطلب هذه العاملة عبر واتساب
                         </a>
                         @endif
-                        <a href="{{ route('admin.workers.cv', $worker->id) }}" target="_blank" rel="noopener"
+                        <a href="{{ route('site.cvs.pdf', $worker->id) }}" target="_blank" rel="noopener"
                            class="block w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-3 rounded-xl transition-colors">
                             تحميل السيرة الذاتية PDF
                         </a>
@@ -127,7 +127,7 @@
             <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
                 <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
                     <h2 class="font-bold text-navy text-sm">السيرة الذاتية</h2>
-                    <a href="{{ route('admin.workers.cv', $worker->id) }}" target="_blank" rel="noopener"
+                    <a href="{{ route('site.cvs.pdf', $worker->id) }}" target="_blank" rel="noopener"
                        class="text-xs text-navy hover:text-gold font-bold transition-colors">
                         فتح في نافذة جديدة ←
                     </a>
@@ -144,7 +144,7 @@
                                 <svg class="w-6 h-6 text-navy" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             </div>
                             <p class="text-sm text-slate-600">متصفحك لا يدعم عرض ملفات PDF مباشرةً.</p>
-                            <a href="{{ route('admin.workers.cv', $worker->id) }}" target="_blank" rel="noopener"
+                            <a href="{{ route('site.cvs.pdf', $worker->id) }}" target="_blank" rel="noopener"
                                class="inline-block mt-4 bg-navy hover:bg-navy-light text-white text-sm font-bold px-6 py-2.5 rounded-lg transition-colors">
                                 فتح السيرة الذاتية
                             </a>

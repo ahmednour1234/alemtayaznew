@@ -239,6 +239,18 @@ class AutoPermission
         'admin.marketing.website-leads.assign'    => 'website-leads.assign',
         'admin.marketing.leads-board'        => 'leads-board.view',
         'admin.marketing.leads-board.auto-assign' => 'leads.create',
+        // ── CV Panel (لوحة السير الذاتية المستقلة) ────────────────────────────
+        // الوصول محكوم بوسيط cv.panel (الأقسام المسموح لها) لا بصلاحيات النظام العامة،
+        // لكن لا بدّ من إدراجها هنا لأن أي مسار غير مُدرج يمرّ بلا حماية.
+        'cv-panel.dashboard'           => null,
+        'cv-panel.upload'              => null,
+        'cv-panel.upload.store'        => null,
+        'cv-panel.cvs.index'           => null,
+        'cv-panel.reserve'             => null,
+        'cv-panel.reserve.store'       => null,
+        'cv-panel.coordinators.index'  => null,
+        'cv-panel.coordinators.update' => null,
+
         // ── Housing (السكن) ──────────────────────────────────────
         'admin.housings.index'   => 'housings.view',
         'admin.housings.create'  => 'housings.create',

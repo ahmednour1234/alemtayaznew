@@ -16,7 +16,7 @@ class Worker extends Model
     protected $fillable = [
         'name', 'passport_number', 'visa_number', 'nationality_id', 'profession',
         'gender', 'experience', 'religion', 'age', 'phone',
-        'cv_path', 'original_cv_name', 'passport_image',
+        'cv_path', 'cv_disk', 'original_cv_name', 'passport_image',
         'status', 'client_id', 'branch_id', 'admin_id',
         'assigned_by_admin_id', 'assigned_at',
         'tamara_paid_at', 'tamara_paid_by_admin_id',
@@ -157,6 +157,24 @@ class Worker extends Model
         return $this->relationLoaded('latestContract')
             ? $this->latestContract !== null
             : $this->latestContract()->exists();
+    }
+
+    /**
+     * قرص تخزين ملف السيرة الذاتية.
+     *
+     * القيمة الفارغة تعني القرص العام — وهو سلوك الملفات القديمة. الملفات
+     * المرفوعة من لوحة إدارة السير تُخزَّن على قرص خاص لا يخدمه أي مسار عام.
+     */
+    public function cvDisk(): string
+    {
+        return $this->cv_disk ?: 'public';
+    }
+
+    /** هل ملف السيرة الذاتية موجود فعلاً على قرصه؟ */
+    public function hasCvFile(): bool
+    {
+        return $this->cv_path
+            && \Illuminate\Support\Facades\Storage::disk($this->cvDisk())->exists($this->cv_path);
     }
 
     /** مهلة الحجز بالأيام بعد تسجيل سداد تمارا. */

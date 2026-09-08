@@ -47,6 +47,20 @@ return [
             'report' => false,
         ],
 
+        /*
+         * ملفات السير الذاتية المرفوعة من لوحة إدارة CV.
+         *
+         * خارج storage/app/public عمداً: المسار العام ‎/file/{path}‎ يخدم
+         * أي ملف تحت المجلد العام بلا تحقّق، فتخزين السير هنا يجعل الوصول
+         * إليها ممكناً عبر الكنترولر وحده — بعد التأكد من إتاحة العاملة.
+         */
+        'cv_private' => [
+            'driver'     => 'local',
+            'root'       => storage_path('app/cv-private'),
+            'throw'      => false,
+            'report'     => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
