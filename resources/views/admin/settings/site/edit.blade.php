@@ -122,6 +122,20 @@
             </div>
         </div>
 
+        {{-- التتبّع والإعلانات --}}
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">التتبّع والإعلانات</h3>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">معرّف Google Ads</label>
+                <input type="text" name="google_ads_id" dir="ltr" placeholder="AW-123456789"
+                       value="{{ old('google_ads_id', $settings['google_ads_id'] ?? '') }}"
+                       class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <p class="text-xs text-slate-500 mt-1.5">
+                    يُحقن وسم gtag.js في كل صفحات الموقع العام. اتركه فارغاً لتعطيل التتبّع.
+                </p>
+            </div>
+        </div>
+
         <div class="flex justify-end gap-3">
             <button type="submit"
                     class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-8 py-2.5 rounded-lg transition-colors">

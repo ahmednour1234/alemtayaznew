@@ -27,6 +27,19 @@
 
     <link rel="icon" type="image/png" href="{{ asset('08_alemtyaz_logo_original.png') }}">
 
+    {{-- Google Ads (gtag.js) — يُحقن فقط إن كان المعرّف مضبوطاً في إعدادات الموقع،
+         وأعلى الرأس ما أمكن ليلتقط الزيارة قبل أي تنقّل. --}}
+    @if($gtagId = $S('google_ads_id'))
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gtagId }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', @json($gtagId));
+    </script>
+    @endif
+
     {{-- Open Graph — تظهر عند مشاركة الرابط في واتساب وتويتر --}}
     <meta property="og:title" content="@yield('title', $S('company_name'))">
     <meta property="og:description" content="@yield('meta_description', $S('company_name') . ' — ' . $S('tagline'))">

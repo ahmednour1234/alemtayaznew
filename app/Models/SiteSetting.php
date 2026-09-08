@@ -56,6 +56,9 @@ class SiteSetting extends Model
             'instagram'     => '',
             'snapchat'      => '',
             'tiktok'        => '',
+
+            // معرّفات التتبّع — تُترك فارغة فلا يُحقن أي وسم حتى تُملأ
+            'google_ads_id' => 'AW-18437746450',
         ];
     }
 
