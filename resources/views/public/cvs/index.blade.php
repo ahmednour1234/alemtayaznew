@@ -69,28 +69,40 @@
             ? route('site.cvs.nationality', $activeNat->getRouteKey())
             : route('site.cvs');
 
-        // بناء رابط يحافظ على بقية الفلاتر ويبدّل واحداً منها
-        $filterUrl = function (string $key, ?string $value) use ($baseUrl, $filters, $activeNat) {
-            $params = array_filter([
-                'experience' => $filters['experience'] ?? null,
-                'religion'   => $filters['religion']   ?? null,
-            ]);
+        $curExp = $filters['experience'] ?? null;
+        $curRel = $filters['religion'] ?? null;
 
-            if ($value === null) {
-                unset($params[$key]);
-            } else {
-                $params[$key] = $value;
-            }
+        // الوسائط الثابتة التي ترافق أي رابط فلترة.
+        // صفحة «كل الجنسيات» تحمل الجنسية كوسيط، أما صفحة الجنسية فتحملها في المسار.
+        $keep = [];
+        if (! $activeNat && ! empty($filters['nationality_id'])) {
+            $keep['nationality_id'] = $filters['nationality_id'];
+        }
 
-            // صفحة «كل الجنسيات» تحمل الجنسية كوسيط لا في المسار
-            if (! $activeNat && ! empty($filters['nationality_id'])) {
-                $params['nationality_id'] = $filters['nationality_id'];
-            }
+        // نبني روابط كل خيار مسبقاً: قائمتان جاهزتان للعرض بدل تعبير طويل
+        // داخل كل وسم <a>.
+        $expUrls = ['' => $baseUrl];
+        $relUrls = ['' => $baseUrl];
 
-            return $baseUrl . ($params ? '?' . http_build_query($params) : '');
-        };
+        foreach (array_keys($experiences) as $k) {
+            $expUrls[$k] = $baseUrl . '?' . http_build_query(
+                array_filter($keep + ['experience' => $k, 'religion' => $curRel])
+            );
+        }
 
-        $hasFilter = ! empty($filters['experience']) || ! empty($filters['religion']);
+        foreach (array_keys($religions) as $k) {
+            $relUrls[$k] = $baseUrl . '?' . http_build_query(
+                array_filter($keep + ['experience' => $curExp, 'religion' => $k])
+            );
+        }
+
+        // رابط «الكل» في كل مجموعة يُبقي فلتر المجموعة الأخرى
+        $allExp = array_filter($keep + ['religion' => $curRel]);
+        $allRel = array_filter($keep + ['experience' => $curExp]);
+        $expUrls[''] = $baseUrl . ($allExp ? '?' . http_build_query($allExp) : '');
+        $relUrls[''] = $baseUrl . ($allRel ? '?' . http_build_query($allRel) : '');
+
+        $hasFilter = $curExp || $curRel;
     @endphp
 
     <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 mb-8">
@@ -100,7 +112,7 @@
             <div>
                 <p class="text-xs font-bold text-slate-500 mb-2.5">الخبرة</p>
                 <div class="flex flex-wrap gap-2">
-                    <a href="{{ $filterUrl('experience', null) }}"
+                    <a href="{{ $expUrls[''] }}"
                        class="px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors
                               {{ empty($filters['experience'])
                                     ? 'bg-navy text-white border-navy'
@@ -108,7 +120,7 @@
                         الكل
                     </a>
                     @foreach($experiences as $key => $label)
-                    <a href="{{ $filterUrl('experience', $key) }}"
+                    <a href="{{ $expUrls[$key] }}"
                        class="px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors
                               {{ ($filters['experience'] ?? null) === $key
                                     ? 'bg-navy text-white border-navy'
@@ -123,7 +135,7 @@
             <div>
                 <p class="text-xs font-bold text-slate-500 mb-2.5">الديانة</p>
                 <div class="flex flex-wrap gap-2">
-                    <a href="{{ $filterUrl('religion', null) }}"
+                    <a href="{{ $relUrls[''] }}"
                        class="px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors
                               {{ empty($filters['religion'])
                                     ? 'bg-navy text-white border-navy'
@@ -131,7 +143,7 @@
                         الكل
                     </a>
                     @foreach($religions as $key => $label)
-                    <a href="{{ $filterUrl('religion', $key) }}"
+                    <a href="{{ $relUrls[$key] }}"
                        class="px-3.5 py-1.5 rounded-full text-xs font-bold border transition-colors
                               {{ ($filters['religion'] ?? null) === $key
                                     ? 'bg-navy text-white border-navy'
