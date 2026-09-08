@@ -73,7 +73,7 @@
     @else
 
     {{-- ══ البطاقات ══ --}}
-    <div id="cv-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+    <div id="cv-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
         @include('public.cvs._cards', ['workers' => $workers])
     </div>
 
