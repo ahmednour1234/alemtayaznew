@@ -102,7 +102,7 @@
                 <td class="px-4 py-3 text-ink-muted">{{ $w->created_at?->format('Y-m-d') }}</td>
                 <td class="px-4 py-3">
                     @if($w->hasCvFile())
-                    <a href="{{ route('admin.workers.cv', $w->id) }}" target="_blank" rel="noopener"
+                    <a href="{{ route('cv-panel.cvs.file', $w->id) }}" target="_blank" rel="noopener"
                        class="text-primary hover:text-primary-dark font-bold">{{ __('cv-panel.view_cv') }}</a>
                     @else
                     <span class="text-ink-muted">{{ __('cv-panel.no_file') }}</span>

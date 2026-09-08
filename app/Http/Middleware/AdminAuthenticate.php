@@ -11,18 +11,22 @@ class AdminAuthenticate
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // لوحة السير الذاتية قائمة بذاتها ولها شاشة دخولها، فلا نُلقي
+        // زائرها في شاشة لوحة الإدارة.
+        $loginRoute = $request->is('cv-panel', 'cv-panel/*') ? 'cv-panel.login' : 'admin.login';
+
         if (! Auth::guard('admin')->check()) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Unauthenticated.'], 401);
             }
-            return redirect()->route('admin.login');
+            return redirect()->route($loginRoute);
         }
 
         $admin = Auth::guard('admin')->user();
 
         if (! $admin->active) {
             Auth::guard('admin')->logout();
-            return redirect()->route('admin.login')
+            return redirect()->route($loginRoute)
                 ->withErrors(['email' => 'حسابك غير مفعّل. يرجى التواصل مع المدير.']);
         }
 

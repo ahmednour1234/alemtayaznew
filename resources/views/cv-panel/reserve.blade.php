@@ -22,7 +22,7 @@
             </p>
         </div>
         @if($worker->hasCvFile())
-        <a href="{{ route('admin.workers.cv', $worker->id) }}" target="_blank" rel="noopener"
+        <a href="{{ route('cv-panel.cvs.file', $worker->id) }}" target="_blank" rel="noopener"
            class="ms-auto text-primary hover:text-primary-dark text-sm font-bold whitespace-nowrap">
             {{ __('cv-panel.view_cv') }}
         </a>

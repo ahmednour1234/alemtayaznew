@@ -242,10 +242,17 @@ class AutoPermission
         // ── CV Panel (لوحة السير الذاتية المستقلة) ────────────────────────────
         // الوصول محكوم بوسيط cv.panel (الأقسام المسموح لها) لا بصلاحيات النظام العامة،
         // لكن لا بدّ من إدراجها هنا لأن أي مسار غير مُدرج يمرّ بلا حماية.
+        'cv-panel.login'               => null,
+        'cv-panel.login.post'          => null,
+        'cv-panel.logout'              => null,
+        'cv-panel.notifications.index' => null,
+        'cv-panel.notifications.read'  => null,
+        'cv-panel.notifications.read-all' => null,
         'cv-panel.dashboard'           => null,
         'cv-panel.upload'              => null,
         'cv-panel.upload.store'        => null,
         'cv-panel.cvs.index'           => null,
+        'cv-panel.cvs.file'            => null,
         'cv-panel.reserve'             => null,
         'cv-panel.reserve.store'       => null,
         'cv-panel.reserve.destroy'     => null,

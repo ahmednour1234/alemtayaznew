@@ -55,6 +55,35 @@ class CvController extends Controller
         ]);
     }
 
+    /**
+     * يخدم ملف السيرة داخل اللوحة.
+     *
+     * لا نعتمد على مسار لوحة الإدارة (admin.workers.cv) لأنه محكوم بصلاحية
+     * workers.view، وقد لا يملكها موظّف خدمة العملاء هنا. اللوحة مستقلة،
+     * فتخدم ملفاتها بنفسها ضمن نطاق ما يراه المستخدم.
+     */
+    public function file(int $id)
+    {
+        $me     = Auth::guard('admin')->user();
+        $worker = Worker::findOrFail($id);
+        $scope  = $this->nationalityScope($me);
+
+        // المنسّق لا يفتح ملفاً خارج جنسياته
+        if ($scope !== null && ! in_array($worker->nationality_id, $scope, true)) {
+            abort(403);
+        }
+
+        abort_unless($worker->hasCvFile(), 404);
+
+        return response()->file(
+            \Illuminate\Support\Facades\Storage::disk($worker->cvDisk())->path($worker->cv_path),
+            [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="cv-' . $worker->id . '.pdf"',
+            ]
+        );
+    }
+
     /** معرّفات الجنسيات المرئية، أو null لمن يرى الكل. */
     protected function nationalityScope($me): ?array
     {

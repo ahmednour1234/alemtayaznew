@@ -364,9 +364,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
 | إليه، وخدمة العملاء تحجز، والمديرون يشرفون ويُسندون الجنسيات.
 | تستخدم حارس admin نفسه، والوصول محكوم بـ cv.panel لا بالصلاحيات العامة.
 */
+// دخول اللوحة — خارج حماية auth.admin، وله شاشته الخاصة لا شاشة لوحة الإدارة
+Route::prefix('cv-panel')->name('cv-panel.')->group(function () {
+    Route::get('login',  [\App\Http\Controllers\CvPanel\AuthController::class, 'showLogin'])->name('login');
+    Route::post('login', [\App\Http\Controllers\CvPanel\AuthController::class, 'login'])->name('login.post');
+});
+
 Route::prefix('cv-panel')->name('cv-panel.')
     ->middleware(['auth.admin', 'cv.panel', 'log.access'])
     ->group(function () {
+        Route::post('logout', [\App\Http\Controllers\CvPanel\AuthController::class, 'logout'])->name('logout');
+
+        // الإشعارات داخل اللوحة
+        Route::get('notifications',           [\App\Http\Controllers\CvPanel\NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('notifications/read-all', [\App\Http\Controllers\CvPanel\NotificationController::class, 'readAll'])->name('notifications.read-all');
+        Route::get('notifications/{id}/read', [\App\Http\Controllers\CvPanel\NotificationController::class, 'read'])->whereNumber('id')->name('notifications.read');
         Route::get('/', [\App\Http\Controllers\CvPanel\DashboardController::class, 'index'])->name('dashboard');
 
         // رفع السير دفعة واحدة
@@ -375,6 +387,8 @@ Route::prefix('cv-panel')->name('cv-panel.')
 
         // قائمة السير
         Route::get('cvs', [\App\Http\Controllers\CvPanel\CvController::class, 'index'])->name('cvs.index');
+        Route::get('cvs/{id}/file', [\App\Http\Controllers\CvPanel\CvController::class, 'file'])
+            ->whereNumber('id')->name('cvs.file');
 
         // الحجز — خدمة العملاء تحجز السيرة للعميل لمدة محدودة
         Route::get('cvs/{id}/reserve',  [\App\Http\Controllers\CvPanel\ReservationController::class, 'create'])

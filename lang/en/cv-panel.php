@@ -52,6 +52,25 @@ return [
         'copied'        => 'Link copied',
         'open_public'   => 'Open public page',
 
+    'auth' => [
+        'title'           => 'CV Panel sign-in',
+        'subtitle'        => 'Sign in with your system account',
+        'email'           => 'Email',
+        'password'        => 'Password',
+        'remember'        => 'Remember me',
+        'submit'          => 'Sign in',
+        'bad_credentials' => 'Invalid credentials.',
+        'inactive'        => 'Your account is not active. Please contact your manager.',
+    ],
+
+    'notifications' => [
+        'title'    => 'Notifications',
+        'unread'   => 'unread',
+        'mark_all' => 'Mark all as read',
+        'empty'    => 'No notifications.',
+        'view_all' => 'View all notifications',
+    ],
+
     'reserve' => [
         'title'           => 'Reserve a CV',
         'action'          => 'Reserve for client',

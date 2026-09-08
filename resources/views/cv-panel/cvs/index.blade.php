@@ -13,7 +13,7 @@
         && ! in_array($me->department, ['accounts', 'accountant', 'coordination'], true);
 @endphp
 
-<div class="flex items-center justify-between gap-4 mb-5">
+<div class="flex flex-wrap items-center justify-between gap-3 mb-5">
     <h1 class="font-extrabold text-lg sm:text-xl">
         {{ __('cv-panel.cvs') }}
         <span class="text-sm font-semibold text-ink-muted">({{ number_format($workers->total()) }})</span>
@@ -27,7 +27,7 @@
 
 {{-- ══ التصفية ══ --}}
 <form method="GET" class="bg-white rounded-2xl border border-slate-200 p-4 mb-6">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
         <input type="text" name="search" value="{{ $filters['search'] ?? '' }}"
                placeholder="{{ __('cv-panel.filters.search') }}"
                class="border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
@@ -76,7 +76,7 @@
     {{ __('cv-panel.no_cvs') }}
 </div>
 @else
-<div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
+<div class="hidden lg:block bg-white rounded-2xl border border-slate-200 overflow-x-auto">
     <table class="w-full text-sm">
         <thead class="bg-slate-50 text-xs text-ink-muted">
             <tr>
@@ -111,78 +111,86 @@
                 <td class="px-4 py-3 text-ink-muted whitespace-nowrap">{{ $w->created_at?->format('Y-m-d') }}</td>
                 <td class="px-4 py-3">
                     @if($w->hasCvFile())
-                    <a href="{{ route('admin.workers.cv', $w->id) }}" target="_blank" rel="noopener"
+                    <a href="{{ route('cv-panel.cvs.file', $w->id) }}" target="_blank" rel="noopener"
                        class="text-primary hover:text-primary-dark font-bold whitespace-nowrap">{{ __('cv-panel.view_cv') }}</a>
                     @else
                     <span class="text-ink-muted">{{ __('cv-panel.no_file') }}</span>
                     @endif
                 </td>
                 <td class="px-4 py-3">
-                    @php
-                        // الإجراءات على حجز قائم مقصورة على من حجزها (والسوبر أدمن)،
-                        // وهي نفس قاعدة WorkerService::unassign حتى لا يظهر زر يفشل.
-                        $mine = $me->isSuperAdmin() || $me->id === $w->assigned_by_admin_id;
-                    @endphp
-
                     <div class="flex items-center justify-end gap-1.5">
-                        @if($w->status === 'available')
-                            @if($canReserve)
-                            <a href="{{ route('cv-panel.reserve', $w->id) }}"
-                               class="bg-navy hover:bg-navy-light text-white text-xs font-bold px-3.5 py-2 rounded-lg whitespace-nowrap transition-colors">
-                                {{ __('cv-panel.reserve.action') }}
-                            </a>
-                            @endif
-
-                        @elseif($w->status === 'reserved')
-                            @if($mine)
-                                {{-- إنشاء العقد: الهدف من الحجز، فيتصدّر الإجراءات.
-                                     نُظهره فقط لمن يجتاز فعلاً فحصَي AutoPermission:
-                                     صلاحية contracts.create، وألا يكون من الأقسام الممنوعة. --}}
-                                @if($canCreateContract)
-                                <a href="{{ route('admin.contracts.create', ['worker_id' => $w->id, 'client_id' => $w->client_id]) }}"
-                                   class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap transition-colors">
-                                    {{ __('cv-panel.reserve.contract') }}
-                                </a>
-                                @endif
-
-                                {{-- تمارا: يظهر ما لم يكن مسجّلاً بالفعل --}}
-                                @if($w->hasTamaraPayment())
-                                <span class="text-[11px] font-bold text-purple-700 bg-purple-50 px-2.5 py-2 rounded-lg whitespace-nowrap">
-                                    {{ __('cv-panel.reserve.tamara_paid') }}
-                                </span>
-                                @else
-                                <form method="POST" action="{{ route('cv-panel.tamara', $w->id) }}" class="inline"
-                                      onsubmit="return confirm(@js(__('cv-panel.reserve.tamara_confirm', ['days' => \App\Models\Worker::TAMARA_RESERVATION_DAYS])))">
-                                    @csrf
-                                    <button type="submit"
-                                            class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap transition-colors">
-                                        {{ __('cv-panel.reserve.tamara') }}
-                                    </button>
-                                </form>
-                                @endif
-
-                                {{-- إلغاء الحجز --}}
-                                <form method="POST" action="{{ route('cv-panel.reserve.destroy', $w->id) }}" class="inline"
-                                      onsubmit="return confirm(@js(__('cv-panel.reserve.cancel_confirm', ['name' => $w->name])))">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                            class="bg-red-50 hover:bg-red-600 text-red-600 hover:text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap transition-colors">
-                                        {{ __('cv-panel.reserve.cancel') }}
-                                    </button>
-                                </form>
-                            @else
-                            <span class="text-[11px] text-ink-muted whitespace-nowrap">
-                                {{ __('cv-panel.reserve.only_reserver') }}
-                            </span>
-                            @endif
-                        @endif
+                        @include('cv-panel.cvs.partials._actions')
                     </div>
                 </td>
             </tr>
             @endforeach
         </tbody>
     </table>
+</div>
+
+{{-- ══ بطاقات الجوال — الجدول لا يصلح لشاشة ضيّقة ══ --}}
+<div class="lg:hidden space-y-3">
+    @foreach($workers as $w)
+    <div class="bg-white rounded-2xl border border-slate-200 p-4">
+
+        <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+                <p class="font-extrabold text-sm leading-snug">{{ $w->name }}</p>
+                <p class="text-[11px] text-ink-muted mt-1">
+                    #{{ $w->id }}
+                    <span class="mx-1">·</span>{{ $w->nationality?->display_name ?? '—' }}
+                    <span class="mx-1">·</span>{{ $w->created_at?->format('Y-m-d') }}
+                </p>
+            </div>
+            <span class="flex-shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold {{ $w->status_bg }} {{ $w->status_color }}">
+                {{ $w->status_label }}
+            </span>
+        </div>
+
+        {{-- الخبرة والديانة --}}
+        <div class="grid grid-cols-2 gap-2 mt-3">
+            <div class="bg-slate-50 rounded-lg px-3 py-2">
+                <p class="text-[10px] text-ink-muted">{{ __('cv-panel.table.experience') }}</p>
+                <p class="text-xs font-bold mt-0.5">{{ $w->experience ? ($experiences[$w->experience] ?? $w->experience) : '—' }}</p>
+            </div>
+            <div class="bg-slate-50 rounded-lg px-3 py-2">
+                <p class="text-[10px] text-ink-muted">{{ __('cv-panel.table.religion') }}</p>
+                <p class="text-xs font-bold mt-0.5">{{ $w->religion ? ($religions[$w->religion] ?? $w->religion) : '—' }}</p>
+            </div>
+        </div>
+
+        {{-- تفاصيل الحجز --}}
+        @if($w->status === 'reserved' && $w->assigned_at)
+        <div class="mt-3 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+            <p class="text-[11px] font-bold text-amber-900">{{ $w->client?->name ?? '—' }}</p>
+            <p class="text-[10px] text-amber-800 mt-0.5">
+                {{ __('cv-panel.reserve.reserved_by', ['name' => $w->assignedBy?->name ?? '—']) }}
+            </p>
+            <p class="text-[10px] text-amber-800">
+                {{ __('cv-panel.reserve.expires', ['time' => $w->assigned_at->copy()->addHours($w->reservationHours())->format('Y-m-d H:i')]) }}
+            </p>
+        </div>
+        @elseif($w->client)
+        <p class="mt-3 text-[11px] text-ink-muted">
+            {{ __('cv-panel.table.client') }}: <span class="font-bold text-ink">{{ $w->client->name }}</span>
+        </p>
+        @endif
+
+        {{-- الملف والإجراءات --}}
+        <div class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+            @if($w->hasCvFile())
+            <a href="{{ route('cv-panel.cvs.file', $w->id) }}" target="_blank" rel="noopener"
+               class="bg-slate-100 hover:bg-slate-200 text-ink text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap transition-colors">
+                {{ __('cv-panel.view_cv') }}
+            </a>
+            @else
+            <span class="text-[11px] text-ink-muted">{{ __('cv-panel.no_file') }}</span>
+            @endif
+
+            @include('cv-panel.cvs.partials._actions')
+        </div>
+    </div>
+    @endforeach
 </div>
 
 <div class="mt-6">{{ $workers->links() }}</div>

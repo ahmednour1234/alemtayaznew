@@ -15,6 +15,9 @@
     $me     = Auth::guard('admin')->user();
     $canMan = $me->isSuperAdmin() || in_array($me->department, ['branch_manager', 'chairman'], true);
 
+    $unreadCount = \App\Http\Controllers\CvPanel\NotificationController::scope($me)
+        ->whereNull('read_at')->count();
+
     $nav = [
         ['route' => 'cv-panel.dashboard', 'label' => __('cv-panel.dashboard'),
          'icon'  => 'M3 12l9-9 9 9M5 10v10h14V10'],
@@ -52,7 +55,12 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family={{ $locConf['google_font'] }}&display=swap" rel="stylesheet">
-    <style>[x-cloak]{display:none!important}</style>
+    <style>
+        [x-cloak]{display:none!important}
+        /* شريط تمرير القائمة العلوية مخفي — التمرير باللمس على الجوال */
+        .no-scrollbar::-webkit-scrollbar{display:none}
+        .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+    </style>
     @stack('styles')
 </head>
 <body class="bg-slate-100 font-sans text-ink antialiased min-h-screen flex flex-col">
@@ -67,27 +75,37 @@
                 <span class="text-sm sm:text-base">{{ __('cv-panel.title') }}</span>
             </a>
 
-            <div class="flex items-center gap-3 text-xs">
-                <span class="hidden sm:inline text-white/70">{{ $me->name }}</span>
-                <a href="{{ route('admin.dashboard') }}" class="hidden sm:inline text-white/70 hover:text-white">
-                    {{ __('cv-panel.back_to_admin') }}
+            <div class="flex items-center gap-2 sm:gap-3 text-xs">
+                <span class="hidden sm:inline text-white/70 max-w-[10rem] truncate">{{ $me->name }}</span>
+
+                {{-- الإشعارات داخل اللوحة — لا تعتمد على شريط لوحة الإدارة --}}
+                <a href="{{ route('cv-panel.notifications.index') }}"
+                   class="relative w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                   title="{{ __('cv-panel.notifications.title') }}" aria-label="{{ __('cv-panel.notifications.title') }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                    @if($unreadCount > 0)
+                    <span class="absolute -top-1 -end-1 min-w-[1.05rem] h-[1.05rem] px-1 rounded-full bg-red-500 text-white
+                                 text-[10px] font-bold flex items-center justify-center">
+                        {{ $unreadCount > 99 ? '99+' : $unreadCount }}
+                    </span>
+                    @endif
                 </a>
-                <form method="POST" action="{{ route('admin.logout') }}">
+                <form method="POST" action="{{ route('cv-panel.logout') }}">
                     @csrf
-                    <button type="submit" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 font-bold transition-colors">
+                    <button type="submit" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 font-bold transition-colors whitespace-nowrap">
                         {{ __('cv-panel.logout') }}
                     </button>
                 </form>
             </div>
         </div>
 
-        <nav class="flex items-center gap-1 overflow-x-auto -mb-px">
+        <nav class="flex items-center gap-1 overflow-x-auto -mb-px no-scrollbar">
             @foreach($nav as $item)
                 @php
                     $isActive = request()->routeIs($item['route']);
                 @endphp
                 <a href="{{ route($item['route']) }}"
-                   class="inline-flex items-center gap-2 px-4 py-3 text-sm font-bold whitespace-nowrap border-b-2 transition-colors
+                   class="inline-flex items-center gap-2 px-3 sm:px-4 py-3 text-xs sm:text-sm font-bold whitespace-nowrap border-b-2 transition-colors
                           {{ $isActive ? 'border-primary text-primary' : 'border-transparent text-white/70 hover:text-white' }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/></svg>
                     {{ $item['label'] }}
