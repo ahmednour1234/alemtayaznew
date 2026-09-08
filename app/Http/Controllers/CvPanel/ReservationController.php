@@ -77,6 +77,45 @@ class ReservationController extends Controller
     }
 
     /**
+     * إلغاء الحجز وإعادة السيرة للإتاحة.
+     *
+     * نفوّض المنطق إلى WorkerService::unassign — هو الذي يتحقّق من الصلاحية
+     * (صاحب الحجز وحده أو السوبر أدمن) ويسجّل ويُشعر، فلا نُكرّر القاعدة هنا
+     * ولا نفتح باباً خلفياً يتجاوزها.
+     */
+    public function destroy(int $id, \App\Services\WorkerService $workers): RedirectResponse
+    {
+        $me = Auth::guard('admin')->user();
+
+        try {
+            $workers->unassign($id, $me);
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', __('cv-panel.reserve.cancelled'));
+    }
+
+    /**
+     * تسجيل سداد تمارا — يمدّد مهلة الحجز إلى 5 أيام من تاريخ الحجز الأصلي.
+     */
+    public function tamara(int $id, \App\Services\WorkerService $workers): RedirectResponse
+    {
+        $me     = Auth::guard('admin')->user();
+        $worker = Worker::findOrFail($id);
+
+        if (! $worker->canRecordTamaraBy($me)) {
+            return back()->with('error', __('cv-panel.reserve.tamara_denied'));
+        }
+
+        $workers->recordTamaraPayment($worker, $me);
+
+        return back()->with('success', __('cv-panel.reserve.tamara_done', [
+            'days' => Worker::TAMARA_RESERVATION_DAYS,
+        ]));
+    }
+
+    /**
      * يحدّد العميل: إمّا عميل قائم، وإمّا عميل جديد يُنشأ من اسم ورقم.
      *
      * ننشئ العميل هنا لأن أغلب من يصل عبر واتساب ليس مسجّلاً بعد، وإجبار

@@ -248,6 +248,8 @@ class AutoPermission
         'cv-panel.cvs.index'           => null,
         'cv-panel.reserve'             => null,
         'cv-panel.reserve.store'       => null,
+        'cv-panel.reserve.destroy'     => null,
+        'cv-panel.tamara'              => null,
         'cv-panel.coordinators.index'  => null,
         'cv-panel.coordinators.update' => null,
 

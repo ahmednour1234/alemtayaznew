@@ -382,6 +382,13 @@ Route::prefix('cv-panel')->name('cv-panel.')
         Route::post('cvs/{id}/reserve', [\App\Http\Controllers\CvPanel\ReservationController::class, 'store'])
             ->whereNumber('id')->name('reserve.store');
 
+        // إلغاء الحجز وسداد تمارا — منطقهما في WorkerService نفسه المستخدم
+        // في لوحة الإدارة، فقاعدة «صاحب الحجز وحده» تُطبَّق في المكانين.
+        Route::delete('cvs/{id}/reserve', [\App\Http\Controllers\CvPanel\ReservationController::class, 'destroy'])
+            ->whereNumber('id')->name('reserve.destroy');
+        Route::post('cvs/{id}/tamara',   [\App\Http\Controllers\CvPanel\ReservationController::class, 'tamara'])
+            ->whereNumber('id')->name('tamara');
+
         // إسناد الجنسيات للمنسّقين — للمديرين فقط (يتحقّق الكنترولر)
         Route::get('coordinators',       [\App\Http\Controllers\CvPanel\CoordinatorController::class, 'index'])->name('coordinators.index');
         Route::put('coordinators/{id}',  [\App\Http\Controllers\CvPanel\CoordinatorController::class, 'update'])->name('coordinators.update');
