@@ -1,5 +1,7 @@
 @extends('public.layouts.app')
-@php($activeNat = $activeNationality ?? null)
+@php
+    $activeNat = $activeNationality ?? null;
+@endphp
 @section('title', $activeNat ? 'عاملات من ' . $activeNat->display_name : 'السير الذاتية المتاحة')
 
 @section('content')
