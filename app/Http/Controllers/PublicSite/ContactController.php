@@ -25,9 +25,16 @@ class ContactController extends Controller
         'استفسار عام',
     ];
 
+    /** صفحة «تواصل معنا» — بيانات التواصل والخريطة فقط، بلا نموذج. */
     public function show()
     {
-        return view('public.contact', [
+        return view('public.contact');
+    }
+
+    /** صفحة «اطلب الآن» — النموذج وحده. */
+    public function order()
+    {
+        return view('public.order', [
             // الفروع المعلَّمة للعرض العام فقط — الفروع الإدارية لا تُعرض للعميل
             'branches'      => Branch::where('active', true)
                 ->where('public', true)

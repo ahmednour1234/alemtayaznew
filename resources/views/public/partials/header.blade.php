@@ -31,7 +31,7 @@
 
             <div class="flex items-center gap-2">
                 {{-- زرّا الإجراء الرئيسيان — نستقبل الطلبات عبرهما --}}
-                <a href="{{ route('site.contact') }}"
+                <a href="{{ route('site.order') }}"
                    class="hidden sm:inline-flex items-center gap-1.5 bg-gold hover:bg-gold-dark text-white text-sm font-bold px-4 py-2 rounded-lg shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6m9-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     اطلب الآن
@@ -75,7 +75,7 @@
 
             {{-- نفس زرّي الإجراء الظاهرين على سطح المكتب --}}
             <div class="pt-2 mt-2 border-t border-white/10 space-y-2">
-                <a href="{{ route('site.contact') }}"
+                <a href="{{ route('site.order') }}"
                    class="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-sm font-bold bg-gold text-white">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6m9-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     اطلب الآن

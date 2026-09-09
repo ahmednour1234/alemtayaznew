@@ -74,7 +74,7 @@
                     </dl>
 
                     <div class="mt-6 space-y-2">
-                        <a href="{{ route('site.contact', ['worker' => $worker->id]) }}"
+                        <a href="{{ route('site.order', ['worker' => $worker->id]) }}"
                            class="block w-full bg-gold hover:bg-gold-dark text-navy text-sm font-bold py-3 rounded-xl transition-colors">
                             اطلب هذه العاملة
                         </a>

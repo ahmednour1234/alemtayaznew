@@ -205,7 +205,7 @@
                 تواصل معنا اليوم وابدأ إجراءات الاستقدام بخطوات واضحة ومتابعة كاملة.
             </p>
             <div class="flex flex-wrap gap-3 justify-center mt-7">
-                <a href="{{ route('site.contact') }}"
+                <a href="{{ route('site.order') }}"
                    class="btn-glow inline-flex items-center gap-2 bg-gold hover:bg-gold-dark text-white font-bold px-8 py-4 rounded-xl hover:-translate-y-0.5 transition-all duration-300">
                     اطلب الآن
                 </a>

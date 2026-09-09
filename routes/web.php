@@ -58,6 +58,9 @@ Route::controller(\App\Http\Controllers\PublicSite\CvController::class)->group(f
 
 Route::controller(\App\Http\Controllers\PublicSite\ContactController::class)->group(function () {
     Route::get('/contact',  'show')->name('site.contact');
+
+    // الطلب في صفحة مستقلة: «تواصل معنا» للبيانات، و«اطلب الآن» للنموذج
+    Route::get('/order',    'order')->name('site.order');
     Route::post('/contact', 'store')->name('site.contact.store');
     Route::post('/lead',    'quickLead')->name('site.lead.store');
 });

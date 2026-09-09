@@ -387,7 +387,7 @@
             </div>
 
             <div class="flex flex-wrap gap-3 justify-center lg:justify-end">
-                <a href="{{ route('site.contact') }}"
+                <a href="{{ route('site.order') }}"
                    class="btn-glow inline-flex items-center justify-center gap-2 bg-gold hover:bg-gold-dark text-white font-bold px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl hover:-translate-y-0.5 transition-all duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-3-3v6m9-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     اطلب الآن

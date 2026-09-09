@@ -235,8 +235,8 @@
 
 @include('public.partials.footer')
 
-{{-- نافذة الطلب السريع — تُستثنى صفحة «تواصل معنا» لأن النموذج معروض فيها --}}
-@unless(request()->routeIs('site.contact'))
+{{-- نافذة الطلب السريع — تُستثنى صفحة «اطلب الآن» لأن النموذج معروض فيها --}}
+@unless(request()->routeIs('site.order'))
     @include('public.partials.lead-popup')
 @endunless
 
