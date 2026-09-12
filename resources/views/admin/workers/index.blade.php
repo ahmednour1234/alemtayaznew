@@ -128,7 +128,7 @@
 
     {{-- Filters --}}
     <form method="GET" class="bg-white rounded-xl shadow-sm p-4 mb-5">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             <div>
                 <label class="block text-xs font-medium text-slate-500 mb-1">{{ __('common.fields.nationality') }}</label>
                 <select name="nationality_id" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
@@ -153,6 +153,15 @@
                     <option value="">{{ __('workers.all_profs') }}</option>
                     @foreach($professions as $key => $label)
                     <option value="{{ $key }}" {{ ($filters['profession'] ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">{{ __('common.fields.experience') }}</label>
+                <select name="experience" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <option value="">{{ __('workers.all_experiences') }}</option>
+                    @foreach(__('workers.experiences') as $key => $label)
+                    <option value="{{ $key }}" {{ ($filters['experience'] ?? '') === $key ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
@@ -200,6 +209,7 @@
                         <input type="hidden" name="nationality_id" value="{{ $filters['nationality_id'] ?? '' }}">
                         <input type="hidden" name="status"         value="{{ $filters['status'] ?? '' }}">
                         <input type="hidden" name="profession"     value="{{ $filters['profession'] ?? '' }}">
+                        <input type="hidden" name="experience"     value="{{ $filters['experience'] ?? '' }}">
                         <input type="hidden" name="search"         value="{{ $filters['search'] ?? '' }}">
                     </div>
                 </template>

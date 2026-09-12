@@ -33,6 +33,9 @@ class WorkerRepository implements WorkerRepositoryInterface
         if (!empty($filters['profession'])) {
             $q->where('profession', $filters['profession']);
         }
+        if (!empty($filters['experience'])) {
+            $q->where('experience', $filters['experience']);
+        }
         if (!empty($filters['search'])) {
             $term = trim($filters['search']);
             // passport_number & phone are encrypted at rest → exact-match via hash columns.

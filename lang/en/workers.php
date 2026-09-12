@@ -16,6 +16,7 @@ return [
     'all_nats'     => 'All nationalities',
     'all_statuses' => 'All statuses',
     'all_profs'    => 'All professions',
+    'all_experiences' => 'All experience levels',
     'no_name'      => 'Unnamed',
 
     // Worker form field labels

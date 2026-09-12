@@ -26,7 +26,7 @@ class WorkerController extends Controller
     // ── Index ─────────────────────────────────────────────────────────────────
     public function index(Request $request)
     {
-        $filters       = $request->only('nationality_id', 'status', 'profession', 'search');
+        $filters       = $request->only('nationality_id', 'status', 'profession', 'experience', 'search');
         $workers       = $this->service->list($filters);
         $nationalities = Nationality::where('active', true)->orderBy('name')->get();
         $professions   = Worker::professions();
@@ -289,7 +289,7 @@ class WorkerController extends Controller
         // «تحديد كل النتائج» → نعيد بناء القائمة من الفلاتر لا من المتصفح
         if ($request->boolean('select_all')) {
             $ids = $this->service->idsMatchingFilters(
-                $request->only(['nationality_id', 'status', 'profession', 'search'])
+                $request->only(['nationality_id', 'status', 'profession', 'experience', 'search'])
             );
         } else {
             $ids = $request->input('worker_ids', []);
@@ -552,7 +552,7 @@ class WorkerController extends Controller
      */
     public function matchingIds(Request $request)
     {
-        $filters = $request->only(['nationality_id', 'status', 'profession', 'search']);
+        $filters = $request->only(['nationality_id', 'status', 'profession', 'experience', 'search']);
 
         if ($request->boolean('has_cv')) {
             $filters['has_cv'] = true;
