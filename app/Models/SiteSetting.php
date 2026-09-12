@@ -59,6 +59,9 @@ class SiteSetting extends Model
 
             // معرّفات التتبّع — تُترك فارغة فلا يُحقن أي وسم حتى تُملأ
             'google_ads_id' => 'AW-18437746450',
+            // Google Analytics 4 — مستقلّ عن معرّف الإعلانات، وكلاهما
+            // يُحمَّل عبر نفس وسم gtag.js
+            'google_analytics_id' => 'G-QE8ZK59M1R',
         ];
     }
 

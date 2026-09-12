@@ -37,11 +37,13 @@ class SiteSettingController extends Controller
             'tiktok'        => ['nullable', 'url', 'max:255'],
             // معرّف Google Ads — صيغة AW-XXXXXXXXX
             'google_ads_id' => ['nullable', 'string', 'max:50', 'regex:/^(AW|G|GT|UA)-[A-Za-z0-9-]+$/'],
+            'google_analytics_id' => ['nullable', 'string', 'max:50', 'regex:/^(AW|G|GT|UA)-[A-Za-z0-9-]+$/'],
         ], [
             'company_name.required' => 'اسم الشركة مطلوب.',
             'email.email'           => 'صيغة البريد الإلكتروني غير صحيحة.',
             '*.url'                 => 'الرابط غير صحيح — يجب أن يبدأ بـ https://',
             'google_ads_id.regex'   => 'معرّف Google Ads غير صحيح — مثال: AW-123456789',
+            'google_analytics_id.regex' => 'معرّف Google Analytics غير صحيح — مثال: G-XXXXXXXXXX',
         ]);
 
         foreach ($data as $key => $value) {

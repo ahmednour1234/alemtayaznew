@@ -27,16 +27,21 @@
 
     <link rel="icon" type="image/png" href="{{ asset('08_alemtyaz_logo_original.png') }}">
 
-    {{-- Google Ads (gtag.js) — يُحقن فقط إن كان المعرّف مضبوطاً في إعدادات الموقع،
-         وأعلى الرأس ما أمكن ليلتقط الزيارة قبل أي تنقّل. --}}
-    @if($gtagId = $S('google_ads_id'))
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gtagId }}"></script>
+    {{-- وسوم جوجل (gtag.js) — الإعلانات والتحليلات.
+         يُحمَّل السكربت مرة واحدة لكليهما (gtag يدعم أكثر من معرّف عبر config
+         متكرّر)، ولا يُحقن أصلاً ما لم يُضبط معرّف واحد على الأقل في إعدادات
+         الموقع. ويوضع أعلى الرأس ما أمكن ليلتقط الزيارة قبل أي تنقّل. --}}
+    @php($gtagIds = array_values(array_filter([$S('google_ads_id'), $S('google_analytics_id')])))
+    @if($gtagIds)
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gtagIds[0] }}"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
+      @foreach($gtagIds as $gtagId)
       gtag('config', @json($gtagId));
+      @endforeach
     </script>
     @endif
 

@@ -125,15 +125,26 @@
         {{-- التتبّع والإعلانات --}}
         <div class="bg-white rounded-xl shadow-sm p-6">
             <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">التتبّع والإعلانات</h3>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5">معرّف Google Ads</label>
-                <input type="text" name="google_ads_id" dir="ltr" placeholder="AW-123456789"
-                       value="{{ old('google_ads_id', $settings['google_ads_id'] ?? '') }}"
-                       class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <p class="text-xs text-slate-500 mt-1.5">
-                    يُحقن وسم gtag.js في كل صفحات الموقع العام. اتركه فارغاً لتعطيل التتبّع.
-                </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">معرّف Google Ads</label>
+                    <input type="text" name="google_ads_id" dir="ltr" placeholder="AW-123456789"
+                           value="{{ old('google_ads_id', $settings['google_ads_id'] ?? '') }}"
+                           class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">معرّف Google Analytics</label>
+                    <input type="text" name="google_analytics_id" dir="ltr" placeholder="G-XXXXXXXXXX"
+                           value="{{ old('google_analytics_id', $settings['google_analytics_id'] ?? '') }}"
+                           class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                </div>
             </div>
+
+            <p class="text-xs text-slate-500 mt-3">
+                يُحقن وسم gtag.js في كل صفحات الموقع العام، ويحمل المعرّفين معاً.
+                اترك الحقل فارغاً لتعطيل ما يخصّه.
+            </p>
         </div>
 
         <div class="flex justify-end gap-3">
