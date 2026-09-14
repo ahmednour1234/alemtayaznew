@@ -27,6 +27,9 @@
 
     <link rel="icon" type="image/png" href="{{ asset('08_alemtyaz_logo_original.png') }}">
 
+    {{-- تحقّق ملكية النطاق — يجب بقاؤه ما دام التحقّق مطلوباً --}}
+    <meta name="domain-verification" content="189c737f2be9e854cce20a01b46dfa8fc34a68342f8a61e3c1cb715d50bfa9a8">
+
     {{-- وسوم جوجل (gtag.js) — الإعلانات والتحليلات.
          يُحمَّل السكربت مرة واحدة لكليهما (gtag يدعم أكثر من معرّف عبر config
          متكرّر)، ولا يُحقن أصلاً ما لم يُضبط معرّف واحد على الأقل في إعدادات
