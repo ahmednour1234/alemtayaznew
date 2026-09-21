@@ -209,7 +209,7 @@
             background: linear-gradient(150deg,
                 {{ $C['primary_dark'] }} 0%, {{ $C['primary'] }} 55%, {{ $C['primary_light'] }} 100%);
             /* تنزاح تلقائياً بعد 2.2 ثانية حتى لو لم يعمل الجافاسكربت */
-            animation: ndLoaderOut .6s ease-in-out 2.2s forwards;
+            animation: ndLoaderOut .6s ease-in-out 4.5s forwards;
         }
         /* يضيفها الجافاسكربت فور اكتمال التحميل لتسريع الانزياح */
         .nd-loader.is-done { animation: ndLoaderOut .5s ease-in-out forwards; }
@@ -223,20 +223,26 @@
         .nd-loader__num {
             display: block; font-size: clamp(4rem, 18vw, 8rem); font-weight: 800;
             line-height: 1; letter-spacing: -.02em;
-            animation: ndNum .9s cubic-bezier(.34,1.56,.64,1) both;
+            animation: ndNum 1.1s cubic-bezier(.34,1.56,.64,1) both,
+                       ndNumPulse 2.4s ease-in-out 1.1s infinite;
         }
         @keyframes ndNum {
             from { opacity: 0; transform: scale(.5) rotate(-8deg); }
             to   { opacity: 1; transform: none; }
         }
+        /* نبض خفيف يُبقي الرقم حيّاً طوال مدّة العرض */
+        @keyframes ndNumPulse {
+            0%, 100% { transform: scale(1); }
+            50%      { transform: scale(1.06); }
+        }
 
         .nd-loader__title {
             font-size: clamp(1rem, 4.5vw, 1.5rem); font-weight: 800; margin-top: .75rem;
-            animation: ndUp .7s ease-out .25s both;
+            animation: ndUp .8s ease-out .5s both;
         }
         .nd-loader__sub {
             font-size: clamp(.8rem, 3.5vw, 1rem); opacity: .85; margin-top: .35rem;
-            animation: ndUp .7s ease-out .4s both;
+            animation: ndUp .8s ease-out .85s both;
         }
         @keyframes ndUp {
             from { opacity: 0; transform: translateY(1rem); }
@@ -246,7 +252,7 @@
         .nd-loader__palm {
             width: 3.5rem; height: 3.5rem; margin: 1.25rem auto 0;
             opacity: .75; transform-origin: bottom center;
-            animation: ndUp .7s ease-out .5s both, ndSway 5s ease-in-out 1.2s infinite;
+            animation: ndUp .8s ease-out 1.2s both, ndSway 4s ease-in-out 2s infinite;
         }
 
         .nd-loader__bar {
@@ -442,7 +448,7 @@
     var el = document.getElementById('nd-loader');
     if (! el) return;
 
-    var MIN_MS = 900;
+    var MIN_MS = 3200;
     var start  = Date.now();
 
     function dismiss() {
