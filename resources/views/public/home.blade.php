@@ -13,10 +13,18 @@
      * لا من المفتاح وحده، فلو لم تُرفع الصورة بعد بقيت الصورة الأصلية بدل
      * أن تنكسر الواجهة.
      */
-    $ndHero    = 'national_day_hero.jpg';
-    $heroImage = ($nationalDay ?? false) && file_exists(public_path($ndHero))
-        ? $ndHero
-        : '09_hero_background.jpg';
+    // نقبل أي امتداد شائع فلا يضطر الرافع إلى تحويل صيغة الصورة،
+    // ونُبقي الصورة الأصلية إن لم يُرفع شيء بعد.
+    $heroImage = '09_hero_background.jpg';
+
+    if ($nationalDay ?? false) {
+        foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
+            if (file_exists(public_path('national_day_hero.' . $ext))) {
+                $heroImage = 'national_day_hero.' . $ext;
+                break;
+            }
+        }
+    }
 
     // الأبعاد تُقرأ من الملف لا تُكتب يدوياً: صورة المناسبة قد تختلف نسبتها،
     // وأي رقم ثابت خاطئ يُحدث قفزة في التخطيط أثناء التحميل على الجوال.
