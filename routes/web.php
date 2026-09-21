@@ -239,6 +239,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::resource('workers', WorkerController::class);
 
+        // ── بانرات الموقع الإعلانية ───────────────────────────────────────
+        Route::post('banners/{id}/toggle', [\App\Http\Controllers\Admin\BannerController::class, 'toggle'])
+            ->whereNumber('id')->name('banners.toggle');
+        Route::resource('banners', \App\Http\Controllers\Admin\BannerController::class)->except('show');
+
         // Recruitment Contracts
         Route::post('contracts/{id}/update-status',  [RecruitmentContractController::class, 'updateStatus'])->name('contracts.update-status');
         Route::post('contracts/{id}/forward',        [RecruitmentContractController::class, 'forward'])->name('contracts.forward');

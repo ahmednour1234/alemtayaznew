@@ -20,7 +20,7 @@
     $showSettingsGroup   = $can('branches.view')||$can('nationalities.view')||$can('airports.view')||$can('housings.view')||$can('roles.manage')||$can('admins.manage')||$can('income-types.view')||$can('expense-types.view');
     $showFinanceGroup    = $can('incomes.view')||$can('expenses.view')||$can('transfers.view')||$can('reports.view')||$can('income-types.view')||$can('expense-types.view')||$can('reports.branch-statement')||$can('reports.income-statement');
     $showPeopleGroup     = $can('clients.view')||$can('agents.view');
-    $showMarketingGroup  = $can('campaigns.view')||$can('leads.view')||$can('website-leads.view')||$can('marketing.reports.view')||$can('calendar.view');
+    $showMarketingGroup  = $can('campaigns.view')||$can('leads.view')||$can('website-leads.view')||$can('marketing.reports.view')||$can('calendar.view')||$can('banners.view');
     $showComplaintsGroup = $can('complaints.view');
     $showOpsGroup        = $can('trips.view')||$can('housing-assignments.view')||$can('housing-visits.view')||$can('housing-visits.reports')||$can('calendar.view')||$can('housing-rentals.reports')||$can('housing-settlements.reports');
     $showSTGroup         = $can('sponsorship-transfers.view');
@@ -616,6 +616,8 @@
                      'd'=>'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
                     ['r'=>'admin.marketing.leads-board',     'p'=>'admin.marketing.leads-board',  'l'=>__('nav.marketing.board'),     'perm'=>'leads-board.view',
                      'd'=>'M3 5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5zM9 9h6M9 13h6M9 17h4'],
+                    ['r'=>'admin.banners.index',             'p'=>'admin.banners.*',              'l'=>'بانرات الموقع',               'perm'=>'banners.view',
+                     'd'=>'M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5zM8 11l2.5 3 3.5-4.5L18 16H6l2-5z'],
                 ] @endphp
                 @foreach($mkItems as $it)
                     @php

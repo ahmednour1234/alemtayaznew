@@ -235,6 +235,14 @@ class AutoPermission
         // ── Marketing: Reports ────────────────────────────────────────────────
         'admin.marketing.reports'            => 'marketing.reports.view',
         'admin.marketing.staff-performance'  => 'marketing.reports.view',
+        // ── بانرات الموقع ─────────────────────────────────────────────────────
+        'admin.banners.index'   => 'banners.view',
+        'admin.banners.create'  => 'banners.create',
+        'admin.banners.store'   => 'banners.create',
+        'admin.banners.edit'    => 'banners.edit',
+        'admin.banners.update'  => 'banners.edit',
+        'admin.banners.destroy' => 'banners.delete',
+        'admin.banners.toggle'  => 'banners.edit',
         'admin.marketing.website-leads.index'     => 'website-leads.view',
         'admin.marketing.website-leads.assign'    => 'website-leads.assign',
         'admin.marketing.leads-board'        => 'leads-board.view',

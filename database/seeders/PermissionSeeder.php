@@ -744,6 +744,11 @@ class PermissionSeeder extends Seeder
             ['name' => 'عرض لوحة الفروع',           'slug' => 'leads-board.view',              'description' => null],
             ['name' => 'عرض طلبات الموقع',          'slug' => 'website-leads.view',            'description' => null],
             ['name' => 'إسناد طلبات الموقع',        'slug' => 'website-leads.assign',          'description' => null],
+            // ── بانرات الموقع ─────────────────────────
+            ['name' => 'عرض بانرات الموقع',         'slug' => 'banners.view',                  'description' => null],
+            ['name' => 'إضافة بانر',                'slug' => 'banners.create',                'description' => null],
+            ['name' => 'تعديل بانر',                'slug' => 'banners.edit',                  'description' => null],
+            ['name' => 'حذف بانر',                  'slug' => 'banners.delete',                'description' => null],
             // ── الأمن والتدقيق ─────────────────────────
             ['name' => 'عرض سجلات الأمن والتدقيق',  'slug' => 'security-logs.view',            'description' => null],
             ['name' => 'إدارة الحوادث الأمنية',     'slug' => 'security-logs.manage',          'description' => null],

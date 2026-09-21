@@ -75,6 +75,9 @@
     </div>
 </section>
 
+{{-- ══ بانرات إعلانية ══ --}}
+@include('public.partials.banners', ['placement' => 'home'])
+
 {{-- ══ مزايا ══ --}}
 <section class="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-20">
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" data-reveal-group>
