@@ -238,8 +238,8 @@
 
         /* سعف نخيل صغيرة تتمايل في زوايا الأقسام */
         .nd-palm {
-            position: absolute; pointer-events: none;
-            color: {{ $C['accent'] }}; opacity: .18;
+            position: absolute; pointer-events: none; z-index: 1;
+            color: {{ $C['primary'] }}; opacity: .5;
             transform-origin: bottom center;
             animation: ndSway 6s ease-in-out infinite;
         }

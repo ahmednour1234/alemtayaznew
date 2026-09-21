@@ -33,13 +33,25 @@
          تتبع لون الوضع، فنستبدلها بهالات خضراء مرسومة وسعف نخيل متمايلة. --}}
     <div class="nd-glow" aria-hidden="true"></div>
 
-    <svg class="nd-palm w-28 h-28 sm:w-40 sm:h-40" style="inset-inline-start:2%;bottom:4%;"
-         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"
+    {{-- نخلتان في الركن الفارغ أسفل النص، بحجمين وإيقاعين مختلفين --}}
+    <svg class="nd-palm w-32 h-32 sm:w-48 sm:h-48" style="inset-inline-start:3%;bottom:-2%;"
+         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"
          stroke-linecap="round" aria-hidden="true">
-        <path d="M12 22V11"/>
-        <path d="M12 11c0-3-2.5-5.5-6-6 1 3 2.5 5 6 6z"/>
-        <path d="M12 11c0-3 2.5-5.5 6-6-1 3-2.5 5-6 6z"/>
-        <path d="M12 11c-1.5-2.5-1-6 1-8 1 2.5 1 5.5-1 8z"/>
+        <path d="M12 23V10"/>
+        <path d="M12 10C12 6.5 9 4 5 3.5c1 3.5 3 6 7 6.5z"/>
+        <path d="M12 10C12 6.5 15 4 19 3.5c-1 3.5-3 6-7 6.5z"/>
+        <path d="M12 10c-1.8-2.8-1.2-6.5 1-9 1.2 3 1 6.2-1 9z"/>
+        <path d="M12 10c1.8-2.8 4.6-4 7.5-3.6-1.8 2.6-4.4 3.8-7.5 3.6z"/>
+    </svg>
+
+    <svg class="nd-palm w-20 h-20 sm:w-28 sm:h-28 hidden sm:block"
+         style="inset-inline-start:14%;bottom:-1%;animation-duration:8s;opacity:.3;"
+         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"
+         stroke-linecap="round" aria-hidden="true">
+        <path d="M12 23V10"/>
+        <path d="M12 10C12 6.5 9 4 5 3.5c1 3.5 3 6 7 6.5z"/>
+        <path d="M12 10C12 6.5 15 4 19 3.5c-1 3.5-3 6-7 6.5z"/>
+        <path d="M12 10c-1.8-2.8-1.2-6.5 1-9 1.2 3 1 6.2-1 9z"/>
     </svg>
     @else
     {{-- خلفية زخرفية (أشكال كحلي وذهبي في الأركان).
