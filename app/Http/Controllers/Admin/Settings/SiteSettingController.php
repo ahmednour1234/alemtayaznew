@@ -35,6 +35,7 @@ class SiteSettingController extends Controller
             'instagram'     => ['nullable', 'url', 'max:255'],
             'snapchat'      => ['nullable', 'url', 'max:255'],
             'tiktok'        => ['nullable', 'url', 'max:255'],
+            'national_day_mode' => ['nullable', 'boolean'],
             // معرّف Google Ads — صيغة AW-XXXXXXXXX
             'google_ads_id' => ['nullable', 'string', 'max:50', 'regex:/^(AW|G|GT|UA)-[A-Za-z0-9-]+$/'],
             'google_analytics_id' => ['nullable', 'string', 'max:50', 'regex:/^(AW|G|GT|UA)-[A-Za-z0-9-]+$/'],
@@ -45,6 +46,9 @@ class SiteSettingController extends Controller
             'google_ads_id.regex'   => 'معرّف Google Ads غير صحيح — مثال: AW-123456789',
             'google_analytics_id.regex' => 'معرّف Google Analytics غير صحيح — مثال: G-XXXXXXXXXX',
         ]);
+
+        // خانة الاختيار لا تُرسَل وهي مُطفأة، فنقرؤها صراحةً وإلا تعذّر إيقافها
+        $data['national_day_mode'] = $request->boolean('national_day_mode') ? '1' : '';
 
         foreach ($data as $key => $value) {
             SiteSetting::updateOrCreate(['key' => $key], ['value' => $value]);

@@ -15,6 +15,42 @@
     $stack   = implode(', ', array_map(fn($f) => str_contains($f, ' ') ? "'$f'" : $f, $locConf['font_stack'] ?? $fallbackConf['font_stack']));
 
     $S = fn(string $k) => \App\Models\SiteSetting::value($k);
+
+    /*
+     * لوحة ألوان الموقع.
+     *
+     * وضع اليوم الوطني يستبدل الكحلي بالأخضر السعودي والذهبي بأخضر أفتح،
+     * فتتبدّل هوية الموقع كلّها بمفتاح واحد في إعدادات الموقع. نعرّف الألوان
+     * هنا مرّة واحدة ونشتقّ منها إعداد Tailwind وقواعد CSS معاً، فلا يبقى
+     * لون مكتوب يدوياً يتخلّف عن التبديل.
+     */
+    $nationalDay = (bool) $S('national_day_mode');
+
+    $C = $nationalDay
+        ? [
+            'primary'       => '#046A38',  // أخضر العلم السعودي
+            'primary_dark'  => '#02502A',
+            'primary_light' => '#0A8F4D',
+            'accent'        => '#1DB954',
+            'accent_dark'   => '#149944',
+            'accent_light'  => '#5FD98A',
+            'hero'          => ['#046A38', '#0A8F4D', '#02502A'],
+            'band'          => ['#05743D', '#0A8F4D', '#046A38'],
+            'glow'          => '29,185,84',
+            'primary_rgb'   => '4,106,56',
+        ]
+        : [
+            'primary'       => '#1e3a6d',
+            'primary_dark'  => '#16294d',
+            'primary_light' => '#2b4d8c',
+            'accent'        => '#c9a84c',
+            'accent_dark'   => '#ab8d38',
+            'accent_light'  => '#e0c674',
+            'hero'          => ['#1e3a6d', '#2b4d8c', '#16294d'],
+            'band'          => ['#24457f', '#2f5596', '#1e3a6d'],
+            'glow'          => '201,168,76',
+            'primary_rgb'   => '30,58,109',
+        ];
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $currentLoc }}" dir="{{ $dir }}">
@@ -64,8 +100,9 @@
             theme: {
                 extend: {
                     colors: {
-                        navy:  { DEFAULT: '#1e3a6d', dark: '#16294d', light: '#2b4d8c' },
-                        gold:  { DEFAULT: '#c9a84c', dark: '#ab8d38', light: '#e0c674' },
+                        {{-- الأسماء ثابتة (navy/gold) والقيم تتبدّل، فلا يحتاج أي قالب للتعديل --}}
+                        navy:  { DEFAULT: '{{ $C['primary'] }}', dark: '{{ $C['primary_dark'] }}', light: '{{ $C['primary_light'] }}' },
+                        gold:  { DEFAULT: '{{ $C['accent'] }}', dark: '{{ $C['accent_dark'] }}', light: '{{ $C['accent_light'] }}' },
                     },
                     fontFamily: { sans: [{!! json_encode(explode(', ', str_replace("'", '', $stack))) !!}] },
                 },
@@ -74,7 +111,7 @@
     </script>
     <style>
         body { font-family: {{ $stack }}; }
-        .hero-grad { background: linear-gradient(135deg, #1e3a6d 0%, #2b4d8c 55%, #16294d 100%); }
+        .hero-grad { background: linear-gradient(135deg, {{ $C['hero'][0] }} 0%, {{ $C['hero'][1] }} 55%, {{ $C['hero'][2] }} 100%); }
 
         /* صورة الواجهة على الشاشات الكبيرة: ملتصقة بحافة الصفحة بلا حشو،
            تشغل نصف العرض بالكامل. في RTL تقع يميناً والنص يساراً،
@@ -90,7 +127,7 @@
                 overflow: hidden;
                 border-start-end-radius: 16rem;
                 border-end-end-radius: 16rem;
-                border-inline-end: 5px solid #c9a84c;
+                border-inline-end: 5px solid {{ $C['accent'] }};
             }
         }
 
@@ -182,18 +219,18 @@
         .stat-icon [fill="#2F6798"]   { fill: #ffffff; }
 
         /* أيقونات ذهبية بالكامل (قوائم التواصل) */
-        .gold-icon [stroke="#2F6798"] { stroke: #c9a84c; }
-        .gold-icon [fill="#2F6798"]   { fill: #c9a84c; }
+        .gold-icon [stroke="#2F6798"] { stroke: {{ $C['accent'] }}; }
+        .gold-icon [fill="#2F6798"]   { fill: {{ $C['accent'] }}; }
 
         /* بطاقة الدعوة قبل التذييل — أزرق أفتح قليلاً من hero-grad لتبرز عن الصفحة */
-        .cta-band { background: linear-gradient(120deg, #24457f 0%, #2f5596 50%, #1e3a6d 100%); }
+        .cta-band { background: linear-gradient(120deg, {{ $C['band'][0] }} 0%, {{ $C['band'][1] }} 50%, {{ $C['band'][2] }} 100%); }
 
         /* هالة مضيئة حول البطاقة تنبض ببطء لتلفت النظر دون إزعاج */
         .cta-shell {
             box-shadow:
                 0 0 0 1px rgba(255,255,255,.08),
-                0 18px 40px -12px rgba(30,58,109,.45),
-                0 0 60px -12px rgba(201,168,76,.35);
+                0 18px 40px -12px rgba({{ $C['primary_rgb'] }},.45),
+                0 0 60px -12px rgba({{ $C['glow'] }},.35);
             animation: ctaPulse 4s ease-in-out infinite;
         }
 
@@ -201,14 +238,14 @@
             0%, 100% {
                 box-shadow:
                     0 0 0 1px rgba(255,255,255,.08),
-                    0 18px 40px -12px rgba(30,58,109,.45),
-                    0 0 60px -12px rgba(201,168,76,.30);
+                    0 18px 40px -12px rgba({{ $C['primary_rgb'] }},.45),
+                    0 0 60px -12px rgba({{ $C['glow'] }},.30);
             }
             50% {
                 box-shadow:
                     0 0 0 1px rgba(255,255,255,.14),
-                    0 18px 46px -12px rgba(30,58,109,.5),
-                    0 0 90px -8px rgba(201,168,76,.55);
+                    0 18px 46px -12px rgba({{ $C['primary_rgb'] }},.5),
+                    0 0 90px -8px rgba({{ $C['glow'] }},.55);
             }
         }
 
@@ -219,10 +256,10 @@
         /* توهّج ناعم حول الزرّ الذهبي عند المرور.
            نستخدم box-shadow لا عنصراً زائفاً بـ z-index سالب، إذ يختفي الأخير
            خلف خلفية القسم عندما تُنشئ الأخيرة سياق تراصّ خاصاً بها. */
-        .btn-glow { box-shadow: 0 10px 25px -10px rgba(201,168,76,.5); }
+        .btn-glow { box-shadow: 0 10px 25px -10px rgba({{ $C['glow'] }},.5); }
         .btn-glow:hover {
-            box-shadow: 0 0 0 4px rgba(201,168,76,.25),
-                        0 12px 32px -8px rgba(201,168,76,.75);
+            box-shadow: 0 0 0 4px rgba({{ $C['glow'] }},.25),
+                        0 12px 32px -8px rgba({{ $C['glow'] }},.75);
         }
 
         /* إخفاء شريط التمرير في السلايدر مع إبقاء التمرير باللمس فعّالاً */

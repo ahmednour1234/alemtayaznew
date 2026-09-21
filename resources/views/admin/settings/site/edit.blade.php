@@ -122,6 +122,31 @@
             </div>
         </div>
 
+        {{-- المناسبات --}}
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">المناسبات</h3>
+
+            <label class="flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" name="national_day_mode" value="1"
+                       @checked(old('national_day_mode', ($settings['national_day_mode'] ?? '') !== ''))
+                       class="mt-0.5 rounded border-slate-300 text-green-600 focus:ring-green-400">
+                <span>
+                    <span class="block text-sm font-medium text-slate-700">وضع اليوم الوطني</span>
+                    <span class="block text-xs text-slate-500 mt-1">
+                        يحوّل ألوان الموقع العام إلى الأخضر السعودي. يُطبَّق فوراً على كل الصفحات،
+                        وتعود الألوان الأصلية بمجرّد إلغاء التفعيل.
+                    </span>
+                </span>
+            </label>
+
+            <div class="flex items-center gap-2 mt-4 ps-7">
+                <span class="w-6 h-6 rounded-md border border-slate-200" style="background:#046A38"></span>
+                <span class="w-6 h-6 rounded-md border border-slate-200" style="background:#0A8F4D"></span>
+                <span class="w-6 h-6 rounded-md border border-slate-200" style="background:#1DB954"></span>
+                <span class="text-xs text-slate-400">ألوان الوضع</span>
+            </div>
+        </div>
+
         {{-- التتبّع والإعلانات --}}
         <div class="bg-white rounded-xl shadow-sm p-6">
             <h3 class="text-sm font-semibold text-slate-600 mb-4 pb-2 border-b border-slate-100">التتبّع والإعلانات</h3>
