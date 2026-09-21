@@ -5,6 +5,28 @@
 @section('content')
 
 {{-- ══ Hero ══ --}}
+@php
+    /*
+     * صورة الواجهة.
+     *
+     * لليوم الوطني صورة خاصة فيها علم السعودية. نتحقّق من وجود الملف فعلياً
+     * لا من المفتاح وحده، فلو لم تُرفع الصورة بعد بقيت الصورة الأصلية بدل
+     * أن تنكسر الواجهة.
+     */
+    $ndHero    = 'national_day_hero.jpg';
+    $heroImage = ($nationalDay ?? false) && file_exists(public_path($ndHero))
+        ? $ndHero
+        : '09_hero_background.jpg';
+
+    // الأبعاد تُقرأ من الملف لا تُكتب يدوياً: صورة المناسبة قد تختلف نسبتها،
+    // وأي رقم ثابت خاطئ يُحدث قفزة في التخطيط أثناء التحميل على الجوال.
+    // تُخزَّن مؤقتاً فلا نقرأ القرص مع كل زيارة للصفحة.
+    [$heroW, $heroH] = \Illuminate\Support\Facades\Cache::remember(
+        'hero_dims_' . $heroImage,
+        now()->addDay(),
+        fn () => @getimagesize(public_path($heroImage)) ?: [1448, 1086]
+    );
+@endphp
 <section class="relative overflow-hidden bg-white">
     @if($nationalDay ?? false)
     {{-- وضع اليوم الوطني: الخلفية الزخرفية صورة ثابتة بالكحلي والذهبي فلا
@@ -30,9 +52,9 @@
 
     {{-- الصورة ملتصقة بحافة الصفحة بلا حشو، والقوس على حافتها الداخلية --}}
     <div class="hero-photo hero-reveal hidden lg:block" style="--d:.05s">
-        <img src="{{ asset('09_hero_background.jpg') }}"
+        <img src="{{ asset($heroImage) }}"
              alt="عاملة منزلية مع أسرة سعودية"
-             loading="eager" fetchpriority="high" width="1448" height="1086"
+             loading="eager" fetchpriority="high" width="{{ $heroW }}" height="{{ $heroH }}"
              class="w-full h-full object-cover object-[55%_center]">
     </div>
 
@@ -43,9 +65,9 @@
                  لا نفرض ارتفاعاً ثابتاً هنا لأن الصورة عريضة (4:3) وأي قصّ
                  رأسي يقطع الأشخاص من الجانبين. --}}
             <div class="lg:hidden -mx-4 sm:-mx-6 order-1 hero-reveal" style="--d:.05s">
-                <img src="{{ asset('09_hero_background.jpg') }}"
+                <img src="{{ asset($heroImage) }}"
                      alt="عاملة منزلية مع أسرة سعودية"
-                     loading="eager" fetchpriority="high" width="1448" height="1086"
+                     loading="eager" fetchpriority="high" width="{{ $heroW }}" height="{{ $heroH }}"
                      class="w-full h-auto object-contain">
             </div>
 
