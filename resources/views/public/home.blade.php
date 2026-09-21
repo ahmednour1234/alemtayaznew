@@ -6,12 +6,27 @@
 
 {{-- ══ Hero ══ --}}
 <section class="relative overflow-hidden bg-white">
+    @if($nationalDay ?? false)
+    {{-- وضع اليوم الوطني: الخلفية الزخرفية صورة ثابتة بالكحلي والذهبي فلا
+         تتبع لون الوضع، فنستبدلها بهالات خضراء مرسومة وسعف نخيل متمايلة. --}}
+    <div class="nd-glow" aria-hidden="true"></div>
+
+    <svg class="nd-palm w-28 h-28 sm:w-40 sm:h-40" style="inset-inline-start:2%;bottom:4%;"
+         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"
+         stroke-linecap="round" aria-hidden="true">
+        <path d="M12 22V11"/>
+        <path d="M12 11c0-3-2.5-5.5-6-6 1 3 2.5 5 6 6z"/>
+        <path d="M12 11c0-3 2.5-5.5 6-6-1 3-2.5 5-6 6z"/>
+        <path d="M12 11c-1.5-2.5-1-6 1-8 1 2.5 1 5.5-1 8z"/>
+    </svg>
+    @else
     {{-- خلفية زخرفية (أشكال كحلي وذهبي في الأركان).
          تُخفى على الجوال: الصورة عريضة (1746×901) وتتمدّد على قسم طويل
          فتختفي أشكالها ويبقى لون مسطّح لا قيمة له. --}}
     <img src="{{ asset('10_hero_pattern.jpg') }}" alt="" aria-hidden="true"
          loading="lazy"
          class="hidden sm:block absolute inset-0 w-full h-full object-cover">
+    @endif
 
     {{-- الصورة ملتصقة بحافة الصفحة بلا حشو، والقوس على حافتها الداخلية --}}
     <div class="hero-photo hero-reveal hidden lg:block" style="--d:.05s">
@@ -36,6 +51,18 @@
 
             {{-- النص (يسار في RTL) — يُزاح قليلاً عن قوس الصورة --}}
             <div class="text-center lg:text-end order-2 lg:order-2 lg:ps-6">
+                @if($nationalDay ?? false)
+                {{-- شارة المناسبة فوق العنوان --}}
+                <div class="hero-rise mb-4 flex justify-center lg:justify-end" style="--d:.15s">
+                    <span class="nd-badge inline-flex items-center gap-2 bg-navy text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-full">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                            <path d="M4 22V4M4 4h13l-2.5 4L17 12H4"/>
+                        </svg>
+                        كل عام والوطن بخير — اليوم الوطني السعودي
+                    </span>
+                </div>
+                @endif
+
                 <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-navy leading-tight hero-rise" style="--d:.25s">
                     {{ $S('company_name') }}<span class="text-gold">...</span>
                 </h1>

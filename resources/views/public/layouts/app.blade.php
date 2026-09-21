@@ -24,7 +24,8 @@
      * هنا مرّة واحدة ونشتقّ منها إعداد Tailwind وقواعد CSS معاً، فلا يبقى
      * لون مكتوب يدوياً يتخلّف عن التبديل.
      */
-    $nationalDay = (bool) $S('national_day_mode');
+    // يصل من View::composer في AppServiceProvider، والاحتياطي لأي عرض مباشر
+    $nationalDay = $nationalDay ?? (bool) $S('national_day_mode');
 
     $C = $nationalDay
         ? [
@@ -197,6 +198,72 @@
         .reveal-start.in,
         .reveal-scale.in { transform: none; }
 
+@if($nationalDay)
+        /* ══════════ وضع اليوم الوطني ══════════
+           زخارف مرسومة بالـ CSS لا صوراً، فتتبع لون الوضع ولا تحتاج رفع ملفات. */
+
+        /* شريط العلم أعلى الصفحة */
+        .nd-ribbon {
+            height: 4px;
+            background: repeating-linear-gradient(90deg,
+                {{ $C['primary'] }} 0 60px, {{ $C['accent'] }} 60px 120px);
+            background-size: 240px 100%;
+            animation: ndRibbon 18s linear infinite;
+        }
+        @keyframes ndRibbon { to { background-position: 240px 0; } }
+
+        /* هالات خضراء ناعمة تحلّ محلّ الخلفية الزخرفية الزرقاء */
+        .nd-glow {
+            position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+        }
+        .nd-glow::before,
+        .nd-glow::after {
+            content: ''; position: absolute; border-radius: 50%;
+            filter: blur(70px); opacity: .4;
+        }
+        .nd-glow::before {
+            width: 30rem; height: 30rem; inset-inline-start: -8rem; bottom: -10rem;
+            background: radial-gradient(circle, {{ $C['accent'] }} 0%, transparent 70%);
+            animation: ndFloat 14s ease-in-out infinite;
+        }
+        .nd-glow::after {
+            width: 22rem; height: 22rem; inset-inline-start: 22%; top: -8rem;
+            background: radial-gradient(circle, {{ $C['primary_light'] }} 0%, transparent 70%);
+            animation: ndFloat 18s ease-in-out infinite reverse;
+        }
+        @keyframes ndFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50%      { transform: translate(2rem, -1.5rem) scale(1.12); }
+        }
+
+        /* سعف نخيل صغيرة تتمايل في زوايا الأقسام */
+        .nd-palm {
+            position: absolute; pointer-events: none;
+            color: {{ $C['accent'] }}; opacity: .18;
+            transform-origin: bottom center;
+            animation: ndSway 6s ease-in-out infinite;
+        }
+        @keyframes ndSway {
+            0%, 100% { transform: rotate(-4deg); }
+            50%      { transform: rotate(4deg); }
+        }
+
+        /* شارة «اليوم الوطني» النابضة */
+        .nd-badge {
+            animation: ndBadge 2.6s ease-in-out infinite;
+        }
+        @keyframes ndBadge {
+            0%, 100% { box-shadow: 0 0 0 0 rgba({{ $C['glow'] }}, .55); }
+            70%      { box-shadow: 0 0 0 14px rgba({{ $C['glow'] }}, 0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .nd-ribbon, .nd-glow::before, .nd-glow::after, .nd-palm, .nd-badge {
+                animation: none !important;
+            }
+        }
+@endif
+
         /* احترام تفضيل تقليل الحركة في نظام المستخدم */
         @media (prefers-reduced-motion: reduce) {
             .hero-rise, .hero-reveal, .hero-line, .hero-photo img {
@@ -271,6 +338,11 @@
     @stack('head')
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
+
+@if($nationalDay)
+{{-- شريط بألوان العلم أعلى الصفحة كلّها --}}
+<div class="nd-ribbon" aria-hidden="true"></div>
+@endif
 
 @include('public.partials.header')
 

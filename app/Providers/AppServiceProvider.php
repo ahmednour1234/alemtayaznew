@@ -9,6 +9,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -30,6 +31,18 @@ class AppServiceProvider extends ServiceProvider
     {
         // ترقيم صفحات بتنسيق Tailwind — يستخدمه الموقع العام (صفحة السير الذاتية).
         Paginator::useTailwind();
+
+        /*
+         * وضع اليوم الوطني متاح لكل قوالب الموقع العام.
+         *
+         * يُقرأ من إعدادات الموقع لا من الـ layout، لأن متغيّرات الـ layout
+         * لا تصل إلى القوالب الممتدّة منه، والأقسام تحتاجه لتبديل زخارفها.
+         * View::composer لا View::share ليبقى الاستعلام كسولاً فلا يُنفَّذ
+         * في طلبات لوحة الإدارة ولا في أوامر الطرفية.
+         */
+        View::composer('public.*', function ($view): void {
+            $view->with('nationalDay', (bool) \App\Models\SiteSetting::value('national_day_mode'));
+        });
 
         // Make @can() / @cannot() / Gate::allows() work with the 'admin' guard.
         // Nullable first param = callback runs even when no web-guard user is present.
