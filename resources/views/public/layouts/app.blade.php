@@ -202,6 +202,72 @@
         /* ══════════ وضع اليوم الوطني ══════════
            زخارف مرسومة بالـ CSS لا صوراً، فتتبع لون الوضع ولا تحتاج رفع ملفات. */
 
+        /* ── شاشة التحميل الاحتفالية ─────────────────────────────────── */
+        .nd-loader {
+            position: fixed; inset: 0; z-index: 200;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(150deg,
+                {{ $C['primary_dark'] }} 0%, {{ $C['primary'] }} 55%, {{ $C['primary_light'] }} 100%);
+            /* تنزاح تلقائياً بعد 2.2 ثانية حتى لو لم يعمل الجافاسكربت */
+            animation: ndLoaderOut .6s ease-in-out 2.2s forwards;
+        }
+        /* يضيفها الجافاسكربت فور اكتمال التحميل لتسريع الانزياح */
+        .nd-loader.is-done { animation: ndLoaderOut .5s ease-in-out forwards; }
+
+        @keyframes ndLoaderOut {
+            to { opacity: 0; visibility: hidden; transform: translateY(-2rem); }
+        }
+
+        .nd-loader__inner { text-align: center; color: #fff; padding: 1.5rem; }
+
+        .nd-loader__num {
+            display: block; font-size: clamp(4rem, 18vw, 8rem); font-weight: 800;
+            line-height: 1; letter-spacing: -.02em;
+            animation: ndNum .9s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        @keyframes ndNum {
+            from { opacity: 0; transform: scale(.5) rotate(-8deg); }
+            to   { opacity: 1; transform: none; }
+        }
+
+        .nd-loader__title {
+            font-size: clamp(1rem, 4.5vw, 1.5rem); font-weight: 800; margin-top: .75rem;
+            animation: ndUp .7s ease-out .25s both;
+        }
+        .nd-loader__sub {
+            font-size: clamp(.8rem, 3.5vw, 1rem); opacity: .85; margin-top: .35rem;
+            animation: ndUp .7s ease-out .4s both;
+        }
+        @keyframes ndUp {
+            from { opacity: 0; transform: translateY(1rem); }
+            to   { opacity: 1; transform: none; }
+        }
+
+        .nd-loader__palm {
+            width: 3.5rem; height: 3.5rem; margin: 1.25rem auto 0;
+            opacity: .75; transform-origin: bottom center;
+            animation: ndUp .7s ease-out .5s both, ndSway 5s ease-in-out 1.2s infinite;
+        }
+
+        .nd-loader__bar {
+            width: min(13rem, 60vw); height: 3px; margin: 1.5rem auto 0;
+            background: rgba(255,255,255,.22); border-radius: 99px; overflow: hidden;
+        }
+        .nd-loader__bar span {
+            display: block; height: 100%; width: 40%; border-radius: 99px;
+            background: #fff;
+            animation: ndBar 1.1s ease-in-out infinite;
+        }
+        @keyframes ndBar {
+            0%   { transform: translateX(-120%); }
+            100% { transform: translateX(320%); }
+        }
+
+        /* لا شاشة تحميل لمن يفضّل تقليل الحركة — تُخفى فوراً */
+        @media (prefers-reduced-motion: reduce) {
+            .nd-loader { animation: none; opacity: 0; visibility: hidden; }
+        }
+
         /* شريط العلم أعلى الصفحة */
         .nd-ribbon {
             height: 4px;
@@ -340,6 +406,58 @@
 <body class="bg-slate-50 text-slate-800 antialiased">
 
 @if($nationalDay)
+{{--
+    شاشة ترحيب باليوم الوطني تظهر أثناء التحميل ثم تنزاح.
+
+    تُخفى بأنيميشن CSS له مدّة محدّدة لا بالجافاسكربت وحده، فلو تعطّل السكربت
+    أو حُجب انزاحت الشاشة في موعدها ولم يعلق الزائر خلف ستار. الجافاسكربت
+    يُسرّع الإخفاء فقط عند اكتمال التحميل مبكراً.
+--}}
+<div id="nd-loader" class="nd-loader" role="status" aria-live="polite">
+    <div class="nd-loader__inner">
+        <span class="nd-loader__num">٩٦</span>
+        <p class="nd-loader__title">اليوم الوطني السعودي</p>
+        <p class="nd-loader__sub">كل عام والوطن بخير</p>
+
+        <svg class="nd-loader__palm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.1" stroke-linecap="round" aria-hidden="true">
+            <path d="M12 23V10"/>
+            <path d="M12 10C12 6.5 9 4 5 3.5c1 3.5 3 6 7 6.5z"/>
+            <path d="M12 10C12 6.5 15 4 19 3.5c-1 3.5-3 6-7 6.5z"/>
+            <path d="M12 10c-1.8-2.8-1.2-6.5 1-9 1.2 3 1 6.2-1 9z"/>
+        </svg>
+
+        <div class="nd-loader__bar" aria-hidden="true"><span></span></div>
+    </div>
+</div>
+
+<script>
+/**
+ * يُخفي شاشة الترحيب فور اكتمال التحميل.
+ *
+ * الإخفاء مضمون بالـ CSS أصلاً (أنيميشن له مدّة محدّدة)، وهذا السكربت يُسرّعه
+ * فقط، مع حدّ أدنى لزمن العرض حتى لا تومض الشاشة وتختفي على اتصال سريع.
+ */
+(function () {
+    var el = document.getElementById('nd-loader');
+    if (! el) return;
+
+    var MIN_MS = 900;
+    var start  = Date.now();
+
+    function dismiss() {
+        var wait = Math.max(0, MIN_MS - (Date.now() - start));
+        setTimeout(function () { el.classList.add('is-done'); }, wait);
+    }
+
+    if (document.readyState === 'complete') {
+        dismiss();
+    } else {
+        window.addEventListener('load', dismiss);
+    }
+})();
+</script>
+
 {{-- شريط بألوان العلم أعلى الصفحة كلّها --}}
 <div class="nd-ribbon" aria-hidden="true"></div>
 @endif

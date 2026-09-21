@@ -70,7 +70,9 @@
              class="w-full h-full object-cover object-[55%_center]">
     </div>
 
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 lg:py-0">
+    {{-- لا حشو علوي على الجوال: الصورة أوّل عنصر وتلتصق بالترويسة،
+         والحشو يعود من sm فصاعداً حيث يبدأ النص بالظهور بجانبها. --}}
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pb-6 sm:pt-10 sm:pb-10 lg:py-0">
         <div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-6 sm:gap-8 lg:gap-6 lg:min-h-[38rem]">
 
             {{-- الصورة على الجوال: بعرض الشاشة كاملاً وبنسبتها الطبيعية.
