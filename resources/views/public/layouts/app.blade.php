@@ -375,21 +375,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
-@php
-    // وسيط شاشة التحميل يرفعه المستخدم باسم national_day_loader.
-    // لا شاشة أصلاً إن لم يُرفع شيء، فلا يُحجب الموقع خلف ستار فارغ.
-    $ndLoaderMedia = null;
-    $ndLoaderType  = null;
-
-    foreach (['mp4' => 'video', 'webm' => 'video', 'gif' => 'image', 'webp' => 'image'] as $ext => $kind) {
-        if (file_exists(public_path('national_day_loader.' . $ext))) {
-            $ndLoaderMedia = 'national_day_loader.' . $ext;
-            $ndLoaderType  = $kind;
-            break;
-        }
-    }
-@endphp
-
+{{-- $ndLoaderMedia / $ndLoaderType يأتيان من View::composer في AppServiceProvider --}}
 @if($nationalDay && ($ndLoaderMedia ?? null))
 {{--
     شاشة ترحيب باليوم الوطني تعرض الوسيط ثم تنزاح.
