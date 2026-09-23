@@ -393,7 +393,7 @@
     }
 @endphp
 
-@if($nationalDay && $ndLoaderMedia)
+@if($nationalDay && ($ndLoaderMedia ?? null))
 {{--
     شاشة ترحيب باليوم الوطني تعرض الوسيط ثم تنزاح.
 
