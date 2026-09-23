@@ -202,77 +202,41 @@
         /* ══════════ وضع اليوم الوطني ══════════
            زخارف مرسومة بالـ CSS لا صوراً، فتتبع لون الوضع ولا تحتاج رفع ملفات. */
 
-        /* ── شاشة التحميل الاحتفالية ─────────────────────────────────── */
+        /* ── شاشة التحميل: وسيط يرفعه المستخدم (فيديو أو صورة متحرّكة) ── */
         .nd-loader {
             position: fixed; inset: 0; z-index: 200;
             display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(150deg,
-                {{ $C['primary_dark'] }} 0%, {{ $C['primary'] }} 55%, {{ $C['primary_light'] }} 100%);
-            /* تنزاح تلقائياً بعد 2.2 ثانية حتى لو لم يعمل الجافاسكربت */
-            animation: ndLoaderOut .6s ease-in-out 4.5s forwards;
+            background: #000;
+            /* تنزاح تلقائياً حتى لو تعطّل الجافاسكربت فلا يعلق الزائر خلف ستار */
+            animation: ndLoaderOut .6s ease-in-out 6s forwards;
         }
-        /* يضيفها الجافاسكربت فور اكتمال التحميل لتسريع الانزياح */
+        /* يضيفها الجافاسكربت عند انتهاء الوسيط أو اكتمال التحميل */
         .nd-loader.is-done { animation: ndLoaderOut .5s ease-in-out forwards; }
 
         @keyframes ndLoaderOut {
-            to { opacity: 0; visibility: hidden; transform: translateY(-2rem); }
+            to { opacity: 0; visibility: hidden; }
         }
 
-        .nd-loader__inner { text-align: center; color: #fff; padding: 1.5rem; }
-
-        .nd-loader__num {
-            display: block; font-size: clamp(4rem, 18vw, 8rem); font-weight: 800;
-            line-height: 1; letter-spacing: -.02em;
-            animation: ndNum 1.1s cubic-bezier(.34,1.56,.64,1) both,
-                       ndNumPulse 2.4s ease-in-out 1.1s infinite;
-        }
-        @keyframes ndNum {
-            from { opacity: 0; transform: scale(.5) rotate(-8deg); }
-            to   { opacity: 1; transform: none; }
-        }
-        /* نبض خفيف يُبقي الرقم حيّاً طوال مدّة العرض */
-        @keyframes ndNumPulse {
-            0%, 100% { transform: scale(1); }
-            50%      { transform: scale(1.06); }
+        /* الوسيط يملأ الشاشة كاملة بلا تشويه، والقصّ مقبول على الأطراف */
+        .nd-loader__media {
+            width: 100%; height: 100%; object-fit: cover; display: block;
         }
 
-        .nd-loader__title {
-            font-size: clamp(1rem, 4.5vw, 1.5rem); font-weight: 800; margin-top: .75rem;
-            animation: ndUp .8s ease-out .5s both;
+        /* زرّ التخطّي — لا نحبس الزائر أمام وسيط طويل */
+        .nd-loader__skip {
+            position: absolute; top: 1rem; inset-inline-end: 1rem; z-index: 2;
+            background: rgba(0,0,0,.45); color: #fff; border: 1px solid rgba(255,255,255,.35);
+            border-radius: 99px; padding: .45rem 1.1rem;
+            font: 600 .8rem/1 inherit; cursor: pointer;
+            backdrop-filter: blur(4px);
         }
-        .nd-loader__sub {
-            font-size: clamp(.8rem, 3.5vw, 1rem); opacity: .85; margin-top: .35rem;
-            animation: ndUp .8s ease-out .85s both;
-        }
-        @keyframes ndUp {
-            from { opacity: 0; transform: translateY(1rem); }
-            to   { opacity: 1; transform: none; }
-        }
-
-        .nd-loader__palm {
-            width: 3.5rem; height: 3.5rem; margin: 1.25rem auto 0;
-            opacity: .75; transform-origin: bottom center;
-            animation: ndUp .8s ease-out 1.2s both, ndSway 4s ease-in-out 2s infinite;
-        }
-
-        .nd-loader__bar {
-            width: min(13rem, 60vw); height: 3px; margin: 1.5rem auto 0;
-            background: rgba(255,255,255,.22); border-radius: 99px; overflow: hidden;
-        }
-        .nd-loader__bar span {
-            display: block; height: 100%; width: 40%; border-radius: 99px;
-            background: #fff;
-            animation: ndBar 1.1s ease-in-out infinite;
-        }
-        @keyframes ndBar {
-            0%   { transform: translateX(-120%); }
-            100% { transform: translateX(320%); }
-        }
+        .nd-loader__skip:hover { background: rgba(0,0,0,.7); }
 
         /* لا شاشة تحميل لمن يفضّل تقليل الحركة — تُخفى فوراً */
         @media (prefers-reduced-motion: reduce) {
             .nd-loader { animation: none; opacity: 0; visibility: hidden; }
         }
+
 
         /* شريط العلم أعلى الصفحة */
         .nd-ribbon {
@@ -411,55 +375,83 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased">
 
-@if($nationalDay)
-{{--
-    شاشة ترحيب باليوم الوطني تظهر أثناء التحميل ثم تنزاح.
+@php
+    /*
+     * وسيط شاشة التحميل: فيديو أو صورة متحرّكة يرفعها المستخدم باسم
+     * national_day_loader. لا شاشة أصلاً إن لم يُرفع شيء، فلا يُحجب الموقع
+     * خلف ستار فارغ.
+     */
+    $ndLoaderMedia = null;
+    $ndLoaderType  = null;
 
-    تُخفى بأنيميشن CSS له مدّة محدّدة لا بالجافاسكربت وحده، فلو تعطّل السكربت
-    أو حُجب انزاحت الشاشة في موعدها ولم يعلق الزائر خلف ستار. الجافاسكربت
-    يُسرّع الإخفاء فقط عند اكتمال التحميل مبكراً.
+    foreach (['mp4' => 'video', 'webm' => 'video', 'gif' => 'image', 'webp' => 'image'] as $ext => $kind) {
+        if (file_exists(public_path('national_day_loader.' . $ext))) {
+            $ndLoaderMedia = 'national_day_loader.' . $ext;
+            $ndLoaderType  = $kind;
+            break;
+        }
+    }
+@endphp
+
+@if($nationalDay && $ndLoaderMedia)
+{{--
+    شاشة ترحيب باليوم الوطني تعرض الوسيط ثم تنزاح.
+
+    الانزياح مضمون بأنيميشن CSS له مدّة محدّدة لا بالجافاسكربت وحده، فلو تعطّل
+    السكربت أو حُجب انزاحت الشاشة في موعدها ولم يعلق الزائر خلفها. ومعها زرّ
+    تخطٍّ لمن لا يريد انتظار الوسيط كاملاً.
 --}}
 <div id="nd-loader" class="nd-loader" role="status" aria-live="polite">
-    <div class="nd-loader__inner">
-        <span class="nd-loader__num">٩٦</span>
-        <p class="nd-loader__title">اليوم الوطني السعودي</p>
-        <p class="nd-loader__sub">كل عام والوطن بخير</p>
+    <button type="button" class="nd-loader__skip" data-nd-skip>تخطٍّ</button>
 
-        <svg class="nd-loader__palm" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="1.1" stroke-linecap="round" aria-hidden="true">
-            <path d="M12 23V10"/>
-            <path d="M12 10C12 6.5 9 4 5 3.5c1 3.5 3 6 7 6.5z"/>
-            <path d="M12 10C12 6.5 15 4 19 3.5c-1 3.5-3 6-7 6.5z"/>
-            <path d="M12 10c-1.8-2.8-1.2-6.5 1-9 1.2 3 1 6.2-1 9z"/>
-        </svg>
-
-        <div class="nd-loader__bar" aria-hidden="true"><span></span></div>
-    </div>
+    @if($ndLoaderType === 'video')
+    {{-- muted + playsinline شرطا التشغيل التلقائي في متصفّحات الجوال --}}
+    <video class="nd-loader__media" autoplay muted playsinline
+           src="{{ asset($ndLoaderMedia) }}" aria-hidden="true"></video>
+    @else
+    <img class="nd-loader__media" src="{{ asset($ndLoaderMedia) }}"
+         alt="تهنئة اليوم الوطني السعودي">
+    @endif
 </div>
 
 <script>
 /**
- * يُخفي شاشة الترحيب فور اكتمال التحميل.
+ * يُخفي شاشة الترحيب.
  *
- * الإخفاء مضمون بالـ CSS أصلاً (أنيميشن له مدّة محدّدة)، وهذا السكربت يُسرّعه
- * فقط، مع حدّ أدنى لزمن العرض حتى لا تومض الشاشة وتختفي على اتصال سريع.
+ * الانزياح مضمون بالـ CSS أصلاً (أنيميشن له مدّة محدّدة)، وهذا السكربت يتيح
+ * إخفاءها أبكر: عند انتهاء الفيديو، أو بضغط زرّ التخطّي، أو إن تعذّر تشغيل
+ * الفيديو أصلاً (بعض المتصفّحات تمنع التشغيل التلقائي).
  */
 (function () {
     var el = document.getElementById('nd-loader');
     if (! el) return;
 
-    var MIN_MS = 3200;
-    var start  = Date.now();
+    var done = false;
 
     function dismiss() {
-        var wait = Math.max(0, MIN_MS - (Date.now() - start));
-        setTimeout(function () { el.classList.add('is-done'); }, wait);
+        if (done) return;
+        done = true;
+        el.classList.add('is-done');
     }
 
-    if (document.readyState === 'complete') {
-        dismiss();
+    var skip = el.querySelector('[data-nd-skip]');
+    if (skip) skip.addEventListener('click', dismiss);
+
+    var video = el.querySelector('video');
+
+    if (video) {
+        video.addEventListener('ended', dismiss);
+        video.addEventListener('error', dismiss);
+
+        // التشغيل التلقائي قد يُرفض؛ عندها لا معنى لستار ساكن
+        var play = video.play();
+        if (play && typeof play.catch === 'function') {
+            play.catch(dismiss);
+        }
     } else {
-        window.addEventListener('load', dismiss);
+        // صورة متحرّكة: لا حدث انتهاء لها، فنترك مؤقّت الـ CSS يتولّى الأمر
+        var img = el.querySelector('img');
+        if (img) img.addEventListener('error', dismiss);
     }
 })();
 </script>

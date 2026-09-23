@@ -20,8 +20,21 @@
 
 @if($ndPopupImage)
 <div x-data="{ open: false }"
-     {{-- بعد انزياح شاشة التحميل (‎3.2‎ ثانية عرض + ‎0.5‎ انزياح) وإلا ظهرت خلفها --}}
-     x-init="setTimeout(() => open = true, 4000)"
+     {{-- ننتظر انزياح شاشة التحميل فعلياً لا بمهلة مقدّرة: مدّة الوسيط تتغيّر
+          بتغيّر الملف المرفوع، وأي رقم ثابت يجعل النافذة تظهر خلف الستار. --}}
+     x-init="
+        const loader = document.getElementById('nd-loader');
+        if (! loader) { setTimeout(() => open = true, 900); }
+        else {
+            const show = () => setTimeout(() => open = true, 400);
+            if (loader.classList.contains('is-done')) { show(); }
+            else {
+                loader.addEventListener('animationend', show, { once: true });
+                // حارس: لو لم يصل حدث الأنيميشن لأي سبب
+                setTimeout(() => { if (! open) show(); }, 8000);
+            }
+        }
+     "
      x-show="open"
      x-cloak
      x-transition:enter="transition ease-out duration-300"
