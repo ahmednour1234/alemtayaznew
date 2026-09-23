@@ -376,11 +376,8 @@
 <body class="bg-slate-50 text-slate-800 antialiased">
 
 @php
-    /*
-     * وسيط شاشة التحميل: فيديو أو صورة متحرّكة يرفعها المستخدم باسم
-     * national_day_loader. لا شاشة أصلاً إن لم يُرفع شيء، فلا يُحجب الموقع
-     * خلف ستار فارغ.
-     */
+    // وسيط شاشة التحميل يرفعه المستخدم باسم national_day_loader.
+    // لا شاشة أصلاً إن لم يُرفع شيء، فلا يُحجب الموقع خلف ستار فارغ.
     $ndLoaderMedia = null;
     $ndLoaderType  = null;
 
