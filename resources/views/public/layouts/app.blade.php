@@ -476,6 +476,11 @@
 
 @include('public.partials.footer')
 
+@if($nationalDay)
+{{-- تهنئة اليوم الوطني — تسبق نافذة الطلب فلا تتزاحمان --}}
+@include('public.partials.national-day-popup')
+@endif
+
 {{-- نافذة الطلب السريع — تُستثنى صفحة «اطلب الآن» لأن النموذج معروض فيها --}}
 @unless(request()->routeIs('site.order'))
     @include('public.partials.lead-popup')

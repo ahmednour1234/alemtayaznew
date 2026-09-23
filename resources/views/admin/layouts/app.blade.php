@@ -19,6 +19,30 @@
 
     $locConf = $locales[$currentLoc] ?? $fallbackConf;
     $dir     = $locConf['dir'] ?? 'rtl';
+
+    /*
+     * وضع اليوم الوطني في لوحة الإدارة.
+     *
+     * نفس المفتاح الذي يحكم الموقع العام، فتتبدّل الواجهتان معاً بضغطة واحدة.
+     * الألوان معرّفة كمتغيّرات CSS أصلاً في هذه اللوحة، فيكفي تبديل قيمها.
+     */
+    $adminNationalDay = (bool) \App\Models\SiteSetting::value('national_day_mode');
+
+    $AC = $adminNationalDay
+        ? [
+            'primary'       => '#046A38',
+            'primary_rgb'   => '4,106,56',
+            'primary_light' => '#e8f5ee',
+            'primary_dark'  => '#02502A',
+            'sidebar'       => '#06261A',
+        ]
+        : [
+            'primary'       => '#c9a84c',
+            'primary_rgb'   => '201,168,76',
+            'primary_light' => '#fdf8e8',
+            'primary_dark'  => '#a88830',
+            'sidebar'       => '#0f172a',
+        ];
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $currentLoc }}" dir="{{ $dir }}">
@@ -34,7 +58,7 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: { DEFAULT: '#c9a84c', light: '#fdf8e8', dark: '#a88830' },
+                        primary: { DEFAULT: '{{ $AC['primary'] }}', light: '{{ $AC['primary_light'] }}', dark: '{{ $AC['primary_dark'] }}' },
                         surface: '#ffffff',
                         bg: '#f5f7fb',
                         ink: { DEFAULT: '#0f172a', muted: '#64748b', faint: '#94a3b8' },
@@ -67,8 +91,9 @@
         :root {
             --sidebar-w: 260px;
             --topbar-h: 60px;
-            --primary: #c9a84c;
-            --primary-light: #fdf8e8;
+            --primary: {{ $AC['primary'] }};
+            --primary-rgb: {{ $AC['primary_rgb'] }};
+            --primary-light: {{ $AC['primary_light'] }};
             --surface: #ffffff;
             --bg: #f5f7fb;
             --ink: #0f172a;
@@ -86,7 +111,7 @@
         #sidebar {
             position: fixed; top: 0;
             width: var(--sidebar-w); height: 100vh;
-            background: #0f172a;
+            background: {{ $AC['sidebar'] }};
             display: flex; flex-direction: column;
             z-index: 50;
             transition: transform .25s cubic-bezier(.4,0,.2,1);
@@ -109,11 +134,11 @@
         }
         .nav-link:hover { background: rgba(255,255,255,.06); color: #cbd5e1; }
         .nav-link.active {
-            background: rgba(201,168,76,.18);
-            color: #c9a84c;
+            background: rgba(var(--primary-rgb),.18);
+            color: var(--primary);
             font-weight: 600;
         }
-        .nav-link.active svg { color: #c9a84c; }
+        .nav-link.active svg { color: var(--primary); }
         .nav-link svg { flex-shrink: 0; width: 16px; height: 16px; transition: color .15s; }
 
         /* ── Main wrapper ── */
@@ -187,7 +212,7 @@
             transition: border-color .15s, background .15s;
             outline: none;
         }
-        .search-input:focus { background: #fff; border-color: #c9a84c; box-shadow: 0 0 0 3px rgba(201,168,76,.12); }
+        .search-input:focus { background: #fff; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(var(--primary-rgb),.12); }
         .search-input::placeholder { color: var(--ink-faint); }
 
         /* ── Icon button ── */
@@ -247,7 +272,7 @@
             transition: color .15s, background .15s;
             padding: 4px 2px;
         }
-        .bnav-item.active { color: #c9a84c; }
+        .bnav-item.active { color: var(--primary); }
         .bnav-item:active, .bnav-item:hover { color: #e2e8f0; background: rgba(255,255,255,.05); }
 
         @media (max-width: 767px) {
@@ -263,8 +288,8 @@
                 display: flex;
                 position: fixed; bottom: 0; left: 0; right: 0;
                 height: 62px;
-                background: #0f172a;
-                border-top: 1px solid rgba(201,168,76,.2);
+                background: {{ $AC['sidebar'] }};
+                border-top: 1px solid rgba(var(--primary-rgb),.2);
                 z-index: 55;
                 align-items: stretch;
             }
@@ -293,8 +318,8 @@
             gap: 4px;
         }
         .ts-wrapper.focus .ts-control {
-            border-color: #c9a84c !important;
-            box-shadow: 0 0 0 3px rgba(201,168,76,.15);
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb),.15);
             outline: none;
         }
         .ts-wrapper .ts-control .item { font-size: 13px; }
@@ -309,7 +334,7 @@
             border-top: 5px solid #94a3b8;
             pointer-events: none;
         }
-        .ts-wrapper.open .ts-control::after { border-top: none; border-bottom: 5px solid #c9a84c; }
+        .ts-wrapper.open .ts-control::after { border-top: none; border-bottom: 5px solid var(--primary); }
         .ts-wrapper .ts-dropdown {
             border: 1px solid #e2e8f0;
             border-radius: 10px;
@@ -329,8 +354,8 @@
             transition: background .12s;
         }
         .ts-wrapper .ts-dropdown .option:hover,
-        .ts-wrapper .ts-dropdown .option.active   { background: #fdf8e8; color: #92720e; }
-        .ts-wrapper .ts-dropdown .option.selected { background: #fef9e7; color: #c9a84c; font-weight: 600; }
+        .ts-wrapper .ts-dropdown .option.active   { background: var(--primary-light); color: #92720e; }
+        .ts-wrapper .ts-dropdown .option.selected { background: #fef9e7; color: var(--primary); font-weight: 600; }
         .ts-dropdown input.dropdown-input {
             border: none;
             border-bottom: 1.5px solid #e8edf5;
@@ -342,7 +367,7 @@
             direction: var(--app-dir);
             background: #fafafa;
         }
-        .ts-dropdown input.dropdown-input:focus { border-bottom-color: #c9a84c; background: #fff; }
+        .ts-dropdown input.dropdown-input:focus { border-bottom-color: var(--primary); background: #fff; }
         .ts-dropdown .no-results { padding: 10px 14px; color: #94a3b8; font-size: 13px; }
         /* hide default arrow from original select */
         select { display: none; }

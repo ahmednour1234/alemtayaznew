@@ -22,9 +22,9 @@
     font-size: 11px; color: #94a3b8; margin: 3px 0 0; font-weight: 500;
 }
 .tb-breadcrumb a { color: #94a3b8; text-decoration: none; transition: color .15s; }
-.tb-breadcrumb a:hover { color: #c9a84c; }
+.tb-breadcrumb a:hover { color: var(--primary); }
 .tb-breadcrumb .crumb-sep { opacity: .5; font-size: 10px; }
-.tb-breadcrumb .crumb-cur { color: #c9a84c; font-weight: 600; }
+.tb-breadcrumb .crumb-cur { color: var(--primary); font-weight: 600; }
 .tb-search-input {
     width: 100%; background: #f8fafc;
     border: 1.5px solid #e8edf5; border-radius: 12px;
@@ -32,7 +32,7 @@
     font-family: var(--app-font); transition: all .18s ease; outline: none;
 }
 .tb-search-input::placeholder { color: #b0bec5; }
-.tb-search-input:focus { background:#fff; border-color:#c9a84c; box-shadow:0 0 0 3px rgba(201,168,76,.13); }
+.tb-search-input:focus { background:#fff; border-color:var(--primary); box-shadow:0 0 0 3px rgba(var(--primary-rgb),.13); }
 /* ── Global Search Dropdown ── */
 .gs-dropdown {
     position:absolute; top:calc(100% + 6px); inset-inline:0;
@@ -58,7 +58,7 @@
 .gs-item-sub   { font-size:11px; color:#94a3b8; margin-top:1px; }
 .gs-badge      { font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; margin-inline-start:auto; }
 .gs-empty      { padding:28px 14px; text-align:center; color:#94a3b8; font-size:13px; }
-.gs-spinner    { width:16px; height:16px; border:2px solid #e2e8f0; border-top-color:#c9a84c; border-radius:50%; animation:gsSpin .6s linear infinite; }
+.gs-spinner    { width:16px; height:16px; border:2px solid #e2e8f0; border-top-color:var(--primary); border-radius:50%; animation:gsSpin .6s linear infinite; }
 @keyframes gsSpin { to { transform:rotate(360deg); } }
 .tb-icon-btn {
     position: relative; width: 38px; height: 38px; border-radius: 10px;
@@ -86,13 +86,13 @@
     border: 1.5px solid #e8edf5; outline: none;
     background: #fff; cursor: pointer; transition: all .18s ease; direction: ltr;
 }
-.tb-user-btn:hover { border-color:#c9a84c; box-shadow:0 2px 14px rgba(201,168,76,.18); background:#fffdf5; }
+.tb-user-btn:hover { border-color:var(--primary); box-shadow:0 2px 14px rgba(var(--primary-rgb),.18); background:#fffdf5; }
 .tb-avatar {
     width: 34px; height: 34px; border-radius: 50%;
-    background: linear-gradient(135deg,#1a2744 0%,#c9a84c 100%);
+    background: linear-gradient(135deg,#1a2744 0%,var(--primary) 100%);
     display: flex; align-items: center; justify-content: center;
     color: #fff; font-size: 13px; font-weight: 800; flex-shrink: 0;
-    box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px rgba(201,168,76,.4);
+    box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px rgba(var(--primary-rgb),.4);
 }
 .tb-notif-panel {
     position: absolute; top: calc(100% + 10px);
@@ -156,7 +156,7 @@
             </svg>
         </button>
 
-        <div style="min-width:0;padding-inline-start:10px;border-inline-start:3px solid #c9a84c;">
+        <div style="min-width:0;padding-inline-start:10px;border-inline-start:3px solid var(--primary);">
             <p style="font-size:15px;font-weight:800;color:#0f172a;margin:0;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                 @yield('title', __('nav.dashboard'))
             </p>
@@ -336,7 +336,7 @@
                             border-bottom:1px solid #f1f5f9;">
                     <div style="display:flex;align-items:center;gap:9px;">
                         <div style="width:32px;height:32px;border-radius:9px;
-                                    background:linear-gradient(135deg,#1a2744,#c9a84c);
+                                    background:linear-gradient(135deg,#1a2744,var(--primary));
                                     display:flex;align-items:center;justify-content:center;">
                             <svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
                                 <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -355,7 +355,7 @@
                         <form method="POST" action="{{ route('admin.notifications.read-all') }}" style="margin:0;">
                             @csrf
                             <button type="submit"
-                                    style="font-size:11px;color:#c9a84c;background:#fdf8e8;
+                                    style="font-size:11px;color:var(--primary);background:#fdf8e8;
                                            border:1px solid #fde68a;border-radius:6px;
                                            cursor:pointer;padding:3px 8px;font-family:Cairo,sans-serif;font-weight:600;"
                                     onmouseover="this.style.background='#fef3c7'"
@@ -396,9 +396,9 @@
                         </div>
                         @if(!$notif->isRead())
                         <div style="width:8px;height:8px;border-radius:50%;
-                                    background:linear-gradient(135deg,#c9a84c,#f59e0b);
+                                    background:linear-gradient(135deg,var(--primary),#f59e0b);
                                     flex-shrink:0;margin-top:6px;
-                                    box-shadow:0 0 0 3px rgba(201,168,76,.2);"></div>
+                                    box-shadow:0 0 0 3px rgba(var(--primary-rgb),.2);"></div>
                         @endif
                     </a>
                     @empty
@@ -425,7 +425,7 @@
 
             <button @click="dropOpen = !dropOpen"
                     class="tb-user-btn"
-                    :style="dropOpen ? 'border-color:#c9a84c;box-shadow:0 2px 14px rgba(201,168,76,.2);background:#fffdf5;' : ''">
+                    :style="dropOpen ? 'border-color:var(--primary);box-shadow:0 2px 14px rgba(var(--primary-rgb),.2);background:#fffdf5;' : ''">
                 <div class="tb-avatar">{{ $initials }}</div>
                 <div class="tb-user-info-text" style="text-align:right;line-height:1.3;flex-shrink:0;">
                     <p style="font-size:13px;font-weight:700;color:#0f172a;margin:0;white-space:nowrap;">
@@ -459,7 +459,7 @@
                             background:linear-gradient(135deg,#1a2744 0%,#2d3f6b 100%);">
                     <div style="display:flex;align-items:center;gap:10px;">
                         <div style="width:40px;height:40px;border-radius:12px;
-                                    background:linear-gradient(135deg,#c9a84c,#f0c060);
+                                    background:linear-gradient(135deg,var(--primary),#f0c060);
                                     display:flex;align-items:center;justify-content:center;
                                     color:#fff;font-size:16px;font-weight:800;flex-shrink:0;">
                             {{ $initials }}
