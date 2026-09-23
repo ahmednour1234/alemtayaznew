@@ -42,6 +42,22 @@ class AppServiceProvider extends ServiceProvider
          */
         View::composer('public.*', function ($view): void {
             $view->with('nationalDay', (bool) \App\Models\SiteSetting::value('national_day_mode'));
+
+            // وسيط شاشة التحميل: يُحسب هنا لا في القالب، فلا يحتاج القالب
+            // كتلة @php وتبقى المسؤولية في طبقة واحدة.
+            $media = null;
+            $type  = null;
+
+            foreach (['mp4' => 'video', 'webm' => 'video', 'gif' => 'image', 'webp' => 'image'] as $ext => $kind) {
+                if (file_exists(public_path('national_day_loader.' . $ext))) {
+                    $media = 'national_day_loader.' . $ext;
+                    $type  = $kind;
+                    break;
+                }
+            }
+
+            $view->with('ndLoaderMedia', $media);
+            $view->with('ndLoaderType', $type);
         });
 
         // Make @can() / @cannot() / Gate::allows() work with the 'admin' guard.
