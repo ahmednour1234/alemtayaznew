@@ -115,13 +115,34 @@ class CvController extends Controller
 
         abort_unless($worker->hasCvFile(), 404);
 
-        return response()->file(
-            \Illuminate\Support\Facades\Storage::disk($worker->cvDisk())->path($worker->cv_path),
-            [
-                'Content-Type'        => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="cv-' . $worker->id . '.pdf"',
-            ]
+        $path = \Illuminate\Support\Facades\Storage::disk($worker->cvDisk())->path($worker->cv_path);
+
+        /*
+         * يُرسَل الملف عبر BinaryFileResponse لا response()->file().
+         *
+         * الفارق أن هذا يدعم ترويسة Range، فيستطيع المتصفّح طلب أجزاء الملف
+         * تباعاً واستئناف ما انقطع بدل أن يعلّق التحميل من أوّله على اتصال
+         * بطيء أو ملف كبير. ويضيف ETag/Last-Modified فتُخزَّن السيرة مؤقتاً
+         * ولا تُنقل كاملة مع كل فتح.
+         */
+        $response = new \Symfony\Component\HttpFoundation\BinaryFileResponse($path);
+
+        $response->headers->set('Content-Type', 'application/pdf');
+        $response->setContentDisposition(
+            \Symfony\Component\HttpFoundation\ResponseHeaderBag::DISPOSITION_INLINE,
+            'cv-' . $worker->id . '.pdf'
         );
+
+        // يُفعّل استجابة 206 الجزئية عند طلب المتصفّح مدى معيّناً
+        $response->headers->set('Accept-Ranges', 'bytes');
+
+        // السير لا تتغيّر بعد رفعها، فالتخزين المؤقّت آمن ويخفّف الحمل
+        $response->setAutoEtag();
+        $response->setAutoLastModified();
+        $response->setPublic();
+        $response->setMaxAge(3600);
+
+        return $response;
     }
 
     /** الشرط الموحّد لما يجوز عرضه للعامة. */

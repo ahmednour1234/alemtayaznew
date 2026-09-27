@@ -56,7 +56,9 @@ class ContactController extends Controller
         RateLimiter::hit($key, 600);
 
         $data = $request->validate([
-            'name'           => ['required', 'string', 'max:255'],
+            // الاسم اختياري: الشريط السريع يطلب الجوال وحده، والاسم يُؤخذ
+            // في المكالمة. رقم بلا اسم أنفع من زائر غادر بلا أثر.
+            'name'           => ['nullable', 'string', 'max:255'],
             'phone'          => ['required', 'string', 'max:30'],
             'city'           => ['nullable', 'string', 'max:100'],
             'nationality_id' => ['nullable', 'integer', 'exists:nationalities,id'],
@@ -113,26 +115,29 @@ class ContactController extends Controller
             'phone'          => ['required', 'string', 'max:30'],
             'city'           => ['nullable', 'string', 'max:100'],
             'nationality_id' => ['nullable', 'integer', 'exists:nationalities,id'],
-            'service'        => ['required', 'string', Rule::in(self::SERVICES)],
+            // النافذة السريعة تطلب الاسم والجوال فقط لرفع نسبة الاستجابة،
+            // فالخدمة اختيارية هنا بخلاف نموذج صفحة الطلب الكامل.
+            'service'        => ['nullable', 'string', Rule::in(self::SERVICES)],
             'notes'          => ['nullable', 'string', 'max:2000'],
             'website'        => ['nullable', 'size:0'],
         ], [
-            'name.required'    => 'الاسم مطلوب.',
-            'phone.required'   => 'رقم الجوال مطلوب.',
-            'service.required' => 'اختيار الخدمة مطلوب.',
-            'service.in'       => 'الخدمة المختارة غير صحيحة.',
-            'website.size'     => 'تعذّر إرسال الطلب.',
+            'phone.required' => 'رقم الجوال مطلوب.',
+            'service.in'     => 'الخدمة المختارة غير صحيحة.',
+            'website.size'   => 'تعذّر إرسال الطلب.',
         ]);
 
         // لا يوجد عمود مستقل للخدمة، فنضمّها في الملاحظات ليراها فريق التسويق
-        $notes = 'الخدمة المطلوبة: ' . $data['service'];
+        $notes = ! empty($data['service'])
+            ? 'الخدمة المطلوبة: ' . $data['service']
+            : 'طلب سريع من النافذة المنبثقة';
+
         if (! empty($data['notes'])) {
-            $notes .= "
-" . $data['notes'];
+            $notes .= PHP_EOL . $data['notes'];
         }
 
         Lead::create([
-            'name'           => $data['name'],
+            // اسم بديل مفهوم لفريق المبيعات حين يصل الرقم وحده
+            'name'           => $data['name'] ?: 'زائر من الموقع',
             'phone'          => $data['phone'],
             'city'           => $data['city'] ?? null,
             'nationality_id' => $data['nationality_id'] ?? null,

@@ -82,44 +82,17 @@
                            class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy">
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">المدينة</label>
-                        <input type="text" x-model="form.city" maxlength="100"
-                               placeholder="الرياض"
-                               class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">الجنسية المطلوبة</label>
-                        <select x-model="form.nationality_id"
-                                class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy">
-                            <option value="">غير محدد</option>
-                            @foreach($popupNationalities as $nat)
-                            <option value="{{ $nat->id }}">{{ $nat->display_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
+                {{-- الجنسية اختيارية: حقل واحد إضافي لا يُثقل النموذج ويفيد
+                     فريق المبيعات في توجيه المكالمة. --}}
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">
-                        الخدمة المطلوبة <span class="text-red-500">*</span>
-                    </label>
-                    <select x-model="form.service" required
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">الجنسية المطلوبة (اختياري)</label>
+                    <select x-model="form.nationality_id"
                             class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy">
-                        <option value="">اختر الخدمة</option>
-                        @foreach(\App\Http\Controllers\PublicSite\ContactController::SERVICES as $srv)
-                        <option value="{{ $srv }}">{{ $srv }}</option>
+                        <option value="">غير محدد</option>
+                        @foreach($popupNationalities as $nat)
+                        <option value="{{ $nat->id }}">{{ $nat->display_name }}</option>
                         @endforeach
                     </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">تفاصيل إضافية</label>
-                    <textarea x-model="form.notes" rows="2" maxlength="2000"
-                              placeholder="اكتب أي تفاصيل تساعدنا في خدمتك..."
-                              class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-navy/30 focus:border-navy"></textarea>
                 </div>
 
                 {{-- أخطاء الخادم --}}

@@ -362,10 +362,28 @@ class WorkerController extends Controller
 
         $path = Storage::disk($worker->cvDisk())->path($worker->cv_path);
 
-        return response()->file($path, [
-            'Content-Type'        => mime_content_type($path) ?: 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . basename($worker->cv_path) . '"',
-        ]);
+        /*
+         * BinaryFileResponse لا response()->file(): الأولى تدعم ترويسة Range
+         * فيستأنف المتصفّح ما انقطع بدل أن يعلّق التحميل على ملف كبير أو
+         * اتصال بطيء، وتضيف ETag فلا يُنقل الملف كاملاً مع كل فتح.
+         */
+        $response = new \Symfony\Component\HttpFoundation\BinaryFileResponse($path);
+
+        $response->headers->set('Content-Type', mime_content_type($path) ?: 'application/pdf');
+        $response->setContentDisposition(
+            \Symfony\Component\HttpFoundation\ResponseHeaderBag::DISPOSITION_INLINE,
+            basename($worker->cv_path)
+        );
+        $response->headers->set('Accept-Ranges', 'bytes');
+
+        $response->setAutoEtag();
+        $response->setAutoLastModified();
+
+        // بيانات خاصة بلوحة الإدارة: تُخزَّن في متصفّح الموظّف وحده لا في وسيط
+        $response->setPrivate();
+        $response->setMaxAge(600);
+
+        return $response;
     }
 
     public function servePassport(int $id)

@@ -482,9 +482,14 @@
 @include('public.partials.national-day-popup')
 @endif
 
-{{-- نافذة الطلب السريع — تُستثنى صفحة «اطلب الآن» لأن النموذج معروض فيها --}}
+{{--
+    شريط التقاط الجوال — وسيلة واحدة لطلب الرقم لا اثنتان.
+    كانت معه نافذة منبثقة تطلب الشيء نفسه، فأُزيلت: تكرار الطلب يُزعج
+    الزائر ويُقلّل الاستجابة بدل أن يزيدها.
+    يُستثنى في صفحة «اطلب الآن» لأن النموذج معروض فيها أصلاً.
+--}}
 @unless(request()->routeIs('site.order'))
-    @include('public.partials.lead-popup')
+    @include('public.partials.phone-bar')
 @endunless
 
 <script>
@@ -628,9 +633,101 @@ function hSlider(delay = 3500) {
  * الوصول إلى localStorage قد يفشل (وضع التصفّح الخاص، حظر التخزين)،
  * لذا نغلّف كل قراءة وكتابة بـ try/catch ونعتبر الفشل «لم تُعرض بعد».
  */
+/**
+ * شريط التقاط رقم الجوال.
+ *
+ * حقل واحد بلا نموذج: أقلّ ما يمكن طلبه من الزائر بموافقته. يظهر بعد أن
+ * يقضي وقتاً كافياً في الصفحة، ويختفي نهائياً بعد الإرسال.
+ */
+function phoneBar() {
+    const KEY    = 'phone_bar_done';    // أرسل رقمه — لا نعرضه ثانية أبداً
+    const SNOOZE = 'phone_bar_snooze';  // أخفاه بلا إرسال — نصمت ثم نعاود
+    const DELAY  = 12000;               // يظهر بعد أن يتصفّح فعلاً لا فور الدخول
+    const DAYS   = 3;
+
+    return {
+        visible: false,
+        done: false,
+        sending: false,
+        error: '',
+        phone: '',
+        website: '',
+
+        init() {
+            if (this.blocked()) return;
+
+            setTimeout(() => {
+                // النافذة المنبثقة تسبقه؛ لا نُظهر الاثنين معاً فنُربك الزائر.
+                // نؤجّل ما دامت مفتوحة ونعاود الفحص.
+                const wait = () => {
+                    if (document.querySelector('[role="dialog"]:not([style*="display: none"])')) {
+                        setTimeout(wait, 2000);
+                        return;
+                    }
+                    this.visible = true;
+                };
+                wait();
+            }, DELAY);
+        },
+
+        blocked() {
+            try {
+                if (localStorage.getItem(KEY) === '1') return true;
+                return parseInt(localStorage.getItem(SNOOZE) || '0', 10) > Date.now();
+            } catch {
+                return false; // التخزين محظور — نعرضه ولا نمنع
+            }
+        },
+
+        dismiss() {
+            this.visible = false;
+            try {
+                localStorage.setItem(SNOOZE, String(Date.now() + DAYS * 86400 * 1000));
+            } catch { /* التخزين محظور — نتجاهل */ }
+        },
+
+        async submit() {
+            this.sending = true;
+            this.error   = '';
+
+            try {
+                const res = await fetch('{{ route('site.lead.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                    },
+                    body: JSON.stringify({ phone: this.phone, website: this.website }),
+                });
+
+                if (! res.ok) {
+                    const body = await res.json().catch(() => ({}));
+                    this.error = body.message
+                        || Object.values(body.errors ?? {}).flat()[0]
+                        || 'تعذّر الإرسال، حاول مرة أخرى.';
+                    return;
+                }
+
+                this.done = true;
+                try { localStorage.setItem(KEY, '1'); } catch { /* نتجاهل */ }
+
+                // يختفي الشريط بعد أن يقرأ الزائر رسالة التأكيد
+                setTimeout(() => { this.visible = false; }, 4000);
+            } catch {
+                this.error = 'تعذّر الاتصال، تحقّق من الشبكة.';
+            } finally {
+                this.sending = false;
+            }
+        },
+    };
+}
+
 function leadPopup() {
-    const KEY   = 'lead_popup_seen';
-    const DELAY = 6000;   // مهلة قبل الظهور — تكفي لإلقاء نظرة على الصفحة
+    const KEY      = 'lead_popup_seen';   // أُرسل الطلب فعلاً — لا تُزعجه ثانية
+    const SNOOZE   = 'lead_popup_snooze'; // أُغلقت بلا إرسال — نعاود بعد مهلة
+    const DELAY    = 6000;                // مهلة قبل الظهور — تكفي لإلقاء نظرة
+    const SNOOZE_H = 24;                  // ساعات الصمت بعد الإغلاق
 
     return {
         open: false,
@@ -640,12 +737,37 @@ function leadPopup() {
         form: { name: '', phone: '', city: '', nationality_id: '', service: '', notes: '', website: '' },
 
         init() {
-            if (this.seen()) return;
-            setTimeout(() => { this.open = true; }, DELAY);
+            if (this.blocked()) return;
+
+            setTimeout(() => { this.show(); }, DELAY);
+
+            /*
+             * نيّة المغادرة: خروج المؤشّر من أعلى النافذة يسبق إغلاق التبويب
+             * عادةً، فنعرض النافذة عندها بدل أن يغادر الزائر بلا أثر.
+             * سطح المكتب فقط — لا مؤشّر على الجوال.
+             */
+            if (window.matchMedia('(min-width: 1024px)').matches) {
+                document.addEventListener('mouseout', (e) => {
+                    if (e.clientY <= 0 && ! e.relatedTarget) this.show();
+                });
+            }
         },
 
-        seen() {
-            try { return localStorage.getItem(KEY) === '1'; } catch { return false; }
+        show() {
+            if (this.open || this.done || this.blocked()) return;
+            this.open = true;
+        },
+
+        /** هل نمتنع عن العرض؟ إمّا أرسل الطلب، أو أغلقها قريباً. */
+        blocked() {
+            try {
+                if (localStorage.getItem(KEY) === '1') return true;
+
+                const until = parseInt(localStorage.getItem(SNOOZE) || '0', 10);
+                return until > Date.now();
+            } catch {
+                return false; // التخزين محظور — نعرضها ولا نمنع
+            }
         },
 
         remember() {
@@ -654,7 +776,14 @@ function leadPopup() {
 
         close() {
             this.open = false;
-            this.remember();
+
+            // الإغلاق بلا إرسال ليس رفضاً نهائياً: نصمت يوماً ثم نعاود،
+            // أمّا الإرسال فيُسجَّل في remember() ولا نعاوده أبداً.
+            if (! this.done) {
+                try {
+                    localStorage.setItem(SNOOZE, String(Date.now() + SNOOZE_H * 3600 * 1000));
+                } catch { /* التخزين محظور — نتجاهل */ }
+            }
         },
 
         async submit() {
