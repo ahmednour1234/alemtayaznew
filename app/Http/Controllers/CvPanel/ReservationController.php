@@ -34,16 +34,39 @@ class ReservationController extends Controller
 
         abort_unless(self::canReserve($me), 403, __('cv-panel.reserve.denied'));
 
-        $clients = Client::where('active', true)
-            ->when($me->isBranchAdmin(), fn ($q) => $q->where('branch_id', $me->branch_id))
-            ->orderBy('name')
-            ->get(['id', 'name']);
-
         return view('cv-panel.reserve', [
             'worker'  => $worker,
-            'clients' => $clients,
             'hours'   => $worker->reservationHours(),
         ]);
+    }
+
+    /**
+     * بحث العملاء بالطلب.
+     *
+     * قائمة العملاء بالآلاف، وتحميلها كاملة في الصفحة يُبطّئها بلا فائدة —
+     * الموظّف يعرف عميله بالاسم. نعيد أوّل ما يطابق ما كتبه فقط.
+     */
+    public function searchClients(Request $request)
+    {
+        $me = Auth::guard('admin')->user();
+
+        abort_unless(self::canReserve($me), 403);
+
+        $term = trim((string) $request->input('q'));
+
+        // أقلّ من حرفين يعيد آلاف النتائج بلا معنى
+        if (mb_strlen($term) < 2) {
+            return response()->json([]);
+        }
+
+        $clients = Client::where('active', true)
+            ->when($me->isBranchAdmin(), fn ($q) => $q->where('branch_id', $me->branch_id))
+            ->where('name', 'like', '%' . $term . '%')
+            ->orderBy('name')
+            ->limit(30)
+            ->get(['id', 'name']);
+
+        return response()->json($clients);
     }
 
     public function store(Request $request, int $id): RedirectResponse

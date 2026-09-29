@@ -43,10 +43,8 @@
             <select name="client_id" id="cvClientSelect" x-bind:disabled="mode !== 'existing'"
                     class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm disabled:bg-slate-50 disabled:text-slate-400
                            focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+                {{-- بلا خيارات مسبقة: تُجلب من الخادم أثناء الكتابة --}}
                 <option value="">{{ __('cv-panel.reserve.choose_client') }}</option>
-                @foreach($clients as $client)
-                <option value="{{ $client->id }}" @selected(old('client_id') == $client->id)>{{ $client->name }}</option>
-                @endforeach
             </select>
         </div>
 
@@ -105,10 +103,32 @@
 
         var ts = new TomSelect(el, {
             placeholder: @json(__('cv-panel.reserve.choose_client')),
-            searchField: ['text'],
+            valueField: 'id',
+            labelField: 'name',
+            searchField: ['name'],
             allowEmptyOption: true,
-            maxOptions: 500,
+            maxOptions: 30,
+
+            // العملاء بالآلاف، فلا تُحمَّل القائمة كاملة: نسأل الخادم عمّا
+            // يكتبه الموظّف فقط. preload معطّل حتى لا يُستدعى قبل الكتابة.
+            load: function (query, callback) {
+                if (query.length < 2) { callback(); return; }
+
+                fetch('{{ route('cv-panel.clients.search') }}?q=' + encodeURIComponent(query), {
+                    headers: { 'Accept': 'application/json' },
+                })
+                    .then(function (res) { return res.json(); })
+                    .then(callback)
+                    .catch(function () { callback(); });
+            },
+
             render: {
+                option: function (data, escape) {
+                    return '<div>' + escape(data.name) + '</div>';
+                },
+                item: function (data, escape) {
+                    return '<div>' + escape(data.name) + '</div>';
+                },
                 no_results: function () {
                     return '<div class="no-results">' + @json(__('cv-panel.reserve.no_client_results')) + '</div>';
                 }

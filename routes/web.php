@@ -405,6 +405,8 @@ Route::prefix('cv-panel')->name('cv-panel.')
             ->whereNumber('id')->name('cvs.file');
 
         // الحجز — خدمة العملاء تحجز السيرة للعميل لمدة محدودة
+        Route::get('clients/search', [\App\Http\Controllers\CvPanel\ReservationController::class, 'searchClients'])
+            ->name('clients.search');
         Route::get('cvs/{id}/reserve',  [\App\Http\Controllers\CvPanel\ReservationController::class, 'create'])
             ->whereNumber('id')->name('reserve');
         Route::post('cvs/{id}/reserve', [\App\Http\Controllers\CvPanel\ReservationController::class, 'store'])

@@ -266,6 +266,7 @@ class AutoPermission
         'cv-panel.users.toggle'        => null,
         'cv-panel.cvs.file'            => null,
         'cv-panel.reserve'             => null,
+        'cv-panel.clients.search'      => null,
         'cv-panel.reserve.store'       => null,
         'cv-panel.reserve.destroy'     => null,
         'cv-panel.tamara'              => null,

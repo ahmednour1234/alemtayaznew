@@ -79,7 +79,7 @@ return [
         'action'          => 'Reserve for client',
         'intro'           => 'Pick the client who requested this CV. It disappears from the site once reserved and stays reserved until someone releases it.',
         'existing_client' => 'Existing client',
-        'choose_client'   => 'Choose a client…',
+        'choose_client'   => 'Type a client name to search…',
         'or_new'          => 'Or a new client',
         'client_name'     => 'Client name',
         'client_phone'    => 'Phone number',
