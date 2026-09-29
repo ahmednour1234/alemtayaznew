@@ -135,13 +135,28 @@
             }
         });
 
-        // Tom Select يبني عنصراً بديلاً، فلا يصله x-bind:disabled من ألبين.
-        // نراقب الحقل الأصلي ونعكس حالته على الأداة يدوياً.
-        new MutationObserver(function () {
-            el.disabled ? ts.disable() : ts.enable();
-        }).observe(el, { attributes: true, attributeFilter: ['disabled'] });
+        /*
+         * Tom Select يبني عنصراً بديلاً، فلا يصله x-bind:disabled من ألبين.
+         * نراقب الحقل الأصلي ونعكس حالته على الأداة يدوياً.
+         *
+         * حارس ضروري: ts.disable()/enable() يُعدّلان خاصية disabled على
+         * العنصر نفسه الذي نراقبه، فبغير تتبّع الحالة الأخيرة يستدعي المراقبُ
+         * نفسَه بلا نهاية ويُعلّق الصفحة.
+         */
+        var lastDisabled = null;
 
-        if (el.disabled) ts.disable();
+        function syncDisabled() {
+            var isDisabled = el.disabled;
+            if (isDisabled === lastDisabled) return;
+
+            lastDisabled = isDisabled;
+            isDisabled ? ts.disable() : ts.enable();
+        }
+
+        new MutationObserver(syncDisabled)
+            .observe(el, { attributes: true, attributeFilter: ['disabled'] });
+
+        syncDisabled();
     }
 
     if (document.readyState === 'loading') {
