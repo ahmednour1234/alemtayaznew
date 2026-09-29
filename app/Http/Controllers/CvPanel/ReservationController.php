@@ -159,6 +159,9 @@ class ReservationController extends Controller
         }
 
         return $me->isSuperAdmin()
-            || in_array($me->department, ['customer_service', 'branch_manager', 'chairman'], true);
+            || in_array($me->department, [
+                \App\Http\Middleware\CvPanelAccess::CUSTOMER_SERVICE,
+                \App\Http\Middleware\CvPanelAccess::MANAGER,
+            ], true);
     }
 }

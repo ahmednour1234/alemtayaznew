@@ -56,7 +56,7 @@ class CoordinatorController extends Controller
         $me = Auth::guard('admin')->user();
 
         abort_unless(
-            $me->isSuperAdmin() || in_array($me->department, ['branch_manager', 'chairman'], true),
+            $me->isSuperAdmin() || in_array($me->department, \App\Http\Middleware\CvPanelAccess::SUPERVISORS, true),
             403,
             __('cv-panel.coordinators.denied')
         );

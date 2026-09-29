@@ -13,7 +13,9 @@
     $dir     = $locConf['dir'] ?? 'rtl';
 
     $me     = Auth::guard('admin')->user();
-    $canMan = $me->isSuperAdmin() || in_array($me->department, ['branch_manager', 'chairman'], true);
+    // القاعدة نفسها التي تطبّقها الكنترولرات — لا نعرض رابطاً يؤدي إلى 403
+    $canMan = $me->isSuperAdmin()
+        || in_array($me->department, \App\Http\Middleware\CvPanelAccess::SUPERVISORS, true);
 
     $unreadCount = \App\Http\Controllers\CvPanel\NotificationController::scope($me)
         ->whereNull('read_at')->count();
@@ -30,6 +32,9 @@
     if ($canMan) {
         $nav[] = ['route' => 'cv-panel.coordinators.index', 'label' => __('cv-panel.coordinators_page.nav'),
                   'icon'  => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'];
+
+        $nav[] = ['route' => 'cv-panel.users.index', 'label' => __('cv-panel.users.nav'),
+                  'icon'  => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'];
     }
 @endphp
 <!DOCTYPE html>

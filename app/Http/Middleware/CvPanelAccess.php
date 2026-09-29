@@ -15,8 +15,24 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class CvPanelAccess
 {
+    /*
+     * أدوار لوحة السير الثلاثة ولا رابع لها:
+     *  • المنسّق        — يرفع السير للجنسيات المسندة إليه.
+     *  • خدمة العملاء   — تحجز السيرة للعميل.
+     *  • مدير الفرع     — يشرف ويُسند الجنسيات ويدير مستخدمي اللوحة.
+     *
+     * المصدر الوحيد لهذه القائمة: يقرأها الوسيط والكنترولرات والخدمات،
+     * فلا يتفرّق التعريف ويختلف من موضع لآخر.
+     */
+    public const COORDINATION     = 'coordination';
+    public const CUSTOMER_SERVICE = 'customer_service';
+    public const MANAGER          = 'branch_manager';
+
     /** الأقسام التي تدخل اللوحة. */
-    public const DEPARTMENTS = ['coordination', 'customer_service', 'branch_manager', 'chairman'];
+    public const DEPARTMENTS = [self::COORDINATION, self::CUSTOMER_SERVICE, self::MANAGER];
+
+    /** من يملك صلاحيات الإشراف داخل اللوحة. */
+    public const SUPERVISORS = [self::MANAGER];
 
     public function handle(Request $request, Closure $next): Response
     {

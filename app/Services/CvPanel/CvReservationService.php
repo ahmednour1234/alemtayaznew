@@ -77,7 +77,7 @@ class CvReservationService
             // «سوبر أدمن» دور لا عمود، فنجمعه عبر العلاقة لا بشرط على الجدول
             $recipients = Admin::where('active', true)
                 ->where(function ($q) {
-                    $q->whereIn('department', ['branch_manager', 'chairman'])
+                    $q->whereIn('department', \App\Http\Middleware\CvPanelAccess::SUPERVISORS)
                       ->orWhereHas('roles', fn ($r) => $r->where('slug', 'super-admin'));
                 })
                 ->get();

@@ -393,6 +393,12 @@ Route::prefix('cv-panel')->name('cv-panel.')
         Route::get('upload',  [\App\Http\Controllers\CvPanel\CvUploadController::class, 'create'])->name('upload');
         Route::post('upload', [\App\Http\Controllers\CvPanel\CvUploadController::class, 'store'])->name('upload.store');
 
+        // مستخدمو اللوحة — للمديرين (يتحقّق الكنترولر)
+        Route::get('users',              [\App\Http\Controllers\CvPanel\UserController::class, 'index'])->name('users.index');
+        Route::post('users',             [\App\Http\Controllers\CvPanel\UserController::class, 'store'])->name('users.store');
+        Route::put('users/{id}',         [\App\Http\Controllers\CvPanel\UserController::class, 'update'])->whereNumber('id')->name('users.update');
+        Route::post('users/{id}/toggle', [\App\Http\Controllers\CvPanel\UserController::class, 'toggle'])->whereNumber('id')->name('users.toggle');
+
         // قائمة السير
         Route::get('cvs', [\App\Http\Controllers\CvPanel\CvController::class, 'index'])->name('cvs.index');
         Route::get('cvs/{id}/file', [\App\Http\Controllers\CvPanel\CvController::class, 'file'])

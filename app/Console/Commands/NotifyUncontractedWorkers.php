@@ -16,8 +16,17 @@ use Illuminate\Console\Command;
  */
 class NotifyUncontractedWorkers extends Command
 {
-    /** مهلة الحجز بالساعات — بعدها يُفكّ الحجز تلقائياً. المصدر الوحيد لهذه القيمة. */
+    /** مهلة الحجز بالساعات — يُبنى عليها التذكير قبل انتهائها. */
     public const RESERVATION_HOURS = 72;
+
+    /*
+     * الفكّ التلقائي للحجز بعد انتهاء المهلة.
+     *
+     * مُعطَّل بقرار العمل: الحجز التزام قائم حتى يفكّه موظّف بنفسه، فلا تعود
+     * سيرة محجوزة إلى العرض العام لمجرّد مرور الوقت. التذكيرات تبقى عاملة
+     * لتنبيه من حجز أنّ العقد لم يُنشأ بعد.
+     */
+    private const AUTO_RELEASE = false;
 
     /** يُرسل تذكير عند تبقّي هذا العدد من الساعات أو أقل. */
     private const REMINDER_BEFORE_HOURS = 6;
@@ -57,7 +66,7 @@ class NotifyUncontractedWorkers extends Command
             // المهلة تُقرأ من العاملة لا من الثابت: سداد تمارا يمدّدها إلى 5 أيام
             $limitHours = $worker->reservationHours();
 
-            if ($hoursElapsed >= $limitHours) {
+            if ($hoursElapsed >= $limitHours && self::AUTO_RELEASE) {
                 // ── انتهت المهلة: فكّ الحجز تلقائياً ─────────────────────────
                 // نلتقط بيانات الحجز قبل تصفيرها لتسجيلها في سجل النشاط
                 $statusBefore = $worker->status_label;

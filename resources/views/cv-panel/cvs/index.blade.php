@@ -103,7 +103,7 @@
                     <span class="block text-[11px] text-ink-muted mt-1 whitespace-nowrap">
                         {{ __('cv-panel.reserve.reserved_by', ['name' => $w->assignedBy?->name ?? '—']) }}
                         <span class="mx-0.5">·</span>
-                        {{ __('cv-panel.reserve.expires', ['time' => $w->assigned_at->copy()->addHours($w->reservationHours())->format('Y-m-d H:i')]) }}
+                        {{ __('cv-panel.reserve.since', ['time' => $w->assigned_at->format('Y-m-d H:i')]) }}
                     </span>
                     @endif
                 </td>
@@ -167,7 +167,7 @@
                 {{ __('cv-panel.reserve.reserved_by', ['name' => $w->assignedBy?->name ?? '—']) }}
             </p>
             <p class="text-[10px] text-amber-800">
-                {{ __('cv-panel.reserve.expires', ['time' => $w->assigned_at->copy()->addHours($w->reservationHours())->format('Y-m-d H:i')]) }}
+                {{ __('cv-panel.reserve.since', ['time' => $w->assigned_at->format('Y-m-d H:i')]) }}
             </p>
         </div>
         @elseif($w->client)

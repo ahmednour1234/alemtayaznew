@@ -23,14 +23,21 @@ class CvUploadController extends Controller
 {
     public function __construct(
         private readonly CvUploadService $service,
+        private readonly \App\Services\CvPanel\CvPurgeService $purge,
     ) {}
 
     public function create(): View
     {
         $me = Auth::guard('admin')->user();
 
+        $nationalities = $this->allowedNationalities($me);
+
         return view('cv-panel.upload', [
-            'nationalities' => $this->allowedNationalities($me),
+            'nationalities' => $nationalities,
+            // عدد ما سيُحذف لكل جنسية، ليعرف المنسّق حجم الأثر قبل أن يقرّر
+            'purgeCounts'   => $nationalities->mapWithKeys(
+                fn ($n) => [$n->id => $this->purge->countFor($n->id)]
+            ),
             'experiences'   => Worker::experienceOptions(),
             'religions'     => Worker::religionOptions(),
             'professions'   => Worker::professions(),
@@ -50,6 +57,8 @@ class CvUploadController extends Controller
             'profession'     => ['nullable', Rule::in(array_keys(Worker::professions()))],
             'cvs'            => ['required', 'array', 'min:1', 'max:100'],
             'cvs.*'          => ['file', 'mimes:pdf', 'max:10240'],
+            // إقرار المنسّق بحذف سير الجنسية القديمة قبل رفع الدفعة الجديدة
+            'purge_old'      => ['nullable', 'boolean'],
         ], [
             'nationality_id.required' => __('cv-panel.upload.nationality_required'),
             'nationality_id.in'       => __('cv-panel.upload.nationality_denied'),
@@ -59,9 +68,21 @@ class CvUploadController extends Controller
             'cvs.max'                 => __('cv-panel.upload.files_max'),
         ]);
 
+        /*
+         * التنظيف يسبق الرفع لا يليه، وإلّا حُذفت الدفعة الجديدة مع القديمة.
+         * ولا يمسّ إلّا المتاح: المحجوز والمتعاقد عليه يبقيان.
+         */
+        $purged = $request->boolean('purge_old')
+            ? $this->purge->purge((int) $data['nationality_id'], $me)
+            : 0;
+
         $result = $this->service->upload($data, $request->file('cvs'), $me);
 
         $message = __('cv-panel.upload.done', ['count' => count($result['created'])]);
+
+        if ($purged > 0) {
+            $message .= ' ' . __('cv-panel.upload.purged', ['count' => $purged]);
+        }
 
         if ($result['duplicates']) {
             $message .= ' ' . __('cv-panel.upload.skipped', [

@@ -13,7 +13,14 @@
     </div>
     @else
     <form method="POST" action="{{ route('cv-panel.upload.store') }}" enctype="multipart/form-data"
-          x-data="{ count: 0, sending: false }" @submit="sending = true"
+          x-data="{
+              count: 0,
+              sending: false,
+              nat: '{{ old('nationality_id') }}',
+              purgeCounts: {{ Js::from($purgeCounts) }},
+              get purgeCount() { return this.purgeCounts[this.nat] ?? 0; },
+          }"
+          @submit="sending = true"
           class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 space-y-5">
         @csrf
 
@@ -22,7 +29,7 @@
                 <label class="block text-xs font-semibold text-ink-muted mb-1.5">
                     {{ __('cv-panel.upload.nationality') }} <span class="text-red-500">*</span>
                 </label>
-                <select name="nationality_id" required
+                <select name="nationality_id" required x-model="nat"
                         class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
                     <option value="">{{ __('cv-panel.upload.choose') }}</option>
                     @foreach($nationalities as $nat)
@@ -81,6 +88,22 @@
             <p class="text-xs text-ink-muted mt-1.5">{{ __('cv-panel.upload.files_hint') }}</p>
             <p x-show="count" x-cloak class="text-xs font-bold text-primary-dark mt-1"
                x-text="'{{ __('cv-panel.upload.selected', ['count' => '__C__']) }}'.replace('__C__', count)"></p>
+        </div>
+
+        {{-- تنظيف سير الجنسية القديمة — يظهر فقط حين يوجد ما يُحذف --}}
+        <div x-show="purgeCount > 0" x-cloak
+             class="rounded-xl border border-amber-300 bg-amber-50 p-4">
+            <label class="flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" name="purge_old" value="1"
+                       class="mt-0.5 rounded border-amber-400 text-amber-600 focus:ring-amber-400">
+                <span>
+                    <span class="block text-sm font-bold text-amber-900"
+                          x-text="'{{ __('cv-panel.upload.purge_label', ['count' => '__C__']) }}'.replace('__C__', purgeCount)"></span>
+                    <span class="block text-xs text-amber-800 mt-1 leading-relaxed">
+                        {{ __('cv-panel.upload.purge_hint') }}
+                    </span>
+                </span>
+            </label>
         </div>
 
         <button type="submit" :disabled="sending"
