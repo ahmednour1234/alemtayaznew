@@ -30,6 +30,8 @@ class CvUploadController extends Controller
     {
         $me = Auth::guard('admin')->user();
 
+        $this->authorizeUpload($me);
+
         $nationalities = $this->allowedNationalities($me);
 
         return view('cv-panel.upload', [
@@ -47,6 +49,8 @@ class CvUploadController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $me      = Auth::guard('admin')->user();
+
+        $this->authorizeUpload($me);
         $allowed = $this->allowedNationalities($me)->pluck('id')->all();
 
         $data = $request->validate([
@@ -96,10 +100,25 @@ class CvUploadController extends Controller
             ->with('success', $message);
     }
 
+    /**
+     * الرفع شغل التنسيق: هو من يجلب السير ويعرف بياناتها.
+     * خدمة العملاء تحجز ولا ترفع، والمدير يشرف ولا يرفع.
+     */
+    public static function canUpload(?\App\Models\Admin $me): bool
+    {
+        return $me !== null && ($me->isSuperAdmin() || $me->isCoordination());
+    }
+
+    private function authorizeUpload($me): void
+    {
+        abort_unless(self::canUpload($me), 403, __('cv-panel.upload.denied'));
+    }
+
     /** الجنسيات التي يحقّ للمستخدم الرفع إليها. */
     private function allowedNationalities($me)
     {
-        if ($me->isSuperAdmin() || ! $me->isCoordination()) {
+        // السوبر أدمن وحده يرفع لأي جنسية؛ المنسّق مقصور على المسندة إليه
+        if ($me->isSuperAdmin()) {
             return Nationality::where('active', true)->orderBy('name')->get();
         }
 

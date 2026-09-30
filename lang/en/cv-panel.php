@@ -42,6 +42,7 @@ return [
         'religion_required'    => 'Religion is required.',
         'files_required'       => 'Upload at least one PDF file.',
         'files_max'            => 'You cannot upload more than 100 files at once.',
+        'denied'      => 'Uploading CVs is restricted to coordination staff.',
         'purged'      => 'and :count old CV(s) removed.',
         'purge_label' => 'Delete the old CVs for this nationality (:count)',
         'purge_hint'  => 'Reserved, client-assigned and contracted CVs are never deleted. Deleted records stay in the database and can be restored, but disappear from the panel and the website.',

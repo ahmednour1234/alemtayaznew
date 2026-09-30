@@ -29,11 +29,13 @@
         {{ __('cv-panel.cvs') }}
         <span class="text-sm font-semibold text-ink-muted">({{ number_format($workers->total()) }})</span>
     </h1>
+    @if(\App\Http\Controllers\CvPanel\CvUploadController::canUpload($me))
     <a href="{{ route('cv-panel.upload') }}"
        class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
         {{ __('cv-panel.upload.title') }}
     </a>
+    @endif
 </div>
 
 {{-- ══ التصفية ══ --}}
