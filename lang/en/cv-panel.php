@@ -66,6 +66,15 @@ return [
         'inactive'        => 'Your account is not active. Please contact your manager.',
     ],
 
+    'delete' => [
+        'button'             => 'Delete',
+        'confirm'            => 'Delete this CV? It disappears from the panel and the site; its record and file are kept.',
+        'done'               => 'CV ":name" deleted.',
+        'denied'             => 'Deleting is restricted to coordination staff.',
+        'denied_nationality' => 'You cannot delete a CV from a nationality not assigned to you.',
+        'booked'             => 'A reserved CV, or one linked to a client or contract, cannot be deleted.',
+    ],
+
     'notifications' => [
         'title'    => 'Notifications',
         'unread'   => 'unread',

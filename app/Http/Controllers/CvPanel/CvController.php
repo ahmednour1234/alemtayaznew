@@ -75,13 +75,68 @@ class CvController extends Controller
 
         abort_unless($worker->hasCvFile(), 404);
 
-        return response()->file(
-            \Illuminate\Support\Facades\Storage::disk($worker->cvDisk())->path($worker->cv_path),
-            [
-                'Content-Type'        => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="cv-' . $worker->id . '.pdf"',
-            ]
+        $path = \Illuminate\Support\Facades\Storage::disk($worker->cvDisk())->path($worker->cv_path);
+
+        // BinaryFileResponse يدعم Range فيستأنف المتصفّح ما انقطع،
+        // بخلاف response()->file() التي تُعلّق التحميل على الملفات الكبيرة.
+        $response = new \Symfony\Component\HttpFoundation\BinaryFileResponse($path);
+
+        $response->headers->set('Content-Type', 'application/pdf');
+        $response->setContentDisposition(
+            \Symfony\Component\HttpFoundation\ResponseHeaderBag::DISPOSITION_INLINE,
+            'cv-' . $worker->id . '.pdf'
         );
+        $response->headers->set('Accept-Ranges', 'bytes');
+        $response->setAutoEtag();
+        $response->setAutoLastModified();
+        $response->setPrivate();
+        $response->setMaxAge(600);
+
+        return $response;
+    }
+
+    /**
+     * حذف سيرة ذاتية.
+     *
+     * مقصور على موظّف التنسيق وعلى الجنسيات المسندة إليه وحدها: هو من رفعها
+     * فهو من يحذفها. الحذف ناعم — الصفّ والملف باقيان ويمكن استرجاعهما.
+     *
+     * لا تُحذف سيرة عليها ارتباط قائم (محجوزة أو مُسندة لعميل أو لها عقد)،
+     * فذلك التزام جارٍ لا يُمحى من هنا.
+     */
+    public function destroy(int $id)
+    {
+        $me = Auth::guard('admin')->user();
+
+        // التنسيق وحده — لا خدمة العملاء ولا المدير
+        abort_unless($me->isCoordination(), 403, __('cv-panel.delete.denied'));
+
+        $worker = Worker::findOrFail($id);
+
+        // وعلى جنسياته وحدها
+        $scope = $me->managedNationalities->pluck('id')->all();
+
+        if (! in_array($worker->nationality_id, $scope, true)) {
+            abort(403, __('cv-panel.delete.denied_nationality'));
+        }
+
+        if ($worker->isBooked() || $worker->client_id || $worker->hasActiveContract()) {
+            return back()->with('error', __('cv-panel.delete.booked'));
+        }
+
+        \App\Models\WorkerActivityLog::create([
+            'worker_id'   => $worker->id,
+            'worker_name' => $worker->name,
+            'admin_id'    => $me->id,
+            'admin_name'  => $me->name,
+            'action'      => 'deleted',
+            'label'       => 'حذف السيرة الذاتية من لوحة السير (حذف ناعم — السجلّ والملف محفوظان)',
+            'ip_address'  => request()?->ip(),
+        ]);
+
+        $worker->delete();
+
+        return back()->with('success', __('cv-panel.delete.done', ['name' => $worker->name]));
     }
 
     /** معرّفات الجنسيات المرئية، أو null لمن يرى الكل. */

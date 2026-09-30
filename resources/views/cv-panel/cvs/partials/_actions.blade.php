@@ -8,6 +8,14 @@
     // الإجراءات على حجز قائم مقصورة على من حجزها (والسوبر أدمن)،
     // وهي نفس قاعدة WorkerService::unassign حتى لا يظهر زر يفشل.
     $mine = $me->isSuperAdmin() || $me->id === $w->assigned_by_admin_id;
+
+    // الحذف: للتنسيق وعلى جنسياته وحدها، ولغير المرتبطة بعميل أو عقد.
+    // نفس شروط CvController::destroy فلا يظهر زر يؤدي إلى 403.
+    $canDelete = $me->isCoordination()
+        && $me->managedNationalities->contains('id', $w->nationality_id)
+        && $w->status === 'available'
+        && ! $w->client_id
+        && ! $w->hasActiveContract();
 @endphp
 
 @if($w->status === 'available')
@@ -16,6 +24,18 @@
        class="bg-navy hover:bg-navy-light text-white text-xs font-bold px-3.5 py-2 rounded-lg whitespace-nowrap transition-colors">
         {{ __('cv-panel.reserve.action') }}
     </a>
+    @endif
+
+    @if($canDelete)
+    <form method="POST" action="{{ route('cv-panel.cvs.destroy', $w->id) }}" class="inline"
+          onsubmit="return confirm(@js(__('cv-panel.delete.confirm')))">
+        @csrf
+        @method('DELETE')
+        <button type="submit"
+                class="bg-red-50 hover:bg-red-600 text-red-600 hover:text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap transition-colors">
+            {{ __('cv-panel.delete.button') }}
+        </button>
+    </form>
     @endif
 
 @elseif($w->status === 'reserved')

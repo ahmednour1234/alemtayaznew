@@ -477,8 +477,12 @@
 
 @include('public.partials.footer')
 
-@if($nationalDay)
-{{-- تهنئة اليوم الوطني — تسبق نافذة الطلب فلا تتزاحمان --}}
+{{--
+    تهنئة اليوم الوطني.
+    تُستثنى صفحات السير والجنسيات: الزائر هناك يتصفّح العاملات فعلاً،
+    وحجب الشاشة بإعلان يقطع عليه ما جاء من أجله.
+--}}
+@if($nationalDay && ! request()->routeIs(['site.cvs', 'site.cvs.show', 'site.cvs.nationality']))
 @include('public.partials.national-day-popup')
 @endif
 

@@ -404,6 +404,10 @@ Route::prefix('cv-panel')->name('cv-panel.')
         Route::get('cvs/{id}/file', [\App\Http\Controllers\CvPanel\CvController::class, 'file'])
             ->whereNumber('id')->name('cvs.file');
 
+        // حذف سيرة — للمنسّق على جنسياته فقط (يتحقّق الكنترولر)
+        Route::delete('cvs/{id}', [\App\Http\Controllers\CvPanel\CvController::class, 'destroy'])
+            ->whereNumber('id')->name('cvs.destroy');
+
         // الحجز — خدمة العملاء تحجز السيرة للعميل لمدة محدودة
         Route::get('clients/search', [\App\Http\Controllers\CvPanel\ReservationController::class, 'searchClients'])
             ->name('clients.search');
