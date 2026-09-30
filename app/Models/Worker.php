@@ -261,7 +261,13 @@ class Worker extends Model
     {
         // العاملة المرتبطة بعقد استقدام يُدار فكّ ارتباطها من العقد نفسه،
         // حتى لا تتعارض حالة العاملة مع العقد القائم.
-        if (! $actor || ! $this->isBooked() || $this->hasActiveContract()) {
+        if (! $actor || $this->hasActiveContract()) {
+            return false;
+        }
+
+        // «تم التعيين» نهاية الدورة لا مرحلة منها: لا يُفكّ التعيين عنها،
+        // فذلك يُعيدها للعرض وقد سُلّمت للعميل فعلاً. الفكّ للحجز القائم وحده.
+        if ($this->status !== 'reserved') {
             return false;
         }
 
