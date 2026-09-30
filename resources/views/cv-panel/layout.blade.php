@@ -43,6 +43,10 @@
                   'icon'  => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'];
     }
 
+    // دليل الشرح آخر التبويبات — متاح للجميع
+    $nav[] = ['route' => 'cv-panel.guide', 'label' => __('cv-panel.guide.nav'),
+              'icon'  => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'];
+
     if ($canMan) {
         $nav[] = ['route' => 'cv-panel.coordinators.index', 'label' => __('cv-panel.coordinators_page.nav'),
                   'icon'  => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'];
@@ -158,6 +162,33 @@
                         </a>
                     </div>
                 </div>
+                {{-- مبدّل اللغة — القائمة نفسها التي يدعمها النظام --}}
+                <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
+                    <button type="button" @click="open = ! open"
+                            class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                            title="{{ __('cv-panel.language') }}" aria-label="{{ __('cv-panel.language') }}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+                    </button>
+
+                    <div x-show="open" x-cloak @click="open = false" class="fixed inset-0 z-40"></div>
+
+                    <div x-show="open" x-cloak
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="absolute z-50 mt-2 w-40 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden text-ink"
+                         style="inset-inline-end: 0;">
+                        @foreach(config('locales.supported', []) as $code => $conf)
+                        <a href="{{ route('locale.switch', $code) }}"
+                           class="flex items-center gap-2 px-3 py-2.5 text-xs font-bold hover:bg-slate-50 transition-colors
+                                  {{ app()->getLocale() === $code ? 'bg-primary-light text-primary-dark' : '' }}">
+                            <span>{{ $conf['flag'] ?? '' }}</span>
+                            <span>{{ $conf['native'] ?? $code }}</span>
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+
                 <form method="POST" action="{{ route('cv-panel.logout') }}">
                     @csrf
                     <button type="submit" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 font-bold transition-colors whitespace-nowrap">

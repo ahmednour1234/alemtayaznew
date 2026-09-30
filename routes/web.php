@@ -399,6 +399,9 @@ Route::prefix('cv-panel')->name('cv-panel.')
         Route::put('users/{id}',         [\App\Http\Controllers\CvPanel\UserController::class, 'update'])->whereNumber('id')->name('users.update');
         Route::post('users/{id}/toggle', [\App\Http\Controllers\CvPanel\UserController::class, 'toggle'])->whereNumber('id')->name('users.toggle');
 
+        // دليل الشرح — متاح لكل مستخدمي اللوحة
+        Route::get('guide', [\App\Http\Controllers\CvPanel\GuideController::class, 'index'])->name('guide');
+
         // قائمة السير
         Route::get('cvs', [\App\Http\Controllers\CvPanel\CvController::class, 'index'])->name('cvs.index');
         Route::get('cvs/{id}/file', [\App\Http\Controllers\CvPanel\CvController::class, 'file'])

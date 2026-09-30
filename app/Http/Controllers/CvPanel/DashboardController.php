@@ -28,7 +28,34 @@ class DashboardController extends Controller
             ->whereNotNull('cv_path')
             ->where('active', true);
 
+        /*
+         * خدمة العملاء تُقاس بحجوزاتها هي لا بمخزون السير كلّه: أرقام عامّة
+         * لا تخصّها ولا تدلّها على شيء. فنعرض لها ما حجزته هي، ونُخفي شبكة
+         * الجنسيات وأحدث ما رُفع — فذلك شأن التنسيق.
+         */
+        $isAgent = $me->isCustomerService() && ! $me->isSuperAdmin();
+
+        if ($isAgent) {
+            $mine = fn () => Worker::query()
+                ->whereNotNull('cv_path')
+                ->where('assigned_by_admin_id', $me->id);
+
+            return view('cv-panel.dashboard', [
+                'agentView' => true,
+                'stats'     => [
+                    'my_reserved' => (clone $mine())->where('status', 'reserved')->count(),
+                    'my_assigned' => (clone $mine())->where('status', 'assigned')->count(),
+                    'my_today'    => (clone $mine())->whereDate('assigned_at', today())->count(),
+                    'available'   => (clone $base())->where('status', 'available')->count(),
+                ],
+                'nationalities' => collect(),
+                'recent'        => (clone $mine())->with(['nationality', 'client'])
+                    ->latest('assigned_at')->limit(12)->get(),
+            ]);
+        }
+
         return view('cv-panel.dashboard', [
+            'agentView' => false,
             'stats' => [
                 'available' => (clone $base())->where('status', 'available')->count(),
                 'reserved'  => (clone $base())->where('status', 'reserved')->count(),

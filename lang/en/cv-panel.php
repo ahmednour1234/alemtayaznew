@@ -7,9 +7,13 @@ return [
     'cvs'          => 'CVs',
     'coordinators' => 'Coordinators & Nationalities',
     'back_to_admin'=> 'Back to admin panel',
+    'language'     => 'Language',
     'logout'       => 'Log out',
 
     'stats' => [
+        'my_reserved' => 'My active reservations',
+        'my_assigned' => 'My completed reservations',
+        'my_today'    => 'Reserved today',
         'available' => 'Available CVs',
         'reserved'  => 'Reserved',
         'assigned'  => 'Assigned',
@@ -18,6 +22,7 @@ return [
 
     'nationalities_overview' => 'Nationalities',
     'available_count'        => ':count available',
+    'my_recent'              => 'My latest reservations',
     'recent'                 => 'Recently uploaded',
     'no_nationalities'       => 'No nationalities assigned to you yet. Contact your branch manager.',
     'no_cvs'                 => 'No matching CVs.',
@@ -97,6 +102,65 @@ return [
         'none_selected'      => 'No CVs selected.',
         'select_all'         => 'Select all',
         'booked'             => 'A reserved CV, or one linked to a client or contract, cannot be deleted.',
+    ],
+
+    'guide' => [
+        'nav'   => 'User guide',
+        'title' => 'CV panel user guide',
+        'intro' => 'A short walkthrough of everything the panel does: uploading, reserving, tracking and deleting.',
+
+        'roles_title' => 'The three roles',
+        'roles_intro' => 'Each role has its own screens; what does not concern you is not shown at all.',
+        'role_coord'  => 'Coordinator: uploads CVs for assigned nationalities, tracks what gets reserved, deletes what is no longer needed.',
+        'role_agent'  => 'Customer service: reserves a CV for a client, tracks their reservations, records Tamara payment.',
+        'role_mgr'    => 'Branch manager: assigns nationalities to coordinators, manages panel users, sees everything.',
+
+        'upload_title' => 'Uploading CVs',
+        'upload_1'     => 'Open "Upload CVs" and pick one of your assigned nationalities.',
+        'upload_2'     => 'Pick experience and religion - both required, since clients filter by them on the site.',
+        'upload_3'     => 'Select PDF files (up to 100 at once). The file name becomes the worker name, so name files properly first.',
+        'upload_4'     => 'If the nationality has older CVs, a warning shows their count with an option to delete them. Reserved, client-linked and contracted CVs are never deleted.',
+        'upload_5'     => 'Duplicate files are skipped automatically and their count is reported.',
+
+        'public_title' => 'Public pages',
+        'public_1'     => 'Each nationality has a public link shown on the panel home page - copy it and send it to the client.',
+        'public_2'     => 'The page lists available CVs only, and clients can filter by experience and religion.',
+        'public_3'     => 'The client taps "Request via WhatsApp" and you receive a message with the CV number and link.',
+
+        'reserve_title' => 'Reserving',
+        'reserve_1'     => 'Search by the CV number from the WhatsApp message, then press "Reserve for client".',
+        'reserve_2'     => 'Pick an existing client (type two letters to search) or enter a new name and phone.',
+        'reserve_3'     => 'Once reserved, the CV leaves the website permanently - it never returns, even if the reservation is cancelled.',
+        'reserve_4'     => 'A reservation stands until someone releases it; it does not expire on its own.',
+        'reserve_5'     => 'Coordinators of that nationality are notified to follow up on the contract.',
+
+        'after_title' => 'After reserving',
+        'after_1'     => '"Create contract": opens the recruitment contract screen with the data prefilled.',
+        'after_2'     => '"Tamara paid": records the client payment. It does not change status, only logs the payment.',
+        'after_3'     => '"Release": cancels the reservation and returns the status to available - but the CV stays off the public site.',
+        'after_4'     => 'These actions are limited to whoever made the reservation (and the super admin).',
+
+        'track_title' => 'Tracking reservations',
+        'track_1'     => 'The "Reserved" tab lists reserved CVs from your nationalities with client and reserver names.',
+        'track_2'     => 'When the process completes, press "Mark assigned" - a manual confirmation that creates no contract.',
+        'track_3'     => 'Anything marked assigned leaves the main list and moves to its own tab.',
+
+        'delete_title' => 'Deleting',
+        'delete_1'     => 'Deleting is for coordinators only, and only within their assigned nationalities.',
+        'delete_2'     => 'Tick the checkboxes then press "Delete selected", or delete a single CV from its delete button.',
+        'delete_3'     => 'Deletion is soft: the record and file stay in the system and can be restored, but the CV disappears from the panel and the site.',
+        'delete_4'     => 'A reserved CV, or one linked to a client or contract, cannot be deleted.',
+
+        'users_title' => 'Users and nationalities',
+        'users_1'     => '"Coordinators & nationalities": assign each coordinator their nationalities - without an assignment they cannot upload.',
+        'users_2'     => '"Users": add a user with their role, edit their details, or disable them.',
+        'users_3'     => 'Disable rather than delete: users are tied to reservation and upload records that must not be lost.',
+
+        'tips_title' => 'Important notes',
+        'tip_1'       => 'Name your PDF files after the workers before uploading - the file name becomes the CV name.',
+        'tip_2'       => 'A CV reserved once never returns to the public site, even if it becomes available again.',
+        'tip_3'       => 'Notifications live in the bell at the top, with filter tabs on their own page.',
+        'tip_4'       => 'You can switch the panel language from the globe icon at the top.',
     ],
 
     'notifications' => [

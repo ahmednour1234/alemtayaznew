@@ -5,12 +5,20 @@
 
 {{-- ══ الأرقام ══ --}}
 @php
-    $cards = [
-        ['key' => 'available', 'color' => 'text-green-600',  'bg' => 'bg-green-50'],
-        ['key' => 'reserved',  'color' => 'text-amber-600',  'bg' => 'bg-amber-50'],
-        ['key' => 'assigned',  'color' => 'text-blue-600',   'bg' => 'bg-blue-50'],
-        ['key' => 'today',     'color' => 'text-primary',    'bg' => 'bg-primary-light'],
-    ];
+    // موظّف خدمة العملاء يقيس نفسه بحجوزاته هو، لا بمخزون السير كلّه
+    $cards = ($agentView ?? false)
+        ? [
+            ['key' => 'my_reserved', 'color' => 'text-amber-600'],
+            ['key' => 'my_assigned', 'color' => 'text-blue-600'],
+            ['key' => 'my_today',    'color' => 'text-primary'],
+            ['key' => 'available',   'color' => 'text-green-600'],
+        ]
+        : [
+            ['key' => 'available', 'color' => 'text-green-600'],
+            ['key' => 'reserved',  'color' => 'text-amber-600'],
+            ['key' => 'assigned',  'color' => 'text-blue-600'],
+            ['key' => 'today',     'color' => 'text-primary'],
+        ];
 @endphp
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     @foreach($cards as $card)
@@ -21,7 +29,8 @@
     @endforeach
 </div>
 
-{{-- ══ الجنسيات ══ --}}
+{{-- ══ الجنسيات — شأن التنسيق، فلا تُعرض لخدمة العملاء ══ --}}
+@unless($agentView ?? false)
 <h2 class="font-extrabold text-lg mb-4">{{ __('cv-panel.nationalities_overview') }}</h2>
 
 @if($nationalities->isEmpty())
@@ -76,10 +85,13 @@
     @endforeach
 </div>
 @endif
+@endunless
 
-{{-- ══ أحدث ما رُفع ══ --}}
+{{-- ══ أحدث نشاط: للتنسيق أحدث ما رُفع، ولخدمة العملاء أحدث ما حجزته ══ --}}
 @if($recent->isNotEmpty())
-<h2 class="font-extrabold text-lg mb-4">{{ __('cv-panel.recent') }}</h2>
+<h2 class="font-extrabold text-lg mb-4">
+    {{ ($agentView ?? false) ? __('cv-panel.my_recent') : __('cv-panel.recent') }}
+</h2>
 <div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
     <table class="w-full text-sm">
         <thead class="bg-slate-50 text-xs text-ink-muted">

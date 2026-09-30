@@ -260,6 +260,7 @@ class AutoPermission
         'cv-panel.upload'              => null,
         'cv-panel.upload.store'        => null,
         'cv-panel.cvs.index'           => null,
+        'cv-panel.guide'               => null,
         'cv-panel.cvs.destroy'         => null,
         'cv-panel.cvs.bulk-destroy'    => null,
         'cv-panel.cvs.reserved'        => null,

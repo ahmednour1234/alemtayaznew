@@ -36,10 +36,21 @@ class ExportAdmins extends Command
             return self::SUCCESS;
         }
 
-        Excel::store(new AdminsExport($this->option('active')), $file);
+        // نحدّد القرص صراحةً: القرص الافتراضي قد يكون public فيتغيّر المسار
+        // ويتعذّر على المستخدم العثور على الملف.
+        Excel::store(new AdminsExport($this->option('active')), $file, 'local');
+
+        // Storage::path يعطي المسار الحقيقي — في لارافل 12 يقع تحت
+        // storage/app/private وليس storage/app مباشرة.
+        $full = \Illuminate\Support\Facades\Storage::disk('local')->path($file);
 
         $this->info("تم تصدير {$count} مستخدماً إلى:");
-        $this->line('  ' . storage_path('app/' . $file));
+        $this->line('  ' . $full);
+        $this->newLine();
+        $this->comment('لتحميله عبر المتصفّح:');
+        $this->line("  cp {$full} public/{$file}");
+        $this->line('  ثمّ افتح: ' . url($file));
+        $this->line("  وامسحه بعد التحميل:  rm public/{$file}");
         $this->newLine();
         $this->comment('كلمات المرور غير مُدرَجة: النظام يخزّنها مجزّأة ولا يحتفظ بنصّها.');
 
