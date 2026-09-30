@@ -208,6 +208,8 @@ class PageController extends Controller
     {
         return $query->where('active', true)
             ->where('status', 'available')
-            ->whereNotNull('cv_path');
+            ->whereNotNull('cv_path')
+            // سيرة حُجزت مرّة لا تعود للعرض العام أبداً
+            ->whereNull('cv_withdrawn_at');
     }
 }

@@ -3,7 +3,44 @@
 
 @section('content')
 
-<h1 class="font-extrabold text-lg sm:text-xl mb-5">{{ __('cv-panel.notifications.title') }}</h1>
+<div class="flex items-center justify-between gap-4 mb-5">
+    <h1 class="font-extrabold text-lg sm:text-xl">{{ __('cv-panel.notifications.title') }}</h1>
+
+    @if(array_sum($counts) > 0)
+    <form method="POST" action="{{ route('cv-panel.notifications.read-all') }}">
+        @csrf
+        <button type="submit" class="text-xs font-bold text-primary hover:text-primary-dark">
+            {{ __('cv-panel.notifications.read_all') }}
+        </button>
+    </form>
+    @endif
+</div>
+
+{{-- ══ تبويبات التصفية ══ --}}
+<div class="flex flex-wrap items-center gap-2 mb-5">
+    @foreach(\App\Http\Controllers\CvPanel\NotificationController::TABS as $key => $types)
+    @php($isActive = $tab === $key && ! $unreadOnly)
+    <a href="{{ route('cv-panel.notifications.index', ['tab' => $key]) }}"
+       class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold border-2 transition-colors
+              {{ $isActive ? 'bg-navy text-white border-navy' : 'bg-white text-navy border-slate-200 hover:border-navy' }}">
+        {{ __('cv-panel.notifications.' . $key) }}
+
+        @if(($counts[$key] ?? 0) > 0)
+        <span class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full text-[11px]
+                     {{ $isActive ? 'bg-white/25' : 'bg-primary text-white' }}">
+            {{ $counts[$key] }}
+        </span>
+        @endif
+    </a>
+    @endforeach
+
+    {{-- «غير المقروء» تصفية على الحالة، فتُعرض منفصلة عن تبويبات النوع --}}
+    <a href="{{ route('cv-panel.notifications.index', ['tab' => $tab, 'unread' => 1]) }}"
+       class="px-4 py-2 rounded-full text-sm font-bold border-2 transition-colors
+              {{ $unreadOnly ? 'bg-navy text-white border-navy' : 'bg-white text-navy border-slate-200 hover:border-navy' }}">
+        {{ __('cv-panel.notifications.unread') }}
+    </a>
+</div>
 
 @if($notifications->isEmpty())
 <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center text-sm text-ink-muted">

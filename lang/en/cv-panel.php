@@ -101,6 +101,7 @@ return [
         'contract'        => 'Create contract',
         'only_reserver'   => 'Actions are available only to whoever reserved it',
         'since'           => 'Reserved since :time',
+        'withdrawn'       => 'Withdrawn from site',
         'reserved_by'     => 'Reserved by :name',
         'expires'         => 'Expires :time',
     ],
@@ -137,6 +138,19 @@ return [
         'none'        => 'None',
         'save'        => 'Save',
         'empty'       => 'No active coordinators.',
+    ],
+
+    'notifications' => [
+        'title'      => 'Notifications',
+        'all'        => 'All',
+        'reserved'   => 'Reservations',
+        'uploads'    => 'Uploads',
+        'released'   => 'Released',
+        'unread'     => 'Unread',
+        'read_all'   => 'Mark all as read',
+        'empty'      => 'No notifications.',
+        'view_all'   => 'View all notifications',
+        'none_yet'   => 'No new notifications',
     ],
 
     'users' => [

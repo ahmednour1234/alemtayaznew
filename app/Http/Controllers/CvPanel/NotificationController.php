@@ -25,16 +25,69 @@ class NotificationController extends Controller
         'worker_unassigned',
     ];
 
-    public function index()
+    /**
+     * تبويبات التصفية: المفتاح في الرابط، والقيمة أنواع الإشعارات تحته.
+     * مصفوفة فارغة تعني «كل الأنواع».
+     */
+    public const TABS = [
+        'all'      => [],
+        'reserved' => ['cv_reserved'],
+        'uploads'  => ['worker_cv_uploaded'],
+        'released' => ['worker_reservation_expired', 'worker_unassigned'],
+    ];
+
+    public function index(Request $request)
     {
-        $me = Auth::guard('admin')->user();
+        $me  = Auth::guard('admin')->user();
+        $tab = $request->input('tab', 'all');
 
-        $notifications = self::scope($me)->latest()->paginate(30);
+        if (! array_key_exists($tab, self::TABS)) {
+            $tab = 'all';
+        }
 
-        // فتح القائمة كاملةً يعني الاطّلاع عليها
-        self::scope($me)->whereNull('read_at')->update(['read_at' => now()]);
+        $query = self::scope($me);
 
-        return view('cv-panel.notifications.index', compact('notifications'));
+        if (self::TABS[$tab]) {
+            $query->whereIn('type', self::TABS[$tab]);
+        }
+
+        // تبويب «غير المقروء» تصفية على الحالة لا على النوع
+        if ($request->boolean('unread')) {
+            $query->whereNull('read_at');
+        }
+
+        $notifications = $query->latest()->paginate(30)->withQueryString();
+
+        // عدد غير المقروء لكل تبويب — يُحسب قبل التعليم بالقراءة
+        $counts = [];
+        foreach (self::TABS as $key => $types) {
+            $c = self::scope($me)->whereNull('read_at');
+            if ($types) {
+                $c->whereIn('type', $types);
+            }
+            $counts[$key] = $c->count();
+        }
+
+        /*
+         * التعليم بالقراءة يقتصر على المعروض في هذه الصفحة.
+         * لو عُلّم الكلّ لأفرغنا تبويب «غير المقروء» بمجرّد فتح الصفحة،
+         * ولضاع على المستخدم ما لم يره بعد في التبويبات الأخرى.
+         */
+        $ids = $notifications->getCollection()
+            ->whereNull('read_at')
+            ->pluck('id')
+            ->all();
+
+        if ($ids) {
+            AdminNotification::whereIn('id', $ids)->update(['read_at' => now()]);
+        }
+
+        return view('cv-panel.notifications.index', [
+            'notifications' => $notifications,
+            'tab'           => $tab,
+            'counts'        => $counts,
+            'unreadOnly'    => $request->boolean('unread'),
+        ]);
     }
 
     /**

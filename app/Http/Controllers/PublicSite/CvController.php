@@ -52,7 +52,8 @@ class CvController extends Controller
             'religions'     => Worker::religionOptions(),
             'nationalities' => Nationality::where('active', true)
                 ->whereHas('workers', fn ($q) => $q->where('active', true)
-                    ->where('status', 'available')->whereNotNull('cv_path'))
+                    ->where('status', 'available')->whereNotNull('cv_path')
+                    ->whereNull('cv_withdrawn_at'))
                 ->orderBy('name')
                 ->get(),
         ]);
@@ -151,6 +152,9 @@ class CvController extends Controller
         return Worker::query()
             ->where('active', true)
             ->where('status', 'available')
-            ->whereNotNull('cv_path');
+            ->whereNotNull('cv_path')
+            // سيرة حُجزت مرّة لا تعود للعرض أبداً، حتى لو فُكّ الحجز
+            // وعادت الحالة إلى «متاحة».
+            ->whereNull('cv_withdrawn_at');
     }
 }

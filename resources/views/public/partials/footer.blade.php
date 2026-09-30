@@ -33,7 +33,8 @@
     // الجنسيات التي فيها عاملات متاحة — تظهر كروابط في التذييل
     $footerNats = \App\Models\Nationality::where('active', true)
         ->whereHas('workers', fn ($q) => $q->where('active', true)
-            ->where('status', 'available')->whereNotNull('cv_path'))
+            ->where('status', 'available')->whereNotNull('cv_path')
+            ->whereNull('cv_withdrawn_at'))
         ->orderBy('name')
         ->get(['id', 'name', 'code']);
 

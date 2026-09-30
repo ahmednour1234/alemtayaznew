@@ -16,7 +16,7 @@ class Worker extends Model
     protected $fillable = [
         'name', 'passport_number', 'visa_number', 'nationality_id', 'profession',
         'gender', 'experience', 'religion', 'age', 'phone',
-        'cv_path', 'cv_disk', 'original_cv_name', 'passport_image',
+        'cv_path', 'cv_disk', 'cv_withdrawn_at', 'original_cv_name', 'passport_image',
         'status', 'client_id', 'branch_id', 'admin_id',
         'assigned_by_admin_id', 'assigned_at',
         'tamara_paid_at', 'tamara_paid_by_admin_id',
@@ -28,6 +28,7 @@ class Worker extends Model
         return [
             'active'          => 'boolean',
             'assigned_at'     => 'datetime',
+            'cv_withdrawn_at' => 'datetime',
             'tamara_paid_at'  => 'datetime',
             'passport_number' => 'encrypted',
             'phone'           => 'encrypted',
@@ -39,6 +40,27 @@ class Worker extends Model
 
     protected static function booted(): void
     {
+        /*
+         * سحب السيرة من العرض العام عند أوّل ارتباط بعميل.
+         *
+         * يُختم الوقت مرّة واحدة ولا يُمحى، فالسيرة التي حُجزت لعميل لا تعود
+         * إلى الموقع ولو فُكّ الحجز وعادت الحالة إلى «متاحة». نضعه هنا لا في
+         * خدمة الحجز وحدها، لأن الارتباط يقع من مسارات عدّة (حجز من اللوحة،
+         * تعيين من لوحة الإدارة، إنشاء عقد، استيراد إكسل) وكلّها تمرّ من هنا.
+         */
+        static::saving(function (Worker $worker): void {
+            if ($worker->cv_withdrawn_at !== null) {
+                return; // سُحبت من قبل — لا تُلمس
+            }
+
+            $isBooked = in_array($worker->status, ['reserved', 'assigned'], true)
+                || $worker->client_id !== null;
+
+            if ($isBooked) {
+                $worker->cv_withdrawn_at = now();
+            }
+        });
+
         // حارس اتساق: لا تُصبح العاملة «متاحة» ولها عقد قائم لم ينتهِ.
         // ظهرت عاملات في حالة «تم الاستلام» ومع ذلك معروضات للحجز، فكان
         // بالإمكان حجزهنّ لعميل ثانٍ. نصحّح الحالة هنا لا في كل مسار على حدة.

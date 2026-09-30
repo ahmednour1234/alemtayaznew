@@ -98,6 +98,13 @@
                     <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold {{ $w->status_bg }} {{ $w->status_color }}">
                         {{ $w->status_label }}
                     </span>
+                    {{-- سُحبت من الموقع رغم أنها «متاحة»: توضيح يمنع الحيرة --}}
+                    @if($w->status === 'available' && $w->cv_withdrawn_at)
+                    <span class="block text-[11px] text-amber-700 mt-1 whitespace-nowrap">
+                        {{ __('cv-panel.reserve.withdrawn') }}
+                    </span>
+                    @endif
+
                     {{-- من حجزها ومتى تنتهي المهلة: يمنع أن يطارد موظّف سيرة محجوزة --}}
                     @if($w->status === 'reserved' && $w->assigned_at)
                     <span class="block text-[11px] text-ink-muted mt-1 whitespace-nowrap">

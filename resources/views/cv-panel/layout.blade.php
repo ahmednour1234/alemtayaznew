@@ -20,6 +20,10 @@
     $unreadCount = \App\Http\Controllers\CvPanel\NotificationController::scope($me)
         ->whereNull('read_at')->count();
 
+    // آخر الإشعارات لقائمة الجرس المنسدلة — قليلة العدد فلا تُثقل كل صفحة
+    $recentNotifs = \App\Http\Controllers\CvPanel\NotificationController::scope($me)
+        ->latest()->limit(6)->get();
+
     $nav = [
         ['route' => 'cv-panel.dashboard', 'label' => __('cv-panel.dashboard'),
          'icon'  => 'M3 12l9-9 9 9M5 10v10h14V10'],
@@ -84,17 +88,66 @@
                 <span class="hidden sm:inline text-white/70 max-w-[10rem] truncate">{{ $me->name }}</span>
 
                 {{-- الإشعارات داخل اللوحة — لا تعتمد على شريط لوحة الإدارة --}}
-                <a href="{{ route('cv-panel.notifications.index') }}"
-                   class="relative w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-                   title="{{ __('cv-panel.notifications.title') }}" aria-label="{{ __('cv-panel.notifications.title') }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-                    @if($unreadCount > 0)
-                    <span class="absolute -top-1 -end-1 min-w-[1.05rem] h-[1.05rem] px-1 rounded-full bg-red-500 text-white
-                                 text-[10px] font-bold flex items-center justify-center">
-                        {{ $unreadCount > 99 ? '99+' : $unreadCount }}
-                    </span>
-                    @endif
-                </a>
+                <div class="relative" x-data="{ open: false }" @keydown.escape.window="open = false">
+                    <button type="button" @click="open = ! open"
+                            class="relative w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                            title="{{ __('cv-panel.notifications.title') }}" aria-label="{{ __('cv-panel.notifications.title') }}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                        @if($unreadCount > 0)
+                        <span class="absolute -top-1 -end-1 min-w-[1.05rem] h-[1.05rem] px-1 rounded-full bg-red-500 text-white
+                                     text-[10px] font-bold flex items-center justify-center">
+                            {{ $unreadCount > 99 ? '99+' : $unreadCount }}
+                        </span>
+                        @endif
+                    </button>
+
+                    {{-- طبقة شفافة تلتقط النقر خارج القائمة فتغلقها --}}
+                    <div x-show="open" x-cloak @click="open = false" class="fixed inset-0 z-40"></div>
+
+                    <div x-show="open" x-cloak
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="absolute z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl
+                                border border-slate-200 overflow-hidden text-ink"
+                         style="inset-inline-end: 0;">
+
+                        <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                            <p class="text-sm font-extrabold">{{ __('cv-panel.notifications.title') }}</p>
+                            @if($unreadCount > 0)
+                            <span class="text-[11px] font-bold text-primary">{{ $unreadCount }}</span>
+                            @endif
+                        </div>
+
+                        @if($recentNotifs->isEmpty())
+                        <p class="px-4 py-8 text-center text-xs text-ink-muted">
+                            {{ __('cv-panel.notifications.none_yet') }}
+                        </p>
+                        @else
+                        <div class="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                            @foreach($recentNotifs as $n)
+                            <a href="{{ route('cv-panel.notifications.read', $n->id) }}"
+                               class="flex items-start gap-2.5 p-3 hover:bg-slate-50 transition-colors {{ $n->read_at ? '' : 'bg-primary-light/40' }}">
+                                <span class="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center"
+                                      style="background: {{ $n->icon_bg }}; color: {{ $n->icon_color }};">
+                                    {!! $n->icon_svg !!}
+                                </span>
+                                <span class="min-w-0">
+                                    <span class="block text-xs font-bold truncate">{{ $n->title }}</span>
+                                    <span class="block text-[11px] text-ink-muted mt-0.5">{{ \Illuminate\Support\Str::limit($n->body, 90) }}</span>
+                                    <span class="block text-[10px] text-ink-muted/70 mt-1">{{ $n->created_at?->diffForHumans() }}</span>
+                                </span>
+                            </a>
+                            @endforeach
+                        </div>
+                        @endif
+
+                        <a href="{{ route('cv-panel.notifications.index') }}"
+                           class="block px-4 py-3 text-center text-xs font-bold text-primary hover:bg-slate-50 border-t border-slate-100">
+                            {{ __('cv-panel.notifications.view_all') }}
+                        </a>
+                    </div>
+                </div>
                 <form method="POST" action="{{ route('cv-panel.logout') }}">
                     @csrf
                     <button type="submit" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 font-bold transition-colors whitespace-nowrap">
@@ -145,6 +198,9 @@
 
     @yield('content')
 </main>
+
+{{-- ألبين لازم للقائمة المنسدلة في الشريط العلوي، فيُحمَّل هنا لا في صفحة بعينها --}}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
 @stack('scripts')
 </body>
