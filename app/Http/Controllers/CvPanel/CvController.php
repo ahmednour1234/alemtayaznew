@@ -25,6 +25,9 @@ class CvController extends Controller
         $query = Worker::query()
             ->whereNotNull('cv_path')
             ->where('active', true)
+            // المعيَّنة انتهت دورتها هنا: تُتابَع في تبويب «تم التعيين»
+            // بصفحة المحجوزة، ولا تزاحم المتاح والمحجوز في هذه القائمة.
+            ->where('status', '!=', 'assigned')
             ->with(['nationality', 'client', 'assignedBy'])
             ->when($scope !== null, fn ($q) => $q->whereIn('nationality_id', $scope))
             ->latest();
@@ -50,7 +53,11 @@ class CvController extends Controller
             'nationalities' => $this->visibleNationalities($scope),
             'experiences'   => Worker::experienceOptions(),
             'religions'     => Worker::religionOptions(),
-            'statuses'      => Worker::statusOptions(),
+            // «تم التعيين» مستبعدة من هذه القائمة، فلا تُعرض في فلتر الحالة
+            // حتى لا يختارها الموظّف فتعود النتيجة فارغة بلا سبب ظاهر.
+            'statuses'      => collect(Worker::statusOptions())
+                ->except('assigned')
+                ->all(),
             'filters'       => $request->only(['nationality_id', 'status', 'experience', 'religion', 'search']),
         ]);
     }
