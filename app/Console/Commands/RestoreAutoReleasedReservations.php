@@ -23,7 +23,7 @@ class RestoreAutoReleasedReservations extends Command
 {
     protected $signature = 'workers:restore-reservations
                             {--nationality= : اسم الجنسية أو جزء منه}
-                            {--admin= : اسم الموظّف الحاجز أو جزء منه}
+                            {--admin= : اسم الموظّف الحاجز أو جزء منه أو معرّفه الرقمي}
                             {--apply : نفّذ التعديل؛ بدونه عرض فقط}';
 
     protected $description = 'إرجاع حجوزات فكّها النظام تلقائياً إلى «محجوزة»';
@@ -33,13 +33,31 @@ class RestoreAutoReleasedReservations extends Command
         $natTerm   = $this->option('nationality');
         $adminTerm = $this->option('admin');
 
+        // معرّف رقمي أدقّ من الاسم: أسماء الموظّفين تحمل بادئات
+        // (مثل «موظف استقبال فرع كذا-») فيتعذّر مطابقتها نصّاً.
+        if ($adminTerm && ctype_digit((string) $adminTerm)) {
+            $admin = Admin::find((int) $adminTerm);
+
+            if (! $admin) {
+                $this->error("لا يوجد موظّف بالمعرّف {$adminTerm}.");
+                return self::FAILURE;
+            }
+
+            $adminTerm = $admin->name;
+            $this->info("الموظّف: {$adminTerm}");
+        }
+
         $natIds = null;
 
         if ($natTerm) {
             $natIds = Nationality::where('name', 'like', '%' . $natTerm . '%')->pluck('id');
 
             if ($natIds->isEmpty()) {
-                $this->error("لم يُعثر على جنسية تطابق «{$natTerm}».");
+                $this->error("لم يُعثر على جنسية تطابق «{$natTerm}». الجنسيات المتاحة:");
+
+                Nationality::orderBy('name')->get(['id', 'name'])
+                    ->each(fn ($n) => $this->line("  {$n->id} | {$n->name}"));
+
                 return self::FAILURE;
             }
         }
