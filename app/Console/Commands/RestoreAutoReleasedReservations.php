@@ -24,7 +24,8 @@ class RestoreAutoReleasedReservations extends Command
     protected $signature = 'workers:restore-reservations
                             {--nationality= : اسم الجنسية أو جزء منه أو معرّفها الرقمي}
                             {--admin= : اسم الموظّف الحاجز أو جزء منه أو معرّفه الرقمي}
-                            {--apply : نفّذ التعديل؛ بدونه عرض فقط}';
+                            {--apply : نفّذ التعديل؛ بدونه عرض فقط}
+                            {--excel= : صدّر النتيجة إلى ملف إكسل بهذا الاسم}';
 
     protected $description = 'إرجاع حجوزات فكّها النظام تلقائياً إلى «محجوزة»';
 
@@ -85,6 +86,7 @@ class RestoreAutoReleasedReservations extends Command
             ->keyBy('id');
 
         $rows      = [];
+        $excelRows = [];
         $plan      = [];
         $problems  = [];
 
@@ -138,6 +140,18 @@ class RestoreAutoReleasedReservations extends Command
                 mb_strimwidth($clientName, 0, 22, '…'),
                 $reserver?->name ? mb_strimwidth($reserver->name, 0, 22, '…') : '— (بلا حاجز)',
             ];
+
+            // صفوف التصدير كاملة بلا اختصار، فالإكسل لا يضيق كالطرفية
+            $excelRows[] = [
+                $worker->id,
+                $worker->name,
+                $worker->nationality?->name ?? '—',
+                $clientName,
+                $reserver?->name ?? '—',
+                $worker->status_label,
+                $worker->client_id ? 'نعم' : 'لا',
+                $log->created_at?->format('Y-m-d H:i'),
+            ];
         }
 
         if ($rows) {
@@ -148,6 +162,10 @@ class RestoreAutoReleasedReservations extends Command
         if ($problems) {
             $this->warn('سير لن تُمسّ:');
             $this->table(['الرقم', 'الاسم', 'السبب'], $problems);
+        }
+
+        if ($path = $this->option('excel')) {
+            $this->export($excelRows, $path);
         }
 
         if (! $plan) {
@@ -180,6 +198,26 @@ class RestoreAutoReleasedReservations extends Command
         $this->info("تم إرجاع {$done} حجزاً.");
 
         return self::SUCCESS;
+    }
+
+    /** يكتب الصفوف في ملف إكسل داخل storage/app. */
+    private function export(array $rows, string $path): void
+    {
+        if (! $rows) {
+            $this->warn('لا صفوف للتصدير.');
+            return;
+        }
+
+        if (! str_ends_with(strtolower($path), '.xlsx')) {
+            $path .= '.xlsx';
+        }
+
+        \Maatwebsite\Excel\Facades\Excel::store(
+            new \App\Exports\AutoReleasedWorkersExport($rows),
+            $path
+        );
+
+        $this->info('تم التصدير إلى: ' . storage_path('app/' . $path));
     }
 
     /**
