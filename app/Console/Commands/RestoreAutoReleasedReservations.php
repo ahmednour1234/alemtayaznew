@@ -22,7 +22,7 @@ use Illuminate\Console\Command;
 class RestoreAutoReleasedReservations extends Command
 {
     protected $signature = 'workers:restore-reservations
-                            {--nationality= : اسم الجنسية أو جزء منه}
+                            {--nationality= : اسم الجنسية أو جزء منه أو معرّفها الرقمي}
                             {--admin= : اسم الموظّف الحاجز أو جزء منه أو معرّفه الرقمي}
                             {--apply : نفّذ التعديل؛ بدونه عرض فقط}';
 
@@ -50,7 +50,10 @@ class RestoreAutoReleasedReservations extends Command
         $natIds = null;
 
         if ($natTerm) {
-            $natIds = Nationality::where('name', 'like', '%' . $natTerm . '%')->pluck('id');
+            // المعرّف الرقمي أضمن: أسماء الجنسيات تختلف في الهمزات والمسافات
+            $natIds = ctype_digit((string) $natTerm)
+                ? Nationality::where('id', (int) $natTerm)->pluck('id')
+                : Nationality::where('name', 'like', '%' . $natTerm . '%')->pluck('id');
 
             if ($natIds->isEmpty()) {
                 $this->error("لم يُعثر على جنسية تطابق «{$natTerm}». الجنسيات المتاحة:");
