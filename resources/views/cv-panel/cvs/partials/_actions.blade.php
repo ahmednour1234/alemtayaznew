@@ -27,15 +27,12 @@
     @endif
 
     @if($canDelete)
-    <form method="POST" action="{{ route('cv-panel.cvs.destroy', $w->id) }}" class="inline"
-          onsubmit="return confirm(@js(__('cv-panel.delete.confirm')))">
-        @csrf
-        @method('DELETE')
-        <button type="submit"
-                class="bg-red-50 hover:bg-red-600 text-red-600 hover:text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap transition-colors">
-            {{ __('cv-panel.delete.button') }}
-        </button>
-    </form>
+    {{-- النموذج خارج شجرة النموذج الجامع (لا تتداخل النماذج في HTML)،
+         والزرّ يشير إليه بخاصية form --}}
+    <button type="submit" form="del-{{ $w->id }}"
+            class="bg-red-50 hover:bg-red-600 text-red-600 hover:text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap transition-colors">
+        {{ __('cv-panel.delete.button') }}
+    </button>
     @endif
 
 @elseif($w->status === 'reserved')
@@ -56,26 +53,17 @@
             {{ __('cv-panel.reserve.tamara_paid') }}
         </span>
         @else
-        <form method="POST" action="{{ route('cv-panel.tamara', $w->id) }}" class="inline"
-              onsubmit="return confirm(@js(__('cv-panel.reserve.tamara_confirm', ['days' => \App\Models\Worker::TAMARA_RESERVATION_DAYS])))">
-            @csrf
-            <button type="submit"
-                    class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap transition-colors">
-                {{ __('cv-panel.reserve.tamara') }}
-            </button>
-        </form>
+        <button type="submit" form="tam-{{ $w->id }}"
+                class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap transition-colors">
+            {{ __('cv-panel.reserve.tamara') }}
+        </button>
         @endif
 
         {{-- إلغاء الحجز --}}
-        <form method="POST" action="{{ route('cv-panel.reserve.destroy', $w->id) }}" class="inline"
-              onsubmit="return confirm(@js(__('cv-panel.reserve.cancel_confirm', ['name' => $w->name])))">
-            @csrf
-            @method('DELETE')
-            <button type="submit"
-                    class="bg-red-50 hover:bg-red-600 text-red-600 hover:text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap transition-colors">
-                {{ __('cv-panel.reserve.cancel') }}
-            </button>
-        </form>
+        <button type="submit" form="cancel-{{ $w->id }}"
+                class="bg-red-50 hover:bg-red-600 text-red-600 hover:text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap transition-colors">
+            {{ __('cv-panel.reserve.cancel') }}
+        </button>
     @else
     <span class="text-[11px] text-ink-muted whitespace-nowrap">
         {{ __('cv-panel.reserve.only_reserver') }}

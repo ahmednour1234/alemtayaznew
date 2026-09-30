@@ -404,6 +404,14 @@ Route::prefix('cv-panel')->name('cv-panel.')
         Route::get('cvs/{id}/file', [\App\Http\Controllers\CvPanel\CvController::class, 'file'])
             ->whereNumber('id')->name('cvs.file');
 
+        // متابعة المحجوز — للمنسّق على جنسياته
+        Route::get('cvs/reserved', [\App\Http\Controllers\CvPanel\CvController::class, 'reserved'])->name('cvs.reserved');
+        Route::post('cvs/{id}/assigned', [\App\Http\Controllers\CvPanel\CvController::class, 'markAssigned'])
+            ->whereNumber('id')->name('cvs.assigned');
+
+        // حذف جماعي
+        Route::delete('cvs', [\App\Http\Controllers\CvPanel\CvController::class, 'bulkDestroy'])->name('cvs.bulk-destroy');
+
         // حذف سيرة — للمنسّق على جنسياته فقط (يتحقّق الكنترولر)
         Route::delete('cvs/{id}', [\App\Http\Controllers\CvPanel\CvController::class, 'destroy'])
             ->whereNumber('id')->name('cvs.destroy');

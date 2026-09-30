@@ -11,6 +11,17 @@
     // صلاحياتهم، فنطابق الشرطين معاً حتى لا نعرض زراً ينتهي بـ 403.
     $canCreateContract = ($me->isSuperAdmin() || $me->hasPermission('contracts.create'))
         && ! in_array($me->department, ['accounts', 'accountant', 'coordination'], true);
+
+    // الحذف الجماعي للتنسيق وحده، وعلى جنسياته — نفس شروط الكنترولر
+    $canBulkDelete = $me->isCoordination();
+    $myNats        = $canBulkDelete ? $me->managedNationalities->pluck('id')->all() : [];
+
+    // هل هذه السيرة قابلة للحذف؟ نفس شروط CvController
+    $deletable = fn ($w) => $canBulkDelete
+        && in_array($w->nationality_id, $myNats, true)
+        && $w->status === 'available'
+        && ! $w->client_id
+        && ! $w->hasActiveContract();
 @endphp
 
 <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
@@ -27,7 +38,7 @@
 
 {{-- ══ التصفية ══ --}}
 <form method="GET" class="bg-white rounded-2xl border border-slate-200 p-4 mb-6">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-3">
         <input type="text" name="search" value="{{ $filters['search'] ?? '' }}"
                placeholder="{{ __('cv-panel.filters.search') }}"
                class="border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
@@ -76,12 +87,72 @@
     {{ __('cv-panel.no_cvs') }}
 </div>
 @else
+
+{{--
+    نموذج واحد يلفّ الجدول والبطاقات معاً، فيصحّ اختيار سيرة من أيّهما.
+    x-data على النموذج ليصل العدّاد وزرّ «تحديد الكل» إلى الصفين.
+--}}
+<form method="POST" action="{{ route('cv-panel.cvs.bulk-destroy') }}"
+      x-data="{
+          selected: [],
+          get allBoxes() { return [...$el.querySelectorAll('input[name='ids[]']')]; },
+          toggleAll(on) {
+              this.allBoxes.forEach(b => b.checked = on);
+              this.selected = on ? this.allBoxes.map(b => b.value) : [];
+          },
+      }"
+      @submit="if (! selected.length) { $event.preventDefault(); return; }
+               if (! confirm(@js(__('cv-panel.delete.bulk_confirm')))) $event.preventDefault();">
+    @csrf
+    @method('DELETE')
+
+    @if($canBulkDelete)
+    {{-- شريط الإجراء — يظهر عند اختيار سيرة واحدة على الأقل --}}
+    <div x-show="selected.length" x-cloak
+         class="sticky top-2 z-20 mb-3 flex flex-wrap items-center justify-between gap-3
+                bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+        <span class="text-sm font-bold text-red-900"
+              x-text="'{{ __('cv-panel.delete.selected', ['count' => '__C__']) }}'.replace('__C__', selected.length)"></span>
+
+        <div class="flex items-center gap-2">
+            <button type="button" @click="toggleAll(false)"
+                    class="text-xs font-bold text-ink-muted hover:text-ink px-3 py-2">
+                {{ __('cv-panel.filters.reset') }}
+            </button>
+            <button type="submit"
+                    class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors">
+                {{ __('cv-panel.delete.bulk_button') }}
+            </button>
+        </div>
+    </div>
+    @endif
+
 <div class="hidden lg:block bg-white rounded-2xl border border-slate-200 overflow-x-auto">
     <table class="w-full text-sm">
         <thead class="bg-slate-50 text-xs text-ink-muted">
             <tr>
-                @foreach(['id', 'name', 'nationality', 'experience', 'religion', 'status', 'client', 'created', 'cv'] as $col)
-                <th class="px-4 py-3 text-start font-semibold whitespace-nowrap">{{ __('cv-panel.table.' . $col) }}</th>
+                @if($canBulkDelete)
+                <th class="ps-4 py-3 w-10">
+                    <input type="checkbox" @change="toggleAll($event.target.checked)"
+                           title="{{ __('cv-panel.delete.select_all') }}"
+                           class="rounded border-slate-300 text-red-600 focus:ring-red-400">
+                </th>
+                @endif
+                {{-- الديانة وتاريخ الرفع يُخفيان دون xl: عشرة أعمدة تتجاوز
+                     عرض الشاشة المتوسطة فيُقصّ الجدول. وهما متاحان في
+                     بطاقات الجوال كاملةً. --}}
+                @foreach([
+                    ['id',          ''],
+                    ['name',        ''],
+                    ['nationality', ''],
+                    ['experience',  'hidden xl:table-cell'],
+                    ['religion',    'hidden xl:table-cell'],
+                    ['status',      ''],
+                    ['client',      'hidden xl:table-cell'],
+                    ['created',     'hidden 2xl:table-cell'],
+                    ['cv',          ''],
+                ] as [$col, $hide])
+                <th class="px-4 py-3 text-start font-semibold whitespace-nowrap {{ $hide }}">{{ __('cv-panel.table.' . $col) }}</th>
                 @endforeach
                 <th class="px-4 py-3"><span class="sr-only">{{ __('cv-panel.reserve.action') }}</span></th>
             </tr>
@@ -89,11 +160,22 @@
         <tbody class="divide-y divide-slate-100">
             @foreach($workers as $w)
             <tr class="hover:bg-slate-50">
+                @if($canBulkDelete)
+                <td class="ps-4 py-3">
+                    @if($deletable($w))
+                    <input type="checkbox" name="ids[]" value="{{ $w->id }}" x-model="selected"
+                           class="rounded border-slate-300 text-red-600 focus:ring-red-400">
+                    @endif
+                </td>
+                @endif
                 <td class="px-4 py-3 text-ink-muted">{{ $w->id }}</td>
-                <td class="px-4 py-3 font-bold">{{ $w->name }}</td>
+                {{-- الاسم قد يكون اسم ملف طويلاً، فنحدّه بعرض أقصى مع تلميح كامل --}}
+                <td class="px-4 py-3 font-bold max-w-[16rem]">
+                    <span class="block truncate" title="{{ $w->name }}">{{ $w->name }}</span>
+                </td>
                 <td class="px-4 py-3 whitespace-nowrap">{{ $w->nationality?->display_name ?? '—' }}</td>
-                <td class="px-4 py-3 whitespace-nowrap">{{ $w->experience ? ($experiences[$w->experience] ?? $w->experience) : '—' }}</td>
-                <td class="px-4 py-3 whitespace-nowrap">{{ $w->religion ? ($religions[$w->religion] ?? $w->religion) : '—' }}</td>
+                <td class="px-4 py-3 whitespace-nowrap hidden xl:table-cell">{{ $w->experience ? ($experiences[$w->experience] ?? $w->experience) : '—' }}</td>
+                <td class="px-4 py-3 whitespace-nowrap hidden xl:table-cell">{{ $w->religion ? ($religions[$w->religion] ?? $w->religion) : '—' }}</td>
                 <td class="px-4 py-3">
                     <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold {{ $w->status_bg }} {{ $w->status_color }}">
                         {{ $w->status_label }}
@@ -114,8 +196,8 @@
                     </span>
                     @endif
                 </td>
-                <td class="px-4 py-3 whitespace-nowrap">{{ $w->client?->name ?? '—' }}</td>
-                <td class="px-4 py-3 text-ink-muted whitespace-nowrap">{{ $w->created_at?->format('Y-m-d') }}</td>
+                <td class="px-4 py-3 whitespace-nowrap hidden xl:table-cell">{{ $w->client?->name ?? '—' }}</td>
+                <td class="px-4 py-3 text-ink-muted whitespace-nowrap hidden 2xl:table-cell">{{ $w->created_at?->format('Y-m-d') }}</td>
                 <td class="px-4 py-3">
                     @if($w->hasCvFile())
                     <a href="{{ route('cv-panel.cvs.file', $w->id) }}" target="_blank" rel="noopener"
@@ -199,6 +281,12 @@
     </div>
     @endforeach
 </div>
+</form>
+
+{{-- نماذج الإجراءات خارج النموذج الجامع حتى لا تتداخل النماذج --}}
+@foreach($workers as $w)
+    @include('cv-panel.cvs.partials._forms')
+@endforeach
 
 <div class="mt-6">{{ $workers->links() }}</div>
 @endif

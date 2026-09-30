@@ -104,6 +104,148 @@ class CvController extends Controller
      * لا تُحذف سيرة عليها ارتباط قائم (محجوزة أو مُسندة لعميل أو لها عقد)،
      * فذلك التزام جارٍ لا يُمحى من هنا.
      */
+    /**
+     * السير المحجوزة من جنسيات هذا المنسّق.
+     *
+     * صفحة متابعة: المنسّق مسؤول عن سير جنسياته، فيتابع هنا ما حُجز منها
+     * حتى يُنشأ له عقد. مقصورة على التنسيق — خدمة العملاء ترى حجوزاتها في
+     * القائمة الرئيسية.
+     */
+    public function reserved(Request $request)
+    {
+        $me = Auth::guard('admin')->user();
+
+        abort_unless($me->isCoordination(), 403, __('cv-panel.reserved_page.denied'));
+
+        $scope = $me->managedNationalities->pluck('id')->all();
+
+        $query = Worker::query()
+            ->whereIn('nationality_id', $scope)
+            ->whereNotNull('cv_path')
+            ->with(['nationality', 'client', 'assignedBy'])
+            ->latest('assigned_at');
+
+        // تبويب الحالة: المحجوزة (افتراضي) أو التي تمّ تعيينها
+        $tab = $request->input('tab') === 'assigned' ? 'assigned' : 'reserved';
+        $query->where('status', $tab);
+
+        if ($nat = $request->input('nationality_id')) {
+            $query->where('nationality_id', $nat);
+        }
+
+        return view('cv-panel.cvs.reserved', [
+            'workers'       => $query->paginate(24)->withQueryString(),
+            'nationalities' => Nationality::whereIn('id', $scope)->orderBy('name')->get(),
+            'tab'           => $tab,
+            'filters'       => $request->only(['nationality_id']),
+            // أعداد التبويبين — تُحسب مستقلّة عن التصفية الجارية
+            'counts'        => [
+                'reserved' => $this->countByStatus($scope, 'reserved'),
+                'assigned' => $this->countByStatus($scope, 'assigned'),
+            ],
+        ]);
+    }
+
+    private function countByStatus(array $scope, string $status): int
+    {
+        return Worker::whereIn('nationality_id', $scope)
+            ->whereNotNull('cv_path')
+            ->where('status', $status)
+            ->count();
+    }
+
+    /**
+     * تعليم السيرة «تمّ التعيين».
+     *
+     * إقرار يدوي بأن العملية اكتملت — لا يُنشئ عقداً ولا يمسّ العميل، إنّما
+     * يُخرج السيرة من قائمة المتابعة إلى المنتهية.
+     */
+    public function markAssigned(int $id)
+    {
+        $me = Auth::guard('admin')->user();
+
+        abort_unless($me->isCoordination(), 403, __('cv-panel.reserved_page.denied'));
+
+        $worker = Worker::findOrFail($id);
+        $scope  = $me->managedNationalities->pluck('id')->all();
+
+        if (! in_array($worker->nationality_id, $scope, true)) {
+            abort(403, __('cv-panel.reserved_page.denied'));
+        }
+
+        if ($worker->status !== 'reserved') {
+            return back()->with('error', __('cv-panel.reserved_page.not_reserved'));
+        }
+
+        $worker->update(['status' => 'assigned']);
+
+        \App\Models\WorkerActivityLog::create([
+            'worker_id'   => $worker->id,
+            'worker_name' => $worker->name,
+            'admin_id'    => $me->id,
+            'admin_name'  => $me->name,
+            'action'      => 'assigned',
+            'label'       => 'تعليم السيرة «تمّ التعيين» من لوحة السير الذاتية',
+            'ip_address'  => request()?->ip(),
+        ]);
+
+        return back()->with('success', __('cv-panel.reserved_page.marked', ['name' => $worker->name]));
+    }
+
+    /**
+     * حذف عدّة سير دفعة واحدة.
+     *
+     * نفس قيود الحذف الفردي تماماً، مطبّقة على كل عنصر على حدة: ما يخالفها
+     * يُتخطّى ويُذكر عدده في الرسالة، فلا تفشل العملية كلّها بسبب سيرة واحدة
+     * حُجزت بين اختيار الموظّف وضغطه على الزرّ.
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $me = Auth::guard('admin')->user();
+
+        abort_unless($me->isCoordination(), 403, __('cv-panel.delete.denied'));
+
+        $data = $request->validate([
+            'ids'   => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ], [
+            'ids.required' => __('cv-panel.delete.none_selected'),
+        ]);
+
+        $scope = $me->managedNationalities->pluck('id')->all();
+
+        $workers = Worker::whereIn('id', $data['ids'])
+            ->whereIn('nationality_id', $scope)   // جنسياته وحدها
+            ->where('status', 'available')
+            ->whereNull('client_id')
+            ->whereDoesntHave('latestContract')
+            ->get();
+
+        foreach ($workers as $worker) {
+            \App\Models\WorkerActivityLog::create([
+                'worker_id'   => $worker->id,
+                'worker_name' => $worker->name,
+                'admin_id'    => $me->id,
+                'admin_name'  => $me->name,
+                'action'      => 'deleted',
+                'label'       => 'حذف جماعي للسير من لوحة السير (حذف ناعم — السجلّ والملف محفوظان)',
+                'ip_address'  => request()?->ip(),
+            ]);
+
+            $worker->delete();
+        }
+
+        $skipped = count($data['ids']) - $workers->count();
+
+        $message = __('cv-panel.delete.bulk_done', ['count' => $workers->count()]);
+
+        if ($skipped > 0) {
+            $message .= ' ' . __('cv-panel.delete.bulk_skipped', ['count' => $skipped]);
+        }
+
+        return back()->with('success', $message);
+    }
+
     public function destroy(int $id)
     {
         $me = Auth::guard('admin')->user();
