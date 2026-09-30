@@ -48,7 +48,9 @@ class DashboardController extends Controller
                     'my_today'    => (clone $mine())->whereDate('assigned_at', today())->count(),
                     'available'   => (clone $base())->where('status', 'available')->count(),
                 ],
-                'nationalities' => collect(),
+                // الروابط العامة يحتاجها الموظّف ليرسلها للعملاء — وهي أصل
+                // عمله. المخفيّ عنه أعداد المخزون لا الروابط نفسها.
+                'nationalities' => $this->visibleNationalities($me),
                 'recent'        => (clone $mine())->with(['nationality', 'client'])
                     ->latest('assigned_at')->limit(12)->get(),
             ]);

@@ -29,8 +29,7 @@
     @endforeach
 </div>
 
-{{-- ══ الجنسيات — شأن التنسيق، فلا تُعرض لخدمة العملاء ══ --}}
-@unless($agentView ?? false)
+{{-- ══ الجنسيات وروابطها العامة ══ --}}
 <h2 class="font-extrabold text-lg mb-4">{{ __('cv-panel.nationalities_overview') }}</h2>
 
 @if($nationalities->isEmpty())
@@ -55,7 +54,10 @@
             @endif
             <div class="min-w-0">
                 <p class="font-bold text-sm truncate">{{ $nat->display_name }}</p>
+                {{-- عدد المخزون يخصّ التنسيق؛ خدمة العملاء تحتاج الرابط لا الرقم --}}
+                @unless($agentView ?? false)
                 <p class="text-xs text-ink-muted mt-0.5">{{ __('cv-panel.available_count', ['count' => $nat->available_count]) }}</p>
+                @endunless
             </div>
         </a>
 
@@ -85,7 +87,6 @@
     @endforeach
 </div>
 @endif
-@endunless
 
 {{-- ══ أحدث نشاط: للتنسيق أحدث ما رُفع، ولخدمة العملاء أحدث ما حجزته ══ --}}
 @if($recent->isNotEmpty())
