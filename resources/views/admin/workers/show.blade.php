@@ -64,10 +64,11 @@
                 <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white text-sm px-4 py-2 rounded-lg"
                         onclick="return confirm('{{ __('workers.assign.confirm_unassign') }}')">{{ __('common.actions.unassign') }}</button>
             </form>
-            @elseif($worker->hasActiveContract())
+            {{-- فكّ التعيين للحجز القائم وحده؛ ما عداه لا يُعرض ولو معطّلاً --}}
+            @elseif($worker->status === 'reserved' && $worker->hasActiveContract())
             <span class="text-xs text-slate-400 px-3 py-2 rounded-lg bg-slate-100 cursor-not-allowed"
                   title="{{ __('workers.assign.has_contract') }}">{{ __('common.actions.unassign') }} {{ __('workers.view.linked') }}</span>
-            @else
+            @elseif($worker->status === 'reserved')
             <span class="text-xs text-slate-400 px-3 py-2 rounded-lg bg-slate-100 cursor-not-allowed"
                   title="{{ __('workers.assign.no_permission') }}">{{ __('common.actions.unassign') }} {{ __('workers.view.not_allowed') }}</span>
             @endif
