@@ -54,10 +54,7 @@
             @endif
             <div class="min-w-0">
                 <p class="font-bold text-sm truncate">{{ $nat->display_name }}</p>
-                {{-- عدد المخزون يخصّ التنسيق؛ خدمة العملاء تحتاج الرابط لا الرقم --}}
-                @unless($agentView ?? false)
                 <p class="text-xs text-ink-muted mt-0.5">{{ __('cv-panel.available_count', ['count' => $nat->available_count]) }}</p>
-                @endunless
             </div>
         </a>
 
