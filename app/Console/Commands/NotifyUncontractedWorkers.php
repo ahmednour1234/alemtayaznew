@@ -28,8 +28,8 @@ class NotifyUncontractedWorkers extends Command
      */
     private const AUTO_RELEASE = false;
 
-    /** يُرسل تذكير عند تبقّي هذا العدد من الساعات أو أقل. */
-    private const REMINDER_BEFORE_HOURS = 6;
+    /** يُرسل تذكير بالمتابعة بعد مُضيّ هذه المدّة على الحجز دون عقد. */
+    private const REMIND_AFTER_HOURS = 66;
 
     protected $signature   = 'workers:notify-uncontracted';
     protected $description = 'فكّ حجز العاملات بلا عقد بعد ' . self::RESERVATION_HOURS . ' ساعة مع إشعار المسؤولين';
@@ -147,15 +147,18 @@ class NotifyUncontractedWorkers extends Command
                 continue;
             }
 
-            $hoursLeft = $limitHours - (int) $hoursElapsed;
-
-            if ($hoursLeft > self::REMINDER_BEFORE_HOURS) {
-                continue; // ما زال أمامه وقت — لا تُزعج الموظّف
+            /*
+             * لا مهلة تنتهي، فلا معنى لـ«ما تبقّى منها». نُذكّر بعد مُضيّ
+             * مدّة معقولة على الحجز دون عقد، مرّة واحدة بفضل upsertNotification.
+             */
+            if ($hoursElapsed < self::REMIND_AFTER_HOURS) {
+                continue;
             }
 
-            $title = 'تنبيه: حجز عاملة على وشك الانتهاء';
-            $body  = "يتبقّى {$hoursLeft} ساعة على انتهاء حجز العاملة «{$workerName}» للعميل «{$clientName}». "
-                   . "أنشئ عقد الاستقدام قبل انتهاء المهلة وإلا سيُفكّ الحجز تلقائياً.";
+            // الحجز لا ينتهي بمرور الوقت، فالتذكير متابعة لا إنذار
+            $title = 'متابعة: حجز بلا عقد';
+            $body  = "العاملة «{$workerName}» محجوزة للعميل «{$clientName}» ولم يُنشأ لها عقد بعد. "
+                   . "الحجز قائم حتى يُفكّ يدوياً، وهذا تذكير بالمتابعة.";
 
             $this->upsertNotification(
                 $worker->assigned_by_admin_id,

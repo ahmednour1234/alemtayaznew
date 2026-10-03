@@ -24,6 +24,7 @@ class RestoreAutoReleasedReservations extends Command
     protected $signature = 'workers:restore-reservations
                             {--nationality= : اسم الجنسية أو جزء منه أو معرّفها الرقمي}
                             {--admin= : اسم الموظّف الحاجز أو جزء منه أو معرّفه الرقمي}
+                            {--since= : اقتصر على ما فُكّ من هذا التاريخ (YYYY-MM-DD)}
                             {--apply : نفّذ التعديل؛ بدونه عرض فقط}
                             {--excel= : صدّر النتيجة إلى ملف إكسل بهذا الاسم}';
 
@@ -70,6 +71,7 @@ class RestoreAutoReleasedReservations extends Command
             ->whereNull('admin_id')
             ->where('label', 'like', '%فكّ النظام حجز العاملة تلقائياً%')
             ->when($adminTerm, fn ($q) => $q->where('label', 'like', '%بواسطة %' . $adminTerm . '%'))
+            ->when($this->option('since'), fn ($q, $d) => $q->whereDate('created_at', '>=', $d))
             ->latest()
             ->get()
             ->unique('worker_id'); // أحدث فكّ لكلّ عاملة
