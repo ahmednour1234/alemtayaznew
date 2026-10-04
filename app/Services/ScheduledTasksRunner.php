@@ -20,7 +20,6 @@ class ScheduledTasksRunner
 
     /** الأوامر والمهلة بالدقائق بين كل تشغيل والذي يليه. */
     private const COMMANDS = [
-        'workers:notify-uncontracted' => 60,    // كل ساعة
         'leads:notify-followups'      => 60,    // كل ساعة
         'contracts:check-delays'      => 1440,  // يومياً
         'contracts:check-arrivals'    => 1440,

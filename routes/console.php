@@ -32,9 +32,7 @@ Schedule::command('housing:check-guarantee')->weeklyOn(0, '09:00');
 // Notify about rental expiry (7 days before and already expired) – runs daily
 Schedule::command('housing:check-rental-expiry')->dailyAt('08:45');
 
-// Remind assigners of workers with no contract; auto-release after 72 hours
-// حجز العاملة صالح 72 ساعة — يعمل كل ساعة ليفكّ الحجز فور انتهاء المهلة
-Schedule::command('workers:notify-uncontracted')->hourly();
+// Reservation expiry automation is disabled by business decision.
 
 // تذكير يومي بالعقود التي أُلغيت تأشيرتها وتنتظر عاملة بديلة
 Schedule::command('contracts:notify-unlinked')->dailyAt('09:00');

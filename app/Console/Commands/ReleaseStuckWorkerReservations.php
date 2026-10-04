@@ -22,12 +22,18 @@ use Illuminate\Console\Command;
 class ReleaseStuckWorkerReservations extends Command
 {
     protected $signature = 'workers:release-stuck
-                            {--dry-run : عرض المتأثرات دون تعديل}';
+                            {--dry-run : عرض المتأثرات دون تعديل}
+                            {--force : Run the disabled reservation release cleanup}';
 
     protected $description = 'إرجاع العاملات العالقات في حالة محجوزة/معيَّنة بلا عميل ولا عقد إلى «متاحة»';
 
     public function handle(): int
     {
+        if (! $this->option('force')) {
+            $this->warn('workers:release-stuck is disabled. Re-run with --force only for a deliberate one-time cleanup.');
+            return self::SUCCESS;
+        }
+
         $workers = Worker::whereIn('status', ['reserved', 'assigned'])
             ->whereNull('client_id')
             ->whereNull('assigned_at')
