@@ -36,6 +36,8 @@ class NotifyUncontractedWorkers extends Command
 
     public function handle(): void
     {
+        $this->info('Reservation expiry notifications are disabled; reservations never expire automatically.');
+        return;
         // العاملات المحجوزة/المعيَّنة لعميل بلا عقد استقدام
         $workers = Worker::where('active', true)
             ->whereIn('status', ['assigned', 'reserved'])

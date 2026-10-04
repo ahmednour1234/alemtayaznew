@@ -11,9 +11,21 @@ class AdminNotification extends Model
     use HasFactory;
     protected $table = 'admin_notifications';
 
+    private const BLOCKED_TYPES = [
+        'worker_reservation_expired',
+        'worker_reservation_expiring',
+    ];
+
     protected $fillable = ['admin_id', 'type', 'title', 'body', 'url', 'read_at'];
 
     protected $casts = ['read_at' => 'datetime'];
+
+    protected static function booted(): void
+    {
+        static::creating(function (AdminNotification $notification): bool {
+            return ! in_array($notification->type, self::BLOCKED_TYPES, true);
+        });
+    }
 
     public function admin(): BelongsTo
     {
