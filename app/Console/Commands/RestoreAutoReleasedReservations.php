@@ -100,7 +100,7 @@ class RestoreAutoReleasedReservations extends Command
             }
 
             // لا نمسّ سيرة ارتبطت من جديد بعد الفكّ
-            if ($worker->client_id || $worker->status !== 'available') {
+            if ($worker->client_id || ! in_array(strtolower((string) $worker->status), ['available', 'reserved', 'assigned'], true)) {
                 $problems[] = [$worker->id, $worker->name, 'حالتها ' . $worker->status_label . ' — لم تُمسّ'];
                 continue;
             }
