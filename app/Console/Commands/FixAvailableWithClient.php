@@ -25,10 +25,15 @@ class FixAvailableWithClient extends Command
 
     public function handle(): int
     {
+        // مرتبطة بعميل مباشرةً، أو عبر عقد استقدام قائم لم ينتهِ (client_id
+        // قد يكون فارغاً والعميل مسجّل في العقد فقط).
         $workers = Worker::where('status', 'available')
-            ->whereNotNull('client_id')
-            ->with(['client', 'nationality', 'assignedBy'])
-            ->get();
+            ->with(['client', 'nationality', 'assignedBy', 'latestContract.client'])
+            ->get()
+            ->filter(fn (Worker $w) => $w->client_id !== null
+                || ($w->latestContract
+                    && ! in_array((int) $w->latestContract->current_status, [14, 15], true)))
+            ->values();
 
         if ($workers->isEmpty()) {
             $this->info('لا توجد عاملات «متاحات» مرتبطات بعميل. الحالة سليمة.');
@@ -43,7 +48,7 @@ class FixAvailableWithClient extends Command
                 $w->id,
                 mb_strimwidth((string) $w->name, 0, 30, '…'),
                 $w->nationality?->name ?? '—',
-                mb_strimwidth((string) ($w->client?->name ?? '—'), 0, 26, '…'),
+                mb_strimwidth((string) ($w->effectiveClient()?->name ?? '—'), 0, 26, '…'),
                 $w->assignedBy?->name ?? '—',
                 $w->hasActiveContract() ? 'نعم' : 'لا',
             ])->all()
@@ -57,7 +62,7 @@ class FixAvailableWithClient extends Command
         $fixed = 0;
 
         foreach ($workers as $worker) {
-            $clientName = $worker->client?->name ?? 'عميل';
+            $clientName = $worker->effectiveClient()?->name ?? 'عميل';
 
             /*
              * التحديث بلا أحداث الموديل: حارس الاتساق في Worker::booted يمنع
@@ -66,6 +71,7 @@ class FixAvailableWithClient extends Command
              */
             Worker::where('id', $worker->id)->update([
                 'status'          => 'assigned',
+                'client_id'       => $worker->client_id ?? $worker->latestContract?->client_id,
                 // نُثبّت سحبها من الموقع العام كي لا تعود للعرض لاحقاً
                 'cv_withdrawn_at' => $worker->cv_withdrawn_at ?? now(),
             ]);
