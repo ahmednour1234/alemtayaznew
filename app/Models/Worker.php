@@ -200,6 +200,9 @@ class Worker extends Model
             && \Illuminate\Support\Facades\Storage::disk($this->cvDisk())->exists($this->cv_path);
     }
 
+    /** مهلة الحجز الاسمية بالساعات (للعرض فقط — لا فكّ تلقائي). */
+    public const RESERVATION_HOURS = 72;
+
     /** مهلة الحجز بالأيام بعد تسجيل سداد تمارا. */
     public const TAMARA_RESERVATION_DAYS = 5;
 
@@ -219,7 +222,7 @@ class Worker extends Model
     {
         return $this->hasTamaraPayment()
             ? self::TAMARA_RESERVATION_DAYS * 24
-            : \App\Console\Commands\NotifyUncontractedWorkers::RESERVATION_HOURS;
+            : self::RESERVATION_HOURS;
     }
 
     /**

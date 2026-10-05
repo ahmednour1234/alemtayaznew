@@ -175,7 +175,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                     <p class="text-xs text-amber-800 leading-relaxed">
-                        {{ __('workers.assignment.reserve_valid', ['hours' => \App\Console\Commands\NotifyUncontractedWorkers::RESERVATION_HOURS]) }}
+                        {{ __('workers.assignment.reserve_valid', ['hours' => \App\Models\Worker::RESERVATION_HOURS]) }}
                     </p>
                 </div>
 

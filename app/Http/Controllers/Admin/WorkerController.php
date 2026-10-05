@@ -512,11 +512,11 @@ class WorkerController extends Controller
             return redirect()->route('admin.contracts.create', [
                 'worker_id' => $id,
                 'client_id' => $clientId,
-            ])->with('success', 'تم حجز العاملة لمدة ' . \App\Console\Commands\NotifyUncontractedWorkers::RESERVATION_HOURS . ' ساعة — أكمل بيانات العقد الآن.');
+            ])->with('success', 'تم حجز العاملة لمدة ' . \App\Models\Worker::RESERVATION_HOURS . ' ساعة — أكمل بيانات العقد الآن.');
         }
 
         return redirect()->route('admin.workers.index')
-            ->with('success', 'تم حجز العاملة للعميل لمدة ' . \App\Console\Commands\NotifyUncontractedWorkers::RESERVATION_HOURS . ' ساعة. أنشئ عقد الاستقدام قبل انتهاء المهلة وإلا يُفكّ الحجز تلقائياً.');
+            ->with('success', 'تم حجز العاملة للعميل لمدة ' . \App\Models\Worker::RESERVATION_HOURS . ' ساعة. أنشئ عقد الاستقدام لإتمام الحجز.');
     }
 
     // ── Unassign ──────────────────────────────────────────────────────────────
