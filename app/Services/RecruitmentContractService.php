@@ -86,16 +86,29 @@ class RecruitmentContractService
 
         // Handle worker change: free old, assign new
         $newWorkerId = $data['worker_id'] ?? null;
-        if ($newWorkerId != $contract->worker_id) {
-            if ($contract->worker_id) {
-                Worker::where('id', $contract->worker_id)->update(['status' => 'available']);
-            }
-            if ($newWorkerId) {
-                Worker::where('id', $newWorkerId)->update(['status' => 'assigned']);
-            }
-        }
+        $oldWorkerId = $contract->worker_id;
 
         $updated = $this->repo->update($contract, $data);
+
+        // بعد حفظ العقد لا قبله، وعبر النموذج لا الاستعلام المباشر، ليمرّ على
+        // حارس الاتساق في Worker. الاستعلام المباشر كان يترك العاملة «متاحة»
+        // وهي ما زالت مرتبطة بعميل.
+        if ($newWorkerId != $oldWorkerId) {
+            if ($oldWorkerId) {
+                Worker::find($oldWorkerId)?->update([
+                    'status'               => 'available',
+                    'client_id'            => null,
+                    'assigned_by_admin_id' => null,
+                    'assigned_at'          => null,
+                ]);
+            }
+            if ($newWorkerId) {
+                Worker::find($newWorkerId)?->update([
+                    'status'    => 'assigned',
+                    'client_id' => $updated->client_id,
+                ]);
+            }
+        }
 
         // Log activity — super admins are not bound to a department, so log null (shows as "الإدارة")
         $editor  = Auth::guard('admin')->user();
@@ -131,7 +144,12 @@ class RecruitmentContractService
 
         // Free worker when contract ends (returned or escaped)
         if (in_array($status, [14, 15]) && $contract->worker_id) {
-            Worker::where('id', $contract->worker_id)->update(['status' => 'available']);
+            Worker::find($contract->worker_id)?->update([
+                'status'               => 'available',
+                'client_id'            => null,
+                'assigned_by_admin_id' => null,
+                'assigned_at'          => null,
+            ]);
         }
 
         // Log status change

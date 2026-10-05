@@ -125,9 +125,12 @@ class HousingAssignmentService
             ->exists();
 
         if (! $hasOtherActive) {
+            // عبر النموذج ليمرّ على حارس الاتساق: عاملة لها عميل أو عقد قائم
+            // تعود «تم التعيين» لا «متاحة».
             Worker::where('id', $assignment->worker_id)
                 ->whereIn('status', ['in_housing', 'for_rent'])
-                ->update(['status' => 'available']);
+                ->get()
+                ->each(fn (Worker $w) => $w->update(['status' => 'available']));
         }
 
         return $assignment;
