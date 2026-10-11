@@ -85,6 +85,15 @@
     </script>
     @endif
 
+    {{-- Microsoft Clarity — تسجيل الجلسات وخرائط الحرارة للموقع العام فقط --}}
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "yvsyop4oed");
+    </script>
+
     {{-- Open Graph — تظهر عند مشاركة الرابط في واتساب وتويتر --}}
     <meta property="og:title" content="@yield('title', $S('company_name'))">
     <meta property="og:description" content="@yield('meta_description', $S('company_name') . ' — ' . $S('tagline'))">
