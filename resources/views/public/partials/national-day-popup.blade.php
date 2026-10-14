@@ -71,12 +71,12 @@
         @if($ndWhats)
         <a href="https://wa.me/{{ $ndWhats }}?text={{ urlencode('السلام عليكم، أرغب في الاستفسار عن الأسعار والعروض.') }}"
            target="_blank" rel="noopener" class="block rounded-2xl overflow-hidden shadow-2xl">
-            <img src="{{ asset($ndPopupImage) }}" alt="أسعار مميزة.. خدمة موثوقة — أسعار الاستقدام حسب الجنسية"
+            <img src="{{ asset($ndPopupImage) }}?v={{ filemtime(public_path($ndPopupImage)) }}" alt="أسعار مميزة.. خدمة موثوقة — أسعار الاستقدام حسب الجنسية"
                  class="w-full h-auto block">
         </a>
         @else
         <div class="rounded-2xl overflow-hidden shadow-2xl">
-            <img src="{{ asset($ndPopupImage) }}" alt="أسعار مميزة.. خدمة موثوقة — أسعار الاستقدام حسب الجنسية"
+            <img src="{{ asset($ndPopupImage) }}?v={{ filemtime(public_path($ndPopupImage)) }}" alt="أسعار مميزة.. خدمة موثوقة — أسعار الاستقدام حسب الجنسية"
                  class="w-full h-auto block">
         </div>
         @endif
