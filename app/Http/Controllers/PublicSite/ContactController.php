@@ -111,7 +111,8 @@ class ContactController extends Controller
         RateLimiter::hit($key, 600);
 
         $data = $request->validate([
-            'name'           => ['required', 'string', 'max:255'],
+            // شريط «اترك رقمك» يرسل الجوال وحده، فالاسم اختياري هنا
+            'name'           => ['nullable', 'string', 'max:255'],
             'phone'          => ['required', 'string', 'max:30'],
             'city'           => ['nullable', 'string', 'max:100'],
             'nationality_id' => ['nullable', 'integer', 'exists:nationalities,id'],
@@ -137,7 +138,7 @@ class ContactController extends Controller
 
         Lead::create([
             // اسم بديل مفهوم لفريق المبيعات حين يصل الرقم وحده
-            'name'           => $data['name'] ?: 'زائر من الموقع',
+            'name'           => ($data['name'] ?? null) ?: 'زائر من الموقع',
             'phone'          => $data['phone'],
             'city'           => $data['city'] ?? null,
             'nationality_id' => $data['nationality_id'] ?? null,

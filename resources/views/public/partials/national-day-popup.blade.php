@@ -49,7 +49,7 @@
      class="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
      @click.self="open = false"
      @keydown.escape.window="open = false"
-     role="dialog" aria-modal="true" aria-label="تهنئة اليوم الوطني">
+     role="dialog" aria-modal="true" aria-label="عروض الأسعار">
 
     <div x-show="open"
          x-transition:enter="transition ease-out duration-400 delay-100"
@@ -69,14 +69,14 @@
         @php($ndWhats = preg_replace('/\D/', '', (string) \App\Models\SiteSetting::value('whatsapp')))
 
         @if($ndWhats)
-        <a href="https://wa.me/{{ $ndWhats }}?text={{ urlencode('السلام عليكم، أرغب في الاستفسار عن عروض اليوم الوطني.') }}"
+        <a href="https://wa.me/{{ $ndWhats }}?text={{ urlencode('السلام عليكم، أرغب في الاستفسار عن الأسعار والعروض.') }}"
            target="_blank" rel="noopener" class="block rounded-2xl overflow-hidden shadow-2xl">
-            <img src="{{ asset($ndPopupImage) }}" alt="تهنئة اليوم الوطني السعودي"
+            <img src="{{ asset($ndPopupImage) }}" alt="أسعار مميزة.. خدمة موثوقة — أسعار الاستقدام حسب الجنسية"
                  class="w-full h-auto block">
         </a>
         @else
         <div class="rounded-2xl overflow-hidden shadow-2xl">
-            <img src="{{ asset($ndPopupImage) }}" alt="تهنئة اليوم الوطني السعودي"
+            <img src="{{ asset($ndPopupImage) }}" alt="أسعار مميزة.. خدمة موثوقة — أسعار الاستقدام حسب الجنسية"
                  class="w-full h-auto block">
         </div>
         @endif
