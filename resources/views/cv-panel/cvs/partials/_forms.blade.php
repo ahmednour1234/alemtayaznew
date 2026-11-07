@@ -25,6 +25,13 @@
 </form>
 @endif
 
+@if($w->status === 'available' && $canDelete && $w->cv_withdrawn_at)
+<form id="repub-{{ $w->id }}" method="POST" action="{{ route('cv-panel.cvs.republish', $w->id) }}"
+      class="hidden" onsubmit="return confirm(@js(__('cv-panel.republish.confirm', ['name' => $w->name])))">
+    @csrf
+</form>
+@endif
+
 @if($w->status === 'reserved' && $mine)
     @unless($w->hasTamaraPayment())
     <form id="tam-{{ $w->id }}" method="POST" action="{{ route('cv-panel.tamara', $w->id) }}"

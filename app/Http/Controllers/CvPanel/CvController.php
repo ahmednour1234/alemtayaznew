@@ -200,6 +200,51 @@ class CvController extends Controller
     }
 
     /**
+     * إرجاع سيرة مسحوبة إلى الموقع العام.
+     *
+     * السحب دائم تلقائياً بعد أول حجز، لكن المنسّق قد يقرّر أن الحجز أُلغي
+     * فعلاً وأن السيرة صالحة للعرض. نقصرها على جنسياته وعلى سيرة متاحة بلا
+     * عميل ولا عقد — نفس شروط الحذف — حتى لا تُعرض سيرة مرتبطة فعلاً.
+     */
+    public function republish(int $id)
+    {
+        $me = Auth::guard('admin')->user();
+
+        abort_unless($me->isCoordination(), 403, __('cv-panel.republish.denied'));
+
+        $worker = Worker::findOrFail($id);
+
+        if (! $me->managedNationalities->contains('id', $worker->nationality_id)) {
+            abort(403, __('cv-panel.republish.denied'));
+        }
+
+        if ($worker->status !== 'available' || $worker->client_id || $worker->hasActiveContract()
+            || $worker->cv_withdrawn_at === null) {
+            return back()->with('error', __('cv-panel.republish.not_allowed'));
+        }
+
+        // تحديث مباشر بلا أحداث: حارس saving يختم السحب فقط عند الحجز،
+        // وهنا الحالة متاحة بلا عميل فلا تعارض، لكنّنا نُبقيه صريحاً.
+        Worker::whereKey($worker->id)->update(['cv_withdrawn_at' => null]);
+
+        try {
+            \App\Models\WorkerActivityLog::create([
+                'worker_id'   => $worker->id,
+                'worker_name' => $worker->name,
+                'admin_id'    => $me->id,
+                'admin_name'  => $me->name,
+                'action'      => 'restored',
+                'label'       => 'أُعيدت السيرة للعرض في الموقع العام بعد إلغاء حجزها',
+                'ip_address'  => request()?->ip(),
+            ]);
+        } catch (\Throwable) {
+            // التسجيل لا يُعطّل الإجراء
+        }
+
+        return back()->with('success', __('cv-panel.republish.done', ['name' => $worker->name]));
+    }
+
+    /**
      * حذف عدّة سير دفعة واحدة.
      *
      * نفس قيود الحذف الفردي تماماً، مطبّقة على كل عنصر على حدة: ما يخالفها

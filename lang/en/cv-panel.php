@@ -284,4 +284,12 @@ return [
         'saved'  => 'Nationalities for :name updated.',
         'denied' => 'Assigning nationalities is restricted to managers.',
     ],
+
+    'republish' => [
+        'button'      => 'Back to site',
+        'confirm'     => 'Show ":name" on the public site again?',
+        'done'        => '":name" is shown on the site again.',
+        'not_allowed' => 'Cannot restore: it must be available, withdrawn, with no client or contract.',
+        'denied'      => 'Only the nationality coordinator can restore CVs to the site.',
+    ],
 ];

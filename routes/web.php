@@ -411,6 +411,8 @@ Route::prefix('cv-panel')->name('cv-panel.')
         Route::get('cvs/reserved', [\App\Http\Controllers\CvPanel\CvController::class, 'reserved'])->name('cvs.reserved');
         Route::post('cvs/{id}/assigned', [\App\Http\Controllers\CvPanel\CvController::class, 'markAssigned'])
             ->whereNumber('id')->name('cvs.assigned');
+        Route::post('cvs/{id}/republish', [\App\Http\Controllers\CvPanel\CvController::class, 'republish'])
+            ->whereNumber('id')->name('cvs.republish');
 
         // حذف جماعي
         Route::delete('cvs', [\App\Http\Controllers\CvPanel\CvController::class, 'bulkDestroy'])->name('cvs.bulk-destroy');
