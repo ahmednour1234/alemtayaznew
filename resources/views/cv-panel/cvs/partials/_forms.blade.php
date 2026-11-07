@@ -25,7 +25,7 @@
 </form>
 @endif
 
-@if($w->status === 'available' && $canDelete && $w->cv_withdrawn_at)
+@if($w->canBeRepublishedBy($me))
 <form id="repub-{{ $w->id }}" method="POST" action="{{ route('cv-panel.cvs.republish', $w->id) }}"
       class="hidden" onsubmit="return confirm(@js(__('cv-panel.republish.confirm', ['name' => $w->name])))">
     @csrf

@@ -173,6 +173,29 @@ class Worker extends Model
      * هل للعاملة عقد استقدام قائم؟ (العقود المحذوفة لا تُحتسب)
      * وجود العقد يعني أن الارتباط يُدار من العقد لا من شاشة العمالة.
      */
+    /**
+     * هل يُسمح بإرجاع هذه السيرة المسحوبة إلى الموقع بواسطة $admin؟
+     * السوبر أدمن، أو منسّق الجنسية. والسيرة متاحة مسحوبة بلا عميل، ولا عقد
+     * قائم (العقد المنتهي برجيع أو هروب لا يمنع).
+     */
+    public function canBeRepublishedBy(?Admin $admin): bool
+    {
+        if (! $admin || $this->cv_withdrawn_at === null || $this->status !== 'available' || $this->client_id) {
+            return false;
+        }
+
+        $allowed = $admin->isSuperAdmin()
+            || ($admin->isCoordination() && $admin->managedNationalities->contains('id', $this->nationality_id));
+
+        if (! $allowed) {
+            return false;
+        }
+
+        $cs = $this->latestContract?->current_status;
+
+        return $this->latestContract === null || in_array((int) $cs, self::CONTRACT_ENDED, true);
+    }
+
     public function hasActiveContract(): bool
     {
         // نستخدم العلاقة المحمّلة مسبقاً (eager-loaded) إن وُجدت لتفادي

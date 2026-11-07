@@ -26,7 +26,7 @@
     </a>
     @endif
 
-    @if($canDelete && $w->cv_withdrawn_at)
+    @if($w->canBeRepublishedBy($me))
     <button type="submit" form="repub-{{ $w->id }}"
             class="bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap transition-colors">
         {{ __('cv-panel.republish.button') }}

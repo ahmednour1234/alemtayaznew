@@ -210,16 +210,11 @@ class CvController extends Controller
     {
         $me = Auth::guard('admin')->user();
 
-        abort_unless($me->isCoordination(), 403, __('cv-panel.republish.denied'));
+        abort_unless($me->isSuperAdmin() || $me->isCoordination(), 403, __('cv-panel.republish.denied'));
 
         $worker = Worker::findOrFail($id);
 
-        if (! $me->managedNationalities->contains('id', $worker->nationality_id)) {
-            abort(403, __('cv-panel.republish.denied'));
-        }
-
-        if ($worker->status !== 'available' || $worker->client_id || $worker->hasActiveContract()
-            || $worker->cv_withdrawn_at === null) {
+        if (! $worker->canBeRepublishedBy($me)) {
             return back()->with('error', __('cv-panel.republish.not_allowed'));
         }
 
