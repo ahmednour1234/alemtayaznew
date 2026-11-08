@@ -220,7 +220,19 @@ class CvController extends Controller
 
         // تحديث مباشر بلا أحداث: حارس saving يختم السحب فقط عند الحجز،
         // وهنا الحالة متاحة بلا عميل فلا تعارض، لكنّنا نُبقيه صريحاً.
-        Worker::whereKey($worker->id)->update(['cv_withdrawn_at' => null]);
+        // لو كانت محجوزة نفكّ الحجز معها، وإلا لن تظهر في الموقع (الموقع
+        // يعرض المتاحة فقط).
+        $wasReserved = $worker->status === 'reserved';
+        $changes = ['cv_withdrawn_at' => null];
+        if ($wasReserved) {
+            $changes += [
+                'status'               => 'available',
+                'client_id'            => null,
+                'assigned_by_admin_id' => null,
+                'assigned_at'          => null,
+            ];
+        }
+        Worker::whereKey($worker->id)->update($changes);
 
         try {
             \App\Models\WorkerActivityLog::create([
@@ -229,7 +241,9 @@ class CvController extends Controller
                 'admin_id'    => $me->id,
                 'admin_name'  => $me->name,
                 'action'      => 'restored',
-                'label'       => 'أُعيدت السيرة للعرض في الموقع العام بعد إلغاء حجزها',
+                'label'       => $wasReserved
+                    ? 'فُكّ حجز السيرة وأُعيدت للعرض في الموقع العام بواسطة المنسّق'
+                    : 'أُعيدت السيرة للعرض في الموقع العام بعد إلغاء حجزها',
                 'ip_address'  => request()?->ip(),
             ]);
         } catch (\Throwable) {

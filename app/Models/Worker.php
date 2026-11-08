@@ -180,7 +180,17 @@ class Worker extends Model
      */
     public function canBeRepublishedBy(?Admin $admin): bool
     {
-        if (! $admin || $this->cv_withdrawn_at === null || $this->status !== 'available' || $this->client_id) {
+        if (! $admin) {
+            return false;
+        }
+
+        // المسحوبة من الموقع، أو المحجوزة (حتى لو لم تُسحب بعد): المنسّق
+        // يقدر يرجّعها للعرض ويفكّ حجزها.
+        $isReserved = $this->status === 'reserved';
+        if ($this->cv_withdrawn_at === null && ! $isReserved) {
+            return false;
+        }
+        if (! in_array($this->status, ['available', 'reserved'], true)) {
             return false;
         }
 
