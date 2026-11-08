@@ -85,7 +85,7 @@ class CheckArrivalDates extends Command
             ->where(function ($q) use ($branchId) {
                 $q->where(function ($q2) use ($branchId) {
                         $q2->where('branch_id', $branchId)
-                           ->whereIn('department', ['branch_manager', 'coordination', 'chairman']);
+                           ->whereIn('department', ['branch_manager', 'coordination', 'coordination_customer_service', 'chairman']);
                     })
                     ->orWhere('department', 'chairman')
                     ->orWhereNull('branch_id');

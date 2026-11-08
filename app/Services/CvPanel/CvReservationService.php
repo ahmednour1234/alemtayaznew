@@ -109,7 +109,7 @@ class CvReservationService
         }
 
         return Admin::where('active', true)
-            ->where('department', 'coordination')
+            ->whereIn('department', \App\Http\Middleware\CvPanelAccess::COORDINATORS)
             ->whereHas('managedNationalities', fn ($q) => $q->where('nationalities.id', $nationalityId))
             ->get();
     }

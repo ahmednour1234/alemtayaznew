@@ -17,7 +17,7 @@ class UpdateAdminRequest extends FormRequest
             'password'  => ['nullable', 'string', 'min:8', 'confirmed'],
             'active'    => ['boolean'],
             'branch_id'  => ['nullable', 'exists:branches,id'],
-            'department' => ['nullable', 'string', 'in:customer_service,coordination,accounts,accountant,branch_manager,chairman'],
+            'department' => ['nullable', 'string', 'in:customer_service,coordination,coordination_customer_service,accounts,accountant,branch_manager,chairman'],
             'roles'      => ['nullable', 'array'],
             'roles.*'    => ['exists:roles,id'],
         ];

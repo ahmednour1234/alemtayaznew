@@ -27,9 +27,17 @@ class CvPanelAccess
     public const COORDINATION     = 'coordination';
     public const CUSTOMER_SERVICE = 'customer_service';
     public const MANAGER          = 'branch_manager';
+    /** دور مزدوج: منسّق وخدمة عملاء معاً. */
+    public const COORDINATION_CUSTOMER_SERVICE = 'coordination_customer_service';
+
+    /** كل من يعمل منسّقاً (المنفرد والمزدوج). */
+    public const COORDINATORS = [self::COORDINATION, self::COORDINATION_CUSTOMER_SERVICE];
+
+    /** كل من يعمل خدمة عملاء (المنفرد والمزدوج). */
+    public const AGENTS = [self::CUSTOMER_SERVICE, self::COORDINATION_CUSTOMER_SERVICE];
 
     /** الأقسام التي تدخل اللوحة. */
-    public const DEPARTMENTS = [self::COORDINATION, self::CUSTOMER_SERVICE, self::MANAGER];
+    public const DEPARTMENTS = [self::COORDINATION, self::CUSTOMER_SERVICE, self::COORDINATION_CUSTOMER_SERVICE, self::MANAGER];
 
     /** من يملك صلاحيات الإشراف داخل اللوحة. */
     public const SUPERVISORS = [self::MANAGER];

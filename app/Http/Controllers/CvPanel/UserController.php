@@ -96,7 +96,7 @@ class UserController extends Controller
         $user->save();
 
         // من لم يعد منسّقاً لا معنى لبقاء جنسيات مسندة إليه
-        if ($data['department'] !== CvPanelAccess::COORDINATION) {
+        if (! in_array($data['department'], CvPanelAccess::COORDINATORS, true)) {
             $user->managedNationalities()->detach();
         }
 

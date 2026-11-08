@@ -24,7 +24,7 @@ class CoordinatorController extends Controller
 
         return view('cv-panel.coordinators.index', [
             'coordinators' => Admin::where('active', true)
-                ->where('department', 'coordination')
+                ->whereIn('department', \App\Http\Middleware\CvPanelAccess::COORDINATORS)
                 ->with('managedNationalities', 'branch')
                 ->orderBy('name')
                 ->get(),
@@ -41,7 +41,7 @@ class CoordinatorController extends Controller
             'nationality_ids.*' => ['integer', 'exists:nationalities,id'],
         ]);
 
-        $coordinator = Admin::where('department', 'coordination')->findOrFail($id);
+        $coordinator = Admin::whereIn('department', \App\Http\Middleware\CvPanelAccess::COORDINATORS)->findOrFail($id);
         $coordinator->managedNationalities()->sync($data['nationality_ids'] ?? []);
 
         return back()->with('success', __('cv-panel.coordinators.saved', ['name' => $coordinator->name]));

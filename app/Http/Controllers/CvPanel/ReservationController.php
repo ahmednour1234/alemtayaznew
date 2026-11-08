@@ -182,8 +182,8 @@ class ReservationController extends Controller
         }
 
         return $me->isSuperAdmin()
+            || $me->isCustomerService()
             || in_array($me->department, [
-                \App\Http\Middleware\CvPanelAccess::CUSTOMER_SERVICE,
                 \App\Http\Middleware\CvPanelAccess::MANAGER,
             ], true);
     }

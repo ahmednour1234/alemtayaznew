@@ -19,6 +19,7 @@ class Admin extends Authenticatable
         return [
             'customer_service' => 'قسم خدمة عملاء',
             'coordination'     => 'قسم تنسيق',
+            'coordination_customer_service' => 'منسق وخدمة عملاء',
             'accounts'         => 'قسم حسابات',
             'accountant'       => 'محاسب عام',
             'branch_manager'   => 'مدير فرع',
@@ -106,12 +107,12 @@ class Admin extends Authenticatable
 
     public function isCoordination(): bool
     {
-        return $this->department === 'coordination';
+        return in_array($this->department, ['coordination', 'coordination_customer_service'], true);
     }
 
     public function isCustomerService(): bool
     {
-        return $this->department === 'customer_service';
+        return in_array($this->department, ['customer_service', 'coordination_customer_service'], true);
     }
 
     /**

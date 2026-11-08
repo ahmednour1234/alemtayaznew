@@ -427,7 +427,7 @@ class WorkerService
         // Notify coordination + branch manager (same branch)
         $branchAdmins = Admin::where('active', true)
             ->where('branch_id', $worker->branch_id)
-            ->whereIn('department', ['coordination', 'branch_manager'])
+            ->whereIn('department', ['coordination', 'coordination_customer_service', 'branch_manager'])
             ->get();
 
         foreach ($branchAdmins as $admin) {
@@ -519,7 +519,7 @@ class WorkerService
 
         $branchAdmins = Admin::where('active', true)
             ->where('branch_id', $branchId)
-            ->whereIn('department', ['coordination', 'branch_manager'])
+            ->whereIn('department', ['coordination', 'coordination_customer_service', 'branch_manager'])
             ->get();
 
         foreach ($branchAdmins as $admin) {
@@ -635,7 +635,7 @@ class WorkerService
                 $q->whereNull('branch_id')
                   ->orWhere(function ($q2) use ($worker) {
                       $q2->where('branch_id', $worker->branch_id)
-                         ->whereIn('department', ['customer_service', 'branch_manager']);
+                         ->whereIn('department', ['customer_service', 'coordination_customer_service', 'branch_manager']);
                   })
                   ->orWhere('department', 'chairman');
             })
@@ -672,7 +672,7 @@ class WorkerService
                 $q->whereNull('branch_id')
                   ->orWhere(function ($q2) use ($branchId) {
                       $q2->where('branch_id', $branchId)
-                         ->whereIn('department', ['customer_service', 'branch_manager']);
+                         ->whereIn('department', ['customer_service', 'coordination_customer_service', 'branch_manager']);
                   })
                   ->orWhere('department', 'chairman');
             })
