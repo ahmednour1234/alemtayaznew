@@ -19,8 +19,49 @@
               nat: '{{ old('nationality_id') }}',
               purgeCounts: {{ Js::from($purgeCounts) }},
               get purgeCount() { return this.purgeCounts[this.nat] ?? 0; },
+              done: 0,
+              total: 0,
+              error: '',
+              result: '',
+              async upload(form) {
+                  const files = Array.from(form.querySelector('input[type=file]').files);
+                  if (!files.length) return;
+                  this.sending = true; this.error = ''; this.result = '';
+                  this.total = files.length; this.done = 0;
+                  const BATCH = 5;
+                  let created = 0, purged = 0, dups = [], redirect = null;
+                  try {
+                      for (let i = 0; i < files.length; i += BATCH) {
+                          const fd = new FormData(form);
+                          fd.delete('cvs[]');
+                          // حذف القديم مرّة واحدة فقط، مع أول دفعة
+                          if (i > 0) fd.delete('purge_old');
+                          files.slice(i, i + BATCH).forEach(f => fd.append('cvs[]', f));
+                          const res = await fetch(form.action, {
+                              method: 'POST', body: fd,
+                              headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                          });
+                          const json = await res.json().catch(() => ({}));
+                          if (!res.ok) {
+                              const errs = json.errors ? Object.values(json.errors).flat() : [];
+                              throw new Error(errs[0] || json.message || ('HTTP ' + res.status));
+                          }
+                          created += json.created || 0;
+                          purged  += json.purged || 0;
+                          dups = dups.concat(json.duplicates || []);
+                          redirect = json.redirect;
+                          this.done = Math.min(i + BATCH, files.length);
+                      }
+                      this.result = @js(__('cv-panel.upload.done', ['count' => '__C__'])).replace('__C__', created)
+                          + (dups.length ? ' — ' + dups.length + ' مكرر' : '');
+                      setTimeout(() => window.location = redirect, 1200);
+                  } catch (e) {
+                      this.error = e.message + ' (' + this.done + '/' + this.total + ')';
+                      this.sending = false;
+                  }
+              },
           }"
-          @submit="sending = true"
+          @submit.prevent="upload($el)"
           class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 space-y-5">
         @csrf
 
@@ -105,6 +146,15 @@
                 </span>
             </label>
         </div>
+
+        <div x-show="sending && total" x-cloak>
+            <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-primary transition-all" :style="'width:' + (total ? done / total * 100 : 0) + '%'"></div>
+            </div>
+            <p class="text-xs text-ink-muted mt-1" x-text="done + ' / ' + total"></p>
+        </div>
+        <p x-show="error" x-cloak x-text="error" class="text-sm font-bold text-red-600"></p>
+        <p x-show="result" x-cloak x-text="result" class="text-sm font-bold text-emerald-700"></p>
 
         <button type="submit" :disabled="sending"
                 class="w-full inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white

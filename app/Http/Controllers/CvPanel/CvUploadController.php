@@ -46,7 +46,7 @@ class CvUploadController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $me      = Auth::guard('admin')->user();
 
@@ -81,6 +81,17 @@ class CvUploadController extends Controller
             : 0;
 
         $result = $this->service->upload($data, $request->file('cvs'), $me);
+
+        // الرفع على دفعات من المتصفح: كل دفعة ترجع أرقامها والصفحة تجمعها.
+        // إرسال كل الملفات في طلب واحد ضخم كان يُسقط المتصفح.
+        if ($request->expectsJson()) {
+            return response()->json([
+                'created'    => count($result['created']),
+                'duplicates' => array_values($result['duplicates']),
+                'purged'     => $purged,
+                'redirect'   => route('cv-panel.cvs.index', ['nationality_id' => $data['nationality_id']]),
+            ]);
+        }
 
         $message = __('cv-panel.upload.done', ['count' => count($result['created'])]);
 
