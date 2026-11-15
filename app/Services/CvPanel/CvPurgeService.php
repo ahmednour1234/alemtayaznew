@@ -24,10 +24,12 @@ class CvPurgeService
      * تُستخدم مرّتين: لعرض العدد على المنسّق قبل أن يقرّر، ثمّ للحذف نفسه
      * بعد موافقته — فيبقى ما عُرض عليه هو ما يُحذف فعلاً.
      */
-    public function candidates(int $nationalityId)
+    public function candidates(int $nationalityId, bool $transfer = false)
     {
         return Worker::query()
             ->where('nationality_id', $nationalityId)
+            // التنظيف داخل النوع نفسه: دفعة استقدام لا تمسّ سير نقل الكفالة والعكس
+            ->where('is_transfer', $transfer)
             ->whereNotNull('cv_path')
             // المتاحة وحدها: المحجوزة والمُسندة التزام قائم
             ->where('status', 'available')
@@ -36,9 +38,9 @@ class CvPurgeService
             ->whereDoesntHave('latestContract');
     }
 
-    public function countFor(int $nationalityId): int
+    public function countFor(int $nationalityId, bool $transfer = false): int
     {
-        return $this->candidates($nationalityId)->count();
+        return $this->candidates($nationalityId, $transfer)->count();
     }
 
     /**
@@ -46,12 +48,12 @@ class CvPurgeService
      *
      * @return int عدد ما حُذف
      */
-    public function purge(int $nationalityId, $actor): int
+    public function purge(int $nationalityId, $actor, bool $transfer = false): int
     {
-        return DB::transaction(function () use ($nationalityId, $actor) {
+        return DB::transaction(function () use ($nationalityId, $actor, $transfer) {
             // نقرأ القائمة داخل المعاملة: لو حُجزت سيرة بين العرض والتنفيذ
             // خرجت من القائمة ولم تُحذف.
-            $workers = $this->candidates($nationalityId)->get();
+            $workers = $this->candidates($nationalityId, $transfer)->get();
 
             foreach ($workers as $worker) {
                 $this->log($worker, $actor);

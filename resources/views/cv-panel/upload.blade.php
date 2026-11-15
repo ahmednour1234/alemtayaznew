@@ -17,8 +17,9 @@
               count: 0,
               sending: false,
               nat: '{{ old('nationality_id') }}',
+              transfer: {{ old('is_transfer', $transfer ? 1 : 0) ? 'true' : 'false' }},
               purgeCounts: {{ Js::from($purgeCounts) }},
-              get purgeCount() { return this.purgeCounts[this.nat] ?? 0; },
+              get purgeCount() { return this.purgeCounts[this.nat + ':' + (this.transfer ? 1 : 0)] ?? 0; },
               done: 0,
               total: 0,
               error: '',
@@ -64,6 +65,23 @@
           @submit.prevent="upload($el)"
           class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 space-y-5">
         @csrf
+
+        {{-- نوع السير: استقدام من الخارج، أو نقل كفالة لعاملة داخل المملكة --}}
+        <div>
+            <label class="block text-xs font-semibold text-ink-muted mb-1.5">نوع السير <span class="text-red-500">*</span></label>
+            <input type="hidden" name="is_transfer" :value="transfer ? 1 : 0">
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" @click="transfer = false"
+                        :class="!transfer ? 'border-primary bg-primary-light text-primary-dark' : 'border-slate-300 text-ink-muted'"
+                        class="border-2 rounded-xl py-2.5 text-sm font-bold transition-colors">استقدام</button>
+                <button type="button" @click="transfer = true"
+                        :class="transfer ? 'border-sky-500 bg-sky-50 text-sky-700' : 'border-slate-300 text-ink-muted'"
+                        class="border-2 rounded-xl py-2.5 text-sm font-bold transition-colors">نقل كفالة</button>
+            </div>
+            <p x-show="transfer" x-cloak class="text-xs text-sky-700 mt-1.5">
+                السير دي هتظهر في صفحة «نقل كفالة» في الموقع بس، وتتحجز بنفس طريقة الحجز العادية.
+            </p>
+        </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>

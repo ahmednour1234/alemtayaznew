@@ -16,7 +16,7 @@ class Worker extends Model
     protected $fillable = [
         'name', 'passport_number', 'visa_number', 'nationality_id', 'profession',
         'gender', 'experience', 'religion', 'age', 'phone',
-        'cv_path', 'cv_disk', 'cv_withdrawn_at', 'original_cv_name', 'passport_image',
+        'cv_path', 'cv_disk', 'cv_withdrawn_at', 'is_transfer', 'original_cv_name', 'passport_image',
         'status', 'client_id', 'branch_id', 'admin_id',
         'assigned_by_admin_id', 'assigned_at',
         'tamara_paid_at', 'tamara_paid_by_admin_id',
@@ -27,6 +27,7 @@ class Worker extends Model
     {
         return [
             'active'          => 'boolean',
+            'is_transfer'     => 'boolean',
             'assigned_at'     => 'datetime',
             'cv_withdrawn_at' => 'datetime',
             'tamara_paid_at'  => 'datetime',

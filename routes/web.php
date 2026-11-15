@@ -54,6 +54,12 @@ Route::controller(\App\Http\Controllers\PublicSite\CvController::class)->group(f
     Route::get('/nationality/{key}', 'byNationality')
         ->where('key', '[A-Za-z0-9]{1,10}')
         ->name('site.cvs.nationality');
+
+    // نقل الكفالة: عاملات داخل المملكة — صفحة عامة ورابط لكل جنسية
+    Route::get('/transfer', 'transfer')->name('site.transfer');
+    Route::get('/transfer/{key}', 'transferByNationality')
+        ->where('key', '[A-Za-z0-9]{1,10}')
+        ->name('site.transfer.nationality');
 });
 
 Route::controller(\App\Http\Controllers\PublicSite\ContactController::class)->group(function () {

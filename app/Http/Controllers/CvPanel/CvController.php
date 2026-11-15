@@ -38,6 +38,12 @@ class CvController extends Controller
             }
         }
 
+        // النوع: استقدام / نقل كفالة. بلا قيمة يُعرض الكل.
+        $type = $request->input('type');
+        if (in_array($type, ['recruitment', 'transfer'], true)) {
+            $query->where('is_transfer', $type === 'transfer');
+        }
+
         if ($search = trim((string) $request->input('search'))) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%");
@@ -58,7 +64,17 @@ class CvController extends Controller
             'statuses'      => collect(Worker::statusOptions())
                 ->except('assigned')
                 ->all(),
-            'filters'       => $request->only(['nationality_id', 'status', 'experience', 'religion', 'search']),
+            'filters'       => $request->only(['nationality_id', 'status', 'experience', 'religion', 'search', 'type']),
+            // روابط الموقع العام لنقل الكفالة، جنسية جنسية، لتُنسخ وتُرسل للعميل
+            'transferLinks' => $type === 'transfer'
+                ? $this->visibleNationalities($scope)->map(fn ($n) => [
+                    'name'  => $n->display_name ?? $n->name,
+                    'url'   => route('site.transfer.nationality', $n->getRouteKey()),
+                    'count' => Worker::where('nationality_id', $n->id)->where('is_transfer', true)
+                        ->where('active', true)->where('status', 'available')
+                        ->whereNotNull('cv_path')->whereNull('cv_withdrawn_at')->count(),
+                ])->values()
+                : collect(),
         ]);
     }
 

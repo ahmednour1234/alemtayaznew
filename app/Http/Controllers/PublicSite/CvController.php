@@ -28,7 +28,10 @@ class CvController extends Controller
             'religion'       => ['nullable', Rule::in(array_keys(Worker::religionOptions()))],
         ]);
 
-        $query = $this->baseQuery()->with('nationality');
+        // صفحات نقل الكفالة منفصلة عن الاستقدام: كلٌّ يعرض نوعه فقط
+        $isTransfer = (bool) $request->attributes->get('transfer', false);
+
+        $query = $this->baseQuery()->with('nationality')->where('is_transfer', $isTransfer);
 
         foreach (['nationality_id', 'experience', 'religion'] as $field) {
             if (! empty($filters[$field])) {
@@ -52,6 +55,7 @@ class CvController extends Controller
             'religions'     => Worker::religionOptions(),
             'nationalities' => Nationality::where('active', true)
                 ->whereHas('workers', fn ($q) => $q->where('active', true)
+                    ->where('is_transfer', $isTransfer)
                     ->where('status', 'available')->whereNotNull('cv_path')
                     ->whereNull('cv_withdrawn_at'))
                 ->orderBy('name')
@@ -86,6 +90,26 @@ class CvController extends Controller
             : $response->with('activeNationality', $nationality);
     }
 
+    /** /transfer — سير نقل الكفالة المتاحة (عاملات داخل المملكة). */
+    public function transfer(Request $request)
+    {
+        $request->attributes->set('transfer', true);
+
+        $response = $this->index($request);
+
+        return $request->boolean('partial') ? $response : $response->with('isTransfer', true);
+    }
+
+    /** /transfer/et — نقل كفالة لجنسية واحدة. */
+    public function transferByNationality(Request $request, string $key)
+    {
+        $request->attributes->set('transfer', true);
+
+        $response = $this->byNationality($request, $key);
+
+        return $request->boolean('partial') ? $response : $response->with('isTransfer', true);
+    }
+
     public function show(int $id)
     {
         $worker = $this->baseQuery()->with('nationality')->findOrFail($id);
@@ -93,6 +117,7 @@ class CvController extends Controller
         $similar = $this->baseQuery()
             ->with('nationality')
             ->where('id', '!=', $worker->id)
+            ->where('is_transfer', $worker->is_transfer)
             ->where('nationality_id', $worker->nationality_id)
             ->take(4)
             ->get();

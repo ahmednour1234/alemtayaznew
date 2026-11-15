@@ -1,8 +1,13 @@
 @extends('public.layouts.app')
 @php
     $activeNat = $activeNationality ?? null;
+    // صفحات نقل الكفالة تعيد استخدام القالب نفسه بروابطها وعناوينها
+    $isTransfer = $isTransfer ?? false;
+    $listRoute  = $isTransfer ? 'site.transfer' : 'site.cvs';
+    $natRoute   = $isTransfer ? 'site.transfer.nationality' : 'site.cvs.nationality';
+    $heading    = $isTransfer ? 'نقل كفالة' : 'السير الذاتية المتاحة';
 @endphp
-@section('title', $activeNat ? 'عاملات من ' . $activeNat->display_name : 'السير الذاتية المتاحة')
+@section('title', $activeNat ? (($isTransfer ? 'نقل كفالة — ' : '') . 'عاملات من ' . $activeNat->display_name) : $heading)
 
 @section('content')
 
@@ -12,7 +17,7 @@
         <nav class="flex items-center gap-2 text-xs text-white/60 mb-3">
             <a href="{{ route('site.home') }}" class="hover:text-white">الرئيسية</a>
             <span>/</span>
-            <a href="{{ route('site.cvs') }}" class="hover:text-white">السير الذاتية</a>
+            <a href="{{ route($listRoute) }}" class="hover:text-white">السير الذاتية</a>
             <span>/</span>
             <span class="text-white/90">{{ $activeNat->display_name }}</span>
         </nav>
@@ -23,12 +28,13 @@
                  class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover object-top border-2 border-white/25 flex-shrink-0">
             @endif
             <div>
-                <h1 class="text-xl sm:text-3xl font-extrabold">عاملات من {{ $activeNat->display_name }}</h1>
+                <h1 class="text-xl sm:text-3xl font-extrabold">{{ $isTransfer ? 'نقل كفالة — ' : '' }}عاملات من {{ $activeNat->display_name }}</h1>
                 <p class="text-white/75 text-sm mt-1.5">{{ $workers->total() }} سيرة ذاتية متاحة</p>
             </div>
         </div>
         @else
-        <h1 class="text-xl sm:text-3xl font-extrabold">السير الذاتية المتاحة</h1>
+        <h1 class="text-xl sm:text-3xl font-extrabold">{{ $heading }}</h1>
+        @if($isTransfer)<p class="text-white/85 text-sm mt-2">عاملات داخل المملكة جاهزات لنقل الكفالة فوراً</p>@endif
         <p class="text-white/75 text-sm mt-2">اختر العاملة المناسبة من بين {{ $workers->total() }} سيرة ذاتية متاحة</p>
         @endif
     </div>
@@ -42,7 +48,7 @@
     {{-- ══ تصفية بالجنسية ══ --}}
     @if($nationalities->isNotEmpty())
     <div class="flex flex-wrap gap-2 mb-8 justify-center">
-        <a href="{{ route('site.cvs') }}"
+        <a href="{{ route($listRoute) }}"
            class="px-4 py-2 rounded-full text-sm font-bold border-2 transition-colors
                   {{ empty($filters['nationality_id'])
                         ? 'bg-navy text-white border-navy'
@@ -51,7 +57,7 @@
         </a>
 
         @foreach($nationalities as $nat)
-        <a href="{{ route('site.cvs.nationality', $nat->getRouteKey()) }}"
+        <a href="{{ route($natRoute, $nat->getRouteKey()) }}"
            class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold border-2 transition-colors
                   {{ ($filters['nationality_id'] ?? null) == $nat->id
                         ? 'bg-navy text-white border-navy'
@@ -71,8 +77,8 @@
          الجنسية القصير صالحاً للمشاركة مع الفلاتر. --}}
     @php
         $baseUrl = $activeNat
-            ? route('site.cvs.nationality', $activeNat->getRouteKey())
-            : route('site.cvs');
+            ? route($natRoute, $activeNat->getRouteKey())
+            : route($listRoute);
 
         $curExp = $filters['experience'] ?? null;
         $curRel = $filters['religion'] ?? null;
@@ -175,7 +181,7 @@
         </div>
         <h3 class="font-bold text-slate-700">لا توجد سير ذاتية متاحة</h3>
         <p class="text-sm text-slate-500 mt-1.5">جرّب تغيير الفلاتر أو اختيار جنسية أخرى.</p>
-        <a href="{{ $hasFilter ? $baseUrl : route('site.cvs') }}" class="inline-block mt-4 text-navy hover:text-gold text-sm font-bold">{{ $hasFilter ? 'إزالة الفلاتر' : 'عرض كل الجنسيات' }}</a>
+        <a href="{{ $hasFilter ? $baseUrl : route($listRoute) }}" class="inline-block mt-4 text-navy hover:text-gold text-sm font-bold">{{ $hasFilter ? 'إزالة الفلاتر' : 'عرض كل الجنسيات' }}</a>
     </div>
     @else
 

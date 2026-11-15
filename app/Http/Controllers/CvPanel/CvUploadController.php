@@ -37,9 +37,12 @@ class CvUploadController extends Controller
         return view('cv-panel.upload', [
             'nationalities' => $nationalities,
             // عدد ما سيُحذف لكل جنسية، ليعرف المنسّق حجم الأثر قبل أن يقرّر
-            'purgeCounts'   => $nationalities->mapWithKeys(
-                fn ($n) => [$n->id => $this->purge->countFor($n->id)]
-            ),
+            // مفتاح «جنسية:نوع» — التنظيف داخل النوع المختار وحده
+            'purgeCounts'   => $nationalities->flatMap(fn ($n) => [
+                $n->id . ':0' => $this->purge->countFor($n->id, false),
+                $n->id . ':1' => $this->purge->countFor($n->id, true),
+            ]),
+            'transfer'      => request()->boolean('transfer'),
             'experiences'   => Worker::experienceOptions(),
             'religions'     => Worker::religionOptions(),
             'professions'   => Worker::professions(),
@@ -63,6 +66,8 @@ class CvUploadController extends Controller
             'cvs.*'          => ['file', 'mimes:pdf', 'max:10240'],
             // إقرار المنسّق بحذف سير الجنسية القديمة قبل رفع الدفعة الجديدة
             'purge_old'      => ['nullable', 'boolean'],
+            // نوع الدفعة: استقدام (الافتراضي) أو نقل كفالة
+            'is_transfer'    => ['nullable', 'boolean'],
         ], [
             'nationality_id.required' => __('cv-panel.upload.nationality_required'),
             'nationality_id.in'       => __('cv-panel.upload.nationality_denied'),
@@ -77,7 +82,7 @@ class CvUploadController extends Controller
          * ولا يمسّ إلّا المتاح: المحجوز والمتعاقد عليه يبقيان.
          */
         $purged = $request->boolean('purge_old')
-            ? $this->purge->purge((int) $data['nationality_id'], $me)
+            ? $this->purge->purge((int) $data['nationality_id'], $me, $request->boolean('is_transfer'))
             : 0;
 
         $result = $this->service->upload($data, $request->file('cvs'), $me);
@@ -89,7 +94,10 @@ class CvUploadController extends Controller
                 'created'    => count($result['created']),
                 'duplicates' => array_values($result['duplicates']),
                 'purged'     => $purged,
-                'redirect'   => route('cv-panel.cvs.index', ['nationality_id' => $data['nationality_id']]),
+                'redirect'   => route('cv-panel.cvs.index', array_filter([
+                    'nationality_id' => $data['nationality_id'],
+                    'type'           => $request->boolean('is_transfer') ? 'transfer' : null,
+                ])),
             ]);
         }
 
@@ -107,7 +115,10 @@ class CvUploadController extends Controller
         }
 
         return redirect()
-            ->route('cv-panel.cvs.index', ['nationality_id' => $data['nationality_id']])
+            ->route('cv-panel.cvs.index', array_filter([
+                'nationality_id' => $data['nationality_id'],
+                'type'           => $request->boolean('is_transfer') ? 'transfer' : null,
+            ]))
             ->with('success', $message);
     }
 

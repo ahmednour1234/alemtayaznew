@@ -26,11 +26,11 @@
 
 <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
     <h1 class="font-extrabold text-lg sm:text-xl">
-        {{ __('cv-panel.cvs') }}
+        {{ ($filters['type'] ?? null) === 'transfer' ? 'نقل كفالة' : __('cv-panel.cvs') }}
         <span class="text-sm font-semibold text-ink-muted">({{ number_format($workers->total()) }})</span>
     </h1>
     @if(\App\Http\Controllers\CvPanel\CvUploadController::canUpload($me))
-    <a href="{{ route('cv-panel.upload') }}"
+    <a href="{{ route('cv-panel.upload', ($filters['type'] ?? null) === 'transfer' ? ['transfer' => 1] : []) }}"
        class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-sm font-bold px-4 py-2.5 rounded-xl transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
         {{ __('cv-panel.upload.title') }}
@@ -38,12 +38,46 @@
     @endif
 </div>
 
+{{-- ══ روابط نقل الكفالة: رابط عام لكل جنسية يُنسخ ويُرسل للعميل ══ --}}
+@if(($filters['type'] ?? null) === 'transfer')
+<div class="bg-white rounded-2xl border border-sky-200 p-4 mb-5" x-data="{ copied: null }">
+    <p class="font-extrabold text-sm mb-1">روابط نقل الكفالة في الموقع</p>
+    <p class="text-xs text-ink-muted mb-3">انسخ رابط الجنسية وابعته للعميل — بيعرض سير نقل الكفالة المتاحة لها فقط.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+        @php $allUrl = route('site.transfer'); @endphp
+        <div class="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2">
+            <span class="text-sm font-bold flex-1 truncate">كل الجنسيات</span>
+            <a href="{{ $allUrl }}" target="_blank" class="text-xs text-navy hover:underline">فتح</a>
+            <button type="button" class="text-xs font-bold text-primary-dark"
+                    @click="navigator.clipboard.writeText(@js($allUrl)); copied = 'all'"
+                    x-text="copied === 'all' ? 'تم النسخ ✓' : 'نسخ'"></button>
+        </div>
+        @foreach($transferLinks as $i => $link)
+        <div class="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2">
+            <span class="text-sm font-bold flex-1 truncate">{{ $link['name'] }}
+                <span class="text-xs font-semibold text-ink-muted">({{ $link['count'] }})</span></span>
+            <a href="{{ $link['url'] }}" target="_blank" class="text-xs text-navy hover:underline">فتح</a>
+            <button type="button" class="text-xs font-bold text-primary-dark"
+                    @click="navigator.clipboard.writeText(@js($link['url'])); copied = {{ $i }}"
+                    x-text="copied === {{ $i }} ? 'تم النسخ ✓' : 'نسخ'"></button>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 {{-- ══ التصفية ══ --}}
 <form method="GET" class="bg-white rounded-2xl border border-slate-200 p-4 mb-6">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-3">
         <input type="text" name="search" value="{{ $filters['search'] ?? '' }}"
                placeholder="{{ __('cv-panel.filters.search') }}"
                class="border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+
+        <select name="type" class="border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+            <option value="">كل الأنواع</option>
+            <option value="recruitment" @selected(($filters['type'] ?? null) === 'recruitment')>استقدام</option>
+            <option value="transfer" @selected(($filters['type'] ?? null) === 'transfer')>نقل كفالة</option>
+        </select>
 
         <select name="nationality_id" class="border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
             <option value="">{{ __('cv-panel.filters.nationality') }}</option>
@@ -174,6 +208,7 @@
                 {{-- الاسم قد يكون اسم ملف طويلاً، فنحدّه بعرض أقصى مع تلميح كامل --}}
                 <td class="px-4 py-3 font-bold max-w-[16rem]">
                     <span class="block truncate" title="{{ $w->name }}">{{ $w->name }}</span>
+                    @if($w->is_transfer)<span class="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700">نقل كفالة</span>@endif
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap">{{ $w->nationality?->display_name ?? '—' }}</td>
                 <td class="px-4 py-3 whitespace-nowrap hidden xl:table-cell">{{ $w->experience ? ($experiences[$w->experience] ?? $w->experience) : '—' }}</td>
@@ -227,6 +262,7 @@
         <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
                 <p class="font-extrabold text-sm leading-snug">{{ $w->name }}</p>
+                @if($w->is_transfer)<span class="inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-50 text-sky-700">نقل كفالة</span>@endif
                 <p class="text-[11px] text-ink-muted mt-1">
                     #{{ $w->id }}
                     <span class="mx-1">·</span>{{ $w->nationality?->display_name ?? '—' }}

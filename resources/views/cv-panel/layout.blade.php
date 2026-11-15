@@ -31,6 +31,11 @@
          'icon'  => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
     ];
 
+    // نقل الكفالة: نفس قائمة السير مفلترة على النوع، ومعها روابط الجنسيات
+    $nav[] = ['route' => 'cv-panel.cvs.index', 'params' => ['type' => 'transfer'],
+              'label' => 'نقل كفالة',
+              'icon'  => 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'];
+
     // الرفع للتنسيق وحده — نفس قاعدة الكنترولر فلا يظهر رابط يؤدي إلى 403
     if (\App\Http\Controllers\CvPanel\CvUploadController::canUpload($me)) {
         $nav[] = ['route' => 'cv-panel.upload', 'label' => __('cv-panel.upload.title'),
@@ -201,9 +206,11 @@
         <nav class="flex items-center gap-1 overflow-x-auto -mb-px no-scrollbar">
             @foreach($nav as $item)
                 @php
-                    $isActive = request()->routeIs($item['route']);
+                    // تبويبا «السير» و«نقل كفالة» على المسار نفسه، يفرّقهما ?type=transfer
+                    $isActive = request()->routeIs($item['route'])
+                        && (($item['params']['type'] ?? null) === 'transfer') === (request('type') === 'transfer');
                 @endphp
-                <a href="{{ route($item['route']) }}"
+                <a href="{{ route($item['route'], $item['params'] ?? []) }}"
                    class="inline-flex items-center gap-2 px-3 sm:px-4 py-3 text-xs sm:text-sm font-bold whitespace-nowrap border-b-2 transition-colors
                           {{ $isActive ? 'border-primary text-primary' : 'border-transparent text-white/70 hover:text-white' }}">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/></svg>

@@ -46,6 +46,7 @@ class CvUploadService
                 'profession'       => $data['profession'] ?? null,
                 'cv_path'          => $file->store('cvs', self::DISK),
                 'cv_disk'          => self::DISK,
+                'is_transfer'      => (bool) ($data['is_transfer'] ?? false),
                 'original_cv_name' => $originalName,
                 'status'           => 'available',
                 'gender'           => 'female',
