@@ -75,7 +75,10 @@ class DashboardController extends Controller
      */
     protected function nationalityScope($me): ?array
     {
-        if ($me->isSuperAdmin() || ! $me->isCoordination()) {
+        // خدمة العملاء (ومنها «منسق وخدمة عملاء») تشوف كل الجنسيات لتحجز منها؛
+        // التقييد بالجنسيات للمنسّق الخالص. صلاحيات المنسّق (حذف/إرجاع/رفع)
+        // تتحقق من جنسياته المسندة في مواضعها.
+        if ($me->isSuperAdmin() || ! $me->isCoordination() || $me->isCustomerService()) {
             return null;
         }
 
