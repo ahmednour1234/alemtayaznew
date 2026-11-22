@@ -47,6 +47,24 @@ class PageController extends Controller
         ]);
     }
 
+    /** الشروط والأحكام — المحتوى من إعدادات الموقع. */
+    public function terms()
+    {
+        return view('public.legal', [
+            'title'   => 'الشروط والأحكام',
+            'content' => \App\Models\SiteSetting::value('terms'),
+        ]);
+    }
+
+    /** سياسة الخصوصية — المحتوى من إعدادات الموقع. */
+    public function privacy()
+    {
+        return view('public.legal', [
+            'title'   => 'سياسة الخصوصية',
+            'content' => \App\Models\SiteSetting::value('privacy'),
+        ]);
+    }
+
     public function about()
     {
         return view('public.about', [

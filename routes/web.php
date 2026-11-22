@@ -39,6 +39,8 @@ use Illuminate\Support\Facades\Route;
 Route::controller(\App\Http\Controllers\PublicSite\PageController::class)->group(function () {
     Route::get('/',      'home')->name('site.home');
     Route::get('/about', 'about')->name('site.about');
+    Route::get('/terms',   'terms')->name('site.terms');
+    Route::get('/privacy', 'privacy')->name('site.privacy');
 });
 
 Route::controller(\App\Http\Controllers\PublicSite\CvController::class)->group(function () {

@@ -29,6 +29,8 @@ class SiteSettingController extends Controller
             'address'       => ['nullable', 'string', 'max:500'],
             'working_hours' => ['nullable', 'string', 'max:255'],
             'about'         => ['nullable', 'string', 'max:5000'],
+            'terms'         => ['nullable', 'string', 'max:50000'],
+            'privacy'       => ['nullable', 'string', 'max:50000'],
             'map_embed'     => ['nullable', 'string', 'max:2000'],
             'facebook'      => ['nullable', 'url', 'max:255'],
             'twitter'       => ['nullable', 'url', 'max:255'],

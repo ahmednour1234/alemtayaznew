@@ -172,6 +172,26 @@
             </p>
         </div>
 
+        {{-- الصفحات القانونية --}}
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="text-sm font-semibold text-slate-600 mb-2 pb-2 border-b border-slate-100">الشروط والأحكام وسياسة الخصوصية</h3>
+            <p class="text-xs text-slate-400">
+                نص عادي: السطر اللي يبدأ بـ <b>#</b> يظهر عنوان، واللي يبدأ بـ <b>-</b> يظهر بند في قائمة، وأي سطر تاني فقرة.
+            </p>
+            <div class="mt-5">
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">الشروط والأحكام</label>
+                <textarea name="terms" rows="14"
+                          class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-400">{{ old('terms', $settings['terms'] ?? '') }}</textarea>
+                <a href="{{ route('site.terms') }}" target="_blank" class="text-xs text-blue-600 hover:underline">عرض الصفحة ↗</a>
+            </div>
+            <div class="mt-5">
+                <label class="block text-sm font-medium text-slate-700 mb-1.5">سياسة الخصوصية</label>
+                <textarea name="privacy" rows="14"
+                          class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-400">{{ old('privacy', $settings['privacy'] ?? '') }}</textarea>
+                <a href="{{ route('site.privacy') }}" target="_blank" class="text-xs text-blue-600 hover:underline">عرض الصفحة ↗</a>
+            </div>
+        </div>
+
         <div class="flex justify-end gap-3">
             <button type="submit"
                     class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-8 py-2.5 rounded-lg transition-colors">

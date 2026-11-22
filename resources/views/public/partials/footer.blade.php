@@ -85,6 +85,8 @@
                         ['site.cvs',     'السير الذاتية'],
                         ['site.about',   'من نحن'],
                         ['site.contact', 'تواصل معنا'],
+                        ['site.terms',   'الشروط والأحكام'],
+                        ['site.privacy', 'سياسة الخصوصية'],
                     ] as [$route, $label])
                     <li>
                         <a href="{{ route($route) }}" class="hover:text-gold transition-colors">{{ $label }}</a>
