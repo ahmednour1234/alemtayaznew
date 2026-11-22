@@ -35,14 +35,6 @@
             @endif
         @endforeach
         @if($inList)</ul>@endif
-
-        @if($S('email') || $S('phone'))
-        <p class="pt-6 text-sm text-slate-500 border-t border-slate-100">
-            للاستفسار:
-            @if($S('phone'))<span dir="ltr">{{ $S('phone') }}</span>@endif
-            @if($S('email')) · <a href="mailto:{{ $S('email') }}" class="text-navy hover:underline">{{ $S('email') }}</a>@endif
-        </p>
-        @endif
     </article>
 </section>
 
