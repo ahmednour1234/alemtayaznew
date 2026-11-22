@@ -17,7 +17,8 @@
 <section class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
     <article class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 leading-loose text-slate-700 space-y-4">
         @php($inList = false)
-        @foreach(preg_split('/\R/', (string) $content) as $line)
+        {{-- تقسيم على \n فقط: ‎/\R/‎ بلا علم u كان يقطع الحروف العربية (البايت 0x85 داخل «م») --}}
+        @foreach(explode("\n", str_replace("\r", '', (string) $content)) as $line)
             @php($line = trim($line))
             @if(str_starts_with($line, '-'))
                 @if(! $inList)<ul class="list-disc ps-6 space-y-1">@php($inList = true)@endif
