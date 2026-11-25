@@ -421,6 +421,7 @@ Route::prefix('cv-panel')->name('cv-panel.')
         // فيديو العاملة: رابط أو ملف
         Route::get('cvs/{id}/video',      [\App\Http\Controllers\CvPanel\VideoController::class, 'edit'])->whereNumber('id')->name('cvs.video');
         Route::post('cvs/{id}/video',     [\App\Http\Controllers\CvPanel\VideoController::class, 'update'])->whereNumber('id')->name('cvs.video.update');
+        Route::post('cvs/{id}/video/chunk', [\App\Http\Controllers\CvPanel\VideoController::class, 'chunk'])->whereNumber('id')->name('cvs.video.chunk');
         Route::get('cvs/{id}/video/file', [\App\Http\Controllers\CvPanel\VideoController::class, 'file'])->whereNumber('id')->name('cvs.video.file');
         Route::get('cvs/reserved', [\App\Http\Controllers\CvPanel\CvController::class, 'reserved'])->name('cvs.reserved');
         Route::post('cvs/{id}/assigned', [\App\Http\Controllers\CvPanel\CvController::class, 'markAssigned'])

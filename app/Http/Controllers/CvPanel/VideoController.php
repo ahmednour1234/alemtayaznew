@@ -80,6 +80,86 @@ class VideoController extends Controller
         return redirect()->route('cv-panel.cvs.video', $worker->id)->with('success', 'تم حفظ الفيديو — يظهر الآن للعميل في الموقع.');
     }
 
+    /** حجم القطعة الواحدة من المتصفّح (2 ميجا) — أصغر بكثير من حدود رفع Hostinger. */
+    public const CHUNK_BYTES = 2 * 1024 * 1024;
+
+    /** أقصى حجم للفيديو بعد التجميع. */
+    public const MAX_BYTES = 500 * 1024 * 1024;
+
+    /**
+     * رفع الفيديو على قطع.
+     *
+     * المتصفّح يقسّم الملف ويرسل القطع بالترتيب؛ نُلحق كل قطعة بملف مؤقت،
+     * وعند آخر قطعة نتحقّق أنه فيديو فعلاً وننقله ونربطه بالعاملة.
+     * هكذا لا يصطدم الفيديو الكبير بحدّ upload_max_filesize ولا يُسقط المتصفّح.
+     */
+    public function chunk(Request $request, int $id)
+    {
+        $worker = Worker::findOrFail($id);
+        $me     = $this->authorizeFor($worker);
+
+        $data = $request->validate([
+            'upload_id' => ['required', 'string', 'regex:/^[A-Za-z0-9]{16,64}$/'],
+            'index'     => ['required', 'integer', 'min:0'],
+            'total'     => ['required', 'integer', 'min:1', 'max:' . (int) ceil(self::MAX_BYTES / self::CHUNK_BYTES)],
+            'name'      => ['required', 'string', 'max:255'],
+            'chunk'     => ['required', 'file', 'max:' . (int) (self::CHUNK_BYTES / 1024 + 64)],
+        ]);
+
+        $disk = Storage::disk(self::DISK);
+        $disk->makeDirectory('tmp');
+        $tmp = $disk->path('tmp/' . $worker->id . '_' . $data['upload_id'] . '.part');
+
+        // أول قطعة تبدأ ملفاً جديداً؛ غيرها يجب أن يأتي بالترتيب
+        if ((int) $data['index'] === 0) {
+            @unlink($tmp);
+        } elseif (! is_file($tmp) || filesize($tmp) !== (int) $data['index'] * self::CHUNK_BYTES) {
+            return response()->json(['message' => 'انقطع الرفع — ابدأ من جديد.'], 422);
+        }
+
+        $out = fopen($tmp, 'ab');
+        $in  = fopen($request->file('chunk')->getRealPath(), 'rb');
+        stream_copy_to_stream($in, $out);
+        fclose($in);
+        fclose($out);
+
+        if (filesize($tmp) > self::MAX_BYTES) {
+            @unlink($tmp);
+            return response()->json(['message' => 'الفيديو أكبر من 500 ميجا.'], 422);
+        }
+
+        // لسه فيه قطع
+        if ((int) $data['index'] < (int) $data['total'] - 1) {
+            return response()->json(['ok' => true]);
+        }
+
+        // آخر قطعة: نتأكد إنه فيديو بمحتواه لا باسمه
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($tmp) ?: '';
+        if (! str_starts_with($mime, 'video/')) {
+            @unlink($tmp);
+            return response()->json(['message' => 'الملف ده مش فيديو.'], 422);
+        }
+
+        $ext = strtolower(pathinfo($data['name'], PATHINFO_EXTENSION));
+        $ext = in_array($ext, ['mp4', 'mov', 'webm', 'm4v', '3gp'], true) ? $ext : 'mp4';
+
+        $final = 'videos/' . $worker->id . '_' . \Illuminate\Support\Str::random(24) . '.' . $ext;
+        $disk->makeDirectory('videos');
+
+        if (! @rename($tmp, $disk->path($final))) {
+            @unlink($tmp);
+            return response()->json(['message' => 'تعذّر حفظ الفيديو على السيرفر.'], 500);
+        }
+
+        $this->deleteFile($worker);
+        $worker->forceFill(['video_path' => $final])->saveQuietly();
+        $this->log($worker, $me, 'رُفع فيديو العاملة');
+
+        session()->flash('success', 'تم رفع الفيديو — يظهر الآن للعميل في الموقع.');
+
+        return response()->json(['ok' => true, 'done' => true]);
+    }
+
     /** معاينة الملف داخل اللوحة. */
     public function file(int $id)
     {
