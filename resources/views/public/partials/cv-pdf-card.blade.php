@@ -56,5 +56,15 @@
            class="flex-1 text-center bg-navy group-hover:bg-gold text-white text-xs font-bold py-2.5 rounded-lg transition-colors duration-300">
             عرض السيرة PDF
         </a>
+
+        {{-- فيديو العاملة — يظهر فقط إن وُجد --}}
+        @if($w->hasVideo())
+        <a href="{{ $w->publicVideoUrl() }}" target="_blank" rel="noopener"
+           class="flex-shrink-0 inline-flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-2.5 rounded-lg transition-colors"
+           title="شاهد فيديو العاملة">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            فيديو
+        </a>
+        @endif
     </div>
 </div>

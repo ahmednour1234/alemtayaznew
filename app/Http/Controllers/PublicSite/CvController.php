@@ -171,6 +171,20 @@ class CvController extends Controller
         return $response;
     }
 
+    /** فيديو العاملة المرفوع — بنفس شرط العرض العام، فيُمنع بعد الحجز. */
+    public function video(int $id)
+    {
+        $worker = $this->baseQuery()->findOrFail($id);
+
+        abort_unless(
+            $worker->video_path
+                && \Illuminate\Support\Facades\Storage::disk(\App\Http\Controllers\CvPanel\VideoController::DISK)->exists($worker->video_path),
+            404
+        );
+
+        return \App\Http\Controllers\CvPanel\VideoController::stream($worker);
+    }
+
     /** الشرط الموحّد لما يجوز عرضه للعامة. */
     private function baseQuery()
     {

@@ -85,7 +85,13 @@ class CvUploadController extends Controller
             ? $this->purge->purge((int) $data['nationality_id'], $me, $request->boolean('is_transfer'))
             : 0;
 
-        $result = $this->service->upload($data, $request->file('cvs'), $me);
+        try {
+            $result = $this->service->upload($data, $request->file('cvs'), $me);
+        } catch (\RuntimeException $e) {
+            return $request->expectsJson()
+                ? response()->json(['message' => $e->getMessage()], 500)
+                : back()->withInput()->with('error', $e->getMessage());
+        }
 
         // الرفع على دفعات من المتصفح: كل دفعة ترجع أرقامها والصفحة تجمعها.
         // إرسال كل الملفات في طلب واحد ضخم كان يُسقط المتصفح.

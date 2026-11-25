@@ -50,6 +50,8 @@ Route::controller(\App\Http\Controllers\PublicSite\CvController::class)->group(f
     // ملف السيرة PDF للزائر — يُخدَم من الكنترولر لا من القرص العام،
     // فالسير الجديدة على قرص خاص ولا تُخدَم إلا وهي متاحة.
     Route::get('/cvs/{id}/pdf', 'pdf')->whereNumber('id')->name('site.cvs.pdf');
+    // فيديو العاملة المرفوع — يُخدَم ما دامت متاحة فقط
+    Route::get('/cvs/{id}/video', 'video')->whereNumber('id')->name('site.cvs.video');
 
     // رابط مختصر لكل جنسية: /nationality/et — أوضح للزائر ولمحرّكات البحث
     // من ‎/cvs?nationality_id=3‎. يُقيَّد بالحروف والأرقام فقط.
@@ -416,6 +418,10 @@ Route::prefix('cv-panel')->name('cv-panel.')
             ->whereNumber('id')->name('cvs.file');
 
         // متابعة المحجوز — للمنسّق على جنسياته
+        // فيديو العاملة: رابط أو ملف
+        Route::get('cvs/{id}/video',      [\App\Http\Controllers\CvPanel\VideoController::class, 'edit'])->whereNumber('id')->name('cvs.video');
+        Route::post('cvs/{id}/video',     [\App\Http\Controllers\CvPanel\VideoController::class, 'update'])->whereNumber('id')->name('cvs.video.update');
+        Route::get('cvs/{id}/video/file', [\App\Http\Controllers\CvPanel\VideoController::class, 'file'])->whereNumber('id')->name('cvs.video.file');
         Route::get('cvs/reserved', [\App\Http\Controllers\CvPanel\CvController::class, 'reserved'])->name('cvs.reserved');
         Route::post('cvs/{id}/assigned', [\App\Http\Controllers\CvPanel\CvController::class, 'markAssigned'])
             ->whereNumber('id')->name('cvs.assigned');

@@ -18,6 +18,14 @@
         && ! $w->hasActiveContract();
 @endphp
 
+{{-- فيديو العاملة: لمنسّق الجنسية والمديرين — ✓ لو مضاف --}}
+@if(\App\Http\Controllers\CvPanel\VideoController::canManage($me, $w))
+<a href="{{ route('cv-panel.cvs.video', $w->id) }}"
+   class="{{ $w->hasVideo() ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-red-50 text-red-700 hover:bg-red-600 hover:text-white' }} text-xs font-bold px-3 py-2 rounded-lg whitespace-nowrap transition-colors">
+    {{ $w->hasVideo() ? 'فيديو ✓' : '+ فيديو' }}
+</a>
+@endif
+
 @if($w->status === 'available')
     @if($canReserve)
     <a href="{{ route('cv-panel.reserve', $w->id) }}"

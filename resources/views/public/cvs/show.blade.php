@@ -85,6 +85,13 @@
                             اطلب هذه العاملة عبر واتساب
                         </a>
                         @endif
+                        @if($worker->hasVideo())
+                        <a href="{{ $worker->publicVideoUrl() }}" target="_blank" rel="noopener"
+                           class="flex items-center justify-center gap-2 w-full bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-3 rounded-xl transition-colors">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            شاهد فيديو العاملة
+                        </a>
+                        @endif
                         <a href="{{ route('site.cvs.pdf', $worker->id) }}" target="_blank" rel="noopener"
                            class="block w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium py-3 rounded-xl transition-colors">
                             تحميل السيرة الذاتية PDF

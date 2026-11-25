@@ -16,7 +16,7 @@ class Worker extends Model
     protected $fillable = [
         'name', 'passport_number', 'visa_number', 'nationality_id', 'profession',
         'gender', 'experience', 'religion', 'age', 'phone',
-        'cv_path', 'cv_disk', 'cv_withdrawn_at', 'is_transfer', 'original_cv_name', 'passport_image',
+        'cv_path', 'cv_disk', 'video_url', 'video_path', 'cv_withdrawn_at', 'is_transfer', 'original_cv_name', 'passport_image',
         'status', 'client_id', 'branch_id', 'admin_id',
         'assigned_by_admin_id', 'assigned_at',
         'tamara_paid_at', 'tamara_paid_by_admin_id',
@@ -225,6 +225,22 @@ class Worker extends Model
     public function cvDisk(): string
     {
         return $this->cv_disk ?: 'public';
+    }
+
+    /** هل للعاملة فيديو (رابط أو ملف)؟ */
+    public function hasVideo(): bool
+    {
+        return (bool) ($this->video_path || $this->video_url);
+    }
+
+    /** رابط مشاهدة الفيديو للعميل: الملف المرفوع أولاً، وإلا الرابط الخارجي. */
+    public function publicVideoUrl(): ?string
+    {
+        if ($this->video_path) {
+            return route('site.cvs.video', $this->id);
+        }
+
+        return $this->video_url ?: null;
     }
 
     /** هل ملف السيرة الذاتية موجود فعلاً على قرصه؟ */
